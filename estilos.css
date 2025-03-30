@@ -1,0 +1,479 @@
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px; /* Calendário grande */
+  margin: 20px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+/* Configurações */
+.configuracoes {
+  background-color: #eee;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.configuracoes label {
+  margin: 0 10px 0 20px;
+}
+
+.configuracoes input[type="number"] {
+  width: 60px;
+  padding: 5px;
+}
+
+.configuracoes button {
+  padding: 8px 15px;
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.configuracoes button:hover {
+  background-color: #4cae4c;
+}
+
+#config-status {
+  font-size: 0.9em;
+  color: green;
+  margin-top: 10px;
+  min-height: 1em; /* Para evitar pulos no layout */
+}
+
+/* Navegação do Calendário */
+.navegacao-calendario {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.navegacao-calendario button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navegacao-calendario button:hover {
+  background-color: #0056b3;
+}
+
+/* Grid do Calendário */
+#calendario-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Garante colunas de largura igual */
+}
+
+#calendario-grid th,
+#calendario-grid td {
+  border: 1px solid #ddd;
+  padding: 10px; /* Aumenta o padding para células maiores */
+  text-align: left;
+  vertical-align: top;
+  height: 120px; /* Altura mínima para células grandes */
+  overflow: hidden; /* Evita que o conteúdo estoure muito */
+  cursor: pointer; /* Indica que o dia é clicável */
+  position: relative; /* Para posicionar o total de horas */
+}
+
+#calendario-grid th {
+  background-color: #f8f8f8;
+  text-align: center;
+  font-weight: bold;
+  height: auto; /* Altura automática para cabeçalho */
+}
+
+.dia-numero {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+  display: block; /* Garante que o número fique na linha de cima */
+}
+
+.dia-fora-mes {
+  background-color: #f9f9f9;
+  color: #ccc;
+  cursor: default;
+}
+
+.dia-selecionado {
+  outline: 3px solid #007bff;
+  outline-offset: -2px;
+}
+
+.lista-materias {
+  font-size: 0.8em; /* Reduz o tamanho da fonte das matérias */
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+  max-height: 60px; /* Limita a altura da lista */
+  overflow-y: auto; /* Adiciona scroll se necessário */
+}
+
+.lista-materias li {
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.total-horas-dia {
+  position: absolute;
+  bottom: 5px;
+  right: 8px;
+  font-size: 0.9em;
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* Cores Condicionais */
+.horas-minimas-ok {
+  background-color: #d4edda; /* Verde claro */
+  color: #155724;
+}
+
+.horas-desejadas-ok {
+  background-color: #007bff; /* Azul */
+  color: white !important; /* Força texto branco */
+}
+
+.horas-desejadas-ok .dia-numero,
+.horas-desejadas-ok .total-horas-dia,
+.horas-desejadas-ok .lista-materias li {
+  color: white; /* Garante que outros textos dentro também fiquem brancos */
+}
+.horas-desejadas-ok .total-horas-dia {
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.2
+  ); /* Fundo levemente escuro para o total */
+}
+
+/* Área de Informação/Adição do Dia */
+.info-dia {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.info-dia h3,
+.info-dia h4 {
+  margin-top: 0;
+  color: #333;
+}
+.add-materia {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaçamento entre elementos */
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+}
+.add-materia label {
+  font-weight: bold;
+}
+.add-materia input[type="text"],
+.add-materia input[type="number"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-materia input[type="text"] {
+  flex-grow: 1; /* Ocupa espaço disponível */
+}
+.add-materia input[type="number"] {
+  width: 70px;
+}
+.add-materia button {
+  padding: 8px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-materia button:hover {
+  background-color: #218838;
+}
+
+#lista-materias-dia {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+#lista-materias-dia li {
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#lista-materias-dia .remove-materia {
+  color: red;
+  cursor: pointer;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+/* Estilos das Abas */
+.abas {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ccc;
+}
+
+.aba-btn {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background-color: #f1f1f1;
+  margin-right: 5px;
+  border-radius: 5px 5px 0 0;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.aba-btn:hover {
+  background-color: #ddd;
+}
+
+.aba-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-bottom: 2px solid #0056b3;
+}
+
+.aba-conteudo {
+  display: none; /* Esconde todas as abas por padrão */
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+}
+
+.aba-conteudo.active {
+  display: block; /* Mostra a aba ativa */
+}
+
+/* Destaque para o dia de hoje */
+#calendario-grid td.hoje {
+  background-color: #fffacd; /* Amarelo claro */
+  font-weight: bold;
+}
+#calendario-grid td.hoje .dia-numero {
+  color: #b8860b; /* Dourado escuro */
+}
+
+/* Botão Ir para Hoje */
+.navegacao-calendario {
+  position: relative; /* Para posicionar o botão */
+}
+#ir-para-hoje {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#ir-para-hoje:hover {
+  background-color: #5a6268;
+}
+
+/* Estilos do Modal */
+.modal {
+  display: none; /* Escondido por padrão */
+  position: fixed; /* Fica fixo na tela */
+  z-index: 1000; /* Fica sobre outros elementos */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Permite scroll se conteúdo for grande */
+  background-color: rgba(0, 0, 0, 0.5); /* Fundo escurecido */
+  animation: fadeIn 0.3s ease-in-out; /* Animação de entrada */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-conteudo {
+  background-color: #fefefe;
+  margin: 10% auto; /* 10% do topo e centralizado horizontalmente */
+  padding: 25px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px; /* Largura máxima */
+  border-radius: 8px;
+  position: relative;
+  animation: slideIn 0.3s ease-in-out; /* Animação de entrada */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-fechar {
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-fechar:hover,
+.modal-fechar:focus {
+  color: black;
+  text-decoration: none;
+}
+
+.add-materia-modal {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.add-materia-modal label {
+  font-weight: bold;
+}
+.add-materia-modal input[type="text"] {
+  flex-grow: 1; /* Input de matéria ocupa mais espaço */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-materia-modal input[type="number"] {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-materia-modal button {
+  padding: 8px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-materia-modal button:hover {
+  background-color: #218838;
+}
+
+#modal-lista-materias {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 15px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#modal-lista-materias li {
+  margin-bottom: 8px;
+  padding: 5px;
+  border-bottom: 1px dotted #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#modal-lista-materias li span:first-child {
+  /* Texto da matéria e tempo */
+  margin-right: 10px;
+}
+
+#modal-lista-materias .remove-materia-modal {
+  color: #dc3545; /* Vermelho */
+  cursor: pointer;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background-color: #f8d7da;
+}
+#modal-lista-materias .remove-materia-modal:hover {
+  background-color: #f1c6cb;
+  color: #721c24;
+}
+
+/* Estilos do Dashboard */
+#dashboard-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.graficos-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite que os gráficos quebrem linha */
+  gap: 20px; /* Espaço entre os gráficos */
+  justify-content: space-around; /* Tenta espaçar igualmente */
+}
+
+.grafico-item {
+  flex: 1 1 400px; /* Flex-grow, flex-shrink, flex-basis (largura mínima) */
+  min-width: 300px; /* Largura mínima absoluta */
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  text-align: center; /* Centraliza o título */
+}
+
+.grafico-item h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 1.1em;
+}
+
+/* Ajustes Finais */
+.total-horas-dia {
+  /* Mudamos para total-tempo-dia */
+  /* (manter estilos anteriores se houver) */
+  font-size: 0.9em;
+}
