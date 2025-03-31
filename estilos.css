@@ -710,3 +710,169 @@ button i.fas.fa-times {
     opacity: 1;
   }
 }
+
+/* --- (CSS Anterior Mantido) --- */
+/* ... */
+
+/* --- Layout da Aba Calendário (Wrapper + Principal + Sidebar) --- */
+#calendario-wrapper {
+  display: flex;
+  gap: 25px; /* Espaço entre calendário e resumo */
+  align-items: flex-start; /* Alinha pelo topo */
+}
+
+#calendario-principal {
+  flex-grow: 1; /* Calendário ocupa o espaço restante */
+}
+
+#resumo-mensal {
+  width: 220px; /* Largura fixa para o resumo */
+  flex-shrink: 0; /* Não encolhe */
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow-light);
+}
+
+#resumo-mensal h4 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--primary-color);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.resumo-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+}
+
+.resumo-item span:nth-child(2) {
+  /* Texto "Dias Mínimos/Desejados" */
+  flex-grow: 1; /* Empurra o contador para a direita */
+  margin-left: 10px;
+  color: var(--text-light-color);
+}
+
+.resumo-item strong {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--text-color);
+}
+
+.indicador-cor {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0; /* Não encolhe */
+}
+
+.cor-verde {
+  background-color: #e4f7d5;
+  border: 1px solid #a3d38b;
+} /* Cor usada no .horas-minimas-ok */
+.cor-azul {
+  background-color: #ddebf7;
+  border: 1px solid #a6c6e3;
+} /* Cor usada no .horas-desejadas-ok */
+
+/* --- Grid do Calendário --- */
+#calendario-grid {
+  width: 100%;
+  border-collapse: collapse;
+  /* table-layout: fixed; */ /* REMOVIDO para acomodar a nova coluna */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+#calendario-grid th,
+#calendario-grid td {
+  border: 1px solid var(--border-color);
+  padding: 10px; /* Reduzido um pouco para caber mais info */
+  text-align: left;
+  vertical-align: top;
+  height: 140px; /* Altura ajustada */
+  position: relative; /* Mantido para posicionamento interno */
+  transition: background-color 0.3s ease;
+}
+#calendario-grid td {
+  cursor: pointer;
+} /* Apenas células de dia */
+#calendario-grid td:not(.dia-fora-mes):not(.total-semanal-cell):hover {
+  /* Hover apenas em dias válidos */
+  background-color: var(--hover-bg-color);
+}
+
+/* Cabeçalho */
+#calendario-grid th {
+  background-color: #f8f9fa;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-light-color);
+  height: auto;
+  padding: 10px 5px; /* Menos padding horizontal */
+  font-size: 0.9em; /* Fonte menor no cabeçalho */
+  cursor: default;
+}
+
+/* Nova Coluna Total Semanal */
+th.coluna-total {
+  background-color: #f1f3f5; /* Cor ligeiramente diferente */
+  width: 90px; /* Largura fixa para a coluna de total */
+  font-size: 0.85em;
+}
+
+td.total-semanal-cell {
+  background-color: #f8f9fa; /* Fundo claro */
+  text-align: center;
+  vertical-align: middle; /* Centraliza verticalmente */
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 0.95em;
+  cursor: default;
+  padding: 5px;
+  border-left: 2px solid var(--border-color); /* Linha divisória mais forte */
+}
+td.total-semanal-cell:hover {
+  background-color: #f1f3f5; /* Leve hover */
+}
+
+/* Ajustes na lista interna e total diário para caber melhor */
+.lista-materias-celula {
+  max-height: 65px; /* Reduz altura máxima */
+  margin-bottom: 20px; /* Menos espaço antes do total */
+  font-size: 0.8em; /* Fonte ainda menor */
+}
+
+.lista-materias-celula li {
+  padding: 2px 4px; /* Menos padding */
+  margin-bottom: 3px;
+}
+
+.lista-materias-celula li .materia-texto {
+  margin-right: 3px;
+}
+.lista-materias-celula li .materia-tempo {
+  font-size: 0.95em; /* Tempo ligeiramente menor */
+  margin-left: 3px;
+  margin-right: 3px;
+}
+.remover-materia-celula {
+  font-size: 0.8em;
+  padding: 0 3px;
+}
+
+.total-tempo-dia-celula {
+  bottom: 5px; /* Mais perto da base */
+  right: 8px;
+  font-size: 0.85em; /* Menor */
+  padding: 2px 4px;
+}
+
+/* ... (Restante do CSS mantido) ... */
