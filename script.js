@@ -557,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Mostra/esconde mensagem e canvas
 		if (msgSemDadosMaterias) msgSemDadosMaterias.style.display = labels.length === 0 ? "block" : "none";
-		if (canvasGraficoMaterias) canvasGraficoMaterias.style.display = labels.length > 0 ? "block" : "none";
+		// if (canvasGraficoMaterias) canvasGraficoMaterias.style.display = labels.length > 0 ? "block" : "none";
 
 		if (labels.length > 0) {
 			graficoMateriasInstance = new Chart(canvasGraficoMaterias, {
@@ -615,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const temDados = data.some((min) => min > 0);
 		// Mostra/esconde mensagem e canvas
 		if (msgSemDadosDias) msgSemDadosDias.style.display = !temDados ? "block" : "none";
-		if (canvasGraficoDias) canvasGraficoDias.style.display = temDados ? "block" : "none";
+		// if (canvasGraficoDias) canvasGraficoDias.style.display = temDados ? "block" : "none";
 
 		if (temDados) {
 			graficoDiasInstance = new Chart(canvasGraficoDias, {
