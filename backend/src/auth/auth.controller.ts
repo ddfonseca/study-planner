@@ -6,6 +6,6 @@ import { auth } from './auth.config';
 export class AuthController {
   @All('*')
   handleAuth(@Req() req: Request) {
-    return auth.handler(req as unknown as Request);
+    return auth.handler(req);
   }
 }
