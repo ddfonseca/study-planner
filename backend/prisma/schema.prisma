@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - integrates with better-auth
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  googleId      String?  @unique @map("google_id")
+  avatar        String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  studySessions StudySession[]
+  userConfig    UserConfig?
+  sharedPlans   SharedPlan[]   @relation("SharedWith")
+  ownedShares   SharedPlan[]   @relation("Owner")
+  sessions      Session[]
+
+  @@map("users")
+}
+
+// better-auth Session model
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// User configuration (min hours, desired hours)
+model UserConfig {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  minHours    Float    @default(2) @map("min_hours")
+  desHours    Float    @default(4) @map("des_hours")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_configs")
+}
+
+// Study session (replaces localStorage materias array)
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  date      DateTime @db.Date
+  subject   String
+  minutes   Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([userId])
+  @@map("study_sessions")
+}
+
+// Sharing functionality
+model SharedPlan {
+  id            String     @id @default(cuid())
+  ownerId       String     @map("owner_id")
+  sharedWithId  String     @map("shared_with_id")
+  permission    Permission @default(READ)
+  startDate     DateTime?  @map("start_date") @db.Date
+  endDate       DateTime?  @map("end_date") @db.Date
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  owner        User @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sharedWith   User @relation("SharedWith", fields: [sharedWithId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, sharedWithId])
+  @@index([sharedWithId])
+  @@map("shared_plans")
+}
+
+enum Permission {
+  READ
+  WRITE
+}

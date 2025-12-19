@@ -1,0 +1,23 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependências do sistema necessárias para Prisma
+RUN apk add --no-cache openssl libc6-compat
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Instalar dependências
+RUN npm install
+
+# Gerar Prisma Client (será regenerado quando necessário via volume)
+RUN npx prisma generate || true
+
+# Expor porta
+EXPOSE 3000
+
+# Comando padrão (será sobrescrito pelo docker-compose)
+CMD ["npm", "run", "start:dev"]
+
