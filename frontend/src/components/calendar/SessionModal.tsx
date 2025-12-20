@@ -14,8 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
-import { Trash2, Plus, Loader2, Clock } from 'lucide-react';
-import type { DayData } from '@/types/session';
+import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
+import type { DayData, StudySession } from '@/types/session';
 
 interface SessionModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ interface SessionModalProps {
   date: Date | null;
   dayData: DayData;
   onAddSession: (subject: string, minutes: number) => Promise<void>;
+  onUpdateSession: (id: string, subject: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
 }
 
@@ -32,11 +33,27 @@ export function SessionModal({
   date,
   dayData,
   onAddSession,
+  onUpdateSession,
   onDeleteSession,
 }: SessionModalProps) {
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingSession, setEditingSession] = useState<StudySession | null>(null);
+
+  const isEditing = editingSession !== null;
+
+  const handleStartEdit = (session: StudySession) => {
+    setEditingSession(session);
+    setSubject(session.materia);
+    setMinutes(session.minutos.toString());
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSession(null);
+    setSubject('');
+    setMinutes('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +61,14 @@ export function SessionModal({
 
     setIsSubmitting(true);
     try {
-      await onAddSession(subject.trim(), parseInt(minutes, 10));
+      if (isEditing && editingSession) {
+        await onUpdateSession(editingSession.id, subject.trim(), parseInt(minutes, 10));
+      } else {
+        await onAddSession(subject.trim(), parseInt(minutes, 10));
+      }
       setSubject('');
       setMinutes('');
+      setEditingSession(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,31 +128,54 @@ export function SessionModal({
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            disabled={!subject.trim() || !minutes || isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
+          <div className="flex gap-2">
+            {isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
+              </Button>
             )}
-            Adicionar Sessão
-          </Button>
+            <Button
+              type="submit"
+              disabled={!subject.trim() || !minutes || isSubmitting}
+              className="flex-1"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : isEditing ? (
+                <Pencil className="h-4 w-4 mr-2" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              {isEditing ? 'Atualizar' : 'Adicionar'}
+            </Button>
+          </div>
         </form>
 
         {/* Sessions list */}
         {dayData.materias.length > 0 && (
           <div className="mt-4 space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Sessões do dia:</h4>
+            <h4 className="text-sm font-medium text-muted-foreground">
+              Sessões do dia: <span className="text-xs">(clique para editar)</span>
+            </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {dayData.materias.map((materia) => (
                 <div
                   key={materia.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  onClick={() => handleStartEdit(materia)}
+                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                    editingSession?.id === materia.id
+                      ? 'bg-primary/20 ring-2 ring-primary'
+                      : 'bg-muted hover:bg-muted/80'
+                  }`}
                 >
-                  <div>
+                  <div className="flex-1">
                     <span className="font-medium text-foreground">{materia.materia}</span>
                     <span className="text-sm text-muted-foreground ml-2">
                       {formatTime(materia.minutos)}
@@ -139,7 +184,10 @@ export function SessionModal({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(materia.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(materia.id);
+                    }}
                     disabled={isSubmitting}
                     className="text-danger hover:text-danger hover:bg-danger/10"
                   >

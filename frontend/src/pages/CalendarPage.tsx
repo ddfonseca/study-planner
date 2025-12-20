@@ -23,7 +23,7 @@ import type { DayData } from '@/types/session';
 export function CalendarPage() {
   const { fetchSessions, isLoading: sessionsLoading } = useSessionStore();
   const { fetchConfig, isLoading: configLoading } = useConfigStore();
-  const { handleAddSession, handleDeleteSession, getSessionsForDate } = useSessions();
+  const { handleAddSession, handleUpdateSession, handleDeleteSession, getSessionsForDate } = useSessions();
   const { toast } = useToast();
 
   const {
@@ -72,6 +72,26 @@ export function CalendarPage() {
       }
     },
     [selectedDate, handleAddSession, toast]
+  );
+
+  // Handle update session
+  const handleUpdateSessionSubmit = useCallback(
+    async (id: string, subject: string, minutes: number) => {
+      try {
+        await handleUpdateSession(id, subject, minutes);
+        toast({
+          title: 'Sucesso',
+          description: 'Sessão atualizada!',
+        });
+      } catch {
+        toast({
+          title: 'Erro',
+          description: 'Falha ao atualizar sessão',
+          variant: 'destructive',
+        });
+      }
+    },
+    [handleUpdateSession, toast]
   );
 
   // Handle delete session
@@ -154,6 +174,7 @@ export function CalendarPage() {
         date={selectedDate}
         dayData={selectedDayData}
         onAddSession={handleAddSessionSubmit}
+        onUpdateSession={handleUpdateSessionSubmit}
         onDeleteSession={handleDeleteSessionSubmit}
       />
     </div>

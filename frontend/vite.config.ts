@@ -13,9 +13,15 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    // Hot reload para Docker
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // Usa backend:3000 dentro do Docker, localhost:3000 fora
+        target: process.env.DOCKER_ENV ? 'http://backend:3000' : 'http://localhost:3000',
         changeOrigin: true,
       },
     },

@@ -43,7 +43,7 @@ export function CalendarCell({
   return (
     <div
       className={cn(
-        'min-h-[100px] p-2 border border-border rounded-md cursor-pointer transition-all hover:shadow-md',
+        'min-h-[80px] p-1.5 border border-border rounded-md cursor-pointer transition-all hover:shadow-md',
         getBgColor(),
         isTodayDate && 'ring-2 ring-primary ring-offset-1',
         !isCurrentMonth && 'opacity-50'
@@ -51,10 +51,10 @@ export function CalendarCell({
       onClick={onClick}
     >
       {/* Day number */}
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-0.5">
         <span
           className={cn(
-            'text-sm font-medium',
+            'text-xs font-medium',
             isTodayDate ? 'text-primary font-bold' : 'text-foreground',
             !isCurrentMonth && 'text-muted-foreground'
           )}
@@ -62,18 +62,18 @@ export function CalendarCell({
           {date.getDate()}
         </span>
         {dayData.totalMinutos > 0 && (
-          <span className="text-xs text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-muted-foreground bg-background/80 px-1 py-0.5 rounded">
             {formatTime(dayData.totalMinutos)}
           </span>
         )}
       </div>
 
       {/* Sessions list */}
-      <div className="space-y-1 max-h-[60px] overflow-y-auto">
-        {dayData.materias.slice(0, 3).map((materia) => (
+      <div className="space-y-0.5 max-h-[40px] overflow-y-auto">
+        {dayData.materias.slice(0, 2).map((materia) => (
           <div
             key={materia.id}
-            className="flex items-center justify-between gap-1 text-xs bg-background/60 rounded px-1.5 py-0.5 group"
+            className="flex items-center justify-between gap-1 text-[10px] bg-background/60 rounded px-1 py-0.5 group"
             onClick={(e) => e.stopPropagation()}
           >
             <span className="truncate flex-1 text-foreground">{materia.materia}</span>
@@ -88,13 +88,13 @@ export function CalendarCell({
               className="opacity-0 group-hover:opacity-100 text-danger hover:text-danger/80 transition-opacity p-0.5"
               aria-label="Remover sessão"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-2.5 w-2.5" />
             </button>
           </div>
         ))}
-        {dayData.materias.length > 3 && (
-          <span className="text-xs text-muted-foreground">
-            +{dayData.materias.length - 3} mais
+        {dayData.materias.length > 2 && (
+          <span className="text-[10px] text-muted-foreground">
+            +{dayData.materias.length - 2} mais
           </span>
         )}
       </div>

@@ -4,7 +4,7 @@
 import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
-import type { CreateSessionDto } from '@/types/api';
+import type { CreateSessionDto, UpdateSessionDto } from '@/types/api';
 import type { CellStatus } from '@/types/session';
 import { hoursToMinutes } from '@/lib/utils/time';
 
@@ -16,6 +16,7 @@ export function useSessions() {
     error,
     fetchSessions,
     addSession,
+    updateSession,
     deleteSession,
     selectDate,
     getSessionsForDate,
@@ -56,6 +57,18 @@ export function useSessions() {
       return addSession(sessionData);
     },
     [addSession]
+  );
+
+  // Update a study session
+  const handleUpdateSession = useCallback(
+    async (id: string, subject: string, minutes: number) => {
+      const sessionData: UpdateSessionDto = {
+        subject,
+        minutes,
+      };
+      return updateSession(id, sessionData);
+    },
+    [updateSession]
   );
 
   // Delete a study session
@@ -117,6 +130,7 @@ export function useSessions() {
     getSessionsForDate,
     getCellStatus,
     handleAddSession,
+    handleUpdateSession,
     handleDeleteSession,
     getMonthStats,
     getWeekTotals,

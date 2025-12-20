@@ -68,8 +68,8 @@ export function CalendarGrid({
                   );
                 })}
                 <td className="p-1">
-                  <div className="min-h-[100px] flex items-center justify-center bg-muted/50 rounded-md border border-border">
-                    <span className="text-sm font-medium text-muted-foreground">
+                  <div className="min-h-[80px] flex items-center justify-center bg-muted/50 rounded-md border border-border">
+                    <span className="text-xs font-medium text-muted-foreground">
                       {weekTotal > 0 ? formatTime(weekTotal) : '-'}
                     </span>
                   </div>
