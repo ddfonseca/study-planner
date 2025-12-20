@@ -1,17 +1,26 @@
 /**
- * Calendar Cell - Individual day in the calendar
+ * Calendar Cell - Individual day in the calendar (heatmap style)
  */
 import { isToday } from 'date-fns';
-import type { DayData, CellStatus } from '@/types/session';
+import type { DayData, CellIntensity } from '@/types/session';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Intensity colors for heatmap (green gradient)
+const intensityColors: Record<CellIntensity, string> = {
+  0: 'bg-card',
+  1: 'bg-green-100 dark:bg-green-950',
+  2: 'bg-green-200 dark:bg-green-900',
+  3: 'bg-green-300 dark:bg-green-800',
+  4: 'bg-green-400 dark:bg-green-700',
+};
 
 interface CalendarCellProps {
   date: Date;
   currentMonth: number;
   dayData: DayData;
-  status: CellStatus;
+  intensity: CellIntensity;
   onClick: () => void;
   onDeleteSession: (id: string) => void;
 }
@@ -20,24 +29,17 @@ export function CalendarCell({
   date,
   currentMonth,
   dayData,
-  status,
+  intensity,
   onClick,
   onDeleteSession,
 }: CalendarCellProps) {
   const isCurrentMonth = date.getMonth() === currentMonth;
   const isTodayDate = isToday(date);
 
-  // Background color based on status
+  // Background color based on intensity
   const getBgColor = () => {
     if (!isCurrentMonth) return 'bg-muted/50';
-    switch (status) {
-      case 'desired':
-        return 'bg-calendar-blue';
-      case 'minimum':
-        return 'bg-calendar-green';
-      default:
-        return 'bg-card';
-    }
+    return intensityColors[intensity];
   };
 
   return (

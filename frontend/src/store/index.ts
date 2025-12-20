@@ -7,6 +7,6 @@ export { useConfigStore } from './configStore';
 export {
   useWeeklyGoalStore,
   calculateWeekStart,
-  calculateWeeklyStatus,
+  isGoalAchieved,
   calculateProgress,
 } from './weeklyGoalStore';

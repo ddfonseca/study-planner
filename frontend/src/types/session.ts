@@ -18,14 +18,8 @@ export interface DayData {
 // Sessions organized by date (YYYY-MM-DD)
 export type SessionsMap = Record<string, DayData>;
 
-// Config for minimum and desired hours
-export interface Config {
-  minHours: number;
-  desHours: number;
-}
-
-// Calendar cell status based on study time
-export type CellStatus = 'empty' | 'below' | 'minimum' | 'desired';
+// Calendar cell intensity based on study time (0-4 for heatmap)
+export type CellIntensity = 0 | 1 | 2 | 3 | 4;
 
 // Date range for filtering
 export interface DateRange {

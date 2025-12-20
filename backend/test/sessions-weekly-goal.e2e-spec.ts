@@ -41,7 +41,7 @@ describe('Sessions + WeeklyGoal Integration', () => {
   describe('Auto-creation of WeeklyGoal', () => {
     it('should have WeeklyGoal created for session week', async () => {
       const user = await createTestUser();
-      await createUserConfig(user.id, { minHours: 20, desHours: 30 });
+      await createUserConfig(user.id, { targetHours: 30 });
 
       // Create a session for Dec 18 (Wednesday of week starting Dec 16)
       const sessionDate = new Date(Date.UTC(2024, 11, 18));
@@ -86,8 +86,7 @@ describe('Sessions + WeeklyGoal Integration', () => {
         data: {
           userId: user.id,
           weekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
@@ -133,22 +132,21 @@ describe('Sessions + WeeklyGoal Integration', () => {
       expect(totalHours).toBe(4.5);
     });
 
-    it('should calculate status based on goal', async () => {
+    it('should calculate progress based on goal', async () => {
       const user = await createTestUser();
 
-      // Create goal with minHours=2, desHours=5
+      // Create goal with targetHours=5
       const weekStart = new Date(Date.UTC(2024, 11, 16));
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
           weekStart,
-          minHours: 2,
-          desHours: 5,
+          targetHours: 5,
           isCustom: false,
         },
       });
 
-      // Create session with 3 hours (above min, below desired)
+      // Create session with 3 hours (60% of target)
       await prisma.studySession.create({
         data: {
           userId: user.id,
@@ -179,16 +177,9 @@ describe('Sessions + WeeklyGoal Integration', () => {
       });
 
       const totalHours = sessions.reduce((acc, s) => acc + s.minutes, 0) / 60;
+      const progress = (totalHours / goal!.targetHours) * 100;
 
-      // Status: GREEN (above min, below desired)
-      const status =
-        totalHours >= goal!.desHours
-          ? 'BLUE'
-          : totalHours >= goal!.minHours
-            ? 'GREEN'
-            : 'NONE';
-
-      expect(status).toBe('GREEN');
+      expect(progress).toBe(60); // 3h / 5h = 60%
     });
   });
 });

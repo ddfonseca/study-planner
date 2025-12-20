@@ -45,8 +45,7 @@ describe('WeeklyGoalService', () => {
           provide: ConfigService,
           useValue: {
             findByUserId: jest.fn().mockResolvedValue({
-              minHours: 20,
-              desHours: 30,
+              targetHours: 30,
               weekStartDay: 1,
             }),
           },
@@ -102,7 +101,7 @@ describe('WeeklyGoalService', () => {
   describe('getOrCreateForWeek', () => {
     it('should create goal with default values if not exists', async () => {
       const user = await createTestUser();
-      await createUserConfig(user.id, { minHours: 20, desHours: 30 });
+      await createUserConfig(user.id, { targetHours: 30 });
 
       // Use UTC date to avoid timezone issues
       const weekStart = new Date(Date.UTC(2024, 11, 16));
@@ -110,8 +109,7 @@ describe('WeeklyGoalService', () => {
 
       expect(goal).toBeDefined();
       expect(goal.userId).toBe(user.id);
-      expect(goal.minHours).toBe(20);
-      expect(goal.desHours).toBe(30);
+      expect(goal.targetHours).toBe(30);
       expect(goal.isCustom).toBe(false);
     });
 
@@ -125,16 +123,14 @@ describe('WeeklyGoalService', () => {
         data: {
           userId: user.id,
           weekStart,
-          minHours: 25,
-          desHours: 35,
+          targetHours: 35,
           isCustom: true,
         },
       });
 
       const goal = await service.getOrCreateForWeek(user.id, weekStart);
 
-      expect(goal.minHours).toBe(25);
-      expect(goal.desHours).toBe(35);
+      expect(goal.targetHours).toBe(35);
       expect(goal.isCustom).toBe(true);
     });
   });
@@ -149,8 +145,7 @@ describe('WeeklyGoalService', () => {
         data: {
           userId: user.id,
           weekStart: new Date(Date.UTC(2024, 11, 16)),
-          minHours: 25,
-          desHours: 35,
+          targetHours: 35,
           isCustom: true,
         },
       });
@@ -163,7 +158,7 @@ describe('WeeklyGoalService', () => {
       );
 
       expect(goal).toBeDefined();
-      expect(goal?.minHours).toBe(25);
+      expect(goal?.targetHours).toBe(35);
     });
   });
 
@@ -180,20 +175,17 @@ describe('WeeklyGoalService', () => {
         data: {
           userId: user.id,
           weekStart: currentWeekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
 
       // Update should succeed - pass the same date
       const updated = await service.update(user.id, currentWeekStart, {
-        minHours: 25,
-        desHours: 40,
+        targetHours: 40,
       });
 
-      expect(updated.minHours).toBe(25);
-      expect(updated.desHours).toBe(40);
+      expect(updated.targetHours).toBe(40);
       expect(updated.isCustom).toBe(true);
     });
 
@@ -212,20 +204,17 @@ describe('WeeklyGoalService', () => {
         data: {
           userId: user.id,
           weekStart: futureWeekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
 
       // Update should succeed
       const updated = await service.update(user.id, futureWeekStart, {
-        minHours: 30,
-        desHours: 45,
+        targetHours: 45,
       });
 
-      expect(updated.minHours).toBe(30);
-      expect(updated.desHours).toBe(45);
+      expect(updated.targetHours).toBe(45);
     });
 
     it('should allow updating past week goal', async () => {
@@ -239,20 +228,17 @@ describe('WeeklyGoalService', () => {
         data: {
           userId: user.id,
           weekStart: pastWeekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
 
       // Update should succeed
       const updated = await service.update(user.id, pastWeekStart, {
-        minHours: 25,
-        desHours: 40,
+        targetHours: 40,
       });
 
-      expect(updated.minHours).toBe(25);
-      expect(updated.desHours).toBe(40);
+      expect(updated.targetHours).toBe(40);
       expect(updated.isCustom).toBe(true);
     });
   });
@@ -267,29 +253,25 @@ describe('WeeklyGoalService', () => {
           {
             userId: user.id,
             weekStart: new Date(Date.UTC(2024, 11, 2)),
-            minHours: 20,
-            desHours: 30,
+            targetHours: 30,
             isCustom: false,
           },
           {
             userId: user.id,
             weekStart: new Date(Date.UTC(2024, 11, 9)),
-            minHours: 25,
-            desHours: 35,
+            targetHours: 35,
             isCustom: true,
           },
           {
             userId: user.id,
             weekStart: new Date(Date.UTC(2024, 11, 16)),
-            minHours: 20,
-            desHours: 30,
+            targetHours: 30,
             isCustom: false,
           },
           {
             userId: user.id,
             weekStart: new Date(Date.UTC(2024, 11, 23)),
-            minHours: 30,
-            desHours: 40,
+            targetHours: 40,
             isCustom: true,
           },
         ],

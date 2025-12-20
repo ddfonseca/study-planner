@@ -113,8 +113,7 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user.id,
           weekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
@@ -129,7 +128,7 @@ describe('WeeklyGoal Model', () => {
       });
 
       expect(found).toBeDefined();
-      expect(found?.minHours).toBe(20);
+      expect(found?.targetHours).toBe(30);
     });
 
     it('should find all weekly goals for a user', async () => {
@@ -140,22 +139,19 @@ describe('WeeklyGoal Model', () => {
           {
             userId: user.id,
             weekStart: new Date('2024-12-09'),
-            minHours: 20,
-            desHours: 30,
+            targetHours: 30,
             isCustom: false,
           },
           {
             userId: user.id,
             weekStart: new Date('2024-12-16'),
-            minHours: 25,
-            desHours: 35,
+            targetHours: 35,
             isCustom: true,
           },
           {
             userId: user.id,
             weekStart: new Date('2024-12-23'),
-            minHours: 20,
-            desHours: 30,
+            targetHours: 30,
             isCustom: false,
           },
         ],
@@ -179,8 +175,7 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user.id,
           weekStart: new Date('2024-12-16'),
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });

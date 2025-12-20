@@ -15,7 +15,6 @@ import {
   CalendarGrid,
   SessionModal,
   StudyTimer,
-  ActivityHeatmap,
 } from '@/components/calendar';
 import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
@@ -23,11 +22,10 @@ import type { DayData } from '@/types/session';
 export function CalendarPage() {
   const { fetchSessions, isLoading: sessionsLoading } = useSessionStore();
   const { fetchConfig, isLoading: configLoading } = useConfigStore();
-  const { handleAddSession, handleUpdateSession, handleDeleteSession, getSessionsForDate } = useSessions();
+  const { handleAddSession, handleUpdateSession, handleDeleteSession, getSessionsForDate, getUniqueSubjects } = useSessions();
   const { toast } = useToast();
 
   const {
-    currentYear,
     currentMonth,
     weeks,
     monthYearDisplay,
@@ -166,15 +164,13 @@ export function CalendarPage() {
         </div>
       </div>
 
-      {/* Activity Heatmap */}
-      <ActivityHeatmap year={currentYear} month={currentMonth} />
-
       {/* Session Modal */}
       <SessionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         date={selectedDate}
         dayData={selectedDayData}
+        subjects={getUniqueSubjects()}
         onAddSession={handleAddSessionSubmit}
         onUpdateSession={handleUpdateSessionSubmit}
         onDeleteSession={handleDeleteSessionSubmit}

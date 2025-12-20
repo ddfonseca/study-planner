@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Combobox } from '@/components/ui/combobox';
 import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
@@ -22,6 +23,7 @@ interface SessionModalProps {
   onClose: () => void;
   date: Date | null;
   dayData: DayData;
+  subjects: string[];
   onAddSession: (subject: string, minutes: number) => Promise<void>;
   onUpdateSession: (id: string, subject: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
@@ -32,6 +34,7 @@ export function SessionModal({
   onClose,
   date,
   dayData,
+  subjects,
   onAddSession,
   onUpdateSession,
   onDeleteSession,
@@ -112,11 +115,13 @@ export function SessionModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="subject">Matéria</Label>
-              <Input
-                id="subject"
-                placeholder="Ex: Matemática"
+              <Combobox
                 value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                onValueChange={setSubject}
+                options={subjects}
+                placeholder="Selecione ou digite..."
+                searchPlaceholder="Buscar matéria..."
+                emptyMessage="Nenhuma matéria encontrada"
                 disabled={isSubmitting}
               />
             </div>

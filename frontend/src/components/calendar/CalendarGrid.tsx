@@ -1,5 +1,5 @@
 /**
- * Calendar Grid - Main calendar view with cells
+ * Calendar Grid - Main calendar view with cells (heatmap style)
  */
 import { useState, useEffect } from 'react';
 import { CalendarCell } from './CalendarCell';
@@ -23,7 +23,7 @@ export function CalendarGrid({
   onCellClick,
   onDeleteSession,
 }: CalendarGridProps) {
-  const { sessions, getCellStatus, getWeekTotals } = useSessions();
+  const { sessions, getCellIntensity, getWeekTotals } = useSessions();
   const { getCachedGoalForWeek, prefetchGoals, calculateWeekStart } = useWeeklyGoals();
   const dayNames = getDayNames();
 
@@ -48,35 +48,20 @@ export function CalendarGrid({
     setSelectedWeekTotal(weekTotal);
   };
 
-  const getWeekStatus = (week: Date[], weekTotal: number): 'BLUE' | 'GREEN' | 'NONE' => {
+  const isGoalAchieved = (week: Date[], weekTotal: number): boolean => {
     const weekStartStr = calculateWeekStart(week[0]);
     const goal = getCachedGoalForWeek(new Date(weekStartStr));
-
-    if (!goal) return 'NONE';
-
+    if (!goal) return false;
     const totalHours = weekTotal / 60;
-    if (totalHours >= goal.desHours) return 'BLUE';
-    if (totalHours >= goal.minHours) return 'GREEN';
-    return 'NONE';
+    return totalHours >= goal.targetHours;
   };
 
   const getWeekProgress = (week: Date[], weekTotal: number): number => {
     const weekStartStr = calculateWeekStart(week[0]);
     const goal = getCachedGoalForWeek(new Date(weekStartStr));
-    if (!goal || goal.desHours === 0) return 0;
+    if (!goal || goal.targetHours === 0) return 0;
     const totalHours = weekTotal / 60;
-    return Math.min(100, (totalHours / goal.desHours) * 100);
-  };
-
-  const getWeekStatusStyles = (status: 'BLUE' | 'GREEN' | 'NONE'): string => {
-    switch (status) {
-      case 'BLUE':
-        return 'bg-blue-500/20 border-blue-500/50 text-blue-700 dark:text-blue-300';
-      case 'GREEN':
-        return 'bg-green-500/20 border-green-500/50 text-green-700 dark:text-green-300';
-      default:
-        return 'bg-muted/50 border-border text-muted-foreground';
-    }
+    return Math.min(100, (totalHours / goal.targetHours) * 100);
   };
 
   return (
@@ -101,8 +86,10 @@ export function CalendarGrid({
           <tbody>
             {weeks.map((week, weekIndex) => {
               const weekTotal = getWeekTotals(week);
-              const weekStatus = getWeekStatus(week, weekTotal);
-              const statusStyles = getWeekStatusStyles(weekStatus);
+              const achieved = isGoalAchieved(week, weekTotal);
+              const statusStyles = achieved
+                ? 'bg-green-500/20 border-green-500/50 text-green-700 dark:text-green-300'
+                : 'bg-muted/50 border-border text-muted-foreground';
 
               return (
                 <tr key={weekIndex}>
@@ -112,7 +99,7 @@ export function CalendarGrid({
                       totalMinutos: 0,
                       materias: [],
                     };
-                    const status = getCellStatus(dateKey);
+                    const intensity = getCellIntensity(dateKey);
 
                     return (
                       <td key={dateKey} className="p-1">
@@ -120,7 +107,7 @@ export function CalendarGrid({
                           date={date}
                           currentMonth={currentMonth}
                           dayData={dayData}
-                          status={status}
+                          intensity={intensity}
                           onClick={() => onCellClick(date)}
                           onDeleteSession={onDeleteSession}
                         />
@@ -140,17 +127,13 @@ export function CalendarGrid({
                           <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-2">
                             <div
                               className={`h-full transition-all ${
-                                weekStatus === 'BLUE'
-                                  ? 'bg-blue-500'
-                                  : weekStatus === 'GREEN'
-                                    ? 'bg-green-500'
-                                    : 'bg-gray-400'
+                                achieved ? 'bg-green-500' : 'bg-gray-400'
                               }`}
                               style={{ width: `${getWeekProgress(week, weekTotal)}%` }}
                             />
                           </div>
                           <span className="text-[10px] opacity-70 mt-1">
-                            {getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.desHours}h
+                            {getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.targetHours}h
                           </span>
                         </>
                       )}

@@ -18,6 +18,16 @@ export class StudySessionsController {
   constructor(private studySessionsService: StudySessionsService) {}
 
   /**
+   * GET /api/study-sessions/subjects
+   * Lista todas as matérias distintas do usuário
+   */
+  @Get('subjects')
+  async getDistinctSubjects(@Session() session: UserSession): Promise<string[]> {
+    const userId = session.user.id;
+    return this.studySessionsService.getDistinctSubjects(userId);
+  }
+
+  /**
    * GET /api/study-sessions?startDate=2024-01-01&endDate=2024-01-31
    * Lista todas as sessões de estudo do usuário, com filtro opcional por data
    */

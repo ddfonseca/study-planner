@@ -160,30 +160,20 @@ export function calculateWeekStart(date: Date, weekStartDay: number = 1): string
 }
 
 /**
- * Calculate weekly status based on total hours and goal
+ * Check if weekly goal is achieved
  */
-export function calculateWeeklyStatus(
-  totalMinutes: number,
-  goal: WeeklyGoal,
-): 'BLUE' | 'GREEN' | 'NONE' {
+export function isGoalAchieved(totalMinutes: number, goal: WeeklyGoal): boolean {
   const totalHours = totalMinutes / 60;
-
-  if (totalHours >= goal.desHours) {
-    return 'BLUE'; // Desired goal achieved
-  }
-  if (totalHours >= goal.minHours) {
-    return 'GREEN'; // Minimum goal achieved
-  }
-  return 'NONE';
+  return totalHours >= goal.targetHours;
 }
 
 /**
- * Calculate progress percentage towards desired goal
+ * Calculate progress percentage towards target goal
  */
 export function calculateProgress(totalMinutes: number, goal: WeeklyGoal): number {
   const totalHours = totalMinutes / 60;
-  if (goal.desHours === 0) return 0;
-  return Math.min(100, (totalHours / goal.desHours) * 100);
+  if (goal.targetHours === 0) return 0;
+  return Math.min(100, (totalHours / goal.targetHours) * 100);
 }
 
 export default useWeeklyGoalStore;

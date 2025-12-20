@@ -3,10 +3,8 @@
  */
 import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
-import { useConfigStore } from '@/store/configStore';
 import type { CreateSessionDto, UpdateSessionDto } from '@/types/api';
-import type { CellStatus } from '@/types/session';
-import { hoursToMinutes } from '@/lib/utils/time';
+import type { CellIntensity } from '@/types/session';
 
 export function useSessions() {
   const {
@@ -22,36 +20,22 @@ export function useSessions() {
     getSessionsForDate,
   } = useSessionStore();
 
-  const { minHours, desHours } = useConfigStore();
-
-  // Calculate daily goal from weekly goal (rounded)
-  const getDailyGoals = useCallback(() => {
-    const dailyMin = Math.round(minHours / 7);
-    const dailyDes = Math.round(desHours / 7);
-    return { dailyMin, dailyDes };
-  }, [minHours, desHours]);
-
-  // Get status for a day based on study time (using daily proportion of weekly goal)
-  const getCellStatus = useCallback(
-    (dateKey: string): CellStatus => {
+  // Get intensity for a day based on study time (heatmap style)
+  // 0 = no study, 1 = <1h, 2 = 1-2h, 3 = 2-3h, 4 = 3h+
+  const getCellIntensity = useCallback(
+    (dateKey: string): CellIntensity => {
       const dayData = sessions[dateKey];
       if (!dayData || dayData.totalMinutos === 0) {
-        return 'empty';
+        return 0;
       }
 
-      const { dailyMin, dailyDes } = getDailyGoals();
-      const minMinutes = hoursToMinutes(dailyMin);
-      const desMinutes = hoursToMinutes(dailyDes);
-
-      if (dayData.totalMinutos >= desMinutes) {
-        return 'desired';
-      }
-      if (dayData.totalMinutos >= minMinutes) {
-        return 'minimum';
-      }
-      return 'below';
+      const minutes = dayData.totalMinutos;
+      if (minutes < 60) return 1;   // < 1h
+      if (minutes < 120) return 2;  // 1-2h
+      if (minutes < 180) return 3;  // 2-3h
+      return 4;                     // 3h+
     },
-    [sessions, getDailyGoals]
+    [sessions]
   );
 
   // Add a new study session
@@ -87,32 +71,6 @@ export function useSessions() {
     [deleteSession]
   );
 
-  // Count days meeting minimum/desired daily goals
-  const getMonthStats = useCallback(
-    (year: number, month: number) => {
-      const { dailyMin, dailyDes } = getDailyGoals();
-      const minMinutes = hoursToMinutes(dailyMin);
-      const desMinutes = hoursToMinutes(dailyDes);
-
-      let greenDays = 0;
-      let blueDays = 0;
-
-      Object.entries(sessions).forEach(([dateKey, dayData]) => {
-        const date = new Date(dateKey);
-        if (date.getFullYear() === year && date.getMonth() === month) {
-          if (dayData.totalMinutos >= desMinutes) {
-            blueDays++;
-          } else if (dayData.totalMinutos >= minMinutes) {
-            greenDays++;
-          }
-        }
-      });
-
-      return { greenDays, blueDays, dailyMin, dailyDes };
-    },
-    [sessions, getDailyGoals]
-  );
-
   // Get weekly totals
   const getWeekTotals = useCallback(
     (weekDates: Date[]) => {
@@ -129,6 +87,17 @@ export function useSessions() {
     [sessions]
   );
 
+  // Get unique subjects from all sessions (for autocomplete)
+  const getUniqueSubjects = useCallback((): string[] => {
+    const subjectsSet = new Set<string>();
+    Object.values(sessions).forEach((dayData) => {
+      dayData.materias.forEach((m) => subjectsSet.add(m.materia));
+    });
+    return Array.from(subjectsSet).sort((a, b) =>
+      a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+    );
+  }, [sessions]);
+
   return {
     sessions,
     selectedDate,
@@ -137,12 +106,12 @@ export function useSessions() {
     fetchSessions,
     selectDate,
     getSessionsForDate,
-    getCellStatus,
+    getCellIntensity,
     handleAddSession,
     handleUpdateSession,
     handleDeleteSession,
-    getMonthStats,
     getWeekTotals,
+    getUniqueSubjects,
   };
 }
 

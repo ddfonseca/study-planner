@@ -27,8 +27,7 @@ export interface Session {
 export interface UserConfig {
   id: string;
   userId: string;
-  minHours: number;
-  desHours: number;
+  targetHours: number;
   weekStartDay: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
   createdAt: string;
   updatedAt: string;
@@ -39,8 +38,7 @@ export interface WeeklyGoal {
   id: string;
   userId: string;
   weekStart: string; // ISO date string (YYYY-MM-DD)
-  minHours: number;
-  desHours: number;
+  targetHours: number;
   isCustom: boolean;
   createdAt: string;
   updatedAt: string;
@@ -48,8 +46,7 @@ export interface WeeklyGoal {
 
 // Update weekly goal DTO
 export interface UpdateWeeklyGoalDto {
-  minHours?: number;
-  desHours?: number;
+  targetHours?: number;
 }
 
 // Auth response after login
@@ -81,8 +78,7 @@ export interface UpdateSessionDto {
 
 // Update config DTO
 export interface UpdateConfigDto {
-  minHours: number;
-  desHours: number;
+  targetHours: number;
 }
 
 // Generic API response wrapper

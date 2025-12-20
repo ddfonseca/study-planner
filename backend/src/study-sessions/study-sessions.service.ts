@@ -11,6 +11,20 @@ export class StudySessionsService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Busca todas as matérias distintas de um usuário
+   */
+  async getDistinctSubjects(userId: string): Promise<string[]> {
+    const subjects = await this.prisma.studySession.findMany({
+      where: { userId },
+      select: { subject: true },
+      distinct: ['subject'],
+      orderBy: { subject: 'asc' },
+    });
+
+    return subjects.map((s) => s.subject);
+  }
+
+  /**
    * Busca todas as sessões de estudo de um usuário
    * Pode filtrar por intervalo de datas
    */

@@ -11,35 +11,23 @@ import { useToast } from '@/hooks/use-toast';
 import { Settings, Loader2 } from 'lucide-react';
 
 export function ConfigPanel() {
-  const { minHours, desHours, updateConfig, isLoading } = useConfigStore();
+  const { targetHours, updateConfig, isLoading } = useConfigStore();
   const { toast } = useToast();
 
-  const [localMinHours, setLocalMinHours] = useState(String(minHours));
-  const [localDesHours, setLocalDesHours] = useState(String(desHours));
+  const [localTargetHours, setLocalTargetHours] = useState(String(targetHours));
 
   // Sync local state with store
   useEffect(() => {
-    setLocalMinHours(String(minHours));
-    setLocalDesHours(String(desHours));
-  }, [minHours, desHours]);
+    setLocalTargetHours(String(targetHours));
+  }, [targetHours]);
 
   const handleSave = async () => {
-    const minValue = parseFloat(localMinHours) || 0;
-    const desValue = parseFloat(localDesHours) || 0;
+    const targetValue = parseFloat(localTargetHours) || 0;
 
-    if (minValue < 0 || desValue < 0) {
+    if (targetValue < 0) {
       toast({
         title: 'Erro',
-        description: 'Os valores devem ser maiores que 0',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (minValue > desValue) {
-      toast({
-        title: 'Erro',
-        description: 'O mínimo não pode ser maior que o desejado',
+        description: 'O valor deve ser maior ou igual a 0',
         variant: 'destructive',
       });
       return;
@@ -47,8 +35,7 @@ export function ConfigPanel() {
 
     try {
       await updateConfig({
-        minHours: minValue,
-        desHours: desValue,
+        targetHours: targetValue,
       });
       toast({
         title: 'Sucesso',
@@ -73,35 +60,17 @@ export function ConfigPanel() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="minHours" className="text-xs flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            Mínimo (h/semana)
+          <Label htmlFor="targetHours" className="text-xs">
+            Horas por Semana
           </Label>
           <Input
-            id="minHours"
+            id="targetHours"
             type="number"
             min="0"
             max="168"
             step="0.5"
-            value={localMinHours}
-            onChange={(e) => setLocalMinHours(e.target.value)}
-            className="h-8"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="desHours" className="text-xs flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            Desejado (h/semana)
-          </Label>
-          <Input
-            id="desHours"
-            type="number"
-            min="0"
-            max="168"
-            step="0.5"
-            value={localDesHours}
-            onChange={(e) => setLocalDesHours(e.target.value)}
+            value={localTargetHours}
+            onChange={(e) => setLocalTargetHours(e.target.value)}
             className="h-8"
           />
         </div>

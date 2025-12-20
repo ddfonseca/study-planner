@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import {
   useWeeklyGoalStore,
   calculateWeekStart,
-  calculateWeeklyStatus,
+  isGoalAchieved,
   calculateProgress,
 } from '@/store';
 import type { WeeklyGoal, UpdateWeeklyGoalDto } from '@/types/api';
@@ -24,7 +24,7 @@ interface WeekStatus {
   goal: WeeklyGoal | null;
   totalMinutes: number;
   totalHours: number;
-  status: 'BLUE' | 'GREEN' | 'NONE';
+  achieved: boolean;
   progress: number; // 0-100
   isLoading: boolean;
 }
@@ -102,7 +102,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
           goal: null,
           totalMinutes,
           totalHours: totalMinutes / 60,
-          status: 'NONE',
+          achieved: false,
           progress: 0,
           isLoading: store.isLoading,
         };
@@ -112,7 +112,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
         goal,
         totalMinutes,
         totalHours: totalMinutes / 60,
-        status: calculateWeeklyStatus(totalMinutes, goal),
+        achieved: isGoalAchieved(totalMinutes, goal),
         progress: calculateProgress(totalMinutes, goal),
         isLoading: store.isLoading,
       };

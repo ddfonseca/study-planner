@@ -4,10 +4,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UpdateConfigDto } from '@/types/api';
-import type { Config } from '@/types/session';
 import { configApi } from '@/lib/api/config';
 
-interface ConfigState extends Config {
+interface ConfigState {
+  targetHours: number;
   isLoading: boolean;
   error: string | null;
 }
@@ -15,8 +15,7 @@ interface ConfigState extends Config {
 interface ConfigActions {
   fetchConfig: () => Promise<void>;
   updateConfig: (config: UpdateConfigDto) => Promise<void>;
-  setMinHours: (hours: number) => void;
-  setDesHours: (hours: number) => void;
+  setTargetHours: (hours: number) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -24,15 +23,13 @@ interface ConfigActions {
 type ConfigStore = ConfigState & ConfigActions;
 
 // Default configuration values
-const DEFAULT_MIN_HOURS = 2;
-const DEFAULT_DES_HOURS = 4;
+const DEFAULT_TARGET_HOURS = 30;
 
 export const useConfigStore = create<ConfigStore>()(
   persist(
     (set) => ({
       // Initial state with defaults
-      minHours: DEFAULT_MIN_HOURS,
-      desHours: DEFAULT_DES_HOURS,
+      targetHours: DEFAULT_TARGET_HOURS,
       isLoading: false,
       error: null,
 
@@ -44,15 +41,13 @@ export const useConfigStore = create<ConfigStore>()(
 
           if (config) {
             set({
-              minHours: config.minHours,
-              desHours: config.desHours,
+              targetHours: config.targetHours,
               isLoading: false,
             });
           } else {
             // Use defaults if no config exists
             set({
-              minHours: DEFAULT_MIN_HOURS,
-              desHours: DEFAULT_DES_HOURS,
+              targetHours: DEFAULT_TARGET_HOURS,
               isLoading: false,
             });
           }
@@ -70,8 +65,7 @@ export const useConfigStore = create<ConfigStore>()(
           const updatedConfig = await configApi.update(config);
 
           set({
-            minHours: updatedConfig.minHours,
-            desHours: updatedConfig.desHours,
+            targetHours: updatedConfig.targetHours,
             isLoading: false,
           });
         } catch (error) {
@@ -83,12 +77,8 @@ export const useConfigStore = create<ConfigStore>()(
         }
       },
 
-      setMinHours: (hours) => {
-        set({ minHours: hours });
-      },
-
-      setDesHours: (hours) => {
-        set({ desHours: hours });
+      setTargetHours: (hours) => {
+        set({ targetHours: hours });
       },
 
       setLoading: (loading) => {
@@ -102,8 +92,7 @@ export const useConfigStore = create<ConfigStore>()(
     {
       name: 'config-storage',
       partialize: (state) => ({
-        minHours: state.minHours,
-        desHours: state.desHours,
+        targetHours: state.targetHours,
       }),
     }
   )
