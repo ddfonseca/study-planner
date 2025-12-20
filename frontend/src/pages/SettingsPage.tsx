@@ -16,11 +16,14 @@ export function SettingsPage() {
   const { minHours, desHours, updateConfig, isLoading } = useConfigStore();
   const { toast } = useToast();
 
-  const [localMinHours, setLocalMinHours] = useState(minHours);
-  const [localDesHours, setLocalDesHours] = useState(desHours);
+  const [localMinHours, setLocalMinHours] = useState(String(minHours));
+  const [localDesHours, setLocalDesHours] = useState(String(desHours));
 
   const handleSave = async () => {
-    if (localMinHours < 0 || localDesHours < 0) {
+    const minValue = parseFloat(localMinHours) || 0;
+    const desValue = parseFloat(localDesHours) || 0;
+
+    if (minValue < 0 || desValue < 0) {
       toast({
         title: 'Erro',
         description: 'Os valores devem ser maiores que 0',
@@ -29,7 +32,7 @@ export function SettingsPage() {
       return;
     }
 
-    if (localMinHours > localDesHours) {
+    if (minValue > desValue) {
       toast({
         title: 'Erro',
         description: 'O mínimo não pode ser maior que o desejado',
@@ -40,8 +43,8 @@ export function SettingsPage() {
 
     try {
       await updateConfig({
-        minHours: localMinHours,
-        desHours: localDesHours,
+        minHours: minValue,
+        desHours: desValue,
       });
       toast({
         title: 'Sucesso',
@@ -119,7 +122,7 @@ export function SettingsPage() {
                 max="168"
                 step="0.5"
                 value={localMinHours}
-                onChange={(e) => setLocalMinHours(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setLocalMinHours(e.target.value)}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
@@ -139,7 +142,7 @@ export function SettingsPage() {
                 max="168"
                 step="0.5"
                 value={localDesHours}
-                onChange={(e) => setLocalDesHours(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setLocalDesHours(e.target.value)}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">

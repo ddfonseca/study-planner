@@ -60,6 +60,14 @@ export function CalendarGrid({
     return 'NONE';
   };
 
+  const getWeekProgress = (week: Date[], weekTotal: number): number => {
+    const weekStartStr = calculateWeekStart(week[0]);
+    const goal = getCachedGoalForWeek(new Date(weekStartStr));
+    if (!goal || goal.desHours === 0) return 0;
+    const totalHours = weekTotal / 60;
+    return Math.min(100, (totalHours / goal.desHours) * 100);
+  };
+
   const getWeekStatusStyles = (status: 'BLUE' | 'GREEN' | 'NONE'): string => {
     switch (status) {
       case 'BLUE':
@@ -122,15 +130,29 @@ export function CalendarGrid({
                   <td className="p-1">
                     <button
                       onClick={() => handleTotalClick(week, weekTotal)}
-                      className={`w-full h-[100px] flex flex-col items-center justify-center rounded-md border transition-colors hover:opacity-80 cursor-pointer ${statusStyles}`}
+                      className={`w-full h-[100px] flex flex-col items-center justify-center rounded-md border transition-colors hover:opacity-80 cursor-pointer px-2 ${statusStyles}`}
                     >
                       <span className="text-sm font-medium">
                         {weekTotal > 0 ? formatTime(weekTotal) : '-'}
                       </span>
                       {getCachedGoalForWeek(new Date(calculateWeekStart(week[0]))) && (
-                        <span className="text-xs opacity-70 mt-1">
-                          Meta: {getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.desHours}h
-                        </span>
+                        <>
+                          <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-2">
+                            <div
+                              className={`h-full transition-all ${
+                                weekStatus === 'BLUE'
+                                  ? 'bg-blue-500'
+                                  : weekStatus === 'GREEN'
+                                    ? 'bg-green-500'
+                                    : 'bg-gray-400'
+                              }`}
+                              style={{ width: `${getWeekProgress(week, weekTotal)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] opacity-70 mt-1">
+                            {getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.desHours}h
+                          </span>
+                        </>
                       )}
                     </button>
                   </td>

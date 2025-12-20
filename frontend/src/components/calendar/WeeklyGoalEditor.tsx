@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useWeeklyGoals } from '@/hooks/useWeeklyGoals';
-import { formatTime } from '@/lib/utils/time';
+import { useSessionStore } from '@/store/sessionStore';
+import { formatTime, hoursToMinutes } from '@/lib/utils/time';
 import type { WeeklyGoal } from '@/types/api';
 
 interface WeeklyGoalEditorProps {
@@ -30,13 +31,45 @@ export function WeeklyGoalEditor({
   currentTotal,
 }: WeeklyGoalEditorProps) {
   const { getGoalForWeek, updateGoal, canEditWeek, isLoading } = useWeeklyGoals();
+  const { sessions } = useSessionStore();
   const [goal, setGoal] = useState<WeeklyGoal | null>(null);
-  const [minHours, setMinHours] = useState<number>(0);
-  const [desHours, setDesHours] = useState<number>(0);
+  const [minHours, setMinHours] = useState<string>('0');
+  const [desHours, setDesHours] = useState<string>('0');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const canEdit = canEditWeek(weekStart);
+
+  // Calculate days meeting daily goals for this week
+  const getWeekDayStats = () => {
+    if (!goal) return { greenDays: 0, blueDays: 0, dailyMin: 0, dailyDes: 0 };
+
+    const dailyMin = Math.round(goal.minHours / 7);
+    const dailyDes = Math.round(goal.desHours / 7);
+    const minMinutes = hoursToMinutes(dailyMin);
+    const desMinutes = hoursToMinutes(dailyDes);
+
+    let greenDays = 0;
+    let blueDays = 0;
+
+    // Check each day of the week
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + i);
+      const dateKey = day.toISOString().split('T')[0];
+      const dayData = sessions[dateKey];
+
+      if (dayData && dayData.totalMinutos >= desMinutes) {
+        blueDays++;
+      } else if (dayData && dayData.totalMinutos >= minMinutes) {
+        greenDays++;
+      }
+    }
+
+    return { greenDays, blueDays, dailyMin, dailyDes };
+  };
+
+  const { greenDays, blueDays, dailyMin, dailyDes } = getWeekDayStats();
 
   // Format date range for display
   const weekStartStr = weekStart.toISOString().split('T')[0];
@@ -62,15 +95,18 @@ export function WeeklyGoalEditor({
       setError(null);
       const loadedGoal = await getGoalForWeek(weekStart);
       setGoal(loadedGoal);
-      setMinHours(loadedGoal.minHours);
-      setDesHours(loadedGoal.desHours);
+      setMinHours(String(loadedGoal.minHours));
+      setDesHours(String(loadedGoal.desHours));
     } catch (err) {
       setError('Erro ao carregar meta');
     }
   };
 
   const handleSave = async () => {
-    if (minHours > desHours) {
+    const minValue = parseFloat(minHours) || 0;
+    const desValue = parseFloat(desHours) || 0;
+
+    if (minValue > desValue) {
       setError('Meta mínima não pode ser maior que a desejada');
       return;
     }
@@ -78,7 +114,7 @@ export function WeeklyGoalEditor({
     try {
       setIsSaving(true);
       setError(null);
-      await updateGoal(weekStart, { minHours, desHours });
+      await updateGoal(weekStart, { minHours: minValue, desHours: desValue });
       onClose();
     } catch (err) {
       if (err instanceof Error && err.message.includes('past')) {
@@ -150,6 +186,30 @@ export function WeeklyGoalEditor({
                 </span>
               </div>
             )}
+
+            {/* Days meeting daily goals */}
+            {goal && (
+              <div className="flex gap-4 mt-3 pt-3 border-t border-border/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-green-500/20 border border-green-500/50" />
+                  <span className="text-xs text-muted-foreground">
+                    ≥{dailyMin}h/dia:
+                  </span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    {greenDays}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/50" />
+                  <span className="text-xs text-muted-foreground">
+                    ≥{dailyDes}h/dia:
+                  </span>
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    {blueDays}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Goal inputs */}
@@ -164,7 +224,7 @@ export function WeeklyGoalEditor({
                 min="0"
                 step="0.5"
                 value={minHours}
-                onChange={(e) => setMinHours(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setMinHours(e.target.value)}
                 disabled={!canEdit || isLoading || isSaving}
                 className="bg-green-500/5 border-green-500/20 focus:border-green-500"
               />
@@ -179,7 +239,7 @@ export function WeeklyGoalEditor({
                 min="0"
                 step="0.5"
                 value={desHours}
-                onChange={(e) => setDesHours(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setDesHours(e.target.value)}
                 disabled={!canEdit || isLoading || isSaving}
                 className="bg-blue-500/5 border-blue-500/20 focus:border-blue-500"
               />

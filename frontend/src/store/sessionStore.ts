@@ -11,7 +11,8 @@ interface SessionState {
   sessions: SessionsMap;
   rawSessions: Session[];
   selectedDate: string | null;
-  isLoading: boolean;
+  isLoading: boolean; // Initial fetch loading
+  isSaving: boolean;  // Add/update/delete operations
   error: string | null;
 }
 
@@ -35,6 +36,7 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
   rawSessions: [],
   selectedDate: null,
   isLoading: false,
+  isSaving: false,
   error: null,
 
   // Actions
@@ -59,7 +61,7 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
 
   addSession: async (sessionData) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSaving: true, error: null });
       const newSession = await sessionsApi.create(sessionData);
 
       // Update local state with new session
@@ -70,13 +72,13 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
       set({
         rawSessions: updatedRawSessions,
         sessions,
-        isLoading: false,
+        isSaving: false,
       });
 
       return newSession;
     } catch (error) {
       set({
-        isLoading: false,
+        isSaving: false,
         error: error instanceof Error ? error.message : 'Failed to add session',
       });
       throw error;
@@ -85,7 +87,7 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
 
   updateSession: async (id, sessionData) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSaving: true, error: null });
       const updatedSession = await sessionsApi.update(id, sessionData);
 
       // Update local state
@@ -98,13 +100,13 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
       set({
         rawSessions: updatedRawSessions,
         sessions,
-        isLoading: false,
+        isSaving: false,
       });
 
       return updatedSession;
     } catch (error) {
       set({
-        isLoading: false,
+        isSaving: false,
         error: error instanceof Error ? error.message : 'Failed to update session',
       });
       throw error;
@@ -113,7 +115,7 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
 
   deleteSession: async (id) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSaving: true, error: null });
       await sessionsApi.delete(id);
 
       // Update local state
@@ -124,11 +126,11 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
       set({
         rawSessions: updatedRawSessions,
         sessions,
-        isLoading: false,
+        isSaving: false,
       });
     } catch (error) {
       set({
-        isLoading: false,
+        isSaving: false,
         error: error instanceof Error ? error.message : 'Failed to delete session',
       });
       throw error;

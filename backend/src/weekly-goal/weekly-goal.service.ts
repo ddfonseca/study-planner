@@ -1,8 +1,8 @@
 /**
  * WeeklyGoal Service
- * Manages weekly study goals with immutable history
+ * Manages weekly study goals
  */
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '../config/config.service';
 import { WeeklyGoal } from '@prisma/client';
@@ -103,7 +103,6 @@ export class WeeklyGoalService {
 
   /**
    * Update weekly goal
-   * THROWS ForbiddenException if week is in the past
    */
   async update(
     userId: string,
@@ -114,16 +113,6 @@ export class WeeklyGoalService {
     const normalizedWeekStart = new Date(
       Date.UTC(weekStart.getUTCFullYear(), weekStart.getUTCMonth(), weekStart.getUTCDate()),
     );
-
-    // Calculate current week start in UTC
-    const now = new Date();
-    const currentWeekStart = this.calculateWeekStart(now, 1);
-
-    if (normalizedWeekStart < currentWeekStart) {
-      throw new ForbiddenException(
-        'Cannot modify goals for past weeks. History is immutable.',
-      );
-    }
 
     return this.prisma.weeklyGoal.update({
       where: {

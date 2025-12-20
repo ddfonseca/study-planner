@@ -7,7 +7,6 @@ import { PrismaClient } from '@prisma/client';
 import { WeeklyGoalService } from '../src/weekly-goal/weekly-goal.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ConfigService } from '../src/config/config.service';
-import { ForbiddenException } from '@nestjs/common';
 import {
   cleanDatabase,
   createTestUser,
@@ -229,7 +228,7 @@ describe('WeeklyGoalService', () => {
       expect(updated.desHours).toBe(45);
     });
 
-    it('should REJECT updating past week goal', async () => {
+    it('should allow updating past week goal', async () => {
       const user = await createTestUser();
 
       // A Monday in the past (UTC)
@@ -246,13 +245,15 @@ describe('WeeklyGoalService', () => {
         },
       });
 
-      // Update should fail
-      await expect(
-        service.update(user.id, pastWeekStart, {
-          minHours: 25,
-          desHours: 40,
-        }),
-      ).rejects.toThrow(ForbiddenException);
+      // Update should succeed
+      const updated = await service.update(user.id, pastWeekStart, {
+        minHours: 25,
+        desHours: 40,
+      });
+
+      expect(updated.minHours).toBe(25);
+      expect(updated.desHours).toBe(40);
+      expect(updated.isCustom).toBe(true);
     });
   });
 

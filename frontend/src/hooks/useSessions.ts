@@ -24,7 +24,14 @@ export function useSessions() {
 
   const { minHours, desHours } = useConfigStore();
 
-  // Get status for a day based on study time
+  // Calculate daily goal from weekly goal (rounded)
+  const getDailyGoals = useCallback(() => {
+    const dailyMin = Math.round(minHours / 7);
+    const dailyDes = Math.round(desHours / 7);
+    return { dailyMin, dailyDes };
+  }, [minHours, desHours]);
+
+  // Get status for a day based on study time (using daily proportion of weekly goal)
   const getCellStatus = useCallback(
     (dateKey: string): CellStatus => {
       const dayData = sessions[dateKey];
@@ -32,8 +39,9 @@ export function useSessions() {
         return 'empty';
       }
 
-      const minMinutes = hoursToMinutes(minHours);
-      const desMinutes = hoursToMinutes(desHours);
+      const { dailyMin, dailyDes } = getDailyGoals();
+      const minMinutes = hoursToMinutes(dailyMin);
+      const desMinutes = hoursToMinutes(dailyDes);
 
       if (dayData.totalMinutos >= desMinutes) {
         return 'desired';
@@ -43,7 +51,7 @@ export function useSessions() {
       }
       return 'below';
     },
-    [sessions, minHours, desHours]
+    [sessions, getDailyGoals]
   );
 
   // Add a new study session
@@ -79,11 +87,12 @@ export function useSessions() {
     [deleteSession]
   );
 
-  // Count days meeting minimum/desired hours
+  // Count days meeting minimum/desired daily goals
   const getMonthStats = useCallback(
     (year: number, month: number) => {
-      const minMinutes = hoursToMinutes(minHours);
-      const desMinutes = hoursToMinutes(desHours);
+      const { dailyMin, dailyDes } = getDailyGoals();
+      const minMinutes = hoursToMinutes(dailyMin);
+      const desMinutes = hoursToMinutes(dailyDes);
 
       let greenDays = 0;
       let blueDays = 0;
@@ -99,9 +108,9 @@ export function useSessions() {
         }
       });
 
-      return { greenDays, blueDays };
+      return { greenDays, blueDays, dailyMin, dailyDes };
     },
-    [sessions, minHours, desHours]
+    [sessions, getDailyGoals]
   );
 
   // Get weekly totals

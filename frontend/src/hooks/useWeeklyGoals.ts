@@ -2,7 +2,7 @@
  * useWeeklyGoals Hook
  * Provides convenient access to weekly goals with automatic fetching
  */
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import {
   useWeeklyGoalStore,
   calculateWeekStart,
