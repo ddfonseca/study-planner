@@ -11,9 +11,11 @@ Planner de estudos com autenticação Google OAuth, sincronização multi-dispos
 - **Validação**: class-validator + class-transformer
 
 ### Frontend
-- **Interface**: HTML5 + CSS3 + JavaScript vanilla
-- **Gráficos**: Chart.js
-- **Autenticação**: Integração com backend via API REST
+- **Framework**: React 19 + TypeScript + Vite
+- **Estilização**: Tailwind CSS + shadcn/ui
+- **Gráficos**: Chart.js + react-chartjs-2
+- **Estado**: Zustand
+- **Roteamento**: React Router DOM
 
 ## 📋 Pré-requisitos
 
@@ -84,7 +86,6 @@ docker-compose up --build
 
 - **Frontend**: http://localhost:8080
 - **Backend API**: http://localhost:3000
-- **Login**: http://localhost:8080/login.html
 
 ## 📁 Estrutura do Projeto
 
@@ -94,21 +95,26 @@ study-planner/
 │   ├── src/
 │   │   ├── auth/              # Autenticação (better-auth + Google OAuth)
 │   │   ├── study-sessions/    # CRUD de sessões de estudo
+│   │   ├── weekly-goal/       # Metas semanais
 │   │   ├── config/            # Configurações do usuário
 │   │   ├── prisma/            # Prisma service
 │   │   └── main.ts            # Entry point
 │   ├── prisma/
 │   │   └── schema.prisma      # Schema do banco de dados
 │   └── .env                   # Variáveis de ambiente
-├── frontend/                   # Frontend
-│   ├── public/
-│   │   ├── index.html         # App principal
-│   │   ├── login.html         # Página de login
-│   │   ├── styles.css         # Estilos
-│   │   └── app.js            # Lógica principal
-│   └── src/
-│       ├── api/               # Cliente API (auth, sessions, config)
-│       └── utils/             # Utilitários (auth, transform)
+├── frontend/                   # Frontend React + Vite
+│   ├── src/
+│   │   ├── components/        # Componentes React
+│   │   │   ├── calendar/      # Calendário, sessões, timer
+│   │   │   ├── dashboard/     # Gráficos e estatísticas
+│   │   │   ├── layout/        # Layouts da aplicação
+│   │   │   └── ui/            # Componentes UI (shadcn)
+│   │   ├── pages/             # Páginas da aplicação
+│   │   ├── hooks/             # Custom hooks
+│   │   ├── store/             # Estado global (Zustand)
+│   │   ├── lib/               # API client e utilitários
+│   │   └── types/             # Tipos TypeScript
+│   └── index.html             # Entry point
 ├── docker-compose.yml         # Orquestração Docker
 ├── nginx.conf                 # Configuração Nginx
 └── README.md                  # Este arquivo
@@ -132,6 +138,10 @@ study-planner/
 - `GET /api/config` - Obter configuração (protegida)
 - `PUT /api/config` - Atualizar configuração (protegida)
 
+### Metas Semanais
+- `GET /api/weekly-goals` - Listar metas semanais (protegida)
+- `PUT /api/weekly-goals/:weekStart` - Atualizar meta semanal (protegida)
+
 ## 🛠️ Desenvolvimento
 
 ### Backend (sem Docker)
@@ -147,10 +157,9 @@ npm run start:dev
 ### Frontend (sem Docker)
 
 ```bash
-cd frontend/public
-python3 -m http.server 8080
-# ou
-npx serve . -p 8080
+cd frontend
+npm install
+npm run dev
 ```
 
 ## 🐛 Troubleshooting
@@ -167,16 +176,19 @@ npx serve . -p 8080
 
 ### Frontend não carrega
 - Verifique se o Nginx está rodando: `docker-compose ps`
-- Acesse: http://localhost:8080/login.html
+- Acesse: http://localhost:8080
 
 ## 📊 Funcionalidades
 
 - ✅ **Autenticação Google OAuth** - Login seguro com conta Google
 - ✅ **Calendário Interativo** - Visualize e gerencie sessões de estudo
+- ✅ **Timer de Estudo** - Cronômetro integrado para sessões
 - ✅ **Dashboard com Gráficos** - Análise de desempenho com Chart.js
+- ✅ **Heatmap Anual** - Visualização de atividade no estilo GitHub
+- ✅ **Progresso Semanal** - Acompanhe suas metas semanais
+- ✅ **Metas Personalizáveis** - Defina metas semanais por período
+- ✅ **Adição Rápida** - Adicione sessões de forma inline
 - ✅ **Sincronização Multi-dispositivo** - Dados salvos no backend
-- ✅ **Configurações Personalizadas** - Defina metas diárias de estudo
-- ⏳ **Compartilhamento** - Em desenvolvimento (FASE 4)
 
 ## 📝 Notas
 
@@ -185,16 +197,6 @@ npx serve . -p 8080
 - CORS configurado para aceitar `http://localhost:8080`
 - Todos os endpoints de API (exceto auth) requerem autenticação
 
-## 🎯 Próximos Passos
-
-- [ ] Implementar funcionalidade de compartilhamento de planos
-- [ ] Adicionar notificações de lembretes
-- [ ] Exportar dados em PDF/CSV
-- [ ] PWA para uso offline
-- [ ] Testes automatizados
-- [ ] CI/CD
-- [ ] Deploy em produção
-
 ## 👨‍💻 Desenvolvimento
 
-Criado com **NestJS**, **PostgreSQL**, **better-auth**, **Prisma**, **Chart.js** e muito ☕
+Criado com **React**, **NestJS**, **PostgreSQL**, **better-auth**, **Prisma**, **Tailwind CSS**, **Chart.js** e **Zustand**
