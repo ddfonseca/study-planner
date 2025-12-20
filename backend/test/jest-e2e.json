@@ -4,8 +4,12 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": "ts-jest",
+    "^.+\\.mjs$": "ts-jest"
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(better-auth|better-call|@thallesp)/)"
+  ],
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   },

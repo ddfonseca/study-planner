@@ -72,6 +72,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(better-auth|better-call|@thallesp)/)"
+    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
