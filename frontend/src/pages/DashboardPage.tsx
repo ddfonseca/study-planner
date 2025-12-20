@@ -12,10 +12,11 @@ import {
   StatsCards,
   SubjectChart,
   DailyChart,
+  AnnualHeatmap,
 } from '@/components/dashboard';
 
 export function DashboardPage() {
-  const { fetchSessions, isLoading } = useSessionStore();
+  const { sessions, fetchSessions, isLoading } = useSessionStore();
   const {
     daysBack,
     stats,
@@ -67,6 +68,9 @@ export function DashboardPage() {
         <SubjectChart data={subjectChartData} />
         <DailyChart data={dailyChartData} />
       </div>
+
+      {/* Annual Heatmap */}
+      <AnnualHeatmap sessions={sessions} />
     </div>
   );
 }
