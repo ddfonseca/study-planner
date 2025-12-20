@@ -7,3 +7,4 @@ export { CalendarGrid } from './CalendarGrid';
 export { SessionModal } from './SessionModal';
 export { MonthSummary } from './MonthSummary';
 export { ConfigPanel } from './ConfigPanel';
+export { WeeklyGoalEditor } from './WeeklyGoalEditor';

@@ -63,19 +63,23 @@ export function formatDayOfWeek(date: Date): string {
 }
 
 /**
- * Get day names for calendar header
+ * Get day names for calendar header (Monday first)
  */
 export function getDayNames(): string[] {
-  return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  return ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 }
 
 /**
  * Get all dates for a calendar month grid (includes padding days)
+ * Calendar starts on Monday (weekday 0 = Monday, 6 = Sunday)
  */
 export function getCalendarDays(year: number, month: number): Date[] {
   const firstDay = new Date(year, month, 1);
   const lastDay = endOfMonth(firstDay);
-  const startDayOfWeek = getDay(firstDay);
+
+  // Convert getDay() (0=Sun, 1=Mon, ..., 6=Sat) to Monday-based (0=Mon, ..., 6=Sun)
+  const dayOfWeek = getDay(firstDay);
+  const startDayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
   const days: Date[] = [];
 

@@ -94,56 +94,56 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Study Goals Card */}
+      {/* Weekly Goals Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Metas de Estudo
+            Metas Semanais Padrão
           </CardTitle>
           <CardDescription>
-            Configure suas horas mínimas e desejadas por dia
+            Configure o padrão de horas para novas semanas. Você pode personalizar semanas individuais clicando na coluna "Total" do calendário.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="minHours" className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-success" />
-                Horas Mínimas
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                Horas Mínimas por Semana
               </Label>
               <Input
                 id="minHours"
                 type="number"
                 min="0"
-                max="24"
+                max="168"
                 step="0.5"
                 value={localMinHours}
                 onChange={(e) => setLocalMinHours(parseFloat(e.target.value) || 0)}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                Dias que atingirem este valor ficam verdes
+                Semanas que atingirem este total ficam verdes
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="desHours" className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                Horas Desejadas
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                Horas Desejadas por Semana
               </Label>
               <Input
                 id="desHours"
                 type="number"
                 min="0"
-                max="24"
+                max="168"
                 step="0.5"
                 value={localDesHours}
                 onChange={(e) => setLocalDesHours(parseFloat(e.target.value) || 0)}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                Dias que atingirem este valor ficam azuis
+                Semanas que atingirem este total ficam azuis
               </p>
             </div>
           </div>

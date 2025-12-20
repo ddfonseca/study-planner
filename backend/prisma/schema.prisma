@@ -23,6 +23,7 @@ model User {
   // Relations
   studySessions StudySession[]
   userConfig    UserConfig?
+  weeklyGoals   WeeklyGoal[]
   sharedPlans   SharedPlan[]   @relation("SharedWith")
   ownedShares   SharedPlan[]   @relation("Owner")
   sessions      Session[]
@@ -82,18 +83,37 @@ model Verification {
   @@map("verification")
 }
 
-// User configuration (min hours, desired hours)
+// User configuration (default weekly goals, week start day)
 model UserConfig {
+  id           String   @id @default(cuid())
+  userId       String   @unique @map("user_id")
+  minHours     Float    @default(20) @map("min_hours")
+  desHours     Float    @default(30) @map("des_hours")
+  weekStartDay Int      @default(1) @map("week_start_day") // 0=Sun, 1=Mon, ..., 6=Sat
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_configs")
+}
+
+// Weekly goal - stores goals for specific weeks (immutable after week ends)
+model WeeklyGoal {
   id        String   @id @default(cuid())
-  userId    String   @unique @map("user_id")
-  minHours  Float    @default(2) @map("min_hours")
-  desHours  Float    @default(4) @map("des_hours")
+  userId    String   @map("user_id")
+  weekStart DateTime @map("week_start") @db.Date // Monday of the week
+  minHours  Float    @map("min_hours")
+  desHours  Float    @map("des_hours")
+  isCustom  Boolean  @default(false) @map("is_custom") // true if user modified
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("user_configs")
+  @@unique([userId, weekStart])
+  @@index([userId])
+  @@map("weekly_goals")
 }
 
 // Study session (replaces localStorage materias array)

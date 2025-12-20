@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { auth } from './auth/auth.config';
 import { StudySessionsModule } from './study-sessions/study-sessions.module';
 import { UserConfigModule } from './config/config.module';
+import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserConfigModule } from './config/config.module';
     AuthModule.forRoot({ auth, disableControllers: true }),
     StudySessionsModule,
     UserConfigModule,
+    WeeklyGoalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

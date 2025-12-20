@@ -1,0 +1,30 @@
+.PHONY: up down logs test test-db test-reset migrate
+
+# Docker
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
+
+logs:
+	docker-compose logs -f
+
+# Testes
+test-db:
+	docker-compose -f docker-compose.test.yml up -d
+
+test-reset:
+	docker-compose -f docker-compose.test.yml down -v
+	docker-compose -f docker-compose.test.yml up -d
+	@sleep 2
+	DATABASE_URL="postgresql://test:test@localhost:5433/study_planner_test?schema=public" npx prisma db push --schema=backend/prisma/schema.prisma --force-reset
+
+test: test-db
+	@sleep 1
+	DATABASE_URL="postgresql://test:test@localhost:5433/study_planner_test?schema=public" npx prisma db push --schema=backend/prisma/schema.prisma
+	cd backend && npm run test:e2e -- --testPathIgnorePatterns="app.e2e-spec|weekly-goal-controller"
+
+# Prisma
+migrate:
+	cd backend && npx prisma migrate dev

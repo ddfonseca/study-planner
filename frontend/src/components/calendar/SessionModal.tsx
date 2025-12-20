@@ -55,6 +55,12 @@ export function SessionModal({
     setMinutes('');
   };
 
+  // Reset state when modal closes
+  const handleClose = () => {
+    handleCancelEdit();
+    onClose();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim() || !minutes) return;
@@ -86,7 +92,7 @@ export function SessionModal({
   if (!date) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

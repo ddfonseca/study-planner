@@ -29,8 +29,27 @@ export interface UserConfig {
   userId: string;
   minHours: number;
   desHours: number;
+  weekStartDay: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
   createdAt: string;
   updatedAt: string;
+}
+
+// Weekly goal
+export interface WeeklyGoal {
+  id: string;
+  userId: string;
+  weekStart: string; // ISO date string (YYYY-MM-DD)
+  minHours: number;
+  desHours: number;
+  isCustom: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Update weekly goal DTO
+export interface UpdateWeeklyGoalDto {
+  minHours?: number;
+  desHours?: number;
 }
 
 // Auth response after login

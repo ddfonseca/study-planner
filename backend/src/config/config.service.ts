@@ -20,8 +20,9 @@ export class ConfigService {
       config = await this.prisma.userConfig.create({
         data: {
           userId,
-          minHours: 2,
-          desHours: 4,
+          minHours: 20, // 20 hours per week (default)
+          desHours: 30, // 30 hours per week (default)
+          weekStartDay: 1, // Monday (default)
         },
       });
     }
@@ -56,8 +57,9 @@ export class ConfigService {
       return await this.prisma.userConfig.create({
         data: {
           userId,
-          minHours: updateDto.minHours ?? 2,
-          desHours: updateDto.desHours ?? 4,
+          minHours: updateDto.minHours ?? 20,
+          desHours: updateDto.desHours ?? 30,
+          weekStartDay: 1,
         },
       });
     }
