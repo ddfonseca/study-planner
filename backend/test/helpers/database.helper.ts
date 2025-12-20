@@ -1,6 +1,6 @@
 /**
  * Database Helper for Tests
- * Utilities for cleaning and seeding test database
+ * Uses TRUNCATE for test isolation (Prisma connection pooling doesn't support manual transactions)
  */
 import { PrismaClient } from '@prisma/client';
 
@@ -16,23 +16,13 @@ const prisma = new PrismaClient({
  * Clean all tables in the test database
  */
 export async function cleanDatabase(): Promise<void> {
-  const tablenames = await prisma.$queryRaw<
-    Array<{ tablename: string }>
-  >`SELECT tablename FROM pg_tables WHERE schemaname='public'`;
-
-  const tables = tablenames
-    .map(({ tablename }) => tablename)
-    .filter((name) => name !== '_prisma_migrations')
-    .map((name) => `"public"."${name}"`)
-    .join(', ');
-
-  if (tables.length > 0) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tables} CASCADE;`);
-    } catch {
-      // Tables might not exist yet
-    }
-  }
+  // Delete in order to respect foreign keys (faster than TRUNCATE for small datasets)
+  await prisma.weeklyGoal.deleteMany();
+  await prisma.studySession.deleteMany();
+  await prisma.userConfig.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.user.deleteMany();
 }
 
 /**
@@ -44,7 +34,7 @@ export async function createTestUser(data?: {
 }): Promise<{ id: string; email: string; name: string }> {
   const user = await prisma.user.create({
     data: {
-      email: data?.email || `test-${Date.now()}@test.com`,
+      email: data?.email || `test-${Date.now()}-${Math.random()}@test.com`,
       name: data?.name || 'Test User',
       emailVerified: true,
     },
