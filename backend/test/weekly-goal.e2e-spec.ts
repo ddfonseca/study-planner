@@ -38,16 +38,14 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user.id,
           weekStart: new Date('2024-12-16'), // Monday
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
 
       expect(weeklyGoal).toBeDefined();
       expect(weeklyGoal.userId).toBe(user.id);
-      expect(weeklyGoal.minHours).toBe(20);
-      expect(weeklyGoal.desHours).toBe(30);
+      expect(weeklyGoal.targetHours).toBe(30);
       expect(weeklyGoal.isCustom).toBe(false);
     });
 
@@ -59,8 +57,7 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user.id,
           weekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
@@ -71,8 +68,7 @@ describe('WeeklyGoal Model', () => {
           data: {
             userId: user.id,
             weekStart,
-            minHours: 25,
-            desHours: 35,
+            targetHours: 35,
             isCustom: true,
           },
         }),
@@ -88,8 +84,7 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user1.id,
           weekStart,
-          minHours: 20,
-          desHours: 30,
+          targetHours: 30,
           isCustom: false,
         },
       });
@@ -98,8 +93,7 @@ describe('WeeklyGoal Model', () => {
         data: {
           userId: user2.id,
           weekStart,
-          minHours: 15,
-          desHours: 25,
+          targetHours: 25,
           isCustom: false,
         },
       });

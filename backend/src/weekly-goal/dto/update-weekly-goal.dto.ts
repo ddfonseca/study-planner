@@ -4,10 +4,5 @@ export class UpdateWeeklyGoalDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  minHours?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  desHours?: number;
+  targetHours?: number;
 }

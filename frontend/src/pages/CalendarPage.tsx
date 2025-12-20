@@ -14,6 +14,8 @@ import {
   CalendarHeader,
   CalendarGrid,
   SessionModal,
+  StudyTimer,
+  ActivityHeatmap,
 } from '@/components/calendar';
 import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
@@ -25,6 +27,7 @@ export function CalendarPage() {
   const { toast } = useToast();
 
   const {
+    currentYear,
     currentMonth,
     weeks,
     monthYearDisplay,
@@ -139,21 +142,32 @@ export function CalendarPage() {
         <h1 className="text-2xl font-bold text-foreground">Calendário de Estudos</h1>
       </div>
 
-      {/* Calendar */}
-      <div className="space-y-4">
-        <CalendarHeader
-          monthYearDisplay={monthYearDisplay}
-          onPreviousMonth={goToPreviousMonth}
-          onNextMonth={goToNextMonth}
-          onToday={goToToday}
-        />
-        <CalendarGrid
-          weeks={weeks}
-          currentMonth={currentMonth}
-          onCellClick={handleCellClick}
-          onDeleteSession={handleDeleteSessionSubmit}
-        />
+      {/* Main content with sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+        {/* Calendar */}
+        <div className="space-y-4">
+          <CalendarHeader
+            monthYearDisplay={monthYearDisplay}
+            onPreviousMonth={goToPreviousMonth}
+            onNextMonth={goToNextMonth}
+            onToday={goToToday}
+          />
+          <CalendarGrid
+            weeks={weeks}
+            currentMonth={currentMonth}
+            onCellClick={handleCellClick}
+            onDeleteSession={handleDeleteSessionSubmit}
+          />
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <StudyTimer />
+        </div>
       </div>
+
+      {/* Activity Heatmap */}
+      <ActivityHeatmap year={currentYear} month={currentMonth} />
 
       {/* Session Modal */}
       <SessionModal

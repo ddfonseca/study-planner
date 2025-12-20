@@ -47,13 +47,12 @@ export async function createTestUser(data?: {
  */
 export async function createUserConfig(
   userId: string,
-  data?: { minHours?: number; desHours?: number },
-): Promise<{ id: string; userId: string; minHours: number; desHours: number }> {
+  data?: { targetHours?: number },
+): Promise<{ id: string; userId: string; targetHours: number }> {
   const config = await prisma.userConfig.create({
     data: {
       userId,
-      minHours: data?.minHours ?? 2,
-      desHours: data?.desHours ?? 4,
+      targetHours: data?.targetHours ?? 30,
     },
   });
   return config;

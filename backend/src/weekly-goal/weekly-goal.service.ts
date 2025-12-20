@@ -73,8 +73,7 @@ export class WeeklyGoalService {
       data: {
         userId,
         weekStart: normalizedWeekStart,
-        minHours: userConfig.minHours,
-        desHours: userConfig.desHours,
+        targetHours: userConfig.targetHours,
         isCustom: false,
       },
     });
