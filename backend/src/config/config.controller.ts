@@ -1,11 +1,10 @@
-import { Controller, Get, Put, Body, UseGuards, Req } from '@nestjs/common';
-import type { Request } from 'express';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { Controller, Get, Put, Body } from '@nestjs/common';
+import { Session } from '@thallesp/nestjs-better-auth';
+import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { ConfigService } from './config.service';
 import { UpdateConfigDto } from './dto';
 
 @Controller('api/config')
-@UseGuards(AuthGuard)
 export class ConfigController {
   constructor(private configService: ConfigService) {}
 
@@ -14,8 +13,8 @@ export class ConfigController {
    * Retorna a configuração do usuário autenticado
    */
   @Get()
-  async getConfig(@Req() req: Request) {
-    const userId = req['user'].id;
+  async getConfig(@Session() session: UserSession) {
+    const userId = session.user.id;
     return this.configService.findByUserId(userId);
   }
 
@@ -24,8 +23,11 @@ export class ConfigController {
    * Atualiza a configuração do usuário autenticado
    */
   @Put()
-  async updateConfig(@Req() req: Request, @Body() updateDto: UpdateConfigDto) {
-    const userId = req['user'].id;
+  async updateConfig(
+    @Session() session: UserSession,
+    @Body() updateDto: UpdateConfigDto,
+  ) {
+    const userId = session.user.id;
     return this.configService.update(userId, updateDto);
   }
 }

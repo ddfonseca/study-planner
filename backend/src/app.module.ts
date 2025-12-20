@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
+import { auth } from './auth/auth.config';
 import { StudySessionsModule } from './study-sessions/study-sessions.module';
 import { UserConfigModule } from './config/config.module';
 
@@ -13,7 +14,7 @@ import { UserConfigModule } from './config/config.module';
       isGlobal: true,
     }),
     PrismaModule,
-    AuthModule,
+    AuthModule.forRoot({ auth, disableControllers: true }),
     StudySessionsModule,
     UserConfigModule,
   ],

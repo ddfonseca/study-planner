@@ -12,13 +12,13 @@ datasource db {
 
 // User model - integrates with better-auth
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
   name          String?
-  googleId      String?  @unique @map("google_id")
-  avatar        String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
   studySessions StudySession[]
@@ -26,8 +26,9 @@ model User {
   sharedPlans   SharedPlan[]   @relation("SharedWith")
   ownedShares   SharedPlan[]   @relation("Owner")
   sessions      Session[]
+  accounts      Account[]
 
-  @@map("users")
+  @@map("user")
 }
 
 // better-auth Session model
@@ -36,22 +37,59 @@ model Session {
   userId    String   @map("user_id")
   token     String   @unique
   expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("sessions")
+  @@map("session")
+}
+
+// better-auth Account model (for OAuth providers)
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String    @map("user_id")
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  idToken               String?   @map("id_token")
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+// better-auth Verification model
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("verification")
 }
 
 // User configuration (min hours, desired hours)
 model UserConfig {
-  id          String   @id @default(cuid())
-  userId      String   @unique @map("user_id")
-  minHours    Float    @default(2) @map("min_hours")
-  desHours    Float    @default(4) @map("des_hours")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  minHours  Float    @default(2) @map("min_hours")
+  desHours  Float    @default(4) @map("des_hours")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -77,16 +115,16 @@ model StudySession {
 
 // Sharing functionality
 model SharedPlan {
-  id            String     @id @default(cuid())
-  ownerId       String     @map("owner_id")
-  sharedWithId  String     @map("shared_with_id")
-  permission    Permission @default(READ)
-  startDate     DateTime?  @map("start_date") @db.Date
-  endDate       DateTime?  @map("end_date") @db.Date
-  createdAt     DateTime   @default(now()) @map("created_at")
+  id           String     @id @default(cuid())
+  ownerId      String     @map("owner_id")
+  sharedWithId String     @map("shared_with_id")
+  permission   Permission @default(READ)
+  startDate    DateTime?  @map("start_date") @db.Date
+  endDate      DateTime?  @map("end_date") @db.Date
+  createdAt    DateTime   @default(now()) @map("created_at")
 
-  owner        User @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
-  sharedWith   User @relation("SharedWith", fields: [sharedWithId], references: [id], onDelete: Cascade)
+  owner      User @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sharedWith User @relation("SharedWith", fields: [sharedWithId], references: [id], onDelete: Cascade)
 
   @@unique([ownerId, sharedWithId])
   @@index([sharedWithId])

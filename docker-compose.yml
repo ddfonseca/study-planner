@@ -33,10 +33,14 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-study_planner}?schema=public
       PORT: 3000
       NODE_ENV: development
+      BACKEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:5173
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-5bMpeQmYI3f9NUyzvNyUIvJ1iInuXuP2riMu//DQcj8=}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - /app/dist
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,10 +48,27 @@ services:
       - study-planner-network
     command: npm run start:dev
 
+  frontend:
+    build:
+      context: ./frontend-new
+      dockerfile: Dockerfile.dev
+    container_name: study-planner-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:3000
+    volumes:
+      - ./frontend-new:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - study-planner-network
+
 volumes:
   postgres_data:
 
 networks:
   study-planner-network:
     driver: bridge
-

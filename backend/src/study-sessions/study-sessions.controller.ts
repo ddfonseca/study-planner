@@ -7,16 +7,13 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
-  Req,
 } from '@nestjs/common';
-import type { Request } from 'express';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { Session } from '@thallesp/nestjs-better-auth';
+import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { StudySessionsService } from './study-sessions.service';
 import { CreateStudySessionDto, UpdateStudySessionDto } from './dto';
 
 @Controller('api/study-sessions')
-@UseGuards(AuthGuard)
 export class StudySessionsController {
   constructor(private studySessionsService: StudySessionsService) {}
 
@@ -26,11 +23,11 @@ export class StudySessionsController {
    */
   @Get()
   async getStudySessions(
-    @Req() req: Request,
+    @Session() session: UserSession,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const userId = req['user'].id;
+    const userId = session.user.id;
     return this.studySessionsService.findByDateRange(
       userId,
       startDate,
@@ -44,10 +41,10 @@ export class StudySessionsController {
    */
   @Post()
   async createStudySession(
-    @Req() req: Request,
+    @Session() session: UserSession,
     @Body() createDto: CreateStudySessionDto,
   ) {
-    const userId = req['user'].id;
+    const userId = session.user.id;
     return this.studySessionsService.create(userId, createDto);
   }
 
@@ -57,11 +54,11 @@ export class StudySessionsController {
    */
   @Put(':id')
   async updateStudySession(
-    @Req() req: Request,
+    @Session() session: UserSession,
     @Param('id') id: string,
     @Body() updateDto: UpdateStudySessionDto,
   ) {
-    const userId = req['user'].id;
+    const userId = session.user.id;
     return this.studySessionsService.update(userId, id, updateDto);
   }
 
@@ -70,8 +67,11 @@ export class StudySessionsController {
    * Deleta uma sessão de estudo
    */
   @Delete(':id')
-  async deleteStudySession(@Req() req: Request, @Param('id') id: string) {
-    const userId = req['user'].id;
+  async deleteStudySession(
+    @Session() session: UserSession,
+    @Param('id') id: string,
+  ) {
+    const userId = session.user.id;
     return this.studySessionsService.delete(userId, id);
   }
 }
