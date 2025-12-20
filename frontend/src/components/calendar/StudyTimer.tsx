@@ -25,7 +25,7 @@ export function StudyTimer() {
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [subject, setSubject] = useState('');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load saved state from localStorage
   useEffect(() => {
