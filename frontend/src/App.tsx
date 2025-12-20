@@ -13,6 +13,8 @@ import { LoginPage } from '@/pages/LoginPage';
 import { CalendarPage } from '@/pages/CalendarPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { TermsPage } from '@/pages/TermsPage';
+import { PrivacyPage } from '@/pages/PrivacyPage';
 
 // Toast notifications
 import { Toaster } from '@/components/ui/toaster';
@@ -25,6 +27,10 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
+
+        {/* Public legal pages */}
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
 
         {/* Protected routes with App Layout */}
         <Route

@@ -2,7 +2,7 @@
  * Login Page with Google OAuth
  */
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,13 +79,13 @@ export function LoginPage() {
         <div className="text-center text-sm text-muted-foreground">
           <p>Ao entrar, você concorda com nossos</p>
           <p>
-            <a href="#" className="text-primary hover:underline">
+            <Link to="/terms" className="text-primary hover:underline">
               Termos de Uso
-            </a>
+            </Link>
             {' e '}
-            <a href="#" className="text-primary hover:underline">
+            <Link to="/privacy" className="text-primary hover:underline">
               Política de Privacidade
-            </a>
+            </Link>
           </p>
         </div>
       </CardContent>
