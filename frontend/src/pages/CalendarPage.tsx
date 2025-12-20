@@ -16,6 +16,7 @@ import {
   SessionModal,
   StudyTimer,
   QuickAddSession,
+  WeeklyProgress,
 } from '@/components/calendar';
 import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
@@ -186,6 +187,7 @@ export function CalendarPage() {
             subjects={getUniqueSubjects()}
             onAddSession={handleQuickAddSession}
           />
+          <WeeklyProgress />
           <StudyTimer />
         </div>
       </div>

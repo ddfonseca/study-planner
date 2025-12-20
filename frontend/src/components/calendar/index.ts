@@ -9,3 +9,4 @@ export { ConfigPanel } from './ConfigPanel';
 export { WeeklyGoalEditor } from './WeeklyGoalEditor';
 export { StudyTimer } from './StudyTimer';
 export { QuickAddSession } from './QuickAddSession';
+export { WeeklyProgress } from './WeeklyProgress';
