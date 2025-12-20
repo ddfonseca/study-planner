@@ -76,7 +76,7 @@ export function LoginPage() {
           <span className="ml-3 font-medium">Entrar com Google</span>
         </Button>
 
-        <div className="text-center text-sm text-text-lighter">
+        <div className="text-center text-sm text-muted-foreground">
           <p>Ao entrar, você concorda com nossos</p>
           <p>
             <a href="#" className="text-primary hover:underline">

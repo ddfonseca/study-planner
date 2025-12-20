@@ -51,7 +51,7 @@ export function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <BarChart3 className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-text">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         </div>
         <DateRangeFilter
           currentDays={daysBack}

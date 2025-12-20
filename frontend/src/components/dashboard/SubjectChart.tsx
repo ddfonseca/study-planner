@@ -60,7 +60,7 @@ export function SubjectChart({ data }: SubjectChartProps) {
           </div>
         ) : (
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-text-lighter">Nenhum dado disponível</p>
+            <p className="text-muted-foreground">Nenhum dado disponível</p>
           </div>
         )}
       </CardContent>

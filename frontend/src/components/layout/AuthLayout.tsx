@@ -10,11 +10,11 @@ export function AuthLayout() {
       {/* Logo */}
       <div className="flex items-center gap-3 mb-8">
         <div className="bg-primary p-3 rounded-xl">
-          <BookOpen className="h-8 w-8 text-white" />
+          <BookOpen className="h-8 w-8 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-text">Study Planner</h1>
-          <p className="text-sm text-text-light">Organize seus estudos</p>
+          <h1 className="text-2xl font-bold text-foreground">Study Planner</h1>
+          <p className="text-sm text-muted-foreground">Organize seus estudos</p>
         </div>
       </div>
 
@@ -24,7 +24,7 @@ export function AuthLayout() {
       </div>
 
       {/* Footer */}
-      <p className="mt-8 text-sm text-text-lighter text-center">
+      <p className="mt-8 text-sm text-muted-foreground text-center">
         Acompanhe seu progresso e alcance suas metas de estudo
       </p>
     </div>

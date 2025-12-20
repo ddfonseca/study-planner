@@ -73,7 +73,7 @@ export function SessionModal({
           </DialogTitle>
           <DialogDescription>
             Total do dia:{' '}
-            <span className="font-medium text-text">
+            <span className="font-medium text-foreground">
               {formatTime(dayData.totalMinutos)}
             </span>
           </DialogDescription>
@@ -123,16 +123,16 @@ export function SessionModal({
         {/* Sessions list */}
         {dayData.materias.length > 0 && (
           <div className="mt-4 space-y-2">
-            <h4 className="text-sm font-medium text-text-light">Sessões do dia:</h4>
+            <h4 className="text-sm font-medium text-muted-foreground">Sessões do dia:</h4>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {dayData.materias.map((materia) => (
                 <div
                   key={materia.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
-                    <span className="font-medium text-text">{materia.materia}</span>
-                    <span className="text-sm text-text-light ml-2">
+                    <span className="font-medium text-foreground">{materia.materia}</span>
+                    <span className="text-sm text-muted-foreground ml-2">
                       {formatTime(materia.minutos)}
                     </span>
                   </div>
@@ -152,7 +152,7 @@ export function SessionModal({
         )}
 
         {dayData.materias.length === 0 && (
-          <p className="text-center text-text-lighter py-4">
+          <p className="text-center text-muted-foreground py-4">
             Nenhuma sessão registrada neste dia
           </p>
         )}

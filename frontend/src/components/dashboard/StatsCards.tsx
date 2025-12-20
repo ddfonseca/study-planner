@@ -52,8 +52,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
                 <Icon className={`h-6 w-6 ${color}`} />
               </div>
               <div>
-                <p className="text-sm text-text-light">{title}</p>
-                <p className="text-2xl font-bold text-text truncate max-w-[150px]">{value}</p>
+                <p className="text-sm text-muted-foreground">{title}</p>
+                <p className="text-2xl font-bold text-foreground truncate max-w-[150px]">{value}</p>
               </div>
             </div>
           </CardContent>

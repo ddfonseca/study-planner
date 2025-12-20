@@ -8,6 +8,76 @@
 @layer base {
   :root {
     --radius: 0.5rem;
+
+    /* Light mode colors */
+    --background: #f7f9fa;
+    --foreground: #333333;
+    --container: #ffffff;
+    --border: #e0e5e9;
+
+    --card: #ffffff;
+    --card-foreground: #333333;
+
+    --primary: #4a90e2;
+    --primary-foreground: #ffffff;
+
+    --secondary: #f1f5f9;
+    --secondary-foreground: #333333;
+
+    --destructive: #d0021b;
+    --destructive-foreground: #ffffff;
+
+    --accent: #f1f5f9;
+    --accent-foreground: #333333;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #999999;
+
+    --ring: #4a90e2;
+    --input: #e0e5e9;
+
+    --popover: #ffffff;
+    --popover-foreground: #333333;
+
+    --calendar-green: #dcfce7;
+    --calendar-blue: #dbeafe;
+    --calendar-today: #fef9c3;
+  }
+
+  .dark {
+    /* Dark mode - cores com alto contraste */
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --container: #1e293b;
+    --border: #334155;
+
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+
+    --primary: #60a5fa;
+    --primary-foreground: #0f172a;
+
+    --secondary: #334155;
+    --secondary-foreground: #f1f5f9;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --accent: #334155;
+    --accent-foreground: #f1f5f9;
+
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+
+    --ring: #60a5fa;
+    --input: #334155;
+
+    --popover: #1e293b;
+    --popover-foreground: #f1f5f9;
+
+    --calendar-green: #166534;
+    --calendar-blue: #1e40af;
+    --calendar-today: #854d0e;
   }
 
   * {
@@ -15,9 +85,9 @@
   }
 
   body {
-    @apply bg-background text-text font-sans;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply font-sans antialiased;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -28,14 +98,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    background-color: var(--muted);
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 rounded;
+    @apply rounded;
+    background-color: var(--border);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-600;
+    background-color: var(--muted-foreground);
   }
 }

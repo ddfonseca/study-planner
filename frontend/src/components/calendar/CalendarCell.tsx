@@ -29,14 +29,14 @@ export function CalendarCell({
 
   // Background color based on status
   const getBgColor = () => {
-    if (!isCurrentMonth) return 'bg-gray-50';
+    if (!isCurrentMonth) return 'bg-muted/50';
     switch (status) {
       case 'desired':
         return 'bg-calendar-blue';
       case 'minimum':
         return 'bg-calendar-green';
       default:
-        return 'bg-white';
+        return 'bg-card';
     }
   };
 
@@ -55,14 +55,14 @@ export function CalendarCell({
         <span
           className={cn(
             'text-sm font-medium',
-            isTodayDate ? 'text-primary font-bold' : 'text-text',
-            !isCurrentMonth && 'text-text-lighter'
+            isTodayDate ? 'text-primary font-bold' : 'text-foreground',
+            !isCurrentMonth && 'text-muted-foreground'
           )}
         >
           {date.getDate()}
         </span>
         {dayData.totalMinutos > 0 && (
-          <span className="text-xs text-text-light bg-white/80 px-1.5 py-0.5 rounded">
+          <span className="text-xs text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded">
             {formatTime(dayData.totalMinutos)}
           </span>
         )}
@@ -73,11 +73,11 @@ export function CalendarCell({
         {dayData.materias.slice(0, 3).map((materia) => (
           <div
             key={materia.id}
-            className="flex items-center justify-between gap-1 text-xs bg-white/60 rounded px-1.5 py-0.5 group"
+            className="flex items-center justify-between gap-1 text-xs bg-background/60 rounded px-1.5 py-0.5 group"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="truncate flex-1 text-text-light">{materia.materia}</span>
-            <span className="text-text-lighter whitespace-nowrap">
+            <span className="truncate flex-1 text-foreground">{materia.materia}</span>
+            <span className="text-muted-foreground whitespace-nowrap">
               {formatTime(materia.minutos)}
             </span>
             <button
@@ -93,7 +93,7 @@ export function CalendarCell({
           </div>
         ))}
         {dayData.materias.length > 3 && (
-          <span className="text-xs text-text-lighter">
+          <span className="text-xs text-muted-foreground">
             +{dayData.materias.length - 3} mais
           </span>
         )}

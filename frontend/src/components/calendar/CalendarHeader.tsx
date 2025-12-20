@@ -36,7 +36,7 @@ export function CalendarHeader({
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <h2 className="text-xl font-semibold text-text capitalize ml-2">
+        <h2 className="text-xl font-semibold text-foreground capitalize ml-2">
           {monthYearDisplay}
         </h2>
       </div>

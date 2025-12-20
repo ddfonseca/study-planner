@@ -50,7 +50,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend-new
+      context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: study-planner-frontend
     restart: unless-stopped
@@ -59,7 +59,7 @@ services:
     environment:
       VITE_API_BASE_URL: http://localhost:3000
     volumes:
-      - ./frontend-new:/app
+      - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend

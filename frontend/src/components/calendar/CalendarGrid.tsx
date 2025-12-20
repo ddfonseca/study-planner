@@ -31,12 +31,12 @@ export function CalendarGrid({
             {dayNames.map((day) => (
               <th
                 key={day}
-                className="py-2 px-1 text-sm font-medium text-text-light text-center"
+                className="py-2 px-1 text-sm font-medium text-muted-foreground text-center"
               >
                 {day}
               </th>
             ))}
-            <th className="py-2 px-1 text-sm font-medium text-text-light text-center w-20">
+            <th className="py-2 px-1 text-sm font-medium text-muted-foreground text-center w-20">
               Total
             </th>
           </tr>
@@ -68,8 +68,8 @@ export function CalendarGrid({
                   );
                 })}
                 <td className="p-1">
-                  <div className="min-h-[100px] flex items-center justify-center bg-gray-50 rounded-md border border-border">
-                    <span className="text-sm font-medium text-text-light">
+                  <div className="min-h-[100px] flex items-center justify-center bg-muted/50 rounded-md border border-border">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {weekTotal > 0 ? formatTime(weekTotal) : '-'}
                     </span>
                   </div>

@@ -61,7 +61,7 @@ export function SettingsPage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <Settings className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-text">Configurações</h1>
+        <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
       </div>
 
       {/* User Profile Card */}
@@ -84,12 +84,12 @@ export function SettingsPage() {
                 />
               )}
               <div>
-                <p className="text-lg font-medium text-text">{user.name}</p>
-                <p className="text-sm text-text-light">{user.email}</p>
+                <p className="text-lg font-medium text-foreground">{user.name}</p>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
           ) : (
-            <p className="text-text-light">Carregando...</p>
+            <p className="text-muted-foreground">Carregando...</p>
           )}
         </CardContent>
       </Card>
@@ -122,7 +122,7 @@ export function SettingsPage() {
                 onChange={(e) => setLocalMinHours(parseFloat(e.target.value) || 0)}
                 className="w-full"
               />
-              <p className="text-xs text-text-lighter">
+              <p className="text-xs text-muted-foreground">
                 Dias que atingirem este valor ficam verdes
               </p>
             </div>
@@ -142,7 +142,7 @@ export function SettingsPage() {
                 onChange={(e) => setLocalDesHours(parseFloat(e.target.value) || 0)}
                 className="w-full"
               />
-              <p className="text-xs text-text-lighter">
+              <p className="text-xs text-muted-foreground">
                 Dias que atingirem este valor ficam azuis
               </p>
             </div>

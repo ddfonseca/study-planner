@@ -119,7 +119,7 @@ export function CalendarPage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <CalendarIcon className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-text">Calendário de Estudos</h1>
+        <h1 className="text-2xl font-bold text-foreground">Calendário de Estudos</h1>
       </div>
 
       {/* Main content */}

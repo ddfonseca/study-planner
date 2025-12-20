@@ -26,7 +26,7 @@ export function MonthSummary({ year, month }: MonthSummaryProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-calendar-green border border-success/30" />
-            <span className="text-sm text-text-light">
+            <span className="text-sm text-muted-foreground">
               ≥ {minHours}h (mínimo)
             </span>
           </div>
@@ -37,7 +37,7 @@ export function MonthSummary({ year, month }: MonthSummaryProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-calendar-blue border border-primary/30" />
-            <span className="text-sm text-text-light">
+            <span className="text-sm text-muted-foreground">
               ≥ {desHours}h (desejado)
             </span>
           </div>
@@ -47,8 +47,8 @@ export function MonthSummary({ year, month }: MonthSummaryProps) {
         {/* Total */}
         <div className="pt-2 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-text">Total de dias ativos</span>
-            <span className="text-lg font-bold text-text">{greenDays + blueDays}</span>
+            <span className="text-sm font-medium text-foreground">Total de dias ativos</span>
+            <span className="text-lg font-bold text-foreground">{greenDays + blueDays}</span>
           </div>
         </div>
       </CardContent>

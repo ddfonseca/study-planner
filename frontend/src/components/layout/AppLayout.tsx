@@ -1,14 +1,37 @@
 /**
  * Main App Layout with Header and Navigation
  */
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Calendar, BarChart3, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, BookOpen, Moon, Sun } from 'lucide-react';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [isDark, setIsDark] = useState(() => {
+    // Check localStorage or system preference
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    // Apply dark mode class to document
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   const handleLogout = async () => {
     await logout();
@@ -30,7 +53,7 @@ export function AppLayout() {
             {/* Logo */}
             <div className="flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-lg font-semibold text-text">
+              <span className="text-lg font-semibold text-foreground">
                 Study Planner
               </span>
             </div>
@@ -45,8 +68,8 @@ export function AppLayout() {
                     `flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors
                     ${
                       isActive
-                        ? 'bg-primary text-white'
-                        : 'text-text-light hover:bg-gray-100 hover:text-text'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     }`
                   }
                 >
@@ -57,7 +80,17 @@ export function AppLayout() {
             </nav>
 
             {/* User Menu */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+
               {user && (
                 <div className="hidden sm:flex items-center gap-2">
                   {user.image && (
@@ -67,7 +100,7 @@ export function AppLayout() {
                       className="h-8 w-8 rounded-full"
                     />
                   )}
-                  <span className="text-sm text-text-light">
+                  <span className="text-sm text-muted-foreground">
                     {user.name || user.email}
                   </span>
                 </div>
@@ -77,7 +110,7 @@ export function AppLayout() {
                 size="sm"
                 onClick={handleLogout}
                 disabled={isLoading}
-                className="text-text-light hover:text-danger"
+                className="text-muted-foreground hover:text-destructive"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
@@ -98,7 +131,7 @@ export function AppLayout() {
                   ${
                     isActive
                       ? 'text-primary'
-                      : 'text-text-light hover:text-text'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`
                 }
               >
