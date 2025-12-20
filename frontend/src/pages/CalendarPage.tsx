@@ -15,6 +15,7 @@ import {
   CalendarGrid,
   SessionModal,
   StudyTimer,
+  QuickAddSession,
 } from '@/components/calendar';
 import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
@@ -112,6 +113,27 @@ export function CalendarPage() {
     [handleDeleteSession, toast]
   );
 
+  // Handle quick add session (today)
+  const handleQuickAddSession = useCallback(
+    async (subject: string, minutes: number) => {
+      const today = formatDateKey(new Date());
+      try {
+        await handleAddSession(today, subject, minutes);
+        toast({
+          title: 'Sucesso',
+          description: 'Sessão adicionada!',
+        });
+      } catch {
+        toast({
+          title: 'Erro',
+          description: 'Falha ao adicionar sessão',
+          variant: 'destructive',
+        });
+      }
+    },
+    [handleAddSession, toast]
+  );
+
   // Get day data for selected date
   const selectedDayData: DayData = selectedDate
     ? getSessionsForDate(formatDateKey(selectedDate))
@@ -160,6 +182,10 @@ export function CalendarPage() {
 
         {/* Sidebar */}
         <div className="space-y-4">
+          <QuickAddSession
+            subjects={getUniqueSubjects()}
+            onAddSession={handleQuickAddSession}
+          />
           <StudyTimer />
         </div>
       </div>
