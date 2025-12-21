@@ -117,7 +117,7 @@ export function WeeklyGoalEditor({
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all ${
-                  achieved ? 'bg-green-500' : 'bg-gray-400'
+                  achieved ? 'bg-primary' : 'bg-gray-400'
                 }`}
                 style={{ width: `${progress}%` }}
               />
@@ -125,7 +125,7 @@ export function WeeklyGoalEditor({
             {goal && (
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>0h</span>
-                <span className={achieved ? 'text-green-600 dark:text-green-400 font-medium' : ''}>
+                <span className={achieved ? 'text-primary font-medium' : ''}>
                   {goal.targetHours}h
                 </span>
               </div>

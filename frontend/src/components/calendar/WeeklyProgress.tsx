@@ -80,7 +80,7 @@ export function WeeklyProgress() {
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeDasharray={`${weeklyStats.progress} 100`}
-                className={weeklyStats.progress >= 100 ? 'text-green-500' : 'text-primary'}
+                className="text-primary"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
@@ -119,7 +119,7 @@ export function WeeklyProgress() {
                         day.isToday
                           ? 'bg-primary'
                           : day.minutes > 0
-                          ? 'bg-green-400 dark:bg-green-600'
+                          ? 'bg-sky-300 dark:bg-sky-700'
                           : 'bg-muted'
                       }`}
                       style={{

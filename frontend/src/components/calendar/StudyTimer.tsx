@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Combobox } from '@/components/ui/combobox';
 import { useSessionStore } from '@/store/sessionStore';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Square, Clock } from 'lucide-react';
@@ -18,7 +18,11 @@ interface TimerState {
   startTime: number | null;
 }
 
-export function StudyTimer() {
+interface StudyTimerProps {
+  subjects: string[];
+}
+
+export function StudyTimer({ subjects }: StudyTimerProps) {
   const { addSession } = useSessionStore();
   const { toast } = useToast();
 
@@ -146,7 +150,7 @@ export function StudyTimer() {
         <div className="text-center">
           <span
             className={`text-3xl font-mono font-bold ${
-              isRunning ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+              isRunning ? 'text-primary' : 'text-muted-foreground'
             }`}
           >
             {formatTime(seconds)}
@@ -154,12 +158,14 @@ export function StudyTimer() {
         </div>
 
         {/* Subject input */}
-        <Input
-          placeholder="Matéria..."
+        <Combobox
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          onValueChange={setSubject}
+          options={subjects}
+          placeholder="Selecione a matéria..."
+          searchPlaceholder="Buscar..."
+          emptyMessage="Nenhuma matéria"
           disabled={isRunning}
-          className="text-center"
         />
 
         {/* Start/Stop button */}

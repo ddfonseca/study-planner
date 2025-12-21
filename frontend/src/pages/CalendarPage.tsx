@@ -190,7 +190,7 @@ export function CalendarPage() {
             onAddSession={handleQuickAddSession}
           />
           <WeeklyProgress />
-          <StudyTimer />
+          <StudyTimer subjects={getUniqueSubjects()} />
         </div>
       </div>
 

@@ -65,42 +65,53 @@ function CalendarPreview() {
     { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
   ];
 
+  // High intensity (3, 4) needs better text contrast
+  const getTextClass = (intensity: number, isToday: boolean) => {
+    if (isToday) return 'text-primary';
+    if (intensity >= 3) return 'text-foreground';
+    return 'text-muted-foreground';
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
-        {days.map((d, i) => (
-          <div
-            key={i}
-            className={`
-              relative rounded-xl p-3 sm:p-4 transition-all shadow-md hover:shadow-lg border border-border
-              ${d.isToday
-                ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-                : ''
-              }
-              ${previewGradientColors[d.intensity]}
-            `}
-          >
-            {/* Day label */}
-            <div className="text-[10px] sm:text-xs font-medium mb-1 text-muted-foreground">
-              {d.label}
-            </div>
-            {/* Day number */}
-            <div className={`text-lg sm:text-xl font-bold ${d.isToday ? 'text-primary' : ''}`}>
-              {d.day}
-            </div>
-            {/* Session info */}
-            {d.session ? (
-              <div className="mt-2 text-[10px] sm:text-xs text-muted-foreground">
-                <div className="font-medium">{d.session}</div>
-                <div className="text-primary font-semibold">{d.time}</div>
+        {days.map((d, i) => {
+          const isHighIntensity = d.intensity >= 3;
+
+          return (
+            <div
+              key={i}
+              className={`
+                relative rounded-xl p-3 sm:p-4 transition-all shadow-md hover:shadow-lg border border-border
+                ${d.isToday
+                  ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                  : ''
+                }
+                ${previewGradientColors[d.intensity]}
+              `}
+            >
+              {/* Day label */}
+              <div className={`text-[10px] sm:text-xs font-medium mb-1 ${isHighIntensity ? 'text-foreground/70' : 'text-muted-foreground'}`}>
+                {d.label}
               </div>
-            ) : (
-              <div className="mt-2 text-[10px] sm:text-xs text-muted-foreground/50">
-                —
+              {/* Day number */}
+              <div className={`text-lg sm:text-xl font-bold ${getTextClass(d.intensity, !!d.isToday)}`}>
+                {d.day}
               </div>
-            )}
-          </div>
-        ))}
+              {/* Session info */}
+              {d.session ? (
+                <div className={`mt-2 text-[10px] sm:text-xs ${isHighIntensity ? 'text-foreground/80' : 'text-muted-foreground'}`}>
+                  <div className="font-medium">{d.session}</div>
+                  <div className={`font-semibold ${isHighIntensity ? 'text-foreground' : 'text-primary'}`}>{d.time}</div>
+                </div>
+              ) : (
+                <div className={`mt-2 text-[10px] sm:text-xs ${isHighIntensity ? 'text-foreground/50' : 'text-muted-foreground/50'}`}>
+                  —
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {/* Total card */}
         <div className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-md">
