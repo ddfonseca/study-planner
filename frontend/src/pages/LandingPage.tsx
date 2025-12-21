@@ -405,7 +405,7 @@ export function LandingPage() {
               </Link>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2024 Study Planner
+              © {new Date().getFullYear()} Study Planner
             </div>
           </div>
         </div>
