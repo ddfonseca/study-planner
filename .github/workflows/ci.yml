@@ -47,7 +47,7 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5433/study_planner_test?schema=public
 
       - name: Run e2e tests
-        run: cd backend && npm run test:e2e -- --testPathIgnorePatterns="app.e2e-spec|weekly-goal-controller|weekly-goal.e2e-spec"
+        run: cd backend && npm run test:e2e
         env:
           DATABASE_URL: postgresql://test:test@localhost:5433/study_planner_test?schema=public
           BETTER_AUTH_SECRET: test-secret-for-ci

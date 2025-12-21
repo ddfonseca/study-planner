@@ -23,7 +23,7 @@ test-reset:
 test: test-db
 	@sleep 1
 	DATABASE_URL="postgresql://test:test@localhost:5433/study_planner_test?schema=public" npx prisma db push --schema=backend/prisma/schema.prisma
-	@(cd backend && npm run test:e2e -- --testPathIgnorePatterns="weekly-goal-controller"); \
+	@(cd backend && npm run test:e2e); \
 	EXIT_CODE=$$?; \
 	docker-compose -f docker-compose.test.yml down --remove-orphans; \
 	exit $$EXIT_CODE
