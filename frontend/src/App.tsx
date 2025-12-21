@@ -9,6 +9,7 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
 // Pages
+import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { CalendarPage } from '@/pages/CalendarPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -47,8 +48,8 @@ function App() {
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
-        {/* Redirect root to app or login */}
-        <Route path="/" element={<Navigate to="/app" replace />} />
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* 404 - Redirect to app */}
         <Route path="*" element={<Navigate to="/app" replace />} />
