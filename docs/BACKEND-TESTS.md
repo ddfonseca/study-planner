@@ -27,8 +27,10 @@ Localizados na pasta `test/`. Testam a lógica de negócio através dos **servi�
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `weekly-goal-service.e2e-spec.ts` | Testes do WeeklyGoalService |
-| `sessions-weekly-goal.e2e-spec.ts` | Testes de integração Sessions + WeeklyGoal |
+| `weekly-goal-service.e2e-spec.ts` | Testes do WeeklyGoalService (20 testes) |
+| `study-sessions-service.e2e-spec.ts` | Testes do StudySessionsService (18 testes) |
+| `config-service.e2e-spec.ts` | Testes do ConfigService (6 testes) |
+| `sessions-weekly-goal.e2e-spec.ts` | Testes de integração (5 testes) |
 
 ## Banco de Dados de Teste
 

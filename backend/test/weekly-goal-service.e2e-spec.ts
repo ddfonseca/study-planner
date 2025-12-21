@@ -89,12 +89,28 @@ describe('WeeklyGoalService', () => {
       expect(result.toISOString().split('T')[0]).toBe('2024-12-16');
     });
 
+    it('should return previous Monday for a Saturday date', () => {
+      // December 21, 2024 is a Saturday
+      const saturday = new Date(Date.UTC(2024, 11, 21));
+      const result = service.calculateWeekStart(saturday, 1);
+
+      expect(result.toISOString().split('T')[0]).toBe('2024-12-16');
+    });
+
     it('should return Sunday for weekStartDay=0 (Sunday start)', () => {
       // December 18, 2024 is a Wednesday, previous Sunday is Dec 15
       const wednesday = new Date(Date.UTC(2024, 11, 18));
       const result = service.calculateWeekStart(wednesday, 0);
 
       expect(result.toISOString().split('T')[0]).toBe('2024-12-15');
+    });
+
+    it('should handle year boundary correctly', () => {
+      // January 1, 2025 is a Wednesday, previous Monday is Dec 30, 2024
+      const newYear = new Date(Date.UTC(2025, 0, 1));
+      const result = service.calculateWeekStart(newYear, 1);
+
+      expect(result.toISOString().split('T')[0]).toBe('2024-12-30');
     });
   });
 
@@ -159,6 +175,18 @@ describe('WeeklyGoalService', () => {
 
       expect(goal).toBeDefined();
       expect(goal?.targetHours).toBe(35);
+    });
+
+    it('should return null when goal does not exist for week', async () => {
+      const user = await createTestUser();
+
+      const goal = await service.getForDate(
+        user.id,
+        new Date(Date.UTC(2024, 11, 18)),
+        1,
+      );
+
+      expect(goal).toBeNull();
     });
   });
 
@@ -285,6 +313,109 @@ describe('WeeklyGoalService', () => {
 
       // Should include Dec 9, Dec 16 (within range)
       expect(goals.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should return empty array when no goals in range', async () => {
+      const user = await createTestUser();
+
+      await prisma.weeklyGoal.create({
+        data: {
+          userId: user.id,
+          weekStart: new Date(Date.UTC(2024, 11, 16)),
+          targetHours: 30,
+          isCustom: false,
+        },
+      });
+
+      const goals = await service.getForDateRange(
+        user.id,
+        new Date(Date.UTC(2024, 0, 1)),
+        new Date(Date.UTC(2024, 0, 31)),
+      );
+
+      expect(goals).toHaveLength(0);
+    });
+
+    it('should order goals by weekStart ascending', async () => {
+      const user = await createTestUser();
+
+      await prisma.weeklyGoal.createMany({
+        data: [
+          {
+            userId: user.id,
+            weekStart: new Date(Date.UTC(2024, 11, 23)),
+            targetHours: 40,
+            isCustom: true,
+          },
+          {
+            userId: user.id,
+            weekStart: new Date(Date.UTC(2024, 11, 9)),
+            targetHours: 35,
+            isCustom: true,
+          },
+          {
+            userId: user.id,
+            weekStart: new Date(Date.UTC(2024, 11, 16)),
+            targetHours: 30,
+            isCustom: false,
+          },
+        ],
+      });
+
+      const goals = await service.getForDateRange(
+        user.id,
+        new Date(Date.UTC(2024, 11, 1)),
+        new Date(Date.UTC(2024, 11, 31)),
+      );
+
+      expect(goals[0].targetHours).toBe(35); // Dec 9
+      expect(goals[1].targetHours).toBe(30); // Dec 16
+      expect(goals[2].targetHours).toBe(40); // Dec 23
+    });
+  });
+
+  describe('User isolation', () => {
+    it('should not return goals from other users', async () => {
+      const user1 = await createTestUser({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const weekStart = new Date(Date.UTC(2024, 11, 16));
+
+      await prisma.weeklyGoal.create({
+        data: {
+          userId: user1.id,
+          weekStart,
+          targetHours: 20,
+          isCustom: false,
+        },
+      });
+
+      await prisma.weeklyGoal.create({
+        data: {
+          userId: user2.id,
+          weekStart,
+          targetHours: 40,
+          isCustom: true,
+        },
+      });
+
+      const goal1 = await service.getForDate(user1.id, weekStart, 1);
+      const goal2 = await service.getForDate(user2.id, weekStart, 1);
+
+      expect(goal1?.targetHours).toBe(20);
+      expect(goal2?.targetHours).toBe(40);
+    });
+
+    it('should allow same weekStart for different users', async () => {
+      const user1 = await createTestUser({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const weekStart = new Date(Date.UTC(2024, 11, 16));
+
+      const goal1 = await service.getOrCreateForWeek(user1.id, weekStart);
+      const goal2 = await service.getOrCreateForWeek(user2.id, weekStart);
+
+      expect(goal1.id).not.toBe(goal2.id);
+      expect(goal1.userId).toBe(user1.id);
+      expect(goal2.userId).toBe(user2.id);
     });
   });
 });
