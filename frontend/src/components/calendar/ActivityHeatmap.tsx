@@ -2,6 +2,7 @@
  * Activity Heatmap - GitHub-style activity visualization
  */
 import { useSessionStore } from '@/store/sessionStore';
+import { useConfigStore } from '@/store/configStore';
 import { getCalendarDays, getDayNames } from '@/lib/utils/date';
 import { cn } from '@/lib/utils';
 
@@ -12,16 +13,18 @@ interface ActivityHeatmapProps {
 
 type Intensity = 0 | 1 | 2 | 3 | 4;
 
-const intensityColors: Record<Intensity, string> = {
+// Gradient style: slate → sky → blue
+const gradientColors: Record<Intensity, string> = {
   0: 'bg-muted',
-  1: 'bg-green-200 dark:bg-green-900',
-  2: 'bg-green-300 dark:bg-green-800',
-  3: 'bg-green-400 dark:bg-green-700',
-  4: 'bg-green-500 dark:bg-green-600',
+  1: 'bg-slate-200 dark:bg-slate-800',
+  2: 'bg-sky-200 dark:bg-sky-900',
+  3: 'bg-sky-300 dark:bg-sky-800',
+  4: 'bg-blue-400 dark:bg-blue-700',
 };
 
 export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
   const { sessions } = useSessionStore();
+  const heatmapStyle = useConfigStore((state) => state.heatmapStyle);
   const days = getCalendarDays(year, month);
   const dayNames = getDayNames();
 
@@ -48,6 +51,26 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
     return date.getMonth() === month;
   };
 
+  // Get cell color based on style
+  const getCellColor = (intensity: Intensity) => {
+    if (heatmapStyle === 'dots') return 'bg-card border border-border';
+    return gradientColors[intensity];
+  };
+
+  // Render dots for intensity
+  const renderDots = (intensity: Intensity) => {
+    if (intensity === 0) return null;
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="grid grid-cols-2 gap-px">
+          {[...Array(intensity)].map((_, i) => (
+            <div key={i} className="w-1 h-1 rounded-full bg-primary" />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 bg-card rounded-lg border">
       <div className="flex items-center justify-between mb-3">
@@ -56,12 +79,27 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
         </span>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>Menos</span>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className={cn('w-3 h-3 rounded-sm', intensityColors[i as Intensity])}
-            />
-          ))}
+          {heatmapStyle === 'gradient' ? (
+            // Gradient legend
+            [0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className={cn('w-3 h-3 rounded-sm', gradientColors[i as Intensity])}
+              />
+            ))
+          ) : (
+            // Dots legend
+            [0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-sm bg-card border border-border flex items-center justify-center"
+              >
+                {i > 0 && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" style={{ opacity: 0.25 + i * 0.2 }} />
+                )}
+              </div>
+            ))
+          )}
           <span>Mais</span>
         </div>
       </div>
@@ -92,8 +130,8 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
                     <td key={dayIndex} className="p-0.5">
                       <div
                         className={cn(
-                          'aspect-square rounded-sm transition-colors',
-                          inMonth ? intensityColors[intensity] : 'bg-transparent',
+                          'aspect-square rounded-sm transition-colors relative',
+                          inMonth ? getCellColor(intensity) : 'bg-transparent',
                           inMonth && 'hover:ring-1 hover:ring-primary'
                         )}
                         title={
@@ -101,7 +139,9 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
                             ? `${date.getDate()}/${month + 1}: ${Math.floor(minutes / 60)}h ${minutes % 60}min`
                             : undefined
                         }
-                      />
+                      >
+                        {heatmapStyle === 'dots' && inMonth && renderDots(intensity)}
+                      </div>
                     </td>
                   );
                 })}

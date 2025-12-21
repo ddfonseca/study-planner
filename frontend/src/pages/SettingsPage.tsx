@@ -15,16 +15,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Settings, User, Clock, Calendar, Save, Loader2 } from 'lucide-react';
+import { Settings, User, Clock, Calendar, Save, Loader2, Palette } from 'lucide-react';
+import type { HeatmapStyle } from '@/store/configStore';
 import { useToast } from '@/hooks/use-toast';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const { targetHours, weekStartDay, updateConfig, isLoading } = useConfigStore();
+  const { targetHours, weekStartDay, heatmapStyle, updateConfig, setHeatmapStyle, isLoading } = useConfigStore();
   const { toast } = useToast();
 
   const [localTargetHours, setLocalTargetHours] = useState(String(targetHours));
   const [localWeekStartDay, setLocalWeekStartDay] = useState(String(weekStartDay));
+
+  const handleHeatmapStyleChange = (value: string) => {
+    setHeatmapStyle(value as HeatmapStyle);
+  };
 
   const handleSave = async () => {
     const targetValue = parseFloat(localTargetHours) || 0;
@@ -158,6 +163,28 @@ export function SettingsPage() {
             </Select>
             <p className="text-xs text-muted-foreground">
               Define qual dia aparece primeiro no calendário
+            </p>
+          </div>
+
+          <div className="space-y-2 max-w-xs">
+            <Label htmlFor="heatmapStyle" className="flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Estilo do Calendário
+            </Label>
+            <Select
+              value={heatmapStyle}
+              onValueChange={handleHeatmapStyleChange}
+            >
+              <SelectTrigger id="heatmapStyle" className="w-full">
+                <SelectValue placeholder="Selecione o estilo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gradient">Gradiente (cores)</SelectItem>
+                <SelectItem value="dots">Pontos (minimalista)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Como a intensidade de estudo é exibida nas células
             </p>
           </div>
 

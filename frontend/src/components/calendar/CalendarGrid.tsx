@@ -89,7 +89,7 @@ export function CalendarGrid({
               const weekTotal = getWeekTotals(week);
               const achieved = isGoalAchieved(week, weekTotal);
               const statusStyles = achieved
-                ? 'bg-green-500/20 border-green-500/50 text-green-700 dark:text-green-300'
+                ? 'bg-primary/20 border-primary/50 text-primary dark:text-primary'
                 : 'bg-muted/50 border-border text-muted-foreground';
 
               return (
@@ -128,7 +128,7 @@ export function CalendarGrid({
                           <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-2">
                             <div
                               className={`h-full transition-all ${
-                                achieved ? 'bg-green-500' : 'bg-gray-400'
+                                achieved ? 'bg-primary' : 'bg-gray-400'
                               }`}
                               style={{ width: `${getWeekProgress(week, weekTotal)}%` }}
                             />

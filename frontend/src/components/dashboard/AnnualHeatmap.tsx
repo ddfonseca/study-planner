@@ -37,18 +37,28 @@ function getDayLabels(weekStartDay: number): string[] {
   return rotated.map((d, i) => i % 2 === 0 ? d : '');
 }
 
-// Get intensity color based on minutes studied
-function getIntensityColor(minutes: number): string {
-  if (minutes === 0) return 'bg-muted';
-  if (minutes < 60) return 'bg-green-200 dark:bg-green-900';
-  if (minutes < 120) return 'bg-green-300 dark:bg-green-800';
-  if (minutes < 180) return 'bg-green-400 dark:bg-green-700';
-  return 'bg-green-500 dark:bg-green-600';
+// Get intensity level based on minutes studied
+function getIntensityLevel(minutes: number): 0 | 1 | 2 | 3 | 4 {
+  if (minutes === 0) return 0;
+  if (minutes < 60) return 1;
+  if (minutes < 120) return 2;
+  if (minutes < 180) return 3;
+  return 4;
 }
+
+// Gradient style: slate → sky → blue
+const gradientColors: Record<number, string> = {
+  0: 'bg-muted',
+  1: 'bg-slate-200 dark:bg-slate-800',
+  2: 'bg-sky-200 dark:bg-sky-900',
+  3: 'bg-sky-300 dark:bg-sky-800',
+  4: 'bg-blue-400 dark:bg-blue-700',
+};
 
 export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
   const currentYear = new Date().getFullYear();
   const weekStartDay = useConfigStore((state) => state.weekStartDay);
+  const heatmapStyle = useConfigStore((state) => state.heatmapStyle);
 
   const dayLabels = useMemo(() => getDayLabels(weekStartDay), [weekStartDay]);
 
@@ -187,17 +197,29 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
             <div className="flex-1 flex gap-[2px]">
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex-1 flex flex-col gap-[2px]">
-                  {week.map((day, dayIndex) => (
-                    <div
-                      key={dayIndex}
-                      className={`aspect-square rounded-sm ${
-                        day.isFuture
-                          ? 'bg-transparent'
-                          : getIntensityColor(day.minutes)
-                      } ${!day.isFuture ? 'hover:ring-1 hover:ring-foreground cursor-pointer' : ''}`}
-                      title={formatTooltip(day)}
-                    />
-                  ))}
+                  {week.map((day, dayIndex) => {
+                    const intensity = getIntensityLevel(day.minutes);
+                    const cellClass = day.isFuture
+                      ? 'bg-transparent'
+                      : heatmapStyle === 'dots'
+                        ? 'bg-card border border-border'
+                        : gradientColors[intensity];
+
+                    return (
+                      <div
+                        key={dayIndex}
+                        className={`aspect-square rounded-sm relative ${cellClass} ${!day.isFuture ? 'hover:ring-1 hover:ring-foreground cursor-pointer' : ''}`}
+                        title={formatTooltip(day)}
+                      >
+                        {/* Dots indicator */}
+                        {heatmapStyle === 'dots' && !day.isFuture && intensity > 0 && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-[5px] h-[5px] rounded-full bg-primary" style={{ opacity: 0.3 + intensity * 0.175 }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -233,11 +255,28 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
           <div className="flex items-center gap-1">
             <span>Menos</span>
             <div className="flex gap-[2px]">
-              <div className="w-[10px] h-[10px] rounded-sm bg-muted" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-green-200 dark:bg-green-900" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-green-300 dark:bg-green-800" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-green-400 dark:bg-green-700" />
-              <div className="w-[10px] h-[10px] rounded-sm bg-green-500 dark:bg-green-600" />
+              {heatmapStyle === 'gradient' ? (
+                // Gradient legend
+                <>
+                  <div className="w-[10px] h-[10px] rounded-sm bg-muted" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-slate-200 dark:bg-slate-800" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-sky-200 dark:bg-sky-900" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-sky-300 dark:bg-sky-800" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-blue-400 dark:bg-blue-700" />
+                </>
+              ) : (
+                // Dots legend
+                [0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="w-[10px] h-[10px] rounded-sm bg-card border border-border flex items-center justify-center"
+                  >
+                    {i > 0 && (
+                      <div className="w-[5px] h-[5px] rounded-full bg-primary" style={{ opacity: 0.3 + i * 0.175 }} />
+                    )}
+                  </div>
+                ))
+              )}
             </div>
             <span>Mais</span>
           </div>

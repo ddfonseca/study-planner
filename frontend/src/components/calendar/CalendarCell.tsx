@@ -6,14 +6,15 @@ import type { DayData, CellIntensity } from '@/types/session';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useConfigStore } from '@/store/configStore';
 
-// Intensity colors for heatmap (green gradient)
-const intensityColors: Record<CellIntensity, string> = {
+// Gradient style: slate → sky → blue (smooth transition)
+const gradientColors: Record<CellIntensity, string> = {
   0: 'bg-card',
-  1: 'bg-green-100 dark:bg-green-950',
-  2: 'bg-green-200 dark:bg-green-900',
-  3: 'bg-green-300 dark:bg-green-800',
-  4: 'bg-green-400 dark:bg-green-700',
+  1: 'bg-slate-100 dark:bg-slate-800',
+  2: 'bg-sky-100 dark:bg-sky-900',
+  3: 'bg-sky-200 dark:bg-sky-800',
+  4: 'bg-blue-300 dark:bg-blue-700',
 };
 
 interface CalendarCellProps {
@@ -25,6 +26,22 @@ interface CalendarCellProps {
   onDeleteSession: (id: string) => void;
 }
 
+// Dots indicator component
+function IntensityDots({ intensity }: { intensity: CellIntensity }) {
+  if (intensity === 0) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-0.5">
+      {[...Array(intensity)].map((_, i) => (
+        <div
+          key={i}
+          className="w-1.5 h-1.5 rounded-full bg-primary"
+        />
+      ))}
+    </div>
+  );
+}
+
 export function CalendarCell({
   date,
   currentMonth,
@@ -33,25 +50,37 @@ export function CalendarCell({
   onClick,
   onDeleteSession,
 }: CalendarCellProps) {
+  const heatmapStyle = useConfigStore((state) => state.heatmapStyle);
   const isCurrentMonth = date.getMonth() === currentMonth;
   const isTodayDate = isToday(date);
 
-  // Background color based on intensity
+  // High intensity needs better text contrast
+  const isHighIntensity = heatmapStyle === 'gradient' && intensity >= 3;
+
+  // Background color based on intensity and style
   const getBgColor = () => {
     if (!isCurrentMonth) return 'bg-muted/50';
-    return intensityColors[intensity];
+    if (heatmapStyle === 'dots') return 'bg-card';
+    return gradientColors[intensity];
   };
 
   return (
     <div
       className={cn(
-        'h-[100px] p-2 border border-border rounded-md cursor-pointer transition-all hover:shadow-md overflow-hidden',
+        'h-[100px] p-2 border border-border rounded-md cursor-pointer transition-all hover:shadow-md overflow-hidden relative',
         getBgColor(),
         isTodayDate && 'ring-2 ring-primary ring-offset-1',
         !isCurrentMonth && 'opacity-50'
       )}
       onClick={onClick}
     >
+      {/* Dots indicator (top-right) */}
+      {heatmapStyle === 'dots' && isCurrentMonth && intensity > 0 && (
+        <div className="absolute top-1.5 right-1.5">
+          <IntensityDots intensity={intensity} />
+        </div>
+      )}
+
       {/* Day number */}
       <div className="flex items-center justify-between mb-1">
         <span
@@ -63,7 +92,7 @@ export function CalendarCell({
         >
           {date.getDate()}
         </span>
-        {dayData.totalMinutos > 0 && (
+        {dayData.totalMinutos > 0 && heatmapStyle === 'gradient' && (
           <span className="text-[10px] text-muted-foreground bg-background/80 px-1 py-0.5 rounded">
             {formatTime(dayData.totalMinutos)}
           </span>

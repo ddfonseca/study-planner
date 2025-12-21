@@ -44,161 +44,79 @@ function FAQItem({
   );
 }
 
-// Calendar SVG Preview component
+// Gradient colors for landing page preview (slate → sky → blue)
+const previewGradientColors: Record<number, string> = {
+  0: 'bg-card',
+  1: 'bg-slate-100 dark:bg-slate-800',
+  2: 'bg-sky-100 dark:bg-sky-900',
+  3: 'bg-sky-200 dark:bg-sky-800',
+  4: 'bg-blue-300 dark:bg-blue-700',
+};
+
+// Calendar Preview component with gradient heatmap style
 function CalendarPreview() {
   const days = [
-    { day: 16, label: 'Seg', intensity: 3, session: 'Mat 1h30' },
-    { day: 17, label: 'Ter', intensity: 2, session: 'Fís 45m' },
-    { day: 18, label: 'Qua', intensity: 0, session: '' },
-    { day: 19, label: 'Qui', intensity: 4, session: 'Quím 2h', isToday: true },
-    { day: 20, label: 'Sex', intensity: 1, session: 'Mat 30m' },
-    { day: 21, label: 'Sáb', intensity: 0, session: '' },
-    { day: 22, label: 'Dom', intensity: 0, session: '' },
+    { day: 16, label: 'Seg', intensity: 3, session: 'Mat', time: '1h30' },
+    { day: 17, label: 'Ter', intensity: 2, session: 'Fís', time: '45m' },
+    { day: 18, label: 'Qua', intensity: 0, session: '', time: '' },
+    { day: 19, label: 'Qui', intensity: 4, session: 'Quím', time: '2h', isToday: true },
+    { day: 20, label: 'Sex', intensity: 1, session: 'Mat', time: '30m' },
+    { day: 21, label: 'Sáb', intensity: 0, session: '', time: '' },
+    { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
   ];
 
-  const getIntensityColor = (intensity: number) => {
-    const colors = [
-      'fill-card',
-      'fill-green-200 dark:fill-green-900',
-      'fill-green-300 dark:fill-green-800',
-      'fill-green-400 dark:fill-green-700',
-      'fill-green-500 dark:fill-green-600',
-    ];
-    return colors[intensity] || colors[0];
-  };
-
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <svg
-        viewBox="0 0 720 180"
-        className="w-full h-auto"
-        role="img"
-        aria-label="Preview do calendário de estudos"
-      >
-        {/* Background */}
-        <rect
-          x="0"
-          y="0"
-          width="720"
-          height="180"
-          rx="12"
-          className="fill-card stroke-border"
-          strokeWidth="1"
-        />
-
-        {/* Header row */}
+    <div className="w-full max-w-4xl mx-auto px-4">
+      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
         {days.map((d, i) => (
-          <text
-            key={`header-${i}`}
-            x={50 + i * 85}
-            y="30"
-            className="fill-muted-foreground text-[12px]"
-            textAnchor="middle"
+          <div
+            key={i}
+            className={`
+              relative rounded-xl p-3 sm:p-4 transition-all shadow-md hover:shadow-lg border border-border
+              ${d.isToday
+                ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                : ''
+              }
+              ${previewGradientColors[d.intensity]}
+            `}
           >
-            {d.label}
-          </text>
-        ))}
-        <text
-          x="660"
-          y="30"
-          className="fill-muted-foreground text-[12px]"
-          textAnchor="middle"
-        >
-          Total
-        </text>
-
-        {/* Day cells */}
-        {days.map((d, i) => (
-          <g key={`cell-${i}`}>
-            {/* Cell background */}
-            <rect
-              x={10 + i * 85}
-              y="45"
-              width="75"
-              height="120"
-              rx="8"
-              className={`${getIntensityColor(d.intensity)} ${
-                d.isToday ? 'stroke-primary stroke-2' : 'stroke-border'
-              }`}
-              strokeWidth={d.isToday ? 2 : 1}
-            />
+            {/* Day label */}
+            <div className="text-[10px] sm:text-xs font-medium mb-1 text-muted-foreground">
+              {d.label}
+            </div>
             {/* Day number */}
-            <text
-              x={22 + i * 85}
-              y="65"
-              className={`text-[14px] ${
-                d.isToday ? 'fill-primary font-bold' : 'fill-foreground'
-              }`}
-            >
+            <div className={`text-lg sm:text-xl font-bold ${d.isToday ? 'text-primary' : ''}`}>
               {d.day}
-            </text>
-            {/* Session */}
-            {d.session && (
-              <text
-                x={47 + i * 85}
-                y="110"
-                className="fill-foreground text-[11px]"
-                textAnchor="middle"
-              >
-                {d.session}
-              </text>
+            </div>
+            {/* Session info */}
+            {d.session ? (
+              <div className="mt-2 text-[10px] sm:text-xs text-muted-foreground">
+                <div className="font-medium">{d.session}</div>
+                <div className="text-primary font-semibold">{d.time}</div>
+              </div>
+            ) : (
+              <div className="mt-2 text-[10px] sm:text-xs text-muted-foreground/50">
+                —
+              </div>
             )}
-          </g>
+          </div>
         ))}
 
-        {/* Total column */}
-        <rect
-          x="605"
-          y="45"
-          width="105"
-          height="120"
-          rx="8"
-          className="fill-card stroke-border"
-          strokeWidth="1"
-        />
-        <text
-          x="660"
-          y="80"
-          className="fill-foreground text-[18px] font-semibold"
-          textAnchor="middle"
-        >
-          5h 45m
-        </text>
-        {/* Progress bar background */}
-        <rect
-          x="620"
-          y="100"
-          width="80"
-          height="8"
-          rx="4"
-          className="fill-muted"
-        />
-        {/* Progress bar fill */}
-        <rect
-          x="620"
-          y="100"
-          width="48"
-          height="8"
-          rx="4"
-          className="fill-green-500"
-        />
-        <text
-          x="660"
-          y="130"
-          className="fill-muted-foreground text-[11px]"
-          textAnchor="middle"
-        >
-          60% da meta
-        </text>
-        <text
-          x="660"
-          y="150"
-          className="fill-muted-foreground text-[10px]"
-          textAnchor="middle"
-        >
-          Meta: 10h
-        </text>
-      </svg>
+        {/* Total card */}
+        <div className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-md">
+          <div className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-1">Total</div>
+          <div className="text-lg sm:text-xl font-bold text-primary">5h 45m</div>
+          <div className="mt-2">
+            {/* Progress bar */}
+            <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
+              <div className="h-full w-[60%] bg-primary rounded-full" />
+            </div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+              60% de 10h
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -237,7 +155,7 @@ export function LandingPage() {
     {
       question: 'O Study Planner é gratuito?',
       answer:
-        'Sim, o Study Planner é completamente gratuito e sem anúncios. Todas as funcionalidades estão disponíveis para todos os usuários.',
+        'Sim, oferecemos um plano gratuito com recursos essenciais para organizar seus estudos. Para funcionalidades avançadas como matérias ilimitadas e estatísticas detalhadas, temos o plano Pro.',
     },
     {
       question: 'Meus dados ficam salvos na nuvem?',
@@ -256,13 +174,38 @@ export function LandingPage() {
     },
   ];
 
-  const features = [
-    'Calendário visual com heatmap',
-    'Metas semanais personalizáveis',
-    'Dashboard com estatísticas',
-    'Modo escuro',
-    'Sincronização na nuvem',
-    'Acesso em qualquer dispositivo',
+  const plans = [
+    {
+      name: 'Gratuito',
+      price: 'R$ 0',
+      period: 'para sempre',
+      description: 'Perfeito para começar a organizar seus estudos.',
+      features: [
+        'Calendário visual com heatmap',
+        'Até 6 disciplinas',
+        'Metas semanais básicas',
+        'Modo escuro',
+        'Sincronização na nuvem',
+      ],
+      cta: 'Começar grátis',
+      highlighted: false,
+    },
+    {
+      name: 'Pro',
+      price: 'R$ 5,90',
+      period: '/mês',
+      description: 'Para quem leva os estudos a sério.',
+      features: [
+        'Tudo do plano Gratuito',
+        'Disciplinas ilimitadas',
+        'Histórico completo de sessões',
+        'Exportar relatórios em PDF',
+        'Lembretes personalizados',
+        'Suporte prioritário',
+      ],
+      cta: 'Assinar Pro',
+      highlighted: true,
+    },
   ];
 
   const scrollToFeatures = () => {
@@ -376,33 +319,61 @@ export function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4">
-            Gratuito para sempre
+      <section id="pricing" className="py-16 md:py-24">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
+            Escolha seu plano
           </h2>
-          <p className="text-muted-foreground mb-8">
-            Sem custos ocultos. Sem anúncios. Apenas foco nos seus estudos.
+          <p className="text-muted-foreground text-center mb-12">
+            Comece grátis e evolua quando precisar de mais recursos.
           </p>
-          <Card className="border-primary/50">
-            <CardContent className="p-8">
-              <div className="text-4xl font-bold mb-2">R$ 0</div>
-              <div className="text-muted-foreground mb-6">para sempre</div>
-              <ul className="text-left space-y-3 mb-8">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/login" className="block">
-                <Button size="lg" className="w-full">
-                  Criar conta grátis
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {plans.map((plan, index) => (
+              <Card
+                key={index}
+                className={`relative ${
+                  plan.highlighted
+                    ? 'border-primary shadow-lg shadow-primary/10'
+                    : 'border-border'
+                }`}
+              >
+                {plan.highlighted && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                      Mais popular
+                    </span>
+                  </div>
+                )}
+                <CardContent className="p-8">
+                  <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {plan.description}
+                  </p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
+                  </div>
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3">
+                        <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to="/login" className="block">
+                    <Button
+                      size="lg"
+                      variant={plan.highlighted ? 'default' : 'outline'}
+                      className="w-full"
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 

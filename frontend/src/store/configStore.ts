@@ -6,9 +6,12 @@ import { persist } from 'zustand/middleware';
 import type { UpdateConfigDto } from '@/types/api';
 import { configApi } from '@/lib/api/config';
 
+export type HeatmapStyle = 'gradient' | 'dots';
+
 interface ConfigState {
   targetHours: number;
   weekStartDay: number; // 0=Dom, 1=Seg
+  heatmapStyle: HeatmapStyle;
   isLoading: boolean;
   error: string | null;
 }
@@ -18,6 +21,7 @@ interface ConfigActions {
   updateConfig: (config: UpdateConfigDto) => Promise<void>;
   setTargetHours: (hours: number) => void;
   setWeekStartDay: (day: number) => void;
+  setHeatmapStyle: (style: HeatmapStyle) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -27,6 +31,7 @@ type ConfigStore = ConfigState & ConfigActions;
 // Default configuration values
 const DEFAULT_TARGET_HOURS = 30;
 const DEFAULT_WEEK_START_DAY = 1; // Segunda-feira
+const DEFAULT_HEATMAP_STYLE: HeatmapStyle = 'gradient';
 
 export const useConfigStore = create<ConfigStore>()(
   persist(
@@ -34,6 +39,7 @@ export const useConfigStore = create<ConfigStore>()(
       // Initial state with defaults
       targetHours: DEFAULT_TARGET_HOURS,
       weekStartDay: DEFAULT_WEEK_START_DAY,
+      heatmapStyle: DEFAULT_HEATMAP_STYLE,
       isLoading: false,
       error: null,
 
@@ -92,6 +98,10 @@ export const useConfigStore = create<ConfigStore>()(
         set({ weekStartDay: day });
       },
 
+      setHeatmapStyle: (style) => {
+        set({ heatmapStyle: style });
+      },
+
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
@@ -105,6 +115,7 @@ export const useConfigStore = create<ConfigStore>()(
       partialize: (state) => ({
         targetHours: state.targetHours,
         weekStartDay: state.weekStartDay,
+        heatmapStyle: state.heatmapStyle,
       }),
     }
   )
