@@ -4,6 +4,7 @@ export class UpdateConfigDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Max(168) // Max 168 hours per week
   targetHours?: number;
 
   @IsOptional()
