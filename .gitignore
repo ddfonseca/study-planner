@@ -34,3 +34,6 @@ backend/prisma/migrations/
 # Logs
 logs/
 *.log
+
+# Local Netlify folder
+.netlify
