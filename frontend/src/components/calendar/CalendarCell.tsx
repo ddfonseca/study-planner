@@ -93,7 +93,12 @@ export function CalendarCell({
           {date.getDate()}
         </span>
         {dayData.totalMinutos > 0 && heatmapStyle === 'gradient' && (
-          <span className="text-[10px] text-muted-foreground bg-background/80 px-1 py-0.5 rounded">
+          <span className={cn(
+            "text-[10px] px-1 py-0.5 rounded",
+            isHighIntensity
+              ? "text-foreground bg-background/90"
+              : "text-muted-foreground bg-background/80"
+          )}>
             {formatTime(dayData.totalMinutos)}
           </span>
         )}
@@ -105,11 +110,17 @@ export function CalendarCell({
           {dayData.materias.slice(0, 2).map((materia) => (
             <div
               key={materia.id}
-              className="flex items-center gap-1 text-[11px] bg-background/60 rounded px-1.5 py-0.5 group min-w-0"
+              className={cn(
+                "flex items-center gap-1 text-[11px] rounded px-1.5 py-0.5 group min-w-0",
+                isHighIntensity ? "bg-background/90" : "bg-background/60"
+              )}
               onClick={(e) => e.stopPropagation()}
             >
               <span className="truncate flex-1 text-foreground min-w-0">{materia.materia}</span>
-              <span className="text-muted-foreground whitespace-nowrap text-[10px] shrink-0">
+              <span className={cn(
+                "whitespace-nowrap text-[10px] shrink-0",
+                isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
+              )}>
                 {formatTime(materia.minutos)}
               </span>
               <button
@@ -125,7 +136,10 @@ export function CalendarCell({
             </div>
           ))}
           {dayData.materias.length > 2 && (
-            <span className="text-[10px] text-muted-foreground pl-1">
+            <span className={cn(
+              "text-[10px] pl-1",
+              isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
+            )}>
               +{dayData.materias.length - 2} mais
             </span>
           )}
