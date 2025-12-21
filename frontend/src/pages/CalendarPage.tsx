@@ -30,6 +30,7 @@ export function CalendarPage() {
   const {
     currentMonth,
     weeks,
+    dayNames,
     monthYearDisplay,
     goToNextMonth,
     goToPreviousMonth,
@@ -176,6 +177,7 @@ export function CalendarPage() {
           <CalendarGrid
             weeks={weeks}
             currentMonth={currentMonth}
+            dayNames={dayNames}
             onCellClick={handleCellClick}
             onDeleteSession={handleDeleteSessionSubmit}
           />

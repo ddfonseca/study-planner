@@ -8,6 +8,7 @@ import { configApi } from '@/lib/api/config';
 
 interface ConfigState {
   targetHours: number;
+  weekStartDay: number; // 0=Dom, 1=Seg
   isLoading: boolean;
   error: string | null;
 }
@@ -16,6 +17,7 @@ interface ConfigActions {
   fetchConfig: () => Promise<void>;
   updateConfig: (config: UpdateConfigDto) => Promise<void>;
   setTargetHours: (hours: number) => void;
+  setWeekStartDay: (day: number) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -24,12 +26,14 @@ type ConfigStore = ConfigState & ConfigActions;
 
 // Default configuration values
 const DEFAULT_TARGET_HOURS = 30;
+const DEFAULT_WEEK_START_DAY = 1; // Segunda-feira
 
 export const useConfigStore = create<ConfigStore>()(
   persist(
     (set) => ({
       // Initial state with defaults
       targetHours: DEFAULT_TARGET_HOURS,
+      weekStartDay: DEFAULT_WEEK_START_DAY,
       isLoading: false,
       error: null,
 
@@ -42,12 +46,14 @@ export const useConfigStore = create<ConfigStore>()(
           if (config) {
             set({
               targetHours: config.targetHours,
+              weekStartDay: config.weekStartDay ?? DEFAULT_WEEK_START_DAY,
               isLoading: false,
             });
           } else {
             // Use defaults if no config exists
             set({
               targetHours: DEFAULT_TARGET_HOURS,
+              weekStartDay: DEFAULT_WEEK_START_DAY,
               isLoading: false,
             });
           }
@@ -66,6 +72,7 @@ export const useConfigStore = create<ConfigStore>()(
 
           set({
             targetHours: updatedConfig.targetHours,
+            weekStartDay: updatedConfig.weekStartDay ?? DEFAULT_WEEK_START_DAY,
             isLoading: false,
           });
         } catch (error) {
@@ -81,6 +88,10 @@ export const useConfigStore = create<ConfigStore>()(
         set({ targetHours: hours });
       },
 
+      setWeekStartDay: (day) => {
+        set({ weekStartDay: day });
+      },
+
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
@@ -93,6 +104,7 @@ export const useConfigStore = create<ConfigStore>()(
       name: 'config-storage',
       partialize: (state) => ({
         targetHours: state.targetHours,
+        weekStartDay: state.weekStartDay,
       }),
     }
   )

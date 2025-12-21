@@ -7,18 +7,26 @@ import {
   formatMonthYear,
   addMonths,
   subMonths,
+  getDayNames,
 } from '@/lib/utils/date';
+import { useConfigStore } from '@/store/configStore';
 
 export function useCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const weekStartDay = useConfigStore((state) => state.weekStartDay);
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
   // Get calendar weeks for current month
   const weeks = useMemo(() => {
-    return getCalendarWeeks(currentYear, currentMonth);
-  }, [currentYear, currentMonth]);
+    return getCalendarWeeks(currentYear, currentMonth, weekStartDay);
+  }, [currentYear, currentMonth, weekStartDay]);
+
+  // Get day names based on weekStartDay
+  const dayNames = useMemo(() => {
+    return getDayNames(weekStartDay);
+  }, [weekStartDay]);
 
   // Format month/year for display
   const monthYearDisplay = useMemo(() => {
@@ -47,6 +55,8 @@ export function useCalendar() {
     currentYear,
     currentMonth,
     weeks,
+    dayNames,
+    weekStartDay,
     monthYearDisplay,
     goToNextMonth,
     goToPreviousMonth,

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import { formatDateKey } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
+import { useConfigStore } from '@/store/configStore';
 import type { SessionsMap } from '@/types/session';
 
 interface AnnualHeatmapProps {
@@ -26,8 +27,15 @@ interface MonthInfo {
   totalMinutes: number;
 }
 
-const DAYS_SHORT = ['Dom', '', 'Ter', '', 'Qui', '', 'Sáb'];
 const MONTHS_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+// Rotate day labels based on weekStartDay
+function getDayLabels(weekStartDay: number): string[] {
+  const fullDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const rotated = [...fullDays.slice(weekStartDay), ...fullDays.slice(0, weekStartDay)];
+  // Show only every other label for space
+  return rotated.map((d, i) => i % 2 === 0 ? d : '');
+}
 
 // Get intensity color based on minutes studied
 function getIntensityColor(minutes: number): string {
@@ -40,15 +48,21 @@ function getIntensityColor(minutes: number): string {
 
 export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
   const currentYear = new Date().getFullYear();
+  const weekStartDay = useConfigStore((state) => state.weekStartDay);
+
+  const dayLabels = useMemo(() => getDayLabels(weekStartDay), [weekStartDay]);
 
   const { weeks, monthsData } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Start from first day of the year, adjusted to the previous Sunday
+    // Start from first day of the year, adjusted to the previous weekStartDay
     const jan1 = new Date(currentYear, 0, 1);
     const startDate = new Date(jan1);
-    startDate.setDate(jan1.getDate() - jan1.getDay()); // Go back to Sunday
+    // Calculate days to go back to reach weekStartDay
+    let daysBack = jan1.getDay() - weekStartDay;
+    if (daysBack < 0) daysBack += 7;
+    startDate.setDate(jan1.getDate() - daysBack);
 
     // End at Dec 31 of the current year
     const dec31 = new Date(currentYear, 11, 31);
@@ -108,7 +122,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
       weeks: weeksData,
       monthsData: monthsInfo,
     };
-  }, [sessions, currentYear]);
+  }, [sessions, currentYear, weekStartDay]);
 
   // Format date for tooltip
   const formatTooltip = (day: DayData): string => {
@@ -162,7 +176,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
           <div className="flex gap-1">
             {/* Day labels */}
             <div className="flex flex-col justify-between py-[2px] text-[10px] text-muted-foreground shrink-0 w-6">
-              {DAYS_SHORT.map((day, i) => (
+              {dayLabels.map((day, i) => (
                 <div key={i} className="h-0 flex items-center">
                   {day}
                 </div>

@@ -8,18 +8,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, User, Clock, Save, Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Settings, User, Clock, Calendar, Save, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const { targetHours, updateConfig, isLoading } = useConfigStore();
+  const { targetHours, weekStartDay, updateConfig, isLoading } = useConfigStore();
   const { toast } = useToast();
 
   const [localTargetHours, setLocalTargetHours] = useState(String(targetHours));
+  const [localWeekStartDay, setLocalWeekStartDay] = useState(String(weekStartDay));
 
   const handleSave = async () => {
     const targetValue = parseFloat(localTargetHours) || 0;
+    const weekStartValue = parseInt(localWeekStartDay, 10);
 
     if (targetValue < 0) {
       toast({
@@ -33,6 +42,7 @@ export function SettingsPage() {
     try {
       await updateConfig({
         targetHours: targetValue,
+        weekStartDay: weekStartValue,
       });
       toast({
         title: 'Sucesso',
@@ -113,6 +123,41 @@ export function SettingsPage() {
             />
             <p className="text-xs text-muted-foreground">
               Semanas que atingirem esta meta ficam verdes no calendário
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar Settings Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Calendário
+          </CardTitle>
+          <CardDescription>
+            Configure como o calendário é exibido
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2 max-w-xs">
+            <Label htmlFor="weekStartDay">
+              Início da Semana
+            </Label>
+            <Select
+              value={localWeekStartDay}
+              onValueChange={setLocalWeekStartDay}
+            >
+              <SelectTrigger id="weekStartDay" className="w-full">
+                <SelectValue placeholder="Selecione o dia" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Domingo</SelectItem>
+                <SelectItem value="1">Segunda-feira</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Define qual dia aparece primeiro no calendário
             </p>
           </div>
 

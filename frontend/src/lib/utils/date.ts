@@ -63,28 +63,33 @@ export function formatDayOfWeek(date: Date): string {
 }
 
 /**
- * Get day names for calendar header (Monday first)
+ * Get day names for calendar header
+ * @param weekStartDay 0=Sunday, 1=Monday (default)
  */
-export function getDayNames(): string[] {
-  return ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+export function getDayNames(weekStartDay: number = 1): string[] {
+  const allDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  // Rotate array to start from weekStartDay
+  return [...allDays.slice(weekStartDay), ...allDays.slice(0, weekStartDay)];
 }
 
 /**
  * Get all dates for a calendar month grid (includes padding days)
- * Calendar starts on Monday (weekday 0 = Monday, 6 = Sunday)
+ * @param weekStartDay 0=Sunday, 1=Monday (default)
  */
-export function getCalendarDays(year: number, month: number): Date[] {
+export function getCalendarDays(year: number, month: number, weekStartDay: number = 1): Date[] {
   const firstDay = new Date(year, month, 1);
   const lastDay = endOfMonth(firstDay);
 
-  // Convert getDay() (0=Sun, 1=Mon, ..., 6=Sat) to Monday-based (0=Mon, ..., 6=Sun)
+  // getDay() returns 0=Sun, 1=Mon, ..., 6=Sat
+  // Calculate how many days we need to go back to reach weekStartDay
   const dayOfWeek = getDay(firstDay);
-  const startDayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  let daysToGoBack = dayOfWeek - weekStartDay;
+  if (daysToGoBack < 0) daysToGoBack += 7;
 
   const days: Date[] = [];
 
   // Add padding days from previous month
-  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+  for (let i = daysToGoBack - 1; i >= 0; i--) {
     days.push(subDays(firstDay, i + 1));
   }
 
@@ -105,9 +110,10 @@ export function getCalendarDays(year: number, month: number): Date[] {
 
 /**
  * Get weeks array from calendar days
+ * @param weekStartDay 0=Sunday, 1=Monday (default)
  */
-export function getCalendarWeeks(year: number, month: number): Date[][] {
-  const days = getCalendarDays(year, month);
+export function getCalendarWeeks(year: number, month: number, weekStartDay: number = 1): Date[][] {
+  const days = getCalendarDays(year, month, weekStartDay);
   const weeks: Date[][] = [];
 
   for (let i = 0; i < days.length; i += 7) {

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { CalendarCell } from './CalendarCell';
 import { WeeklyGoalEditor } from './WeeklyGoalEditor';
-import { formatDateKey, getDayNames } from '@/lib/utils/date';
+import { formatDateKey } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { useSessions } from '@/hooks/useSessions';
 import { useWeeklyGoals } from '@/hooks/useWeeklyGoals';
@@ -13,6 +13,7 @@ import type { DayData } from '@/types/session';
 interface CalendarGridProps {
   weeks: Date[][];
   currentMonth: number;
+  dayNames: string[];
   onCellClick: (date: Date) => void;
   onDeleteSession: (id: string) => void;
 }
@@ -20,12 +21,12 @@ interface CalendarGridProps {
 export function CalendarGrid({
   weeks,
   currentMonth,
+  dayNames,
   onCellClick,
   onDeleteSession,
 }: CalendarGridProps) {
   const { sessions, getCellIntensity, getWeekTotals } = useSessions();
   const { getCachedGoalForWeek, prefetchGoals, calculateWeekStart } = useWeeklyGoals();
-  const dayNames = getDayNames();
 
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
   const [selectedWeekTotal, setSelectedWeekTotal] = useState<number>(0);

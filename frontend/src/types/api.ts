@@ -78,7 +78,8 @@ export interface UpdateSessionDto {
 
 // Update config DTO
 export interface UpdateConfigDto {
-  targetHours: number;
+  targetHours?: number;
+  weekStartDay?: number; // 0=Dom, 1=Seg
 }
 
 // Generic API response wrapper
