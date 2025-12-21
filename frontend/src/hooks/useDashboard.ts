@@ -30,20 +30,32 @@ export function useDashboard() {
     const labels = Object.keys(stats.subjectBreakdown);
     const data = Object.values(stats.subjectBreakdown);
 
-    // Generate colors for each subject
-    const colors = labels.map((_, i) => {
-      const hue = (i * 137.5) % 360; // Golden angle for good distribution
-      return `hsl(${hue}, 70%, 50%)`;
-    });
+    // Modern soft color palette (pastel tones)
+    const modernPalette = [
+      { bg: '#a5b4fc', border: '#818cf8' }, // Indigo 300/400
+      { bg: '#c4b5fd', border: '#a78bfa' }, // Violet 300/400
+      { bg: '#67e8f9', border: '#22d3ee' }, // Cyan 300/400
+      { bg: '#fda4af', border: '#fb7185' }, // Rose 300/400
+      { bg: '#6ee7b7', border: '#34d399' }, // Emerald 300/400
+      { bg: '#fcd34d', border: '#fbbf24' }, // Amber 300/400
+      { bg: '#93c5fd', border: '#60a5fa' }, // Blue 300/400
+      { bg: '#f9a8d4', border: '#f472b6' }, // Pink 300/400
+      { bg: '#5eead4', border: '#2dd4bf' }, // Teal 300/400
+      { bg: '#d8b4fe', border: '#c084fc' }, // Purple 300/400
+      { bg: '#86efac', border: '#4ade80' }, // Green 300/400
+      { bg: '#fca5a5', border: '#f87171' }, // Red 300/400
+    ];
+
+    const colors = labels.map((_, i) => modernPalette[i % modernPalette.length]);
 
     return {
       labels,
       datasets: [
         {
           data,
-          backgroundColor: colors,
-          borderColor: colors.map((c) => c.replace('50%', '40%')),
-          borderWidth: 1,
+          backgroundColor: colors.map(c => c.bg),
+          borderColor: colors.map(c => c.border),
+          borderWidth: 2,
         },
       ],
     };
@@ -70,10 +82,10 @@ export function useDashboard() {
         {
           label: 'Minutos estudados',
           data,
-          backgroundColor: '#4a90e2',
-          borderColor: '#2f6cb5',
+          backgroundColor: '#a5b4fc',
+          borderColor: '#818cf8',
           borderWidth: 1,
-          borderRadius: 4,
+          borderRadius: 6,
         },
       ],
     };
