@@ -1,46 +1,23 @@
 /**
  * WeeklyGoalService Tests
- * TDD: Tests written BEFORE implementation
+ * Using jest-prisma for automatic transaction rollback
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@prisma/client';
 import { WeeklyGoalService } from '../src/weekly-goal/weekly-goal.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ConfigService } from '../src/config/config.service';
-import {
-  cleanDatabase,
-  createTestUser,
-  createUserConfig,
-} from './helpers/database.helper';
-
-// Mock PrismaService
-class MockPrismaService extends PrismaClient {
-  constructor() {
-    super({
-      datasources: {
-        db: {
-          url: 'postgresql://test:test@localhost:5433/study_planner_test?schema=public',
-        },
-      },
-    });
-  }
-}
+import { createTestUser, createUserConfig } from './helpers/database.helper';
 
 describe('WeeklyGoalService', () => {
   let service: WeeklyGoalService;
-  let prisma: PrismaClient;
 
-  beforeAll(async () => {
-    prisma = new MockPrismaService();
-    await prisma.$connect();
+  beforeEach(async () => {
+    const prisma = jestPrisma.client;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WeeklyGoalService,
-        {
-          provide: PrismaService,
-          useValue: prisma,
-        },
+        { provide: PrismaService, useValue: prisma },
         {
           provide: ConfigService,
           useValue: {
@@ -56,25 +33,15 @@ describe('WeeklyGoalService', () => {
     service = module.get<WeeklyGoalService>(WeeklyGoalService);
   });
 
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
-  beforeEach(async () => {
-    await cleanDatabase();
-  });
-
   describe('calculateWeekStart', () => {
     it('should return Monday for a Monday date', () => {
-      // December 16, 2024 is a Monday - use UTC date
-      const monday = new Date(Date.UTC(2024, 11, 16)); // Month is 0-indexed
-      const result = service.calculateWeekStart(monday, 1); // 1 = Monday start
+      const monday = new Date(Date.UTC(2024, 11, 16));
+      const result = service.calculateWeekStart(monday, 1);
 
       expect(result.toISOString().split('T')[0]).toBe('2024-12-16');
     });
 
     it('should return previous Monday for a Wednesday date', () => {
-      // December 18, 2024 is a Wednesday
       const wednesday = new Date(Date.UTC(2024, 11, 18));
       const result = service.calculateWeekStart(wednesday, 1);
 
@@ -82,7 +49,6 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should return previous Monday for a Sunday date', () => {
-      // December 22, 2024 is a Sunday
       const sunday = new Date(Date.UTC(2024, 11, 22));
       const result = service.calculateWeekStart(sunday, 1);
 
@@ -90,7 +56,6 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should return previous Monday for a Saturday date', () => {
-      // December 21, 2024 is a Saturday
       const saturday = new Date(Date.UTC(2024, 11, 21));
       const result = service.calculateWeekStart(saturday, 1);
 
@@ -98,7 +63,6 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should return Sunday for weekStartDay=0 (Sunday start)', () => {
-      // December 18, 2024 is a Wednesday, previous Sunday is Dec 15
       const wednesday = new Date(Date.UTC(2024, 11, 18));
       const result = service.calculateWeekStart(wednesday, 0);
 
@@ -106,7 +70,6 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should handle year boundary correctly', () => {
-      // January 1, 2025 is a Wednesday, previous Monday is Dec 30, 2024
       const newYear = new Date(Date.UTC(2025, 0, 1));
       const result = service.calculateWeekStart(newYear, 1);
 
@@ -119,7 +82,6 @@ describe('WeeklyGoalService', () => {
       const user = await createTestUser();
       await createUserConfig(user.id, { targetHours: 30 });
 
-      // Use UTC date to avoid timezone issues
       const weekStart = new Date(Date.UTC(2024, 11, 16));
       const goal = await service.getOrCreateForWeek(user.id, weekStart);
 
@@ -130,11 +92,10 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should return existing goal if exists', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
-      // Use UTC date to match what the service stores
       const weekStart = new Date(Date.UTC(2024, 11, 16));
 
-      // Create goal directly with UTC date
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
@@ -153,10 +114,10 @@ describe('WeeklyGoalService', () => {
 
   describe('getForDate', () => {
     it('should return goal for the week containing the date', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
       await createUserConfig(user.id);
 
-      // Create goal for week of Dec 16 (UTC)
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
@@ -166,7 +127,6 @@ describe('WeeklyGoalService', () => {
         },
       });
 
-      // Query with Wednesday Dec 18 (same week) - UTC
       const goal = await service.getForDate(
         user.id,
         new Date(Date.UTC(2024, 11, 18)),
@@ -192,13 +152,12 @@ describe('WeeklyGoalService', () => {
 
   describe('update', () => {
     it('should allow updating current week goal', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
-      // Get current week's Monday using UTC
       const now = new Date();
       const currentWeekStart = service.calculateWeekStart(now, 1);
 
-      // Create goal for current week - use the exact same date object
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
@@ -208,7 +167,6 @@ describe('WeeklyGoalService', () => {
         },
       });
 
-      // Update should succeed - pass the same date
       const updated = await service.update(user.id, currentWeekStart, {
         targetHours: 40,
       });
@@ -218,16 +176,15 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should allow updating future week goal', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
-      // Calculate a future week start (14 days ahead to ensure it's next week)
       const now = new Date();
       const futureDate = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 14),
       );
       const futureWeekStart = service.calculateWeekStart(futureDate, 1);
 
-      // Create goal for future week
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
@@ -237,7 +194,6 @@ describe('WeeklyGoalService', () => {
         },
       });
 
-      // Update should succeed
       const updated = await service.update(user.id, futureWeekStart, {
         targetHours: 45,
       });
@@ -246,12 +202,11 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should allow updating past week goal', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
-      // A Monday in the past (UTC)
-      const pastWeekStart = new Date(Date.UTC(2024, 0, 1)); // Jan 1, 2024 is a Monday
+      const pastWeekStart = new Date(Date.UTC(2024, 0, 1));
 
-      // Create goal for past week
       await prisma.weeklyGoal.create({
         data: {
           userId: user.id,
@@ -261,7 +216,6 @@ describe('WeeklyGoalService', () => {
         },
       });
 
-      // Update should succeed
       const updated = await service.update(user.id, pastWeekStart, {
         targetHours: 40,
       });
@@ -273,35 +227,15 @@ describe('WeeklyGoalService', () => {
 
   describe('getForDateRange', () => {
     it('should return all goals within date range', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
-      // Create multiple goals with UTC dates
       await prisma.weeklyGoal.createMany({
         data: [
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 2)),
-            targetHours: 30,
-            isCustom: false,
-          },
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 9)),
-            targetHours: 35,
-            isCustom: true,
-          },
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 16)),
-            targetHours: 30,
-            isCustom: false,
-          },
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 23)),
-            targetHours: 40,
-            isCustom: true,
-          },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 2)), targetHours: 30, isCustom: false },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 9)), targetHours: 35, isCustom: true },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 16)), targetHours: 30, isCustom: false },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 23)), targetHours: 40, isCustom: true },
         ],
       });
 
@@ -311,11 +245,11 @@ describe('WeeklyGoalService', () => {
         new Date(Date.UTC(2024, 11, 20)),
       );
 
-      // Should include Dec 9, Dec 16 (within range)
       expect(goals.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should return empty array when no goals in range', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
       await prisma.weeklyGoal.create({
@@ -337,28 +271,14 @@ describe('WeeklyGoalService', () => {
     });
 
     it('should order goals by weekStart ascending', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
       await prisma.weeklyGoal.createMany({
         data: [
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 23)),
-            targetHours: 40,
-            isCustom: true,
-          },
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 9)),
-            targetHours: 35,
-            isCustom: true,
-          },
-          {
-            userId: user.id,
-            weekStart: new Date(Date.UTC(2024, 11, 16)),
-            targetHours: 30,
-            isCustom: false,
-          },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 23)), targetHours: 40, isCustom: true },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 9)), targetHours: 35, isCustom: true },
+          { userId: user.id, weekStart: new Date(Date.UTC(2024, 11, 16)), targetHours: 30, isCustom: false },
         ],
       });
 
@@ -376,26 +296,17 @@ describe('WeeklyGoalService', () => {
 
   describe('User isolation', () => {
     it('should not return goals from other users', async () => {
+      const prisma = jestPrisma.client;
       const user1 = await createTestUser({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
       const weekStart = new Date(Date.UTC(2024, 11, 16));
 
       await prisma.weeklyGoal.create({
-        data: {
-          userId: user1.id,
-          weekStart,
-          targetHours: 20,
-          isCustom: false,
-        },
+        data: { userId: user1.id, weekStart, targetHours: 20, isCustom: false },
       });
 
       await prisma.weeklyGoal.create({
-        data: {
-          userId: user2.id,
-          weekStart,
-          targetHours: 40,
-          isCustom: true,
-        },
+        data: { userId: user2.id, weekStart, targetHours: 40, isCustom: true },
       });
 
       const goal1 = await service.getForDate(user1.id, weekStart, 1);

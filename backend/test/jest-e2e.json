@@ -1,7 +1,11 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
-  "testEnvironment": "node",
+  "testEnvironment": "@quramy/jest-prisma/environment",
+  "testEnvironmentOptions": {
+    "verboseQuery": false,
+    "enableExperimentalRollbackInTransaction": true
+  },
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest",
@@ -13,6 +17,5 @@
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   },
-  "setupFilesAfterEnv": ["<rootDir>/setup.ts"],
   "testTimeout": 30000
 }

@@ -1,31 +1,16 @@
 /**
  * ConfigService Tests
+ * Using jest-prisma for automatic transaction rollback
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '../src/config/config.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { cleanDatabase, createTestUser } from './helpers/database.helper';
-
-class MockPrismaService extends PrismaClient {
-  constructor() {
-    super({
-      datasources: {
-        db: {
-          url: 'postgresql://test:test@localhost:5433/study_planner_test?schema=public',
-        },
-      },
-    });
-  }
-}
 
 describe('ConfigService', () => {
   let service: ConfigService;
-  let prisma: PrismaClient;
 
-  beforeAll(async () => {
-    prisma = new MockPrismaService();
-    await prisma.$connect();
+  beforeEach(async () => {
+    const prisma = jestPrisma.client;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -37,13 +22,17 @@ describe('ConfigService', () => {
     service = module.get<ConfigService>(ConfigService);
   });
 
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
-  beforeEach(async () => {
-    await cleanDatabase();
-  });
+  // Helper to create test user
+  async function createTestUser(data?: { email?: string; name?: string }) {
+    const prisma = jestPrisma.client;
+    return prisma.user.create({
+      data: {
+        email: data?.email || `test-${Date.now()}-${Math.random()}@test.com`,
+        name: data?.name || 'Test User',
+        emailVerified: true,
+      },
+    });
+  }
 
   describe('findByUserId', () => {
     it('should create default config if not exists', async () => {
@@ -58,6 +47,7 @@ describe('ConfigService', () => {
     });
 
     it('should return existing config', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
       // Create config directly
@@ -109,6 +99,7 @@ describe('ConfigService', () => {
     });
 
     it('should preserve other fields when updating one field', async () => {
+      const prisma = jestPrisma.client;
       const user = await createTestUser();
 
       // Create config with custom weekStartDay

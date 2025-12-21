@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["@types/jest", "@quramy/jest-prisma"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,

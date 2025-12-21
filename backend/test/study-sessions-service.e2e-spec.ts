@@ -1,32 +1,18 @@
 /**
  * StudySessionsService Tests
+ * Using jest-prisma for automatic transaction rollback
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@prisma/client';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { StudySessionsService } from '../src/study-sessions/study-sessions.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { cleanDatabase, createTestUser } from './helpers/database.helper';
-
-class MockPrismaService extends PrismaClient {
-  constructor() {
-    super({
-      datasources: {
-        db: {
-          url: 'postgresql://test:test@localhost:5433/study_planner_test?schema=public',
-        },
-      },
-    });
-  }
-}
+import { createTestUser } from './helpers/database.helper';
 
 describe('StudySessionsService', () => {
   let service: StudySessionsService;
-  let prisma: PrismaClient;
 
-  beforeAll(async () => {
-    prisma = new MockPrismaService();
-    await prisma.$connect();
+  beforeEach(async () => {
+    const prisma = jestPrisma.client;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -36,14 +22,6 @@ describe('StudySessionsService', () => {
     }).compile();
 
     service = module.get<StudySessionsService>(StudySessionsService);
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
-  beforeEach(async () => {
-    await cleanDatabase();
   });
 
   describe('create', () => {
