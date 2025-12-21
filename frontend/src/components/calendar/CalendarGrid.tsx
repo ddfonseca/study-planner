@@ -31,16 +31,20 @@ export function CalendarGrid({
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
   const [selectedWeekTotal, setSelectedWeekTotal] = useState<number>(0);
 
-  // Prefetch goals for displayed weeks
+  // Prefetch goals for displayed weeks (use date range as stable key)
+  const dateRangeKey =
+    weeks.length > 0 && weeks[0].length > 0
+      ? `${formatDateKey(weeks[0][0])}-${formatDateKey(weeks[weeks.length - 1][weeks[weeks.length - 1].length - 1])}`
+      : '';
+
   useEffect(() => {
-    if (weeks.length > 0) {
+    if (dateRangeKey && weeks.length > 0) {
       const firstWeek = weeks[0];
       const lastWeek = weeks[weeks.length - 1];
-      if (firstWeek.length > 0 && lastWeek.length > 0) {
-        prefetchGoals(firstWeek[0], lastWeek[lastWeek.length - 1]);
-      }
+      prefetchGoals(firstWeek[0], lastWeek[lastWeek.length - 1]);
     }
-  }, [weeks, prefetchGoals]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRangeKey]);
 
   const handleTotalClick = (week: Date[], weekTotal: number) => {
     // Get the first day of the week to calculate week start

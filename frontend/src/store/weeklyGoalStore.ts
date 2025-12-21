@@ -11,6 +11,8 @@ interface WeeklyGoalState {
   goals: Record<string, WeeklyGoal>;
   isLoading: boolean;
   error: string | null;
+  // Track pending fetches to prevent duplicates
+  _pendingFetches: Record<string, Promise<void>>;
 }
 
 interface WeeklyGoalActions {
@@ -52,6 +54,7 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
   goals: {},
   isLoading: false,
   error: null,
+  _pendingFetches: {},
 
   getGoalForWeek: async (weekStart: string) => {
     const cached = get().goals[weekStart];
@@ -99,28 +102,51 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
   },
 
   fetchGoalsForRange: async (startDate: string, endDate: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      const goals = await weeklyGoalsApi.getForDateRange(startDate, endDate);
+    const fetchKey = `${startDate}-${endDate}`;
 
-      const goalsMap = goals.reduce((acc, goal) => {
-        // weekStart from API is ISO string, extract date part
-        const weekStartKey = goal.weekStart.split('T')[0];
-        acc[weekStartKey] = goal;
-        return acc;
-      }, {} as Record<string, WeeklyGoal>);
-
-      set((state) => ({
-        goals: { ...state.goals, ...goalsMap },
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch goals',
-      });
-      throw error;
+    // Return existing promise if fetch is already in progress
+    const pending = get()._pendingFetches[fetchKey];
+    if (pending) {
+      return pending;
     }
+
+    const fetchPromise = (async () => {
+      try {
+        set({ isLoading: true, error: null });
+        const goals = await weeklyGoalsApi.getForDateRange(startDate, endDate);
+
+        const goalsMap = goals.reduce((acc, goal) => {
+          // weekStart from API is ISO string, extract date part
+          const weekStartKey = goal.weekStart.split('T')[0];
+          acc[weekStartKey] = goal;
+          return acc;
+        }, {} as Record<string, WeeklyGoal>);
+
+        set((state) => ({
+          goals: { ...state.goals, ...goalsMap },
+          isLoading: false,
+        }));
+      } catch (error) {
+        set({
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Failed to fetch goals',
+        });
+        throw error;
+      } finally {
+        // Clean up pending fetch
+        set((state) => {
+          const { [fetchKey]: _, ...rest } = state._pendingFetches;
+          return { _pendingFetches: rest };
+        });
+      }
+    })();
+
+    // Track the pending fetch
+    set((state) => ({
+      _pendingFetches: { ...state._pendingFetches, [fetchKey]: fetchPromise },
+    }));
+
+    return fetchPromise;
   },
 
   getCachedGoal: (weekStart: string) => {
