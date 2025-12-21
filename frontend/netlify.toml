@@ -1,7 +1,22 @@
 [build]
-  command = "npm run build"
+  base = "frontend"
+  command = "npm install && npm run build"
   publish = "dist"
 
+[build.environment]
+  # API calls will go through Netlify proxy (same domain = no third-party cookie issues)
+  VITE_API_BASE_URL = ""
+  VITE_FRONTEND_URL = "https://study-planner-front.netlify.app"
+
+# Proxy API requests to Fly.io backend (must be before the catch-all)
+[[redirects]]
+  from = "/api/*"
+  to = "https://study-planner-api.fly.dev/api/:splat"
+  status = 200
+  force = true
+  headers = {X-Forwarded-Host = "study-planner-front.netlify.app"}
+
+# SPA fallback (catch-all for client-side routing)
 [[redirects]]
   from = "/*"
   to = "/index.html"

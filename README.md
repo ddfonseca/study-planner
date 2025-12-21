@@ -190,6 +190,89 @@ npm run dev
 - ✅ **Adição Rápida** - Adicione sessões de forma inline
 - ✅ **Sincronização Multi-dispositivo** - Dados salvos no backend
 
+## 🌍 Deploy
+
+O deploy é automatizado via GitHub Actions usando tags específicas.
+
+### CI/CD com Tags
+
+| Tag Pattern | Deploy |
+|-------------|--------|
+| `frontend-v*` | Frontend → Netlify |
+| `backend-v*` | Backend → Fly.io |
+
+#### Criar tag e fazer deploy
+
+```bash
+# Deploy do frontend
+git tag frontend-v1.0.0
+git push origin frontend-v1.0.0
+
+# Deploy do backend
+git tag backend-v1.0.0
+git push origin backend-v1.0.0
+```
+
+### Configurar Secrets no GitHub
+
+Vá em **Settings** → **Secrets and variables** → **Actions** e adicione:
+
+#### Secrets (obrigatórios)
+
+| Secret | Descrição | Como obter |
+|--------|-----------|------------|
+| `NETLIFY_AUTH_TOKEN` | Token de autenticação Netlify | `netlify login` → Account Settings → Personal Access Tokens |
+| `NETLIFY_SITE_ID` | ID do site Netlify | `netlify status` ou Dashboard do Netlify |
+| `FLY_API_TOKEN` | Token de autenticação Fly.io | `fly tokens create deploy` |
+
+#### Variables (opcionais)
+
+| Variable | Descrição |
+|----------|-----------|
+| `VITE_API_BASE_URL` | URL do backend (ex: `https://sua-api.fly.dev`) |
+| `VITE_FRONTEND_URL` | URL do frontend (ex: `https://study-planner-front.netlify.app`) |
+| `VITE_APP_NAME` | Nome da aplicação |
+
+### URLs de Produção
+
+- **Frontend**: https://study-planner-front.netlify.app
+- **Backend**: (configurar após deploy no Fly.io)
+
+### Deploy Manual via CLI
+
+#### Frontend (Netlify)
+
+```bash
+# Instalar Netlify CLI
+npm install -g netlify-cli
+
+# Login
+netlify login
+
+# Inicializar projeto (primeira vez)
+netlify init
+
+# Deploy para produção
+netlify deploy --prod --filter frontend-new
+
+# Gerenciar variáveis de ambiente
+netlify env:list --filter frontend-new
+netlify env:set VITE_API_BASE_URL https://sua-api.fly.dev --filter frontend-new
+```
+
+#### Backend (Fly.io)
+
+```bash
+# Instalar Fly CLI
+curl -L https://fly.io/install.sh | sh
+
+# Login
+fly auth login
+
+# Deploy
+fly deploy
+```
+
 ## 📝 Notas
 
 - Os dados são salvos no banco PostgreSQL

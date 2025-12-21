@@ -1,4 +1,4 @@
-.PHONY: up down logs test test-db test-reset migrate
+.PHONY: up down logs test test-db test-reset migrate deploy-frontend deploy-backend deploy-all
 
 # Docker
 up:
@@ -34,3 +34,12 @@ test: test-db
 # Prisma
 migrate:
 	cd backend && npx prisma migrate dev
+
+# Deploy
+deploy-frontend:
+	netlify deploy --prod --filter frontend-new
+
+deploy-backend:
+	cd backend && fly deploy
+
+deploy-all: deploy-backend deploy-frontend

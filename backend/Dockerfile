@@ -11,7 +11,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install all dependencies (including dev for build)
-RUN npm ci
+RUN npm install
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -34,7 +34,7 @@ RUN apk add --no-cache openssl libc6-compat
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma/
@@ -55,4 +55,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/config || exit 1
 
 # Start the application
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

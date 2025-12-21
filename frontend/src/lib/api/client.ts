@@ -4,7 +4,10 @@
  */
 import type { ApiError } from '@/types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// In production: empty string (uses Netlify proxy at same domain)
+// In development: undefined, so fallback to localhost
+const envApiUrl = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = envApiUrl !== undefined ? envApiUrl : 'http://localhost:3000';
 
 class ApiClient {
   private baseURL: string;

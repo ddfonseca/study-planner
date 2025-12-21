@@ -4,10 +4,10 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Backend URL for OAuth callbacks
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-// Frontend URL for trusted origins and redirects
+// Frontend URL - all requests go through Netlify proxy (same domain)
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Backend URL for internal reference
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -17,11 +17,13 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirectURI: `${BACKEND_URL}/api/auth/callback/google`,
+      // OAuth callback goes through Netlify proxy (same domain as frontend)
+      redirectURI: `${FRONTEND_URL}/api/auth/callback/google`,
     },
   },
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: BACKEND_URL,
+  // Use frontend URL since all requests come through Netlify proxy
+  baseURL: FRONTEND_URL,
   basePath: '/api/auth',
   trustedOrigins: [FRONTEND_URL, BACKEND_URL],
 });

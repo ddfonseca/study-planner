@@ -15,8 +15,13 @@ async function bootstrap() {
   // Use Winston logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
-  // Security headers
-  app.use(helmet());
+  // Security headers (configured for CORS compatibility)
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    }),
+  );
 
   // CORS configuration
   app.enableCors({
@@ -41,6 +46,11 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance();
   const authHandler = toNodeHandler(auth);
 
+  // Health check endpoint (no auth required)
+  expressApp.get('/health', (_req: any, res: any) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
   // Handle Better Auth routes first (before body parser)
   expressApp.use((req: any, res: any, next: any) => {
     if (req.path.startsWith('/api/auth')) {
@@ -54,7 +64,7 @@ async function bootstrap() {
   expressApp.use(express.urlencoded({ extended: true }));
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   logger.log(`Backend running on http://localhost:${port}`, 'Bootstrap');

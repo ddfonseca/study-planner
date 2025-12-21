@@ -1,0 +1,14 @@
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_API_BASE_URL = "https://study-planner-api.fly.dev"
+  VITE_FRONTEND_URL = "https://study-planner-front.netlify.app"
+
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
