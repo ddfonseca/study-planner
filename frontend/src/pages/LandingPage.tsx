@@ -201,22 +201,22 @@ export function LandingPage() {
       cta: 'Começar grátis',
       highlighted: false,
     },
-    {
-      name: 'Pro',
-      price: 'R$ 5,90',
-      period: '/mês',
-      description: 'Para quem leva os estudos a sério.',
-      features: [
-        'Tudo do plano Gratuito',
-        'Disciplinas ilimitadas',
-        'Histórico completo de sessões',
-        'Exportar relatórios em PDF',
-        'Lembretes personalizados',
-        'Suporte prioritário',
-      ],
-      cta: 'Assinar Pro',
-      highlighted: true,
-    },
+    // {
+    //   name: 'Pro',
+    //   price: 'R$ 5,90',
+    //   period: '/mês',
+    //   description: 'Para quem leva os estudos a sério.',
+    //   features: [
+    //     'Tudo do plano Gratuito',
+    //     'Disciplinas ilimitadas',
+    //     'Histórico completo de sessões',
+    //     'Exportar relatórios em PDF',
+    //     'Lembretes personalizados',
+    //     'Suporte prioritário',
+    //   ],
+    //   cta: 'Assinar Pro',
+    //   highlighted: true,
+    // },
   ];
 
   const scrollToFeatures = () => {
