@@ -29,7 +29,7 @@ build/
 Thumbs.db
 
 # Prisma
-backend/prisma/migrations/
+# Migrations devem ser versionadas para deploy em produção
 
 # Logs
 logs/

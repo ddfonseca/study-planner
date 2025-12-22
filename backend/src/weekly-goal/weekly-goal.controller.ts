@@ -21,36 +21,50 @@ export class WeeklyGoalController {
   constructor(private readonly weeklyGoalService: WeeklyGoalService) {}
 
   /**
-   * Get weekly goal for a specific week
+   * Get weekly goal for a specific week and workspace
    * Creates with defaults if not exists
+   * @param workspaceId - Required workspace ID
    */
   @Get(':weekStart')
   async getForWeek(
     @Session() session: UserSession,
     @Param('weekStart') weekStartStr: string,
+    @Query('workspaceId') workspaceId: string,
   ) {
     const userId = session.user.id;
     const weekStart = this.parseWeekStart(weekStartStr);
-    return this.weeklyGoalService.getOrCreateForWeek(userId, weekStart);
+
+    if (!workspaceId) {
+      throw new BadRequestException('workspaceId is required');
+    }
+
+    return this.weeklyGoalService.getOrCreateForWeek(userId, workspaceId, weekStart);
   }
 
   /**
-   * Update weekly goal for a specific week
-   * THROWS 403 if week is in the past
+   * Update weekly goal for a specific week and workspace
+   * @param workspaceId - Required workspace ID
    */
   @Put(':weekStart')
   async update(
     @Session() session: UserSession,
     @Param('weekStart') weekStartStr: string,
+    @Query('workspaceId') workspaceId: string,
     @Body() updateDto: UpdateWeeklyGoalDto,
   ) {
     const userId = session.user.id;
     const weekStart = this.parseWeekStart(weekStartStr);
-    return this.weeklyGoalService.update(userId, weekStart, updateDto);
+
+    if (!workspaceId) {
+      throw new BadRequestException('workspaceId is required');
+    }
+
+    return this.weeklyGoalService.update(userId, workspaceId, weekStart, updateDto);
   }
 
   /**
    * Get all weekly goals within a date range
+   * @param workspaceId - Optional, can be "all" for all workspaces
    */
   @Get()
   async getForDateRange(
@@ -67,7 +81,7 @@ export class WeeklyGoalController {
       ? new Date(query.endDate)
       : new Date(); // Default: now
 
-    return this.weeklyGoalService.getForDateRange(userId, startDate, endDate);
+    return this.weeklyGoalService.getForDateRange(userId, query.workspaceId, startDate, endDate);
   }
 
   /**

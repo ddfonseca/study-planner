@@ -39,11 +39,12 @@ export class WeeklyGoalService {
   }
 
   /**
-   * Get or create weekly goal for a specific week
+   * Get or create weekly goal for a specific week and workspace
    * If not exists, creates with user's default config values
    */
   async getOrCreateForWeek(
     userId: string,
+    workspaceId: string,
     weekStart: Date,
   ): Promise<WeeklyGoal> {
     // Normalize to UTC start of day - use UTC methods to avoid timezone issues
@@ -54,8 +55,9 @@ export class WeeklyGoalService {
     // Try to find existing
     const existing = await this.prisma.weeklyGoal.findUnique({
       where: {
-        userId_weekStart: {
+        userId_workspaceId_weekStart: {
           userId,
+          workspaceId,
           weekStart: normalizedWeekStart,
         },
       },
@@ -72,6 +74,7 @@ export class WeeklyGoalService {
     return this.prisma.weeklyGoal.create({
       data: {
         userId,
+        workspaceId,
         weekStart: normalizedWeekStart,
         targetHours: userConfig.targetHours,
         isCustom: false,
@@ -80,11 +83,12 @@ export class WeeklyGoalService {
   }
 
   /**
-   * Get weekly goal for a specific date
+   * Get weekly goal for a specific date and workspace
    * Calculates which week the date belongs to
    */
   async getForDate(
     userId: string,
+    workspaceId: string,
     date: Date,
     weekStartDay: number,
   ): Promise<WeeklyGoal | null> {
@@ -92,8 +96,9 @@ export class WeeklyGoalService {
 
     return this.prisma.weeklyGoal.findUnique({
       where: {
-        userId_weekStart: {
+        userId_workspaceId_weekStart: {
           userId,
+          workspaceId,
           weekStart,
         },
       },
@@ -101,10 +106,11 @@ export class WeeklyGoalService {
   }
 
   /**
-   * Update weekly goal
+   * Update weekly goal for a specific workspace
    */
   async update(
     userId: string,
+    workspaceId: string,
     weekStart: Date,
     data: UpdateWeeklyGoalDto,
   ): Promise<WeeklyGoal> {
@@ -115,8 +121,9 @@ export class WeeklyGoalService {
 
     return this.prisma.weeklyGoal.update({
       where: {
-        userId_weekStart: {
+        userId_workspaceId_weekStart: {
           userId,
+          workspaceId,
           weekStart: normalizedWeekStart,
         },
       },
@@ -129,20 +136,29 @@ export class WeeklyGoalService {
 
   /**
    * Get all weekly goals within a date range
+   * @param workspaceId - Optional, can be "all" for all workspaces or undefined
    */
   async getForDateRange(
     userId: string,
+    workspaceId: string | undefined,
     startDate: Date,
     endDate: Date,
   ): Promise<WeeklyGoal[]> {
-    return this.prisma.weeklyGoal.findMany({
-      where: {
-        userId,
-        weekStart: {
-          gte: startDate,
-          lte: endDate,
-        },
+    const where: any = {
+      userId,
+      weekStart: {
+        gte: startDate,
+        lte: endDate,
       },
+    };
+
+    // Filter by workspace if not "all"
+    if (workspaceId && workspaceId !== 'all') {
+      where.workspaceId = workspaceId;
+    }
+
+    return this.prisma.weeklyGoal.findMany({
+      where,
       orderBy: {
         weekStart: 'asc',
       },
@@ -150,10 +166,11 @@ export class WeeklyGoalService {
   }
 
   /**
-   * Find weekly goal by user and week start
+   * Find weekly goal by user, workspace and week start
    */
   async findByUserAndWeek(
     userId: string,
+    workspaceId: string,
     weekStart: Date,
   ): Promise<WeeklyGoal | null> {
     const normalizedWeekStart = new Date(weekStart);
@@ -161,8 +178,9 @@ export class WeeklyGoalService {
 
     return this.prisma.weeklyGoal.findUnique({
       where: {
-        userId_weekStart: {
+        userId_workspaceId_weekStart: {
           userId,
+          workspaceId,
           weekStart: normalizedWeekStart,
         },
       },

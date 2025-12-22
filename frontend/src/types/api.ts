@@ -12,10 +12,22 @@ export interface User {
   updatedAt?: string;
 }
 
+// Workspace entity
+export interface Workspace {
+  id: string;
+  userId: string;
+  name: string;
+  color: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Session entity from backend
 export interface Session {
   id: string;
   userId: string;
+  workspaceId: string;
   date: string; // ISO date string
   subject: string;
   minutes: number;
@@ -37,6 +49,7 @@ export interface UserConfig {
 export interface WeeklyGoal {
   id: string;
   userId: string;
+  workspaceId: string;
   weekStart: string; // ISO date string (YYYY-MM-DD)
   targetHours: number;
   isCustom: boolean;
@@ -64,6 +77,7 @@ export interface ApiError {
 
 // Create session DTO
 export interface CreateSessionDto {
+  workspaceId: string;
   date: string;
   subject: string;
   minutes: number;
@@ -86,4 +100,16 @@ export interface UpdateConfigDto {
 export interface ApiResponse<T> {
   data: T;
   message?: string;
+}
+
+// Create workspace DTO
+export interface CreateWorkspaceDto {
+  name: string;
+  color?: string;
+}
+
+// Update workspace DTO
+export interface UpdateWorkspaceDto {
+  name?: string;
+  color?: string;
 }

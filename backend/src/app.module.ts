@@ -10,6 +10,7 @@ import { auth } from './auth/auth.config';
 import { StudySessionsModule } from './study-sessions/study-sessions.module';
 import { UserConfigModule } from './config/config.module';
 import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
+import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
     StudySessionsModule,
     UserConfigModule,
     WeeklyGoalModule,
+    WorkspaceModule,
   ],
   providers: [
     {

@@ -9,6 +9,7 @@ export class ConfigService {
   /**
    * Busca a configuração do usuário
    * Cria uma configuração padrão se não existir
+   * Também garante que o usuário tenha um workspace default
    */
   async findByUserId(userId: string) {
     let config = await this.prisma.userConfig.findUnique({
@@ -26,7 +27,30 @@ export class ConfigService {
       });
     }
 
+    // Garantir que o usuário tenha um workspace default
+    await this.ensureDefaultWorkspace(userId);
+
     return config;
+  }
+
+  /**
+   * Garante que o usuário tenha um workspace default
+   */
+  private async ensureDefaultWorkspace(userId: string) {
+    const hasWorkspace = await this.prisma.workspace.findFirst({
+      where: { userId, isDefault: true },
+    });
+
+    if (!hasWorkspace) {
+      await this.prisma.workspace.create({
+        data: {
+          userId,
+          name: 'Geral',
+          color: '#6366f1',
+          isDefault: true,
+        },
+      });
+    }
   }
 
   /**

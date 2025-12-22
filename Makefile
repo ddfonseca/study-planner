@@ -37,4 +37,4 @@ deploy-front:
 deploy-back:
 	cd backend && fly deploy
 
-deploy-all: deploy-backend deploy-frontend
+deploy-all: deploy-back deploy-front

@@ -18,28 +18,35 @@ export class StudySessionsController {
   constructor(private studySessionsService: StudySessionsService) {}
 
   /**
-   * GET /api/study-sessions/subjects
-   * Lista todas as matérias distintas do usuário
+   * GET /api/study-sessions/subjects?workspaceId=xxx
+   * Lista todas as matérias distintas do workspace
+   * workspaceId pode ser "all" para listar de todos os workspaces
    */
   @Get('subjects')
-  async getDistinctSubjects(@Session() session: UserSession): Promise<string[]> {
+  async getDistinctSubjects(
+    @Session() session: UserSession,
+    @Query('workspaceId') workspaceId?: string,
+  ): Promise<string[]> {
     const userId = session.user.id;
-    return this.studySessionsService.getDistinctSubjects(userId);
+    return this.studySessionsService.getDistinctSubjects(userId, workspaceId);
   }
 
   /**
-   * GET /api/study-sessions?startDate=2024-01-01&endDate=2024-01-31
-   * Lista todas as sessões de estudo do usuário, com filtro opcional por data
+   * GET /api/study-sessions?workspaceId=xxx&startDate=2024-01-01&endDate=2024-01-31
+   * Lista todas as sessões de estudo do usuário, filtradas por workspace e opcionalmente por data
+   * workspaceId pode ser "all" para listar de todos os workspaces
    */
   @Get()
   async getStudySessions(
     @Session() session: UserSession,
+    @Query('workspaceId') workspaceId: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
     const userId = session.user.id;
     return this.studySessionsService.findByDateRange(
       userId,
+      workspaceId,
       startDate,
       endDate,
     );

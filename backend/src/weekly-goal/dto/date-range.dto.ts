@@ -1,6 +1,10 @@
-import { IsDateString, IsOptional } from 'class-validator';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class DateRangeDto {
+  @IsOptional()
+  @IsString()
+  workspaceId?: string;
+
   @IsOptional()
   @IsDateString()
   startDate?: string;

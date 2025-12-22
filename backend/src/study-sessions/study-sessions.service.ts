@@ -11,11 +11,21 @@ export class StudySessionsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Busca todas as matérias distintas de um usuário
+   * Busca todas as matérias distintas de um usuário ou workspace
+   * @param workspaceId - ID do workspace ou "all" para todos os workspaces do usuário
    */
-  async getDistinctSubjects(userId: string): Promise<string[]> {
+  async getDistinctSubjects(
+    userId: string,
+    workspaceId?: string,
+  ): Promise<string[]> {
+    const where: any = { userId };
+
+    if (workspaceId && workspaceId !== 'all') {
+      where.workspaceId = workspaceId;
+    }
+
     const subjects = await this.prisma.studySession.findMany({
-      where: { userId },
+      where,
       select: { subject: true },
       distinct: ['subject'],
       orderBy: { subject: 'asc' },
@@ -26,16 +36,23 @@ export class StudySessionsService {
 
   /**
    * Busca todas as sessões de estudo de um usuário
-   * Pode filtrar por intervalo de datas
+   * Pode filtrar por workspace e intervalo de datas
+   * @param workspaceId - ID do workspace ou "all" para todos os workspaces do usuário
    */
   async findByDateRange(
     userId: string,
+    workspaceId: string,
     startDate?: string,
     endDate?: string,
   ) {
     const where: any = {
       userId,
     };
+
+    // Filtrar por workspace se não for "all"
+    if (workspaceId && workspaceId !== 'all') {
+      where.workspaceId = workspaceId;
+    }
 
     if (startDate || endDate) {
       where.date = {};
@@ -59,9 +76,19 @@ export class StudySessionsService {
    * Cria uma nova sessão de estudo
    */
   async create(userId: string, createDto: CreateStudySessionDto) {
+    // Verificar se o workspace pertence ao usuário
+    const workspace = await this.prisma.workspace.findFirst({
+      where: { id: createDto.workspaceId, userId },
+    });
+
+    if (!workspace) {
+      throw new ForbiddenException('Invalid workspace');
+    }
+
     return this.prisma.studySession.create({
       data: {
         userId,
+        workspaceId: createDto.workspaceId,
         date: new Date(createDto.date),
         subject: createDto.subject,
         minutes: createDto.minutes,

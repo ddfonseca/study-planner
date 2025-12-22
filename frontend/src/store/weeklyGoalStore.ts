@@ -1,13 +1,18 @@
 /**
  * Weekly Goal Store using Zustand
- * Caches weekly goals by weekStart date
+ * Caches weekly goals by workspaceId and weekStart date
  */
 import { create } from 'zustand';
 import type { WeeklyGoal, UpdateWeeklyGoalDto } from '@/types/api';
 import { weeklyGoalsApi } from '@/lib/api';
 
+// Cache key format: workspaceId:weekStart
+function getCacheKey(workspaceId: string, weekStart: string): string {
+  return `${workspaceId}:${weekStart}`;
+}
+
 interface WeeklyGoalState {
-  // Map of weekStart (YYYY-MM-DD) to WeeklyGoal
+  // Map of workspaceId:weekStart to WeeklyGoal
   goals: Record<string, WeeklyGoal>;
   isLoading: boolean;
   error: string | null;
@@ -17,27 +22,26 @@ interface WeeklyGoalState {
 
 interface WeeklyGoalActions {
   /**
-   * Get or create weekly goal for a specific week
+   * Get or create weekly goal for a specific week and workspace
    * Fetches from cache if available, otherwise from API
    */
-  getGoalForWeek: (weekStart: string) => Promise<WeeklyGoal>;
+  getGoalForWeek: (workspaceId: string, weekStart: string) => Promise<WeeklyGoal>;
 
   /**
-   * Update weekly goal for a specific week
-   * Throws if week is in the past
+   * Update weekly goal for a specific week and workspace
    */
-  updateGoal: (weekStart: string, data: UpdateWeeklyGoalDto) => Promise<WeeklyGoal>;
+  updateGoal: (workspaceId: string, weekStart: string, data: UpdateWeeklyGoalDto) => Promise<WeeklyGoal>;
 
   /**
    * Fetch goals for a date range and cache them
    */
-  fetchGoalsForRange: (startDate: string, endDate: string) => Promise<void>;
+  fetchGoalsForRange: (startDate: string, endDate: string, workspaceId?: string) => Promise<void>;
 
   /**
    * Get goal from cache (sync)
    * Returns undefined if not cached
    */
-  getCachedGoal: (weekStart: string) => WeeklyGoal | undefined;
+  getCachedGoal: (workspaceId: string, weekStart: string) => WeeklyGoal | undefined;
 
   /**
    * Clear all cached goals
@@ -56,18 +60,19 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
   error: null,
   _pendingFetches: {},
 
-  getGoalForWeek: async (weekStart: string) => {
-    const cached = get().goals[weekStart];
+  getGoalForWeek: async (workspaceId: string, weekStart: string) => {
+    const cacheKey = getCacheKey(workspaceId, weekStart);
+    const cached = get().goals[cacheKey];
     if (cached) {
       return cached;
     }
 
     try {
       set({ isLoading: true, error: null });
-      const goal = await weeklyGoalsApi.getForWeek(weekStart);
+      const goal = await weeklyGoalsApi.getForWeek(workspaceId, weekStart);
 
       set((state) => ({
-        goals: { ...state.goals, [weekStart]: goal },
+        goals: { ...state.goals, [cacheKey]: goal },
         isLoading: false,
       }));
 
@@ -81,13 +86,14 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
     }
   },
 
-  updateGoal: async (weekStart: string, data: UpdateWeeklyGoalDto) => {
+  updateGoal: async (workspaceId: string, weekStart: string, data: UpdateWeeklyGoalDto) => {
+    const cacheKey = getCacheKey(workspaceId, weekStart);
     try {
       set({ isLoading: true, error: null });
-      const updatedGoal = await weeklyGoalsApi.update(weekStart, data);
+      const updatedGoal = await weeklyGoalsApi.update(workspaceId, weekStart, data);
 
       set((state) => ({
-        goals: { ...state.goals, [weekStart]: updatedGoal },
+        goals: { ...state.goals, [cacheKey]: updatedGoal },
         isLoading: false,
       }));
 
@@ -101,8 +107,8 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
     }
   },
 
-  fetchGoalsForRange: async (startDate: string, endDate: string) => {
-    const fetchKey = `${startDate}-${endDate}`;
+  fetchGoalsForRange: async (startDate: string, endDate: string, workspaceId?: string) => {
+    const fetchKey = `${workspaceId || 'all'}:${startDate}-${endDate}`;
 
     // Return existing promise if fetch is already in progress
     const pending = get()._pendingFetches[fetchKey];
@@ -113,12 +119,13 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
     const fetchPromise = (async () => {
       try {
         set({ isLoading: true, error: null });
-        const goals = await weeklyGoalsApi.getForDateRange(startDate, endDate);
+        const goals = await weeklyGoalsApi.getForDateRange(startDate, endDate, workspaceId);
 
         const goalsMap = goals.reduce((acc, goal) => {
           // weekStart from API is ISO string, extract date part
           const weekStartKey = goal.weekStart.split('T')[0];
-          acc[weekStartKey] = goal;
+          const cacheKey = getCacheKey(goal.workspaceId, weekStartKey);
+          acc[cacheKey] = goal;
           return acc;
         }, {} as Record<string, WeeklyGoal>);
 
@@ -150,8 +157,9 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
     return fetchPromise;
   },
 
-  getCachedGoal: (weekStart: string) => {
-    return get().goals[weekStart];
+  getCachedGoal: (workspaceId: string, weekStart: string) => {
+    const cacheKey = getCacheKey(workspaceId, weekStart);
+    return get().goals[cacheKey];
   },
 
   clearCache: () => {

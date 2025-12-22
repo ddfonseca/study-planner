@@ -7,13 +7,28 @@ import type { Session, CreateSessionDto, UpdateSessionDto } from '@/types/api';
 export const sessionsApi = {
   /**
    * Get all study sessions with optional date range filter
+   * @param workspaceId - Workspace ID or "all" for all workspaces
    */
-  async getAll(startDate?: string, endDate?: string): Promise<Session[]> {
+  async getAll(
+    workspaceId: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<Session[]> {
     const params = new URLSearchParams();
+    params.append('workspaceId', workspaceId);
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
-    const query = params.toString();
-    return apiClient.get<Session[]>(`/api/study-sessions${query ? '?' + query : ''}`);
+    return apiClient.get<Session[]>(`/api/study-sessions?${params.toString()}`);
+  },
+
+  /**
+   * Get distinct subjects for a workspace
+   * @param workspaceId - Workspace ID or "all" for all workspaces
+   */
+  async getSubjects(workspaceId: string): Promise<string[]> {
+    const params = new URLSearchParams();
+    params.append('workspaceId', workspaceId);
+    return apiClient.get<string[]>(`/api/study-sessions/subjects?${params.toString()}`);
   },
 
   /**

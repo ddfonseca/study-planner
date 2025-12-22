@@ -9,6 +9,7 @@ import {
   isGoalAchieved,
   calculateProgress,
 } from '@/store';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { WeeklyGoal, UpdateWeeklyGoalDto } from '@/types/api';
 import type { Session } from '@/types/api';
 
@@ -32,16 +33,24 @@ interface WeekStatus {
 export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
   const { weekStartDay = 1 } = options;
   const store = useWeeklyGoalStore();
+  const { currentWorkspaceId } = useWorkspaceStore();
+
+  // Whether goals can be edited (not in "all" mode)
+  const canModifyGoals = currentWorkspaceId !== null;
 
   /**
    * Get goal for a specific week
+   * Returns null if in "all" mode (consolidated view)
    */
   const getGoalForWeek = useCallback(
-    async (date: Date): Promise<WeeklyGoal> => {
+    async (date: Date): Promise<WeeklyGoal | null> => {
+      if (!currentWorkspaceId) {
+        return null; // Goals don't make sense in consolidated view
+      }
       const weekStart = calculateWeekStart(date, weekStartDay);
-      return store.getGoalForWeek(weekStart);
+      return store.getGoalForWeek(currentWorkspaceId, weekStart);
     },
-    [weekStartDay, store],
+    [weekStartDay, store, currentWorkspaceId],
   );
 
   /**
@@ -49,10 +58,13 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
    */
   const getCachedGoalForWeek = useCallback(
     (date: Date): WeeklyGoal | undefined => {
+      if (!currentWorkspaceId) {
+        return undefined;
+      }
       const weekStart = calculateWeekStart(date, weekStartDay);
-      return store.getCachedGoal(weekStart);
+      return store.getCachedGoal(currentWorkspaceId, weekStart);
     },
-    [weekStartDay, store],
+    [weekStartDay, store, currentWorkspaceId],
   );
 
   /**
@@ -60,10 +72,13 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
    */
   const updateGoal = useCallback(
     async (date: Date, data: UpdateWeeklyGoalDto): Promise<WeeklyGoal> => {
+      if (!currentWorkspaceId) {
+        throw new Error('Selecione um workspace para editar a meta');
+      }
       const weekStart = calculateWeekStart(date, weekStartDay);
-      return store.updateGoal(weekStart, data);
+      return store.updateGoal(currentWorkspaceId, weekStart, data);
     },
-    [weekStartDay, store],
+    [weekStartDay, store, currentWorkspaceId],
   );
 
   /**
@@ -95,7 +110,20 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
       });
 
       const totalMinutes = weekSessions.reduce((acc, s) => acc + s.minutes, 0);
-      const goal = store.getCachedGoal(weekStart);
+
+      // In "all" mode, we don't have goals
+      if (!currentWorkspaceId) {
+        return {
+          goal: null,
+          totalMinutes,
+          totalHours: totalMinutes / 60,
+          achieved: false,
+          progress: 0,
+          isLoading: store.isLoading,
+        };
+      }
+
+      const goal = store.getCachedGoal(currentWorkspaceId, weekStart);
 
       if (!goal) {
         return {
@@ -117,7 +145,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
         isLoading: store.isLoading,
       };
     },
-    [weekStartDay, store],
+    [weekStartDay, store, currentWorkspaceId],
   );
 
   /**
@@ -127,9 +155,9 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
     async (startDate: Date, endDate: Date): Promise<void> => {
       const start = calculateWeekStart(startDate, weekStartDay);
       const end = calculateWeekStart(endDate, weekStartDay);
-      await store.fetchGoalsForRange(start, end);
+      await store.fetchGoalsForRange(start, end, currentWorkspaceId || undefined);
     },
-    [weekStartDay, store],
+    [weekStartDay, store, currentWorkspaceId],
   );
 
   return {
@@ -137,6 +165,8 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
     goals: store.goals,
     isLoading: store.isLoading,
     error: store.error,
+    currentWorkspaceId,
+    canModifyGoals,
 
     // Actions
     getGoalForWeek,

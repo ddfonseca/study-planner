@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useSessions } from '@/hooks/useSessions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart3 } from 'lucide-react';
 
@@ -16,7 +17,8 @@ import {
 } from '@/components/dashboard';
 
 export function DashboardPage() {
-  const { sessions, fetchSessions, isLoading } = useSessionStore();
+  const { sessions, isLoading } = useSessionStore();
+  const { fetchSessions } = useSessions();
   const {
     daysBack,
     stats,

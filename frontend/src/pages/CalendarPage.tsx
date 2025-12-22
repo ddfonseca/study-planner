@@ -22,9 +22,17 @@ import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
 
 export function CalendarPage() {
-  const { fetchSessions, isLoading: sessionsLoading } = useSessionStore();
+  const { isLoading: sessionsLoading } = useSessionStore();
   const { fetchConfig, isLoading: configLoading } = useConfigStore();
-  const { handleAddSession, handleUpdateSession, handleDeleteSession, getSessionsForDate, getUniqueSubjects } = useSessions();
+  const {
+    handleAddSession,
+    handleUpdateSession,
+    handleDeleteSession,
+    getSessionsForDate,
+    getUniqueSubjects,
+    fetchSessions,
+    canModify,
+  } = useSessions();
   const { toast } = useToast();
 
   const {
@@ -188,6 +196,7 @@ export function CalendarPage() {
           <QuickAddSession
             subjects={getUniqueSubjects()}
             onAddSession={handleQuickAddSession}
+            canModify={canModify}
           />
           <WeeklyProgress />
           <StudyTimer subjects={getUniqueSubjects()} />
@@ -204,6 +213,7 @@ export function CalendarPage() {
         onAddSession={handleAddSessionSubmit}
         onUpdateSession={handleUpdateSessionSubmit}
         onDeleteSession={handleDeleteSessionSubmit}
+        canModify={canModify}
       />
     </div>
   );

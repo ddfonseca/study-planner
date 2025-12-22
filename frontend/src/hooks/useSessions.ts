@@ -3,6 +3,7 @@
  */
 import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { CreateSessionDto, UpdateSessionDto } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
 
@@ -12,13 +13,29 @@ export function useSessions() {
     selectedDate,
     isLoading,
     error,
-    fetchSessions,
+    fetchSessions: storeFetchSessions,
     addSession,
     updateSession,
     deleteSession,
     selectDate,
     getSessionsForDate,
   } = useSessionStore();
+
+  const { currentWorkspaceId } = useWorkspaceStore();
+
+  // Effective workspace ID ("all" for consolidated view)
+  const effectiveWorkspaceId = currentWorkspaceId || 'all';
+
+  // Whether user can add/edit sessions (not in "all" mode)
+  const canModify = currentWorkspaceId !== null;
+
+  // Fetch sessions with current workspace
+  const fetchSessions = useCallback(
+    async (startDate?: string, endDate?: string) => {
+      return storeFetchSessions(effectiveWorkspaceId, startDate, endDate);
+    },
+    [storeFetchSessions, effectiveWorkspaceId]
+  );
 
   // Get intensity for a day based on study time (heatmap style)
   // 0 = no study, 1 = <1h, 2 = 1-2h, 3 = 2-3h, 4 = 3h+
@@ -41,14 +58,18 @@ export function useSessions() {
   // Add a new study session
   const handleAddSession = useCallback(
     async (date: string, subject: string, minutes: number) => {
+      if (!currentWorkspaceId) {
+        throw new Error('Selecione um workspace para adicionar sessão');
+      }
       const sessionData: CreateSessionDto = {
+        workspaceId: currentWorkspaceId,
         date,
         subject,
         minutes,
       };
       return addSession(sessionData);
     },
-    [addSession]
+    [addSession, currentWorkspaceId]
   );
 
   // Update a study session
@@ -103,6 +124,8 @@ export function useSessions() {
     selectedDate,
     isLoading,
     error,
+    currentWorkspaceId,
+    canModify,
     fetchSessions,
     selectDate,
     getSessionsForDate,

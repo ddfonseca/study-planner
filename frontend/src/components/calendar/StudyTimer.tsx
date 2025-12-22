@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
-import { useSessionStore } from '@/store/sessionStore';
+import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Square, Clock } from 'lucide-react';
 
@@ -23,7 +23,7 @@ interface StudyTimerProps {
 }
 
 export function StudyTimer({ subjects }: StudyTimerProps) {
-  const { addSession } = useSessionStore();
+  const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
 
   const [isRunning, setIsRunning] = useState(false);
@@ -113,19 +113,15 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
     if (minutes > 0) {
       try {
         const today = new Date().toISOString().split('T')[0];
-        await addSession({
-          date: today,
-          subject: subject.trim(),
-          minutes,
-        });
+        await handleAddSession(today, subject.trim(), minutes);
         toast({
           title: 'Sessão salva!',
           description: `${minutes} minutos de ${subject} registrados`,
         });
-      } catch {
+      } catch (err) {
         toast({
           title: 'Erro',
-          description: 'Falha ao salvar sessão',
+          description: err instanceof Error ? err.message : 'Falha ao salvar sessão',
           variant: 'destructive',
         });
       }
@@ -170,11 +166,15 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
           placeholder="Selecione a matéria..."
           searchPlaceholder="Buscar..."
           emptyMessage="Nenhuma matéria"
-          disabled={isRunning}
+          disabled={isRunning || !canModify}
         />
 
         {/* Start/Stop button */}
-        {!isRunning ? (
+        {!canModify ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+            Selecione um workspace para usar o timer.
+          </p>
+        ) : !isRunning ? (
           <Button onClick={handleStart} className="w-full" size="lg">
             <Play className="h-4 w-4 mr-2" />
             Iniciar

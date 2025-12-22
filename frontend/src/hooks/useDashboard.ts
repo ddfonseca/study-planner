@@ -3,11 +3,17 @@
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { filterSessionsByDateRange, calculateStats } from '@/lib/utils/transform';
 import { getDateRangeFromDays, formatDateKey } from '@/lib/utils/date';
 
 export function useDashboard() {
   const { sessions } = useSessionStore();
+  const { currentWorkspaceId, getCurrentWorkspace } = useWorkspaceStore();
+
+  // Whether viewing consolidated data
+  const isConsolidatedView = currentWorkspaceId === null;
+  const currentWorkspace = getCurrentWorkspace();
   const [daysBack, setDaysBack] = useState(30);
 
   // Calculate date range based on days back
@@ -104,6 +110,9 @@ export function useDashboard() {
     subjectChartData,
     dailyChartData,
     setDateRangePreset,
+    currentWorkspaceId,
+    currentWorkspace,
+    isConsolidatedView,
   };
 }
 

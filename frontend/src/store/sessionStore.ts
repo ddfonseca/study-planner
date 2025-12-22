@@ -17,7 +17,7 @@ interface SessionState {
 }
 
 interface SessionActions {
-  fetchSessions: (startDate?: string, endDate?: string) => Promise<void>;
+  fetchSessions: (workspaceId: string, startDate?: string, endDate?: string) => Promise<void>;
   addSession: (session: CreateSessionDto) => Promise<Session>;
   updateSession: (id: string, session: UpdateSessionDto) => Promise<Session>;
   deleteSession: (id: string) => Promise<void>;
@@ -40,10 +40,10 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
   error: null,
 
   // Actions
-  fetchSessions: async (startDate, endDate) => {
+  fetchSessions: async (workspaceId, startDate, endDate) => {
     try {
       set({ isLoading: true, error: null });
-      const rawSessions = await sessionsApi.getAll(startDate, endDate);
+      const rawSessions = await sessionsApi.getAll(workspaceId, startDate, endDate);
       const sessions = transformSessionsToAppFormat(rawSessions);
       set({
         rawSessions,

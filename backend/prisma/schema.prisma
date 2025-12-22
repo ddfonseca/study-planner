@@ -24,6 +24,7 @@ model User {
   studySessions StudySession[]
   userConfig    UserConfig?
   weeklyGoals   WeeklyGoal[]
+  workspaces    Workspace[]
   sharedPlans   SharedPlan[]   @relation("SharedWith")
   ownedShares   SharedPlan[]   @relation("Owner")
   sessions      Session[]
@@ -97,37 +98,62 @@ model UserConfig {
   @@map("user_configs")
 }
 
-// Weekly goal - stores goals for specific weeks
+// Workspace - isolates study sessions and goals per context (Work, Personal, etc.)
+model Workspace {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String   @db.VarChar(50)
+  color     String?  @default("#6366f1") @db.VarChar(7)
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studySessions StudySession[]
+  weeklyGoals   WeeklyGoal[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("workspaces")
+}
+
+// Weekly goal - stores goals for specific weeks per workspace
 model WeeklyGoal {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
+  workspaceId String   @map("workspace_id")
   weekStart   DateTime @map("week_start") @db.Date // Monday of the week
   targetHours Float    @map("target_hours")
   isCustom    Boolean  @default(false) @map("is_custom") // true if user modified
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, weekStart])
+  @@unique([userId, workspaceId, weekStart])
   @@index([userId])
+  @@index([workspaceId])
   @@map("weekly_goals")
 }
 
 // Study session (replaces localStorage materias array)
 model StudySession {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  date      DateTime @db.Date
-  subject   String
-  minutes   Int
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  workspaceId String   @map("workspace_id")
+  date        DateTime @db.Date
+  subject     String
+  minutes     Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
   @@index([userId])
+  @@index([workspaceId])
   @@map("study_sessions")
 }
 

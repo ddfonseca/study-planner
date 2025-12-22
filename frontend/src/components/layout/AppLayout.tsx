@@ -6,6 +6,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Calendar, BarChart3, Settings, LogOut, BookOpen, Moon, Sun } from 'lucide-react';
+import { WorkspaceSelector } from '@/components/workspace';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
@@ -53,10 +54,13 @@ export function AppLayout() {
             {/* Logo */}
             <div className="flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-lg font-semibold text-foreground">
+              <span className="text-lg font-semibold text-foreground hidden sm:inline">
                 Study Planner
               </span>
             </div>
+
+            {/* Workspace Selector */}
+            <WorkspaceSelector />
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-1">

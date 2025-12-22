@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useConfigStore } from '@/store/configStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,17 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Settings, User, Clock, Calendar, Save, Loader2, Palette } from 'lucide-react';
+import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers } from 'lucide-react';
 import type { HeatmapStyle } from '@/store/configStore';
 import { useToast } from '@/hooks/use-toast';
+import { WorkspaceManager } from '@/components/workspace';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
   const { targetHours, weekStartDay, heatmapStyle, updateConfig, setHeatmapStyle, isLoading } = useConfigStore();
+  const { workspaces } = useWorkspaceStore();
   const { toast } = useToast();
 
   const [localTargetHours, setLocalTargetHours] = useState(String(targetHours));
   const [localWeekStartDay, setLocalWeekStartDay] = useState(String(weekStartDay));
+  const [isWorkspaceManagerOpen, setIsWorkspaceManagerOpen] = useState(false);
 
   const handleHeatmapStyleChange = (value: string) => {
     setHeatmapStyle(value as HeatmapStyle);
@@ -97,6 +101,45 @@ export function SettingsPage() {
           ) : (
             <p className="text-muted-foreground">Carregando...</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Workspaces Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Layers className="h-5 w-5" />
+            Workspaces
+          </CardTitle>
+          <CardDescription>
+            Organize suas sessões de estudo em diferentes contextos
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {workspaces.map((workspace) => (
+              <div
+                key={workspace.id}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm"
+              >
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: workspace.color || '#6366f1' }}
+                />
+                {workspace.name}
+                {workspace.isDefault && (
+                  <span className="text-xs text-muted-foreground">(Padrão)</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setIsWorkspaceManagerOpen(true)}
+          >
+            <Layers className="h-4 w-4 mr-2" />
+            Gerenciar Workspaces
+          </Button>
         </CardContent>
       </Card>
 
@@ -198,6 +241,12 @@ export function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Workspace Manager Modal */}
+      <WorkspaceManager
+        isOpen={isWorkspaceManagerOpen}
+        onClose={() => setIsWorkspaceManagerOpen(false)}
+      />
     </div>
   );
 }

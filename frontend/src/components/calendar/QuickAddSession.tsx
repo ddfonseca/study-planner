@@ -12,12 +12,36 @@ import { Plus, Loader2 } from 'lucide-react';
 interface QuickAddSessionProps {
   subjects: string[];
   onAddSession: (subject: string, minutes: number) => Promise<void>;
+  canModify?: boolean;
 }
 
-export function QuickAddSession({ subjects, onAddSession }: QuickAddSessionProps) {
+export function QuickAddSession({
+  subjects,
+  onAddSession,
+  canModify = true,
+}: QuickAddSessionProps) {
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Show message when in "all" mode
+  if (!canModify) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Adicionar Estudo de Hoje
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Selecione um workspace para adicionar sessões.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

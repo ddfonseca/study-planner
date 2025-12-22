@@ -29,13 +29,14 @@ export function WeeklyGoalEditor({
   weekStart,
   currentTotal,
 }: WeeklyGoalEditorProps) {
-  const { getGoalForWeek, updateGoal, canEditWeek, isLoading } = useWeeklyGoals();
+  const { getGoalForWeek, updateGoal, canEditWeek, canModifyGoals, isLoading } = useWeeklyGoals();
   const [goal, setGoal] = useState<WeeklyGoal | null>(null);
   const [targetHours, setTargetHours] = useState<string>('30');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const canEdit = canEditWeek(weekStart);
+  // Can edit if not in "all" mode and week is current or future
+  const canEdit = canModifyGoals && canEditWeek(weekStart);
 
   // Format date range for display
   const weekEnd = new Date(weekStart);
@@ -53,8 +54,10 @@ export function WeeklyGoalEditor({
     try {
       setError(null);
       const loadedGoal = await getGoalForWeek(weekStart);
-      setGoal(loadedGoal);
-      setTargetHours(String(loadedGoal.targetHours));
+      if (loadedGoal) {
+        setGoal(loadedGoal);
+        setTargetHours(String(loadedGoal.targetHours));
+      }
     } catch {
       setError('Erro ao carregar meta');
     }
@@ -147,6 +150,12 @@ export function WeeklyGoalEditor({
             />
           </div>
 
+          {!canModifyGoals && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              Selecione um workspace para editar metas.
+            </p>
+          )}
+
           {goal?.isCustom && (
             <p className="text-xs text-muted-foreground">
               Esta meta foi personalizada para esta semana.
@@ -162,7 +171,7 @@ export function WeeklyGoalEditor({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={isLoading || isSaving}>
+          <Button onClick={handleSave} disabled={!canEdit || isLoading || isSaving}>
             {isSaving ? 'Salvando...' : 'Salvar'}
           </Button>
         </ResponsiveDialogFooter>

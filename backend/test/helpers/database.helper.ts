@@ -37,3 +37,40 @@ export async function createUserConfig(
   });
   return config;
 }
+
+/**
+ * Create a test workspace
+ */
+export async function createTestWorkspace(
+  userId: string,
+  data?: { name?: string; color?: string; isDefault?: boolean },
+): Promise<{ id: string; userId: string; name: string; color: string | null; isDefault: boolean }> {
+  const prisma = jestPrisma.client;
+  const workspace = await prisma.workspace.create({
+    data: {
+      userId,
+      name: data?.name || `Workspace-${Date.now()}`,
+      color: data?.color || '#6366f1',
+      isDefault: data?.isDefault ?? false,
+    },
+  });
+  return workspace;
+}
+
+/**
+ * Create a test user with default workspace
+ */
+export async function createTestUserWithWorkspace(data?: {
+  email?: string;
+  name?: string;
+}): Promise<{
+  user: { id: string; email: string; name: string };
+  workspace: { id: string; userId: string; name: string; color: string | null; isDefault: boolean };
+}> {
+  const user = await createTestUser(data);
+  const workspace = await createTestWorkspace(user.id, {
+    name: 'Geral',
+    isDefault: true,
+  });
+  return { user, workspace };
+}

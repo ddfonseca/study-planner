@@ -27,6 +27,7 @@ interface SessionModalProps {
   onAddSession: (subject: string, minutes: number) => Promise<void>;
   onUpdateSession: (id: string, subject: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
+  canModify?: boolean;
 }
 
 export function SessionModal({
@@ -38,6 +39,7 @@ export function SessionModal({
   onAddSession,
   onUpdateSession,
   onDeleteSession,
+  canModify = true,
 }: SessionModalProps) {
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -111,79 +113,90 @@ export function SessionModal({
         </ResponsiveDialogHeader>
 
         {/* Add session form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="subject">Matéria</Label>
-              <Combobox
-                value={subject}
-                onValueChange={setSubject}
-                options={subjects}
-                placeholder="Selecione ou digite..."
-                searchPlaceholder="Buscar matéria..."
-                emptyMessage="Nenhuma matéria encontrada"
-                disabled={isSubmitting}
-              />
+        {canModify ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="subject">Matéria</Label>
+                <Combobox
+                  value={subject}
+                  onValueChange={setSubject}
+                  options={subjects}
+                  placeholder="Selecione ou digite..."
+                  searchPlaceholder="Buscar matéria..."
+                  emptyMessage="Nenhuma matéria encontrada"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minutes">Minutos</Label>
+                <Input
+                  id="minutes"
+                  type="number"
+                  placeholder="Ex: 60"
+                  min="1"
+                  max="1440"
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="minutes">Minutos</Label>
-              <Input
-                id="minutes"
-                type="number"
-                placeholder="Ex: 60"
-                min="1"
-                max="1440"
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {isEditing && (
+            <div className="flex gap-2">
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </Button>
+              )}
               <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancelEdit}
-                disabled={isSubmitting}
+                type="submit"
+                disabled={!subject.trim() || !minutes || isSubmitting}
                 className="flex-1"
               >
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : isEditing ? (
+                  <Pencil className="h-4 w-4 mr-2" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                {isEditing ? 'Atualizar' : 'Adicionar'}
               </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={!subject.trim() || !minutes || isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : isEditing ? (
-                <Pencil className="h-4 w-4 mr-2" />
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              {isEditing ? 'Atualizar' : 'Adicionar'}
-            </Button>
-          </div>
-        </form>
+            </div>
+          </form>
+        ) : (
+          <p className="text-sm text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+            Selecione um workspace para adicionar ou editar sessões.
+          </p>
+        )}
 
         {/* Sessions list */}
         {dayData.materias.length > 0 && (
           <div className="mt-4 space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">
-              Sessões do dia: <span className="text-xs">(clique para editar)</span>
+              Sessões do dia:{' '}
+              {canModify && <span className="text-xs">(clique para editar)</span>}
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {dayData.materias.map((materia) => (
                 <div
                   key={materia.id}
-                  onClick={() => handleStartEdit(materia)}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                  onClick={() => canModify && handleStartEdit(materia)}
+                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                    canModify ? 'cursor-pointer' : 'cursor-default'
+                  } ${
                     editingSession?.id === materia.id
                       ? 'bg-primary/20 ring-2 ring-primary'
-                      : 'bg-muted hover:bg-muted/80'
+                      : canModify
+                        ? 'bg-muted hover:bg-muted/80'
+                        : 'bg-muted'
                   }`}
                 >
                   <div className="flex-1">
@@ -192,18 +205,20 @@ export function SessionModal({
                       {formatTime(materia.minutos)}
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(materia.id);
-                    }}
-                    disabled={isSubmitting}
-                    className="text-danger hover:text-danger hover:bg-danger/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {canModify && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(materia.id);
+                      }}
+                      disabled={isSubmitting}
+                      className="text-danger hover:text-danger hover:bg-danger/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

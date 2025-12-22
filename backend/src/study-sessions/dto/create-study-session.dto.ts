@@ -9,6 +9,10 @@ import {
 } from 'class-validator';
 
 export class CreateStudySessionDto {
+  @IsString()
+  @IsNotEmpty()
+  workspaceId: string;
+
   @IsDateString()
   @IsNotEmpty()
   date: string;
