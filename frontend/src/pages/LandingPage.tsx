@@ -7,7 +7,6 @@ import {
   Target,
   BarChart3,
   Moon,
-  Check,
   ChevronDown,
   BookOpen,
 } from 'lucide-react';
@@ -185,39 +184,39 @@ export function LandingPage() {
     },
   ];
 
-  const plans = [
-    {
-      name: 'Gratuito',
-      price: 'R$ 0',
-      period: 'para sempre',
-      description: 'Perfeito para começar a organizar seus estudos.',
-      features: [
-        'Calendário visual com heatmap',
-        'Até 6 disciplinas',
-        'Metas semanais básicas',
-        'Modo escuro',
-        'Sincronização na nuvem',
-      ],
-      cta: 'Começar grátis',
-      highlighted: false,
-    },
-    // {
-    //   name: 'Pro',
-    //   price: 'R$ 5,90',
-    //   period: '/mês',
-    //   description: 'Para quem leva os estudos a sério.',
-    //   features: [
-    //     'Tudo do plano Gratuito',
-    //     'Disciplinas ilimitadas',
-    //     'Histórico completo de sessões',
-    //     'Exportar relatórios em PDF',
-    //     'Lembretes personalizados',
-    //     'Suporte prioritário',
-    //   ],
-    //   cta: 'Assinar Pro',
-    //   highlighted: true,
-    // },
-  ];
+  // const plans = [
+  //   {
+  //     name: 'Gratuito',
+  //     price: 'R$ 0',
+  //     period: 'para sempre',
+  //     description: 'Perfeito para começar a organizar seus estudos.',
+  //     features: [
+  //       'Calendário visual com heatmap',
+  //       'Até 6 disciplinas',
+  //       'Metas semanais básicas',
+  //       'Modo escuro',
+  //       'Sincronização na nuvem',
+  //     ],
+  //     cta: 'Começar grátis',
+  //     highlighted: false,
+  //   },
+  //   // {
+  //   //   name: 'Pro',
+  //   //   price: 'R$ 5,90',
+  //   //   period: '/mês',
+  //   //   description: 'Para quem leva os estudos a sério.',
+  //   //   features: [
+  //   //     'Tudo do plano Gratuito',
+  //   //     'Disciplinas ilimitadas',
+  //   //     'Histórico completo de sessões',
+  //   //     'Exportar relatórios em PDF',
+  //   //     'Lembretes personalizados',
+  //   //     'Suporte prioritário',
+  //   //   ],
+  //   //   cta: 'Assinar Pro',
+  //   //   highlighted: true,
+  //   // },
+  // ];
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
@@ -330,6 +329,7 @@ export function LandingPage() {
       </section>
 
       {/* Pricing Section */}
+      {/*}
       <section id="pricing" className="py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
@@ -387,7 +387,7 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
+      */}
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="max-w-5xl mx-auto px-4">
