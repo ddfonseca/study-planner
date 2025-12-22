@@ -9,6 +9,11 @@ import {
   Moon,
   ChevronDown,
   BookOpen,
+  Brain,
+  TrendingUp,
+  Focus,
+  Compass,
+  Repeat,
 } from 'lucide-react';
 
 // FAQ Item component
@@ -275,6 +280,104 @@ export function LandingPage() {
             Visualize seu progresso
           </h2>
           <CalendarPreview />
+        </div>
+      </section>
+
+      {/* Why Net Hours Section */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
+            Por que medir horas líquidas?
+          </h2>
+          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            Não é sobre estudar mais. É sobre estudar melhor.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Card 1 - Distribuição estratégica */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
+                  <Compass className="h-6 w-6 text-blue-500" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Distribua seu esforço</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Tem 300 horas até a prova? Visualize como alocar seu tempo nas matérias que mais pesam no resultado.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 2 - Foco real */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
+                  <Focus className="h-6 w-6 text-purple-500" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Meça seu foco real</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Num mundo de notificações e distrações, saber quanto tempo você realmente manteve a mente no estudo é um superpoder.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 3 - Consistência */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
+                  <Repeat className="h-6 w-6 text-green-500" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Consistência vence intensidade</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  1 hora por dia vale mais que 7 horas no domingo. Construa o hábito e os resultados virão.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 4 - Compare consigo mesmo */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-orange-500" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Compare com você mesmo</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Sua evolução semana a semana é o que importa. Não se compare com os outros, supere seu eu de ontem.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 5 - Ferramenta, não obsessão */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/60" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Ferramenta, não obsessão</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Horas líquidas são uma bússola, não um chicote. Use os dados para ajustar sua rota, não para se cobrar.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 6 - Sem culpa */}
+            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-400" />
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
+                  <Target className="h-6 w-6 text-rose-500" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Sem culpa nos dias ruins</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Todo mundo tem dias menos produtivos. O que importa é voltar no dia seguinte. Consistência, não perfeição.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 

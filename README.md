@@ -162,22 +162,6 @@ npm install
 npm run dev
 ```
 
-## 🐛 Troubleshooting
-
-### Erro: "BETTER_AUTH_SECRET must be at least 32 characters"
-✅ Já resolvido! A variável está configurada no `.env`
-
-### Erro: "redirect_uri_mismatch" no Google OAuth
-- Verifique se a URI no Google Console é exatamente: `http://localhost:3000/api/auth/callback/google`
-
-### Erro: "Cannot connect to database"
-- Certifique-se que o Docker Compose está rodando
-- Aguarde alguns segundos para o PostgreSQL inicializar
-
-### Frontend não carrega
-- Verifique se o Nginx está rodando: `docker-compose ps`
-- Acesse: http://localhost:8080
-
 ## 📊 Funcionalidades
 
 - ✅ **Autenticação Google OAuth** - Login seguro com conta Google

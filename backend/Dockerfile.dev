@@ -5,19 +5,24 @@ WORKDIR /app
 # Instalar dependências do sistema necessárias para Prisma
 RUN apk add --no-cache openssl libc6-compat
 
+# Change ownership to node user (uid 1000)
+RUN chown -R node:node /app
+
+# Switch to node user
+USER node
+
 # Copiar arquivos de dependências
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node prisma ./prisma/
 
 # Instalar dependências
 RUN npm install
 
-# Gerar Prisma Client (será regenerado quando necessário via volume)
+# Gerar Prisma Client
 RUN npx prisma generate || true
 
 # Expor porta
 EXPOSE 3000
 
-# Comando padrão (será sobrescrito pelo docker-compose)
+# Comando padrão
 CMD ["npm", "run", "start:dev"]
-

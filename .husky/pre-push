@@ -1,7 +1,0 @@
-#!/bin/sh
-
-echo "Running e2e tests..."
-
-make test || exit 1
-
-echo "All tests passed!"

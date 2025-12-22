@@ -2,12 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-RUN npm install
+# Change ownership to node user (uid 1000)
+RUN chown -R node:node /app
 
-# Copy source code
-COPY . .
+# Switch to node user
+USER node
+
+# Install dependencies
+COPY --chown=node:node package*.json ./
+RUN npm install
 
 # Expose Vite dev server port
 EXPOSE 5173

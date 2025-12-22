@@ -17,15 +17,12 @@ services:
   backend-test:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.test
     container_name: study-planner-backend-test
     environment:
       DATABASE_URL: postgresql://test:test@postgres-test:5432/study_planner_test?schema=public
       BETTER_AUTH_SECRET: test-secret-for-ci-minimum-32-chars
       NODE_ENV: test
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     depends_on:
       postgres-test:
         condition: service_healthy

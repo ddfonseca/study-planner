@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependências do sistema necessárias para Prisma
+RUN apk add --no-cache openssl libc6-compat
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Instalar dependências (incluindo devDependencies para testes)
+RUN npm install
+
+# Gerar Prisma Client
+RUN npx prisma generate
+
+# Copiar todo o código fonte
+COPY . .
+
+# Comando padrão para testes
+CMD ["npm", "run", "test:e2e"]
