@@ -41,7 +41,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
       const weekStart = calculateWeekStart(date, weekStartDay);
       return store.getGoalForWeek(weekStart);
     },
-    [weekStartDay, store.getGoalForWeek],
+    [weekStartDay, store],
   );
 
   /**
@@ -52,7 +52,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
       const weekStart = calculateWeekStart(date, weekStartDay);
       return store.getCachedGoal(weekStart);
     },
-    [weekStartDay, store.getCachedGoal],
+    [weekStartDay, store],
   );
 
   /**
@@ -63,7 +63,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
       const weekStart = calculateWeekStart(date, weekStartDay);
       return store.updateGoal(weekStart, data);
     },
-    [weekStartDay, store.updateGoal],
+    [weekStartDay, store],
   );
 
   /**
@@ -117,7 +117,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
         isLoading: store.isLoading,
       };
     },
-    [weekStartDay, store.getCachedGoal, store.isLoading],
+    [weekStartDay, store],
   );
 
   /**
@@ -129,7 +129,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
       const end = calculateWeekStart(endDate, weekStartDay);
       await store.fetchGoalsForRange(start, end);
     },
-    [weekStartDay, store.fetchGoalsForRange],
+    [weekStartDay, store],
   );
 
   return {

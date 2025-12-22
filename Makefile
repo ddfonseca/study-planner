@@ -1,4 +1,4 @@
-.PHONY: up down logs test test-db test-reset migrate deploy-frontend deploy-backend deploy-all
+.PHONY: up down logs test test-docker test-db test-reset migrate deploy-frontend deploy-backend deploy-all lint
 
 # Docker
 up:
@@ -31,15 +31,29 @@ test: test-db
 	docker-compose -f docker-compose.test.yml down --remove-orphans 2>/dev/null; \
 	exit $$EXIT_CODE
 
+# Testes via Docker (não precisa de node_modules local)
+test-docker: test-db
+	@sleep 1
+	docker-compose exec -T backend sh -c "DATABASE_URL='postgresql://test:test@host.docker.internal:5433/study_planner_test?schema=public' npx prisma db push"
+	@docker-compose exec -T backend sh -c "DATABASE_URL='postgresql://test:test@host.docker.internal:5433/study_planner_test?schema=public' npm run test:e2e"; \
+	EXIT_CODE=$$?; \
+	docker-compose -f docker-compose.test.yml down --remove-orphans 2>/dev/null; \
+	exit $$EXIT_CODE
+
+# Lint via Docker
+lint:
+	docker-compose exec -T frontend npm run lint
+	docker-compose exec -T backend npm run lint
+
 # Prisma
 migrate:
 	cd backend && npx prisma migrate dev
 
 # Deploy
-deploy-frontend:
+deploy-front:
 	netlify deploy --prod --filter frontend-new
 
-deploy-backend:
+deploy-back:
 	cd backend && fly deploy
 
 deploy-all: deploy-backend deploy-frontend

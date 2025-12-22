@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, LoggerService } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { toNodeHandler } from 'better-auth/node';
+import type { Express, Request, Response, NextFunction } from 'express';
 import * as express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -43,16 +44,16 @@ async function bootstrap() {
     }),
   );
 
-  const expressApp = app.getHttpAdapter().getInstance();
+  const expressApp = app.getHttpAdapter().getInstance() as Express;
   const authHandler = toNodeHandler(auth);
 
   // Health check endpoint (no auth required)
-  expressApp.get('/health', (_req: any, res: any) => {
+  expressApp.get('/health', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
   });
 
   // Handle Better Auth routes first (before body parser)
-  expressApp.use((req: any, res: any, next: any) => {
+  expressApp.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith('/api/auth')) {
       return authHandler(req, res);
     }
@@ -66,7 +67,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 
-  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+  const logger = app.get<LoggerService>(WINSTON_MODULE_NEST_PROVIDER);
   logger.log(`Backend running on http://localhost:${port}`, 'Bootstrap');
   logger.log(`API available at http://localhost:${port}/api`, 'Bootstrap');
 }

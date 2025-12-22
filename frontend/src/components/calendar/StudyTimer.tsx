@@ -30,15 +30,19 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
   const [seconds, setSeconds] = useState(0);
   const [subject, setSubject] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initializedRef = useRef(false);
 
-  // Load saved state from localStorage
+  // Load saved state from localStorage on mount
+  /* eslint-disable react-hooks/set-state-in-effect -- Initialization from localStorage on mount is intentional */
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const state: TimerState = JSON.parse(saved);
         if (state.isRunning && state.startTime) {
-          // Calculate elapsed time since start
           const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
           setSeconds(elapsed);
           setSubject(state.subject);
@@ -52,6 +56,7 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
       }
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Save state to localStorage
   useEffect(() => {

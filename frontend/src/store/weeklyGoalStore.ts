@@ -135,7 +135,8 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
       } finally {
         // Clean up pending fetch
         set((state) => {
-          const { [fetchKey]: _, ...rest } = state._pendingFetches;
+          const rest = { ...state._pendingFetches };
+          delete rest[fetchKey];
           return { _pendingFetches: rest };
         });
       }

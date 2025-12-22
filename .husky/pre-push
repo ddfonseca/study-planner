@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Running e2e tests via Docker..."
+
+# Check if backend container is running
+if ! docker ps --filter "name=study-planner-backend" --format "{{.Status}}" | grep -q "Up"; then
+  echo "Error: Docker containers not running. Start with: docker-compose up -d"
+  exit 1
+fi
+
+make test-docker || exit 1
+
+echo "All tests passed!"

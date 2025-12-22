@@ -23,9 +23,21 @@ import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
           format: winston.format.combine(
             winston.format.timestamp(),
             winston.format.colorize(),
-            winston.format.printf(({ timestamp, level, message, context }) => {
-              return `${timestamp} [${context || 'App'}] ${level}: ${message}`;
-            }),
+            winston.format.printf(
+              ({
+                timestamp,
+                level,
+                message,
+                context,
+              }: {
+                timestamp?: string;
+                level: string;
+                message: string;
+                context?: string;
+              }) => {
+                return `${timestamp ?? ''} [${context ?? 'App'}] ${level}: ${message}`;
+              },
+            ),
           ),
         }),
       ],

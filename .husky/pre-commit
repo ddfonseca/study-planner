@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo "Running lint and build checks via Docker..."
+
+# Check if containers are running
+if ! docker ps --filter "name=study-planner-backend" --format "{{.Status}}" | grep -q "Up"; then
+  echo "Error: Docker containers not running. Start with: docker-compose up -d"
+  exit 1
+fi
+
+# Frontend
+echo "Checking frontend..."
+docker-compose exec -T frontend npm run lint || exit 1
+docker-compose exec -T frontend npm run build || exit 1
+
+# Backend
+echo "Checking backend..."
+docker-compose exec -T backend npm run lint || exit 1
+docker-compose exec -T backend npm run build || exit 1
+
+echo "All checks passed!"

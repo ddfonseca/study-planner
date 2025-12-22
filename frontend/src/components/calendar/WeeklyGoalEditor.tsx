@@ -1,7 +1,7 @@
 /**
  * Weekly Goal Editor - Modal for editing weekly goals
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -38,7 +38,6 @@ export function WeeklyGoalEditor({
   const canEdit = canEditWeek(weekStart);
 
   // Format date range for display
-  const weekStartStr = weekStart.toISOString().split('T')[0];
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
   const weekEndStr = weekEnd.toLocaleDateString('pt-BR', {
@@ -50,13 +49,7 @@ export function WeeklyGoalEditor({
     month: 'short',
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      loadGoal();
-    }
-  }, [isOpen, weekStartStr]);
-
-  const loadGoal = async () => {
+  const loadGoal = useCallback(async () => {
     try {
       setError(null);
       const loadedGoal = await getGoalForWeek(weekStart);
@@ -65,7 +58,13 @@ export function WeeklyGoalEditor({
     } catch {
       setError('Erro ao carregar meta');
     }
-  };
+  }, [getGoalForWeek, weekStart]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadGoal();
+    }
+  }, [isOpen, loadGoal]);
 
   const handleSave = async () => {
     const targetValue = parseFloat(targetHours) || 0;
