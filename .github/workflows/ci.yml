@@ -36,7 +36,7 @@ jobs:
           node-version: '22'
 
       - name: Install backend dependencies
-        run: cd backend && npm ci
+        run: cd backend && npm ci --ignore-scripts
 
       - name: Generate Prisma client
         run: cd backend && npx prisma generate
@@ -66,7 +66,7 @@ jobs:
           node-version: '22'
 
       - name: Install frontend dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm ci --ignore-scripts
 
       - name: Build frontend
         run: cd frontend && npm run build

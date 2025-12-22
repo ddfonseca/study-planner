@@ -2,10 +2,12 @@
 
 echo "Running lint and build checks via Docker..."
 
-# Check if containers are running
+# Start containers if not running
 if ! docker ps --filter "name=study-planner-backend" --format "{{.Status}}" | grep -q "Up"; then
-  echo "Error: Docker containers not running. Start with: docker-compose up -d"
-  exit 1
+  echo "Starting Docker containers..."
+  docker-compose up -d --quiet-pull
+  echo "Waiting for containers to be ready..."
+  sleep 5
 fi
 
 # Frontend
