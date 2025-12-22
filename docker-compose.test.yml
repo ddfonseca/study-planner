@@ -1,11 +1,7 @@
-version: '3.8'
-
 services:
   postgres-test:
     image: postgres:15-alpine
     container_name: study-planner-postgres-test
-    ports:
-      - "5433:5432"
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
@@ -17,3 +13,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: study-planner-backend-test
+    environment:
+      DATABASE_URL: postgresql://test:test@postgres-test:5432/study_planner_test?schema=public
+      BETTER_AUTH_SECRET: test-secret-for-ci-minimum-32-chars
+      NODE_ENV: test
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: sh -c "npx prisma db push && npx jest --config ./test/jest-e2e.json"
