@@ -14,6 +14,9 @@ import {
   Focus,
   Compass,
   Repeat,
+  Check,
+  Crown,
+  Building2,
 } from 'lucide-react';
 
 // FAQ Item component
@@ -189,39 +192,61 @@ export function LandingPage() {
     },
   ];
 
-  // const plans = [
-  //   {
-  //     name: 'Gratuito',
-  //     price: 'R$ 0',
-  //     period: 'para sempre',
-  //     description: 'Perfeito para começar a organizar seus estudos.',
-  //     features: [
-  //       'Calendário visual com heatmap',
-  //       'Até 6 disciplinas',
-  //       'Metas semanais básicas',
-  //       'Modo escuro',
-  //       'Sincronização na nuvem',
-  //     ],
-  //     cta: 'Começar grátis',
-  //     highlighted: false,
-  //   },
-  //   // {
-  //   //   name: 'Pro',
-  //   //   price: 'R$ 5,90',
-  //   //   period: '/mês',
-  //   //   description: 'Para quem leva os estudos a sério.',
-  //   //   features: [
-  //   //     'Tudo do plano Gratuito',
-  //   //     'Disciplinas ilimitadas',
-  //   //     'Histórico completo de sessões',
-  //   //     'Exportar relatórios em PDF',
-  //   //     'Lembretes personalizados',
-  //   //     'Suporte prioritário',
-  //   //   ],
-  //   //   cta: 'Assinar Pro',
-  //   //   highlighted: true,
-  //   // },
-  // ];
+  const plans = [
+    {
+      name: 'Gratuito',
+      icon: BookOpen,
+      price: 'R$ 0',
+      period: 'para sempre',
+      description: 'Perfeito para começar a organizar seus estudos.',
+      features: [
+        'Calendário visual com heatmap',
+        '1 ciclo de estudo',
+        '2 workspaces',
+        'Até 20 sessões por dia',
+        '30 dias de histórico',
+        'Metas semanais',
+        'Modo escuro',
+      ],
+      cta: 'Começar grátis',
+      highlighted: false,
+    },
+    {
+      name: 'Pro',
+      icon: Crown,
+      price: 'R$ 19,90',
+      period: '/mês',
+      description: 'Para quem leva os estudos a sério.',
+      features: [
+        'Tudo do plano Gratuito',
+        '10 ciclos de estudo',
+        '10 workspaces',
+        'Sessões ilimitadas',
+        '1 ano de histórico',
+        'Exportar dados',
+        'Compartilhar com 5 pessoas',
+      ],
+      cta: 'Assinar Pro',
+      highlighted: true,
+    },
+    {
+      name: 'Business',
+      icon: Building2,
+      price: 'R$ 49,90',
+      period: '/mês',
+      description: 'Para equipes, escolas e instituições.',
+      features: [
+        'Tudo do plano Pro',
+        'Ciclos ilimitados',
+        'Workspaces ilimitados',
+        'Histórico completo',
+        'Compartilhamentos ilimitados',
+        'Suporte prioritário',
+      ],
+      cta: 'Falar com vendas',
+      highlighted: false,
+    },
+  ];
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
@@ -432,65 +457,71 @@ export function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      {/*}
       <section id="pricing" className="py-16 md:py-24">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
             Escolha seu plano
           </h2>
           <p className="text-muted-foreground text-center mb-12">
             Comece grátis e evolua quando precisar de mais recursos.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {plans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`relative ${
-                  plan.highlighted
-                    ? 'border-primary shadow-lg shadow-primary/10'
-                    : 'border-border'
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                      Mais popular
-                    </span>
-                  </div>
-                )}
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    {plan.description}
-                  </p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/login" className="block">
-                    <Button
-                      size="lg"
-                      variant={plan.highlighted ? 'default' : 'outline'}
-                      className="w-full"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {plans.map((plan, index) => {
+              const IconComponent = plan.icon;
+              return (
+                <Card
+                  key={index}
+                  className={`relative ${
+                    plan.highlighted
+                      ? 'border-primary shadow-lg shadow-primary/10 scale-105'
+                      : 'border-border'
+                  }`}
+                >
+                  {plan.highlighted && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                        Mais popular
+                      </span>
+                    </div>
+                  )}
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`p-2 rounded-lg ${plan.highlighted ? 'bg-primary/10' : 'bg-muted'}`}>
+                        <IconComponent className={`h-5 w-5 ${plan.highlighted ? 'text-primary' : 'text-muted-foreground'}`} />
+                      </div>
+                      <h3 className="text-xl font-semibold">{plan.name}</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm mb-4">
+                      {plan.description}
+                    </p>
+                    <div className="mb-6">
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
+                    </div>
+                    <ul className="space-y-2 mb-6">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/login" className="block">
+                      <Button
+                        size="lg"
+                        variant={plan.highlighted ? 'default' : 'outline'}
+                        className="w-full"
+                      >
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
-      */}
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="max-w-5xl mx-auto px-4">
