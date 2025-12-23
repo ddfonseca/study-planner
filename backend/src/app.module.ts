@@ -12,6 +12,7 @@ import { UserConfigModule } from './config/config.module';
 import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { StudyCycleModule } from './study-cycle/study-cycle.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { StudyCycleModule } from './study-cycle/study-cycle.module';
     WeeklyGoalModule,
     WorkspaceModule,
     StudyCycleModule,
+    SubscriptionModule,
   ],
   providers: [
     {

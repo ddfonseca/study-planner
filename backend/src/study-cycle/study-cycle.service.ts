@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 import { CreateStudyCycleDto, UpdateStudyCycleDto } from './dto';
 
 export interface CycleItemProgress {
@@ -62,7 +63,10 @@ export interface CycleSuggestion {
 
 @Injectable()
 export class StudyCycleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subscriptionService: SubscriptionService,
+  ) {}
 
 
   /**
@@ -155,6 +159,17 @@ export class StudyCycleService {
    */
   async create(userId: string, workspaceId: string, dto: CreateStudyCycleDto) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    // Check subscription limit for cycles
+    const currentCount = await this.prisma.studyCycle.count({
+      where: { workspaceId },
+    });
+    await this.subscriptionService.enforceFeatureLimit(
+      userId,
+      'max_cycles',
+      currentCount,
+      'Limite de ciclos de estudo atingido. Faça upgrade para criar mais.',
+    );
 
     // Check if name already exists
     const existing = await this.prisma.studyCycle.findFirst({

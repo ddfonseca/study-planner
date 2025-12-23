@@ -5,13 +5,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto';
-
-const MAX_WORKSPACES = 5;
 
 @Injectable()
 export class WorkspaceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subscriptionService: SubscriptionService,
+  ) {}
 
   /**
    * Lista todos os workspaces de um usuário
@@ -46,16 +48,13 @@ export class WorkspaceService {
    * Cria um novo workspace
    */
   async create(userId: string, createDto: CreateWorkspaceDto) {
-    // Verificar limite de workspaces
-    const count = await this.prisma.workspace.count({
-      where: { userId },
-    });
-
-    if (count >= MAX_WORKSPACES) {
-      throw new BadRequestException(
-        `Maximum of ${MAX_WORKSPACES} workspaces allowed`,
-      );
-    }
+    // Verificar limite de workspaces via subscription
+    await this.subscriptionService.enforceFeatureLimit(
+      userId,
+      'max_workspaces',
+      await this.prisma.workspace.count({ where: { userId } }),
+      'Limite de workspaces atingido. Faça upgrade para criar mais.',
+    );
 
     // Verificar nome duplicado
     const existing = await this.prisma.workspace.findUnique({

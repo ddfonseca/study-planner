@@ -29,6 +29,7 @@ model User {
   ownedShares   SharedPlan[]   @relation("Owner")
   sessions      Session[]
   accounts      Account[]
+  subscription  Subscription?
 
   @@map("user")
 }
@@ -252,4 +253,102 @@ model StudyCycleCompletion {
   @@index([cycleId])
   @@index([completedAt])
   @@map("study_cycle_completions")
+}
+
+// =====================================================
+// SUBSCRIPTION SYSTEM
+// =====================================================
+
+// Subscription Plan - available plans (free, pro, business)
+model SubscriptionPlan {
+  id           String   @id @default(cuid())
+  name         String   @unique @db.VarChar(50) // "free", "pro", "business"
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?
+  priceMonthly Float    @default(0) @map("price_monthly")
+  priceYearly  Float    @default(0) @map("price_yearly")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  limits        PlanLimit[]
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+// Plan Limit - flexible limits per feature
+model PlanLimit {
+  id         String @id @default(cuid())
+  planId     String @map("plan_id")
+  feature    String @db.VarChar(50) // "max_cycles", "max_workspaces", etc.
+  limitValue Int    @map("limit_value") // -1 = unlimited
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, feature])
+  @@map("plan_limits")
+}
+
+// Subscription - user's active subscription
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String             @unique @map("user_id")
+  planId             String             @map("plan_id")
+  status             SubscriptionStatus @default(ACTIVE)
+  billingCycle       BillingCycle       @default(MONTHLY) @map("billing_cycle")
+  currentPeriodStart DateTime           @map("current_period_start")
+  currentPeriodEnd   DateTime           @map("current_period_end")
+  cancelAtPeriodEnd  Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt         DateTime?          @map("canceled_at")
+  externalId         String?            @map("external_id") // Mercado Pago subscription ID
+  externalCustomerId String?            @map("external_customer_id") // Mercado Pago customer ID
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+// Payment - payment history
+model Payment {
+  id             String        @id @default(cuid())
+  subscriptionId String        @map("subscription_id")
+  amount         Float
+  currency       String        @default("BRL") @db.VarChar(3)
+  status         PaymentStatus @default(PENDING)
+  externalId     String?       @map("external_id") // Mercado Pago payment ID
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@map("payments")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  PAUSED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
