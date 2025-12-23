@@ -16,9 +16,13 @@ import {
   SessionModal,
   StudyTimer,
   WeeklyProgress,
+  MobileDayView,
+  MobileBottomNav,
 } from '@/components/calendar';
+import type { MobileTab } from '@/components/calendar';
 import { CycleSuggestionCard } from '@/components/study-cycle';
 import { formatDateKey } from '@/lib/utils/date';
+import { useIsSmallMobile } from '@/hooks/useMediaQuery';
 import type { DayData } from '@/types/session';
 
 export function CalendarPage() {
@@ -45,9 +49,13 @@ export function CalendarPage() {
     goToToday,
   } = useCalendar();
 
+  const isMobile = useIsSmallMobile();
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [mobileTab, setMobileTab] = useState<MobileTab>('calendar');
+  const [timerActive, setTimerActive] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
@@ -58,6 +66,21 @@ export function CalendarPage() {
   // Handle cell click - open modal
   const handleCellClick = useCallback((date: Date) => {
     setSelectedDate(date);
+    setIsModalOpen(true);
+  }, []);
+
+  // Handle edit session from mobile view (opens modal with that day's sessions)
+  const handleEditSession = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+
+  // Handle mobile date change
+  const handleMobileDateChange = useCallback((date: Date) => {
+    setSelectedDate(date);
+  }, []);
+
+  // Handle mobile add session
+  const handleMobileAddSession = useCallback(() => {
     setIsModalOpen(true);
   }, []);
 
@@ -143,53 +166,102 @@ export function CalendarPage() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <CalendarIcon className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">Calendário de Estudos</h1>
-      </div>
-
-      {/* Main content with sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
-        {/* Calendar */}
-        <div className="space-y-4">
-          <CalendarHeader
-            monthYearDisplay={monthYearDisplay}
-            onPreviousMonth={goToPreviousMonth}
-            onNextMonth={goToNextMonth}
-            onToday={goToToday}
-          />
-          <CalendarGrid
-            weeks={weeks}
-            currentMonth={currentMonth}
-            dayNames={dayNames}
-            onCellClick={handleCellClick}
+  // Render mobile content based on active tab
+  const renderMobileContent = () => {
+    switch (mobileTab) {
+      case 'calendar':
+        return (
+          <MobileDayView
+            date={selectedDate || new Date()}
+            onDateChange={handleMobileDateChange}
+            dayData={selectedDayData}
+            onAddSession={handleMobileAddSession}
+            onEditSession={handleEditSession}
             onDeleteSession={handleDeleteSessionSubmit}
+            canModify={canModify}
           />
+        );
+      case 'cycle':
+        return <CycleSuggestionCard />;
+      case 'progress':
+        return <WeeklyProgress />;
+      case 'timer':
+        return (
+          <StudyTimer
+            subjects={getUniqueSubjects()}
+            onRunningChange={setTimerActive}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={isMobile ? 'pb-20' : ''}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <CalendarIcon className="h-6 w-6 text-primary" />
+          <h1 className={`font-bold text-foreground ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+            Calendário de Estudos
+          </h1>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          <CycleSuggestionCard />
-          <WeeklyProgress />
-          <StudyTimer subjects={getUniqueSubjects()} />
-        </div>
+        {isMobile ? (
+          /* Mobile: Tab-based content */
+          renderMobileContent()
+        ) : (
+          /* Desktop: Full Calendar with Sidebar */
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+            {/* Calendar */}
+            <div className="space-y-4">
+              <CalendarHeader
+                monthYearDisplay={monthYearDisplay}
+                onPreviousMonth={goToPreviousMonth}
+                onNextMonth={goToNextMonth}
+                onToday={goToToday}
+              />
+              <CalendarGrid
+                weeks={weeks}
+                currentMonth={currentMonth}
+                dayNames={dayNames}
+                onCellClick={handleCellClick}
+                onDeleteSession={handleDeleteSessionSubmit}
+              />
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-4">
+              <CycleSuggestionCard />
+              <WeeklyProgress />
+              <StudyTimer subjects={getUniqueSubjects()} />
+            </div>
+          </div>
+        )}
+
+        {/* Session Modal */}
+        <SessionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          date={selectedDate}
+          dayData={selectedDayData}
+          subjects={getUniqueSubjects()}
+          onAddSession={handleAddSessionSubmit}
+          onUpdateSession={handleUpdateSessionSubmit}
+          onDeleteSession={handleDeleteSessionSubmit}
+          canModify={canModify}
+        />
       </div>
 
-      {/* Session Modal */}
-      <SessionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        date={selectedDate}
-        dayData={selectedDayData}
-        subjects={getUniqueSubjects()}
-        onAddSession={handleAddSessionSubmit}
-        onUpdateSession={handleUpdateSessionSubmit}
-        onDeleteSession={handleDeleteSessionSubmit}
-        canModify={canModify}
-      />
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <MobileBottomNav
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+          timerActive={timerActive}
+        />
+      )}
     </div>
   );
 }

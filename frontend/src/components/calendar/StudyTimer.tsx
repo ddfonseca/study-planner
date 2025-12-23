@@ -20,9 +20,10 @@ interface TimerState {
 
 interface StudyTimerProps {
   subjects: string[];
+  onRunningChange?: (isRunning: boolean) => void;
 }
 
-export function StudyTimer({ subjects }: StudyTimerProps) {
+export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
 
@@ -68,6 +69,11 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [isRunning, seconds, subject]);
+
+  // Notify parent about running state changes
+  useEffect(() => {
+    onRunningChange?.(isRunning);
+  }, [isRunning, onRunningChange]);
 
   // Timer interval
   useEffect(() => {

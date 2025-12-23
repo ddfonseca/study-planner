@@ -38,4 +38,20 @@ export function useIsMobile(): boolean {
   return useMediaQuery('(max-width: 767px)');
 }
 
+/**
+ * Hook to detect if device is tablet or smaller (< 1024px)
+ * Useful for showing simplified layouts on tablets
+ */
+export function useIsTabletOrSmaller(): boolean {
+  return useMediaQuery('(max-width: 1023px)');
+}
+
+/**
+ * Hook to detect if device is small mobile (< 640px)
+ * For compact mobile-only layouts
+ */
+export function useIsSmallMobile(): boolean {
+  return useMediaQuery('(max-width: 639px)');
+}
+
 export default useMediaQuery;

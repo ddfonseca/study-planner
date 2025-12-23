@@ -10,3 +10,6 @@ export { WeeklyGoalEditor } from './WeeklyGoalEditor';
 export { StudyTimer } from './StudyTimer';
 export { QuickAddSession } from './QuickAddSession';
 export { WeeklyProgress } from './WeeklyProgress';
+export { MobileDayView } from './MobileDayView';
+export { MobileBottomNav } from './MobileBottomNav';
+export type { MobileTab } from './MobileBottomNav';
