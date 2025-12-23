@@ -5,15 +5,38 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { RefreshCw, ChevronRight, Settings, BookOpen } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy } from 'lucide-react';
 import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
-  const { suggestion, isLoading, refresh, advanceToNext } = useStudyCycleStore();
+  const {
+    cycle,
+    cycles,
+    suggestion,
+    isLoading,
+    refresh,
+    advanceToNext,
+    activateCycle,
+    resetCycle,
+  } = useStudyCycleStore();
   const [editorOpen, setEditorOpen] = useState(false);
+  const [editorMode, setEditorMode] = useState<'create' | 'edit'>('edit');
+  const [showAllItems, setShowAllItems] = useState(false);
+  const [cycleSelectorOpen, setCycleSelectorOpen] = useState(false);
 
   // Fetch cycle data when workspace changes
   useEffect(() => {
@@ -48,7 +71,7 @@ export function CycleSuggestionCard() {
             </Button>
           </CardContent>
         </Card>
-        <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} />
+        <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode="create" />
       </>
     );
   }
@@ -67,20 +90,94 @@ export function CycleSuggestionCard() {
     }
   };
 
+  const handleReset = async () => {
+    if (!currentWorkspaceId) return;
+    try {
+      await resetCycle(currentWorkspaceId);
+    } catch (error) {
+      console.error('Failed to reset cycle:', error);
+    }
+  };
+
+  const handleCycleSelect = async (cycleId: string) => {
+    if (!currentWorkspaceId) return;
+    setCycleSelectorOpen(false);
+    if (cycleId === 'new') {
+      setEditorMode('create');
+      setEditorOpen(true);
+      return;
+    }
+    if (cycleId === cycle?.id) return;
+    try {
+      await activateCycle(currentWorkspaceId, cycleId);
+    } catch (error) {
+      console.error('Failed to activate cycle:', error);
+    }
+  };
+
   return (
     <>
       <Card>
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Estudar Agora
-            </CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <BookOpen className="h-4 w-4 shrink-0" />
+              {cycles.length >= 1 ? (
+                <Popover open={cycleSelectorOpen} onOpenChange={setCycleSelectorOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs font-medium justify-between min-w-0"
+                      disabled={isLoading}
+                    >
+                      <span className="truncate">{cycle?.name || 'Selecionar'}</span>
+                      <ChevronsUpDown className="h-3 w-3 ml-1 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-0" align="start">
+                    <Command>
+                      <CommandList>
+                        <CommandGroup>
+                          {cycles.map((c) => (
+                            <CommandItem
+                              key={c.id}
+                              value={c.id}
+                              onSelect={() => handleCycleSelect(c.id)}
+                            >
+                              <Check
+                                className={`mr-2 h-3 w-3 ${c.id === cycle?.id ? 'opacity-100' : 'opacity-0'}`}
+                              />
+                              <span className="truncate">{c.name}</span>
+                            </CommandItem>
+                          ))}
+                          <CommandItem
+                            value="new"
+                            onSelect={() => handleCycleSelect('new')}
+                            className="text-primary"
+                          >
+                            <Plus className="mr-2 h-3 w-3" />
+                            Novo ciclo
+                          </CommandItem>
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <CardTitle className="text-sm font-medium truncate">
+                  {cycle?.name || 'Estudar Agora'}
+                </CardTitle>
+              )}
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
-              onClick={() => setEditorOpen(true)}
+              className="h-6 w-6 shrink-0"
+              onClick={() => {
+                setEditorMode('edit');
+                setEditorOpen(true);
+              }}
             >
               <Settings className="h-3.5 w-3.5" />
             </Button>
@@ -105,7 +202,23 @@ export function CycleSuggestionCard() {
           </div>
 
           {/* Status and actions */}
-          {data.isCurrentComplete ? (
+          {data.isCycleComplete ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <Trophy className="h-4 w-4" />
+                <span className="text-sm font-medium">Ciclo Completo!</span>
+              </div>
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handleReset}
+                disabled={isLoading}
+              >
+                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                Reiniciar Ciclo
+              </Button>
+            </div>
+          ) : data.isCurrentComplete ? (
             <div className="space-y-2">
               <p className="text-xs text-green-600 dark:text-green-400 font-medium">
                 Meta atingida!
@@ -132,7 +245,7 @@ export function CycleSuggestionCard() {
           )}
 
           {/* Next subject preview */}
-          {!data.isCurrentComplete && (
+          {!data.isCurrentComplete && !data.isCycleComplete && (
             <div className="pt-2 border-t">
               <p className="text-xs text-muted-foreground truncate" title={`Próximo: ${data.nextSubject}`}>
                 Próximo: <span className="font-medium">{data.nextSubject}</span>
@@ -140,9 +253,73 @@ export function CycleSuggestionCard() {
               </p>
             </div>
           )}
+
+          {/* All items progress (collapsible) */}
+          {data.allItemsProgress && data.allItemsProgress.length > 1 && (
+            <div className="pt-2 border-t">
+              <button
+                type="button"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+                onClick={() => setShowAllItems(!showAllItems)}
+              >
+                <ChevronDown
+                  className={`h-3 w-3 transition-transform ${showAllItems ? 'rotate-180' : ''}`}
+                />
+                {showAllItems ? 'Ocultar matérias' : 'Ver todas as matérias'}
+              </button>
+
+              {showAllItems && (
+                <div className="mt-2 space-y-2">
+                  {/* Statistics summary */}
+                  {(() => {
+                    const totalTarget = data.allItemsProgress.reduce((sum, item) => sum + item.targetMinutes, 0);
+                    const totalAccumulated = data.allItemsProgress.reduce((sum, item) => sum + item.accumulatedMinutes, 0);
+                    const completedCount = data.allItemsProgress.filter((item) => item.isComplete).length;
+                    const overallPercent = totalTarget > 0 ? Math.round((totalAccumulated / totalTarget) * 100) : 0;
+                    return (
+                      <div className="p-2 rounded-md bg-muted/30 border border-border/50 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Progresso geral</span>
+                          <span className="font-medium">{Math.min(100, overallPercent)}%</span>
+                        </div>
+                        <Progress value={Math.min(100, overallPercent)} className="h-1.5" />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{completedCount}/{data.allItemsProgress.length} matérias</span>
+                          <span>{formatDuration(totalAccumulated)}/{formatDuration(totalTarget)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Individual items */}
+                  {data.allItemsProgress.map((item) => {
+                    const itemProgress = calculateCycleProgress(item.accumulatedMinutes, item.targetMinutes);
+                    const isCurrent = item.position === data.currentPosition;
+                    return (
+                      <div
+                        key={item.position}
+                        className={`p-2 rounded-md ${isCurrent ? 'bg-primary/10' : 'bg-muted/50'}`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={`text-xs truncate ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
+                            {item.isComplete && <Check className="h-3 w-3 inline mr-1 text-green-500" />}
+                            {item.subject}
+                          </span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                            {formatDuration(item.accumulatedMinutes)}/{formatDuration(item.targetMinutes)}
+                          </span>
+                        </div>
+                        <Progress value={itemProgress} className="h-1.5" />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
-      <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} />
+      <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode={editorMode} />
     </>
   );
 }

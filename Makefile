@@ -1,4 +1,4 @@
-.PHONY: up down logs build test lint migrate deploy-front deploy-back deploy-all
+.PHONY: up down logs build test lint migrate prisma-generate deploy-front deploy-back deploy-all
 
 # Docker
 up:
@@ -29,6 +29,9 @@ lint:
 # Prisma
 migrate:
 	cd backend && npx prisma migrate dev
+
+prisma-generate:
+	docker-compose exec -T backend npx prisma generate
 
 # Deploy
 deploy-front:

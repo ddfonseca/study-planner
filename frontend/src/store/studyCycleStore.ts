@@ -13,6 +13,7 @@ import { studyCycleApi } from '@/lib/api';
 
 interface StudyCycleState {
   cycle: StudyCycle | null;
+  cycles: StudyCycle[];
   suggestion: CycleSuggestion | null;
   isLoading: boolean;
   error: string | null;
@@ -21,9 +22,19 @@ interface StudyCycleState {
 
 interface StudyCycleActions {
   /**
-   * Fetch cycle for a workspace
+   * Fetch active cycle for a workspace
    */
   fetchCycle: (workspaceId: string) => Promise<void>;
+
+  /**
+   * Fetch all cycles for a workspace
+   */
+  fetchCycles: (workspaceId: string) => Promise<void>;
+
+  /**
+   * Activate a specific cycle
+   */
+  activateCycle: (workspaceId: string, cycleId: string) => Promise<void>;
 
   /**
    * Fetch current study suggestion
@@ -31,7 +42,7 @@ interface StudyCycleActions {
   fetchSuggestion: (workspaceId: string) => Promise<void>;
 
   /**
-   * Create a new cycle (replaces existing)
+   * Create a new cycle
    */
   createCycle: (workspaceId: string, data: CreateStudyCycleDto) => Promise<StudyCycle>;
 
@@ -51,6 +62,11 @@ interface StudyCycleActions {
   deleteCycle: (workspaceId: string) => Promise<void>;
 
   /**
+   * Reset cycle (zeroes progress, keeps sessions)
+   */
+  resetCycle: (workspaceId: string) => Promise<void>;
+
+  /**
    * Clear cycle state
    */
   clearCycle: () => void;
@@ -65,6 +81,7 @@ type StudyCycleStore = StudyCycleState & StudyCycleActions;
 
 export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   cycle: null,
+  cycles: [],
   suggestion: null,
   isLoading: false,
   error: null,
@@ -81,6 +98,35 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch cycle',
       });
+    }
+  },
+
+  fetchCycles: async (workspaceId: string) => {
+    try {
+      const cycles = await studyCycleApi.listCycles(workspaceId);
+      set({ cycles });
+    } catch (error) {
+      set({
+        cycles: [],
+        error: error instanceof Error ? error.message : 'Failed to fetch cycles',
+      });
+    }
+  },
+
+  activateCycle: async (workspaceId: string, cycleId: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      const cycle = await studyCycleApi.activateCycle(workspaceId, cycleId);
+      set({ cycle, isLoading: false });
+      // Refresh cycles list and suggestion
+      await get().fetchCycles(workspaceId);
+      await get().fetchSuggestion(workspaceId);
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to activate cycle',
+      });
+      throw error;
     }
   },
 
@@ -160,9 +206,26 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
     }
   },
 
+  resetCycle: async (workspaceId: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      const cycle = await studyCycleApi.reset(workspaceId);
+      set({ cycle, isLoading: false });
+      // Refresh suggestion after resetting
+      await get().fetchSuggestion(workspaceId);
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to reset cycle',
+      });
+      throw error;
+    }
+  },
+
   clearCycle: () => {
     set({
       cycle: null,
+      cycles: [],
       suggestion: null,
       error: null,
       currentWorkspaceId: null,
@@ -172,6 +235,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   refresh: async (workspaceId: string) => {
     await Promise.all([
       get().fetchCycle(workspaceId),
+      get().fetchCycles(workspaceId),
       get().fetchSuggestion(workspaceId),
     ]);
   },

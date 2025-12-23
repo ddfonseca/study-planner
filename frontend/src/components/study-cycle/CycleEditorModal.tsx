@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Combobox } from '@/components/ui/combobox';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   RefreshCw,
   Plus,
@@ -31,6 +32,7 @@ import type { CreateCycleItemDto } from '@/types/api';
 interface CycleEditorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: 'create' | 'edit'; // 'create' for new cycle, 'edit' for editing active cycle
 }
 
 interface CycleItemForm extends CreateCycleItemDto {
@@ -41,9 +43,9 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }
 
-export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) {
+export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEditorModalProps) {
   const { currentWorkspaceId } = useWorkspaceStore();
-  const { cycle, isLoading, createCycle, updateCycle, deleteCycle } = useStudyCycleStore();
+  const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } = useStudyCycleStore();
   const { getUniqueSubjects } = useSessions();
   const subjects = getUniqueSubjects();
 
@@ -51,11 +53,15 @@ export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) 
   const [cycleName, setCycleName] = useState('');
   const [newSubject, setNewSubject] = useState('');
   const [newMinutes, setNewMinutes] = useState('');
+  const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Determine if editing or creating
+  const isEditing = mode === 'edit' && !!cycle;
 
   // Load existing cycle data when modal opens
   useEffect(() => {
-    if (open && cycle) {
+    if (open && isEditing && cycle) {
       setCycleName(cycle.name || '');
       setItems(
         cycle.items.map((item) => ({
@@ -64,11 +70,13 @@ export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) 
           targetMinutes: item.targetMinutes,
         }))
       );
-    } else if (open && !cycle) {
+      setActivateOnCreate(false);
+    } else if (open && !isEditing) {
       setCycleName('');
       setItems([]);
+      setActivateOnCreate(cycles.length === 0);
     }
-  }, [open, cycle]);
+  }, [open, isEditing, cycle, cycles.length]);
 
   const handleAddItem = () => {
     if (!newSubject.trim() || !newMinutes) return;
@@ -109,18 +117,27 @@ export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) 
 
   const handleSave = async () => {
     if (!currentWorkspaceId || items.length === 0) return;
+    if (!isEditing && !cycleName.trim()) return; // Name required for new cycles
 
     setIsSaving(true);
     try {
-      const data = {
-        name: cycleName.trim() || undefined,
-        items: items.map(({ subject, targetMinutes }) => ({ subject, targetMinutes })),
-      };
-
-      if (cycle) {
+      if (isEditing) {
+        const data = {
+          name: cycleName.trim() || undefined,
+          items: items.map(({ subject, targetMinutes }) => ({ subject, targetMinutes })),
+        };
         await updateCycle(currentWorkspaceId, data);
       } else {
+        const data = {
+          name: cycleName.trim(),
+          items: items.map(({ subject, targetMinutes }) => ({ subject, targetMinutes })),
+          activateOnCreate,
+        };
         await createCycle(currentWorkspaceId, data);
+      }
+      // Refresh all cycles
+      if (currentWorkspaceId) {
+        await refresh(currentWorkspaceId);
       }
       onOpenChange(false);
     } catch (error) {
@@ -164,17 +181,34 @@ export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) 
         </ResponsiveDialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Cycle name (optional) */}
+          {/* Cycle name */}
           <div className="space-y-2">
-            <Label htmlFor="cycleName">Nome do ciclo (opcional)</Label>
+            <Label htmlFor="cycleName">
+              Nome do ciclo {!isEditing && <span className="text-destructive">*</span>}
+            </Label>
             <Input
               id="cycleName"
               placeholder="Ex: Concurso TRT"
               value={cycleName}
               onChange={(e) => setCycleName(e.target.value)}
               maxLength={50}
+              required={!isEditing}
             />
           </div>
+
+          {/* Activate on create checkbox (only for new cycles) */}
+          {!isEditing && cycles.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="activateOnCreate"
+                checked={activateOnCreate}
+                onCheckedChange={(checked) => setActivateOnCreate(checked === true)}
+              />
+              <Label htmlFor="activateOnCreate" className="text-sm font-normal cursor-pointer">
+                Ativar este ciclo ao criar
+              </Label>
+            </div>
+          )}
 
           {/* Add item form */}
           <div className="space-y-2">
@@ -296,7 +330,7 @@ export function CycleEditorModal({ open, onOpenChange }: CycleEditorModalProps) 
           </Button>
           <Button
             onClick={handleSave}
-            disabled={items.length === 0 || isSaving || isLoading}
+            disabled={items.length === 0 || isSaving || isLoading || (!isEditing && !cycleName.trim())}
             className="w-full sm:w-auto"
           >
             {isSaving ? (

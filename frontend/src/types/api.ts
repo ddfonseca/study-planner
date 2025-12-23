@@ -135,6 +135,15 @@ export interface StudyCycle {
   updatedAt: string;
 }
 
+// Cycle item progress
+export interface CycleItemProgress {
+  subject: string;
+  targetMinutes: number;
+  accumulatedMinutes: number;
+  isComplete: boolean;
+  position: number;
+}
+
 // Cycle Suggestion response
 export interface CycleSuggestion {
   hasCycle: boolean;
@@ -148,7 +157,40 @@ export interface CycleSuggestion {
     nextTargetMinutes: number;
     currentPosition: number;
     totalItems: number;
+    allItemsProgress: CycleItemProgress[];
+    isCycleComplete: boolean;
   } | null;
+}
+
+// Cycle statistics
+export interface CycleStatistics {
+  totalTargetMinutes: number;
+  totalAccumulatedMinutes: number;
+  completedItemsCount: number;
+  totalItemsCount: number;
+  overallPercentage: number;
+  averagePerItem: number;
+}
+
+// Cycle history entry
+export interface CycleHistoryEntry {
+  id: string;
+  type: 'advance' | 'completion';
+  fromSubject?: string;
+  toSubject?: string;
+  minutesSpent?: number;
+  cycleName?: string;
+  totalTargetMinutes?: number;
+  totalSpentMinutes?: number;
+  itemsCount?: number;
+  timestamp: string;
+}
+
+// Cycle history response
+export interface CycleHistory {
+  entries: CycleHistoryEntry[];
+  totalAdvances: number;
+  totalCompletions: number;
 }
 
 // Create cycle item DTO
@@ -159,8 +201,9 @@ export interface CreateCycleItemDto {
 
 // Create study cycle DTO
 export interface CreateStudyCycleDto {
-  name?: string;
+  name: string;
   items: CreateCycleItemDto[];
+  activateOnCreate?: boolean;
 }
 
 // Update study cycle DTO

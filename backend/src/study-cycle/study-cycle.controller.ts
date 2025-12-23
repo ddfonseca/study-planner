@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
@@ -18,7 +19,7 @@ export class StudyCycleController {
 
   /**
    * GET /api/workspaces/:workspaceId/cycle
-   * Retorna o ciclo do workspace
+   * Retorna o ciclo ativo do workspace
    */
   @Get()
   async getCycle(
@@ -27,6 +28,19 @@ export class StudyCycleController {
   ) {
     const userId = session.user.id;
     return this.studyCycleService.getCycle(userId, workspaceId);
+  }
+
+  /**
+   * GET /api/workspaces/:workspaceId/cycle/list
+   * Lista todos os ciclos do workspace
+   */
+  @Get('list')
+  async listCycles(
+    @Session() session: UserSession,
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const userId = session.user.id;
+    return this.studyCycleService.listCycles(userId, workspaceId);
   }
 
   /**
@@ -43,8 +57,50 @@ export class StudyCycleController {
   }
 
   /**
+   * GET /api/workspaces/:workspaceId/cycle/statistics
+   * Retorna estatísticas do ciclo
+   */
+  @Get('statistics')
+  async getStatistics(
+    @Session() session: UserSession,
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const userId = session.user.id;
+    return this.studyCycleService.getStatistics(userId, workspaceId);
+  }
+
+  /**
+   * GET /api/workspaces/:workspaceId/cycle/history
+   * Retorna histórico de avanços e completudes
+   */
+  @Get('history')
+  async getHistory(
+    @Session() session: UserSession,
+    @Param('workspaceId') workspaceId: string,
+    @Query('limit') limit?: string,
+  ) {
+    const userId = session.user.id;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.studyCycleService.getHistory(userId, workspaceId, limitNum);
+  }
+
+  /**
+   * POST /api/workspaces/:workspaceId/cycle/:cycleId/activate
+   * Ativa um ciclo específico
+   */
+  @Post(':cycleId/activate')
+  async activateCycle(
+    @Session() session: UserSession,
+    @Param('workspaceId') workspaceId: string,
+    @Param('cycleId') cycleId: string,
+  ) {
+    const userId = session.user.id;
+    return this.studyCycleService.activateCycle(userId, workspaceId, cycleId);
+  }
+
+  /**
    * POST /api/workspaces/:workspaceId/cycle
-   * Cria um novo ciclo (substitui existente)
+   * Cria um novo ciclo
    */
   @Post()
   async create(
@@ -81,6 +137,19 @@ export class StudyCycleController {
   ) {
     const userId = session.user.id;
     return this.studyCycleService.advanceToNext(userId, workspaceId);
+  }
+
+  /**
+   * POST /api/workspaces/:workspaceId/cycle/reset
+   * Reseta o ciclo (zera progresso mantendo sessões)
+   */
+  @Post('reset')
+  async resetCycle(
+    @Session() session: UserSession,
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const userId = session.user.id;
+    return this.studyCycleService.resetCycle(userId, workspaceId);
   }
 
   /**

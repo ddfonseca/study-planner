@@ -5,16 +5,32 @@ import { apiClient } from './client';
 import type {
   StudyCycle,
   CycleSuggestion,
+  CycleStatistics,
+  CycleHistory,
   CreateStudyCycleDto,
   UpdateStudyCycleDto,
 } from '@/types/api';
 
 export const studyCycleApi = {
   /**
-   * Get cycle for a workspace
+   * Get active cycle for a workspace
    */
   async getCycle(workspaceId: string): Promise<StudyCycle | null> {
     return apiClient.get<StudyCycle | null>(`/api/workspaces/${workspaceId}/cycle`);
+  },
+
+  /**
+   * List all cycles for a workspace
+   */
+  async listCycles(workspaceId: string): Promise<StudyCycle[]> {
+    return apiClient.get<StudyCycle[]>(`/api/workspaces/${workspaceId}/cycle/list`);
+  },
+
+  /**
+   * Activate a specific cycle
+   */
+  async activateCycle(workspaceId: string, cycleId: string): Promise<StudyCycle> {
+    return apiClient.post<StudyCycle>(`/api/workspaces/${workspaceId}/cycle/${cycleId}/activate`);
   },
 
   /**
@@ -22,6 +38,20 @@ export const studyCycleApi = {
    */
   async getSuggestion(workspaceId: string): Promise<CycleSuggestion> {
     return apiClient.get<CycleSuggestion>(`/api/workspaces/${workspaceId}/cycle/suggestion`);
+  },
+
+  /**
+   * Get cycle statistics
+   */
+  async getStatistics(workspaceId: string): Promise<CycleStatistics | null> {
+    return apiClient.get<CycleStatistics | null>(`/api/workspaces/${workspaceId}/cycle/statistics`);
+  },
+
+  /**
+   * Get cycle history
+   */
+  async getHistory(workspaceId: string, limit = 20): Promise<CycleHistory | null> {
+    return apiClient.get<CycleHistory | null>(`/api/workspaces/${workspaceId}/cycle/history?limit=${limit}`);
   },
 
   /**
@@ -49,6 +79,13 @@ export const studyCycleApi = {
    */
   async advance(workspaceId: string): Promise<StudyCycle> {
     return apiClient.post<StudyCycle>(`/api/workspaces/${workspaceId}/cycle/advance`);
+  },
+
+  /**
+   * Reset cycle (zeroes progress, keeps sessions)
+   */
+  async reset(workspaceId: string): Promise<StudyCycle> {
+    return apiClient.post<StudyCycle>(`/api/workspaces/${workspaceId}/cycle/reset`);
   },
 
   /**

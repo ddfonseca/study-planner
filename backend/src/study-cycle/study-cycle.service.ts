@@ -7,6 +7,42 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudyCycleDto, UpdateStudyCycleDto } from './dto';
 
+export interface CycleItemProgress {
+  subject: string;
+  targetMinutes: number;
+  accumulatedMinutes: number;
+  isComplete: boolean;
+  position: number;
+}
+
+export interface CycleStatistics {
+  totalTargetMinutes: number;
+  totalAccumulatedMinutes: number;
+  completedItemsCount: number;
+  totalItemsCount: number;
+  overallPercentage: number;
+  averagePerItem: number;
+}
+
+export interface CycleHistoryEntry {
+  id: string;
+  type: 'advance' | 'completion';
+  fromSubject?: string;
+  toSubject?: string;
+  minutesSpent?: number;
+  cycleName?: string;
+  totalTargetMinutes?: number;
+  totalSpentMinutes?: number;
+  itemsCount?: number;
+  timestamp: Date;
+}
+
+export interface CycleHistory {
+  entries: CycleHistoryEntry[];
+  totalAdvances: number;
+  totalCompletions: number;
+}
+
 export interface CycleSuggestion {
   hasCycle: boolean;
   suggestion: {
@@ -19,12 +55,15 @@ export interface CycleSuggestion {
     nextTargetMinutes: number;
     currentPosition: number;
     totalItems: number;
+    allItemsProgress: CycleItemProgress[];
+    isCycleComplete: boolean;
   } | null;
 }
 
 @Injectable()
 export class StudyCycleService {
   constructor(private prisma: PrismaService) {}
+
 
   /**
    * Verifica se o usuário tem acesso ao workspace
@@ -46,13 +85,13 @@ export class StudyCycleService {
   }
 
   /**
-   * Busca o ciclo de um workspace (com itens ordenados)
+   * Busca o ciclo ativo de um workspace (com itens ordenados)
    */
   async getCycle(userId: string, workspaceId: string) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
-    return this.prisma.studyCycle.findUnique({
-      where: { workspaceId },
+    return this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
       include: {
         items: {
           orderBy: { position: 'asc' },
@@ -62,22 +101,98 @@ export class StudyCycleService {
   }
 
   /**
-   * Cria um novo ciclo (substitui existente)
+   * Lista todos os ciclos de um workspace
+   */
+  async listCycles(userId: string, workspaceId: string) {
+    await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    return this.prisma.studyCycle.findMany({
+      where: { workspaceId },
+      orderBy: [{ isActive: 'desc' }, { displayOrder: 'asc' }, { name: 'asc' }],
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+  }
+
+  /**
+   * Ativa um ciclo específico (desativa os outros)
+   */
+  async activateCycle(userId: string, workspaceId: string, cycleId: string) {
+    await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    // Verify the cycle exists and belongs to this workspace
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { id: cycleId, workspaceId },
+    });
+
+    if (!cycle) {
+      throw new NotFoundException('Cycle not found');
+    }
+
+    // Deactivate all cycles in this workspace
+    await this.prisma.studyCycle.updateMany({
+      where: { workspaceId },
+      data: { isActive: false },
+    });
+
+    // Activate the selected cycle
+    return this.prisma.studyCycle.update({
+      where: { id: cycleId },
+      data: { isActive: true },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+  }
+
+  /**
+   * Cria um novo ciclo
    */
   async create(userId: string, workspaceId: string, dto: CreateStudyCycleDto) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
-    // Deletar ciclo existente se houver
-    await this.prisma.studyCycle.deleteMany({
-      where: { workspaceId },
+    // Check if name already exists
+    const existing = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, name: dto.name },
     });
 
-    // Criar novo ciclo com itens
+    if (existing) {
+      throw new BadRequestException('A cycle with this name already exists');
+    }
+
+    // Get current max displayOrder
+    const maxOrder = await this.prisma.studyCycle.aggregate({
+      where: { workspaceId },
+      _max: { displayOrder: true },
+    });
+    const nextOrder = (maxOrder._max.displayOrder ?? -1) + 1;
+
+    // Check if this is the first cycle (auto-activate)
+    const cycleCount = await this.prisma.studyCycle.count({
+      where: { workspaceId },
+    });
+    const shouldActivate = cycleCount === 0;
+
+    // If activating this cycle, deactivate others first
+    if (shouldActivate || dto.activateOnCreate) {
+      await this.prisma.studyCycle.updateMany({
+        where: { workspaceId },
+        data: { isActive: false },
+      });
+    }
+
+    // Create new cycle with items
     return this.prisma.studyCycle.create({
       data: {
         workspaceId,
         name: dto.name,
-        isActive: true,
+        isActive: shouldActivate || dto.activateOnCreate === true,
+        displayOrder: nextOrder,
         currentItemIndex: 0,
         items: {
           create: dto.items.map((item, index) => ({
@@ -96,13 +211,13 @@ export class StudyCycleService {
   }
 
   /**
-   * Atualiza ciclo existente
+   * Atualiza ciclo ativo existente
    */
   async update(userId: string, workspaceId: string, dto: UpdateStudyCycleDto) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
-    const cycle = await this.prisma.studyCycle.findUnique({
-      where: { workspaceId },
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
     });
 
     if (!cycle) {
@@ -175,14 +290,18 @@ export class StudyCycleService {
   }
 
   /**
-   * Avança para o próximo item do ciclo
+   * Avança para o próximo item do ciclo ativo
    */
   async advanceToNext(userId: string, workspaceId: string) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
-    const cycle = await this.prisma.studyCycle.findUnique({
-      where: { workspaceId },
-      include: { items: true },
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
     });
 
     if (!cycle) {
@@ -193,8 +312,64 @@ export class StudyCycleService {
       throw new BadRequestException('Cycle has no items');
     }
 
+    const currentIndex = cycle.currentItemIndex;
+    const currentItem = cycle.items[currentIndex];
+
     // Circular: volta ao início quando chega no final
-    const nextIndex = (cycle.currentItemIndex + 1) % cycle.items.length;
+    const nextIndex = (currentIndex + 1) % cycle.items.length;
+    const nextItem = cycle.items[nextIndex];
+
+    // Get accumulated minutes for current subject
+    const sessionsAgg = await this.prisma.studySession.aggregate({
+      where: { workspaceId, subject: currentItem.subject },
+      _sum: { minutes: true },
+    });
+    const minutesSpent = sessionsAgg._sum.minutes || 0;
+
+    // Record advance in history
+    await this.prisma.studyCycleAdvance.create({
+      data: {
+        cycleId: cycle.id,
+        fromSubject: currentItem.subject,
+        toSubject: nextItem.subject,
+        fromPosition: currentIndex,
+        toPosition: nextIndex,
+        minutesSpent,
+      },
+    });
+
+    // If completing the cycle (returning to position 0), record completion
+    if (nextIndex === 0) {
+      const totalTarget = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
+
+      // Get total accumulated for all subjects
+      const allSessionsAgg = await this.prisma.studySession.groupBy({
+        by: ['subject'],
+        where: { workspaceId },
+        _sum: { minutes: true },
+      });
+      const subjectMinutes = allSessionsAgg.reduce(
+        (acc, s) => {
+          acc[s.subject] = s._sum.minutes || 0;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+      const totalSpent = cycle.items.reduce(
+        (sum, item) => sum + (subjectMinutes[item.subject] || 0),
+        0,
+      );
+
+      await this.prisma.studyCycleCompletion.create({
+        data: {
+          cycleId: cycle.id,
+          cycleName: cycle.name,
+          totalTargetMinutes: totalTarget,
+          totalSpentMinutes: totalSpent,
+          itemsCount: cycle.items.length,
+        },
+      });
+    }
 
     return this.prisma.studyCycle.update({
       where: { id: cycle.id },
@@ -208,13 +383,13 @@ export class StudyCycleService {
   }
 
   /**
-   * Retorna a sugestão de estudo atual baseada no ciclo
+   * Retorna a sugestão de estudo atual baseada no ciclo ativo
    */
   async getSuggestion(userId: string, workspaceId: string): Promise<CycleSuggestion> {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
-    const cycle = await this.prisma.studyCycle.findUnique({
-      where: { workspaceId },
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
       include: {
         items: {
           orderBy: { position: 'asc' },
@@ -226,10 +401,14 @@ export class StudyCycleService {
       return { hasCycle: false, suggestion: null };
     }
 
-    // Buscar minutos acumulados por matéria das sessões
+    // Buscar minutos acumulados por matéria das sessões (filtrado por lastResetAt)
+    // Usa createdAt (timestamp completo) para filtrar corretamente
     const sessionsAgg = await this.prisma.studySession.groupBy({
       by: ['subject'],
-      where: { workspaceId },
+      where: {
+        workspaceId,
+        ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
+      },
       _sum: { minutes: true },
     });
 
@@ -258,6 +437,18 @@ export class StudyCycleService {
     const nextIndex = (cycle.currentItemIndex + 1) % itemsWithProgress.length;
     const nextItem = itemsWithProgress[nextIndex];
 
+    // Build progress for all items
+    const allItemsProgress: CycleItemProgress[] = itemsWithProgress.map((item) => ({
+      subject: item.subject,
+      targetMinutes: item.targetMinutes,
+      accumulatedMinutes: item.accumulatedMinutes,
+      isComplete: item.accumulatedMinutes >= item.targetMinutes,
+      position: item.position,
+    }));
+
+    // Check if entire cycle is complete
+    const isCycleComplete = allItemsProgress.every((item) => item.isComplete);
+
     return {
       hasCycle: true,
       suggestion: {
@@ -270,7 +461,174 @@ export class StudyCycleService {
         nextTargetMinutes: nextItem.targetMinutes,
         currentPosition: cycle.currentItemIndex,
         totalItems: itemsWithProgress.length,
+        allItemsProgress,
+        isCycleComplete,
       },
     };
+  }
+
+  /**
+   * Retorna estatísticas do ciclo ativo
+   */
+  async getStatistics(userId: string, workspaceId: string): Promise<CycleStatistics | null> {
+    await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+
+    if (!cycle || !cycle.isActive || cycle.items.length === 0) {
+      return null;
+    }
+
+    // Buscar minutos acumulados por matéria das sessões (filtrado por lastResetAt)
+    // Usa createdAt (timestamp completo) para filtrar corretamente
+    const sessionsAgg = await this.prisma.studySession.groupBy({
+      by: ['subject'],
+      where: {
+        workspaceId,
+        ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
+      },
+      _sum: { minutes: true },
+    });
+
+    const subjectMinutes = sessionsAgg.reduce(
+      (acc, s) => {
+        acc[s.subject] = s._sum.minutes || 0;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    // Calcular estatísticas
+    const totalTargetMinutes = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
+    const totalAccumulatedMinutes = cycle.items.reduce(
+      (sum, item) => sum + (subjectMinutes[item.subject] || 0),
+      0,
+    );
+
+    const completedItemsCount = cycle.items.filter(
+      (item) => (subjectMinutes[item.subject] || 0) >= item.targetMinutes,
+    ).length;
+
+    const totalItemsCount = cycle.items.length;
+    const overallPercentage =
+      totalTargetMinutes > 0
+        ? Math.min(100, Math.round((totalAccumulatedMinutes / totalTargetMinutes) * 100))
+        : 0;
+    const averagePerItem =
+      totalItemsCount > 0 ? Math.round(totalAccumulatedMinutes / totalItemsCount) : 0;
+
+    return {
+      totalTargetMinutes,
+      totalAccumulatedMinutes,
+      completedItemsCount,
+      totalItemsCount,
+      overallPercentage,
+      averagePerItem,
+    };
+  }
+
+  /**
+   * Retorna histórico de avanços e completudes do ciclo
+   */
+  async getHistory(
+    userId: string,
+    workspaceId: string,
+    limit = 20,
+  ): Promise<CycleHistory | null> {
+    await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
+    });
+
+    if (!cycle) {
+      return null;
+    }
+
+    // Get advances
+    const advances = await this.prisma.studyCycleAdvance.findMany({
+      where: { cycleId: cycle.id },
+      orderBy: { advancedAt: 'desc' },
+      take: limit,
+    });
+
+    // Get completions
+    const completions = await this.prisma.studyCycleCompletion.findMany({
+      where: { cycleId: cycle.id },
+      orderBy: { completedAt: 'desc' },
+      take: limit,
+    });
+
+    // Merge and sort by timestamp
+    const entries: CycleHistoryEntry[] = [
+      ...advances.map((a) => ({
+        id: a.id,
+        type: 'advance' as const,
+        fromSubject: a.fromSubject,
+        toSubject: a.toSubject,
+        minutesSpent: a.minutesSpent,
+        timestamp: a.advancedAt,
+      })),
+      ...completions.map((c) => ({
+        id: c.id,
+        type: 'completion' as const,
+        cycleName: c.cycleName || undefined,
+        totalTargetMinutes: c.totalTargetMinutes,
+        totalSpentMinutes: c.totalSpentMinutes,
+        itemsCount: c.itemsCount,
+        timestamp: c.completedAt,
+      })),
+    ]
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, limit);
+
+    // Get total counts
+    const totalAdvances = await this.prisma.studyCycleAdvance.count({
+      where: { cycleId: cycle.id },
+    });
+    const totalCompletions = await this.prisma.studyCycleCompletion.count({
+      where: { cycleId: cycle.id },
+    });
+
+    return {
+      entries,
+      totalAdvances,
+      totalCompletions,
+    };
+  }
+
+  /**
+   * Reseta o ciclo ativo (zera progresso mantendo sessões)
+   */
+  async resetCycle(userId: string, workspaceId: string) {
+    await this.verifyWorkspaceAccess(userId, workspaceId);
+
+    const cycle = await this.prisma.studyCycle.findFirst({
+      where: { workspaceId, isActive: true },
+    });
+
+    if (!cycle) {
+      throw new NotFoundException('Study cycle not found');
+    }
+
+    return this.prisma.studyCycle.update({
+      where: { id: cycle.id },
+      data: {
+        lastResetAt: new Date(),
+        currentItemIndex: 0,
+      },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
   }
 }

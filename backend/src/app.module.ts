@@ -44,11 +44,11 @@ import { StudyCycleModule } from './study-cycle/study-cycle.module';
         }),
       ],
     }),
-    // Rate limiting: 100 requests per minute, 10 per second
+    // Rate limiting: 300 requests per minute, 30 per second
     ThrottlerModule.forRoot({
       throttlers: [
-        { ttl: 60000, limit: 100 },
-        { ttl: 1000, limit: 10 },
+        { ttl: 60000, limit: 300 },
+        { ttl: 1000, limit: 30 },
       ],
     }),
     PrismaModule,

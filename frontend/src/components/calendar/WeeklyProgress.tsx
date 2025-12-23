@@ -7,34 +7,48 @@ import { TrendingUp } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
 import { formatTime } from '@/lib/utils/time';
-
-const DAYS_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+import { getDayNames } from '@/lib/utils/date';
 
 export function WeeklyProgress() {
   const { sessions } = useSessionStore();
-  const { targetHours } = useConfigStore();
+  const { targetHours, weekStartDay } = useConfigStore();
 
-  // Get last 7 days data
+  // Get current week data (fixed days, respecting weekStartDay)
   const weekData = useMemo(() => {
     const today = new Date();
-    const days: { date: Date; minutes: number; label: string; isToday: boolean }[] = [];
+    const todayKey = today.toISOString().split('T')[0];
+    const currentDayOfWeek = today.getDay(); // 0=Dom, 1=Seg...
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
+    // Calculate start of current week
+    let diff = currentDayOfWeek - weekStartDay;
+    if (diff < 0) diff += 7;
+
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - diff);
+
+    // Get day labels based on weekStartDay
+    const dayLabels = getDayNames(weekStartDay);
+
+    // Generate 7 days of the week
+    const days: { date: Date; minutes: number; label: string; isToday: boolean; isFuture: boolean }[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + i);
       const dateKey = date.toISOString().split('T')[0];
       const dayData = sessions[dateKey];
 
       days.push({
         date,
         minutes: dayData?.totalMinutos || 0,
-        label: DAYS_SHORT[date.getDay()],
-        isToday: i === 0,
+        label: dayLabels[i],
+        isToday: dateKey === todayKey,
+        isFuture: date > today,
       });
     }
 
     return days;
-  }, [sessions]);
+  }, [sessions, weekStartDay]);
 
   // Calculate weekly total and progress
   const weeklyStats = useMemo(() => {
@@ -99,9 +113,9 @@ export function WeeklyProgress() {
           </div>
         </div>
 
-        {/* Bar Chart - Last 7 days */}
+        {/* Bar Chart - Current week */}
         <div>
-          <p className="text-xs text-muted-foreground mb-2">Últimos 7 dias</p>
+          <p className="text-xs text-muted-foreground mb-2">Semana atual</p>
           <div className="flex items-end gap-1 h-16">
             {weekData.map((day, index) => {
               const height = weeklyStats.maxMinutes > 0
@@ -116,24 +130,32 @@ export function WeeklyProgress() {
                   >
                     <div
                       className={`absolute bottom-0 w-full rounded-t transition-all ${
-                        day.isToday
+                        day.isFuture
+                          ? 'bg-muted/30'
+                          : day.isToday
                           ? 'bg-primary'
                           : day.minutes > 0
                           ? 'bg-sky-300 dark:bg-sky-700'
                           : 'bg-muted'
                       }`}
                       style={{
-                        height: day.minutes > 0 ? `${Math.max(height, 8)}%` : '4px'
+                        height: day.isFuture ? '4px' : day.minutes > 0 ? `${Math.max(height, 8)}%` : '4px'
                       }}
                     />
                     {/* Tooltip */}
-                    {day.minutes > 0 && (
+                    {day.minutes > 0 && !day.isFuture && (
                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md border">
                         {formatTime(day.minutes)}
                       </div>
                     )}
                   </div>
-                  <span className={`text-[10px] ${day.isToday ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+                  <span className={`text-[10px] ${
+                    day.isFuture
+                      ? 'text-muted-foreground/50'
+                      : day.isToday
+                      ? 'font-bold text-primary'
+                      : 'text-muted-foreground'
+                  }`}>
                     {day.label}
                   </span>
                 </div>

@@ -111,7 +111,7 @@ model Workspace {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   studySessions StudySession[]
   weeklyGoals   WeeklyGoal[]
-  studyCycle    StudyCycle?
+  studyCycles   StudyCycle[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -181,20 +181,26 @@ enum Permission {
   WRITE
 }
 
-// Study Cycle - rotational study schedule per workspace
+// Study Cycle - rotational study schedule per workspace (multiple cycles allowed)
 model StudyCycle {
-  id               String   @id @default(cuid())
-  workspaceId      String   @unique @map("workspace_id")
-  name             String?  @db.VarChar(50)
-  isActive         Boolean  @default(true) @map("is_active")
-  currentItemIndex Int      @default(0) @map("current_item_index")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id               String    @id @default(cuid())
+  workspaceId      String    @map("workspace_id")
+  name             String    @db.VarChar(50)
+  isActive         Boolean   @default(false) @map("is_active")
+  currentItemIndex Int       @default(0) @map("current_item_index")
+  displayOrder     Int       @default(0) @map("display_order")
+  lastResetAt      DateTime? @map("last_reset_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  items     StudyCycleItem[]
+  workspace   Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items       StudyCycleItem[]
+  advances    StudyCycleAdvance[]
+  completions StudyCycleCompletion[]
 
+  @@unique([workspaceId, name])
   @@index([workspaceId])
+  @@index([workspaceId, isActive])
   @@map("study_cycles")
 }
 
@@ -211,4 +217,39 @@ model StudyCycleItem {
   @@unique([cycleId, position])
   @@index([cycleId])
   @@map("study_cycle_items")
+}
+
+// Study Cycle Advance - tracks each time user advances to next subject
+model StudyCycleAdvance {
+  id           String   @id @default(cuid())
+  cycleId      String   @map("cycle_id")
+  fromSubject  String   @map("from_subject") @db.VarChar(100)
+  toSubject    String   @map("to_subject") @db.VarChar(100)
+  fromPosition Int      @map("from_position")
+  toPosition   Int      @map("to_position")
+  minutesSpent Int      @map("minutes_spent")
+  advancedAt   DateTime @default(now()) @map("advanced_at")
+
+  cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  @@index([cycleId])
+  @@index([advancedAt])
+  @@map("study_cycle_advances")
+}
+
+// Study Cycle Completion - tracks when entire cycle is completed
+model StudyCycleCompletion {
+  id                 String   @id @default(cuid())
+  cycleId            String   @map("cycle_id")
+  cycleName          String?  @map("cycle_name") @db.VarChar(50)
+  totalTargetMinutes Int      @map("total_target_minutes")
+  totalSpentMinutes  Int      @map("total_spent_minutes")
+  itemsCount         Int      @map("items_count")
+  completedAt        DateTime @default(now()) @map("completed_at")
+
+  cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  @@index([cycleId])
+  @@index([completedAt])
+  @@map("study_cycle_completions")
 }

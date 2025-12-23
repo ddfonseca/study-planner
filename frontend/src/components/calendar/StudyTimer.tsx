@@ -86,6 +86,22 @@ export function StudyTimer({ subjects }: StudyTimerProps) {
     };
   }, [isRunning]);
 
+  // Update page title when timer is running
+  useEffect(() => {
+    if (isRunning) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      document.title = `${timeStr} - ${subject}`;
+    } else {
+      document.title = 'Study Planner';
+    }
+    return () => {
+      document.title = 'Study Planner';
+    };
+  }, [isRunning, seconds, subject]);
+
   const formatTime = (totalSeconds: number): string => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);

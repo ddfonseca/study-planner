@@ -74,12 +74,13 @@ export function SessionModal({
     try {
       if (isEditing && editingSession) {
         await onUpdateSession(editingSession.id, subject.trim(), parseInt(minutes, 10));
+        setEditingSession(null);
       } else {
         await onAddSession(subject.trim(), parseInt(minutes, 10));
       }
       setSubject('');
       setMinutes('');
-      setEditingSession(null);
+      onClose();
     } finally {
       setIsSubmitting(false);
     }
