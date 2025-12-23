@@ -4,6 +4,7 @@
 import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useStudyCycleStore } from '@/store/studyCycleStore';
 import type { CreateSessionDto, UpdateSessionDto } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
 
@@ -22,6 +23,7 @@ export function useSessions() {
   } = useSessionStore();
 
   const { currentWorkspaceId } = useWorkspaceStore();
+  const { cycle, fetchSuggestion } = useStudyCycleStore();
 
   // Effective workspace ID ("all" for consolidated view)
   const effectiveWorkspaceId = currentWorkspaceId || 'all';
@@ -67,9 +69,12 @@ export function useSessions() {
         subject,
         minutes,
       };
-      return addSession(sessionData);
+      const result = await addSession(sessionData);
+      // Refresh cycle suggestion to reflect new accumulated minutes
+      fetchSuggestion(currentWorkspaceId);
+      return result;
     },
-    [addSession, currentWorkspaceId]
+    [addSession, currentWorkspaceId, fetchSuggestion]
   );
 
   // Update a study session
@@ -79,17 +84,27 @@ export function useSessions() {
         subject,
         minutes,
       };
-      return updateSession(id, sessionData);
+      const result = await updateSession(id, sessionData);
+      // Refresh cycle suggestion to reflect updated minutes
+      if (currentWorkspaceId) {
+        fetchSuggestion(currentWorkspaceId);
+      }
+      return result;
     },
-    [updateSession]
+    [updateSession, currentWorkspaceId, fetchSuggestion]
   );
 
   // Delete a study session
   const handleDeleteSession = useCallback(
     async (id: string) => {
-      return deleteSession(id);
+      const result = await deleteSession(id);
+      // Refresh cycle suggestion to reflect deleted minutes
+      if (currentWorkspaceId) {
+        fetchSuggestion(currentWorkspaceId);
+      }
+      return result;
     },
-    [deleteSession]
+    [deleteSession, currentWorkspaceId, fetchSuggestion]
   );
 
   // Get weekly totals
@@ -108,16 +123,18 @@ export function useSessions() {
     [sessions]
   );
 
-  // Get unique subjects from all sessions (for autocomplete)
+  // Get unique subjects from all sessions and cycle (for autocomplete)
   const getUniqueSubjects = useCallback((): string[] => {
     const subjectsSet = new Set<string>();
     Object.values(sessions).forEach((dayData) => {
       dayData.materias.forEach((m) => subjectsSet.add(m.materia));
     });
+    // Include subjects from study cycle
+    cycle?.items.forEach((item) => subjectsSet.add(item.subject));
     return Array.from(subjectsSet).sort((a, b) =>
       a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
     );
-  }, [sessions]);
+  }, [sessions, cycle]);
 
   return {
     sessions,

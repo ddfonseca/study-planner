@@ -113,3 +113,60 @@ export interface UpdateWorkspaceDto {
   name?: string;
   color?: string;
 }
+
+// Study Cycle Item
+export interface StudyCycleItem {
+  id: string;
+  cycleId: string;
+  subject: string;
+  targetMinutes: number;
+  position: number;
+}
+
+// Study Cycle
+export interface StudyCycle {
+  id: string;
+  workspaceId: string;
+  name: string | null;
+  isActive: boolean;
+  currentItemIndex: number;
+  items: StudyCycleItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Cycle Suggestion response
+export interface CycleSuggestion {
+  hasCycle: boolean;
+  suggestion: {
+    currentSubject: string;
+    currentTargetMinutes: number;
+    currentAccumulatedMinutes: number;
+    remainingMinutes: number;
+    isCurrentComplete: boolean;
+    nextSubject: string;
+    nextTargetMinutes: number;
+    currentPosition: number;
+    totalItems: number;
+  } | null;
+}
+
+// Create cycle item DTO
+export interface CreateCycleItemDto {
+  subject: string;
+  targetMinutes: number;
+}
+
+// Create study cycle DTO
+export interface CreateStudyCycleDto {
+  name?: string;
+  items: CreateCycleItemDto[];
+}
+
+// Update study cycle DTO
+export interface UpdateStudyCycleDto {
+  name?: string;
+  isActive?: boolean;
+  currentItemIndex?: number;
+  items?: CreateCycleItemDto[];
+}

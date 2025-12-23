@@ -18,6 +18,7 @@ import {
   QuickAddSession,
   WeeklyProgress,
 } from '@/components/calendar';
+import { CycleSuggestionCard } from '@/components/study-cycle';
 import { formatDateKey } from '@/lib/utils/date';
 import type { DayData } from '@/types/session';
 
@@ -193,6 +194,7 @@ export function CalendarPage() {
 
         {/* Sidebar */}
         <div className="space-y-4">
+          <CycleSuggestionCard />
           <QuickAddSession
             subjects={getUniqueSubjects()}
             onAddSession={handleQuickAddSession}
