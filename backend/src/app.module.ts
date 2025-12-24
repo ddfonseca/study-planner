@@ -13,6 +13,7 @@ import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { StudyCycleModule } from './study-cycle/study-cycle.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { MercadoPagoModule } from './mercadopago/mercadopago.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     WorkspaceModule,
     StudyCycleModule,
     SubscriptionModule,
+    MercadoPagoModule,
   ],
   providers: [
     {

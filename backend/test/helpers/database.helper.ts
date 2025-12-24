@@ -74,3 +74,81 @@ export async function createTestUserWithWorkspace(data?: {
   });
   return { user, workspace };
 }
+
+/**
+ * Create a subscription plan
+ */
+export async function createTestSubscriptionPlan(data?: {
+  name?: string;
+  displayName?: string;
+  priceMonthly?: number;
+  priceYearly?: number;
+  mercadoPagoPlanId?: string;
+}): Promise<{
+  id: string;
+  name: string;
+  displayName: string;
+  priceMonthly: number;
+  priceYearly: number;
+}> {
+  const prisma = jestPrisma.client;
+  const plan = await prisma.subscriptionPlan.create({
+    data: {
+      name: data?.name || `plan-${Date.now()}`,
+      displayName: data?.displayName || 'Test Plan',
+      priceMonthly: data?.priceMonthly ?? 19.90,
+      priceYearly: data?.priceYearly ?? 199.90,
+      mercadoPagoPlanId: data?.mercadoPagoPlanId,
+    },
+  });
+  return plan;
+}
+
+/**
+ * Create plan limits
+ */
+export async function createTestPlanLimits(
+  planId: string,
+  limits: Array<{ feature: string; limitValue: number }>,
+): Promise<void> {
+  const prisma = jestPrisma.client;
+  await prisma.planLimit.createMany({
+    data: limits.map((l) => ({
+      planId,
+      feature: l.feature,
+      limitValue: l.limitValue,
+    })),
+  });
+}
+
+/**
+ * Create a subscription for a user
+ */
+export async function createTestSubscription(
+  userId: string,
+  planId: string,
+  data?: {
+    status?: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'TRIALING' | 'PAUSED';
+    billingCycle?: 'MONTHLY' | 'YEARLY';
+    externalId?: string;
+  },
+): Promise<{
+  id: string;
+  userId: string;
+  planId: string;
+  status: string;
+}> {
+  const prisma = jestPrisma.client;
+  const subscription = await prisma.subscription.create({
+    data: {
+      userId,
+      planId,
+      status: data?.status || 'ACTIVE',
+      billingCycle: data?.billingCycle || 'MONTHLY',
+      externalId: data?.externalId,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+  return subscription;
+}

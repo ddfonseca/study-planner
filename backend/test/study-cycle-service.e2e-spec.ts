@@ -10,18 +10,27 @@ import {
 } from '@nestjs/common';
 import { StudyCycleService } from '../src/study-cycle/study-cycle.service';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { SubscriptionService } from '../src/subscription/subscription.service';
 import { createTestUser, createTestWorkspace, createTestUserWithWorkspace } from './helpers/database.helper';
 
 describe('StudyCycleService', () => {
   let service: StudyCycleService;
 
+  // Mock SubscriptionService to always allow (no limits enforced in tests)
+  const mockSubscriptionService = {
+    enforceFeatureLimit: jest.fn().mockResolvedValue(undefined),
+    checkFeatureLimit: jest.fn().mockResolvedValue({ allowed: true, limit: -1, current: 0, remaining: Infinity }),
+  };
+
   beforeEach(async () => {
     const prisma = jestPrisma.client;
+    jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StudyCycleService,
         { provide: PrismaService, useValue: prisma },
+        { provide: SubscriptionService, useValue: mockSubscriptionService },
       ],
     }).compile();
 

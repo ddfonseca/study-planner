@@ -261,15 +261,16 @@ model StudyCycleCompletion {
 
 // Subscription Plan - available plans (free, pro, business)
 model SubscriptionPlan {
-  id           String   @id @default(cuid())
-  name         String   @unique @db.VarChar(50) // "free", "pro", "business"
-  displayName  String   @map("display_name") @db.VarChar(100)
-  description  String?
-  priceMonthly Float    @default(0) @map("price_monthly")
-  priceYearly  Float    @default(0) @map("price_yearly")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(cuid())
+  name               String   @unique @db.VarChar(50) // "free", "pro", "business"
+  displayName        String   @map("display_name") @db.VarChar(100)
+  description        String?
+  priceMonthly       Float    @default(0) @map("price_monthly")
+  priceYearly        Float    @default(0) @map("price_yearly")
+  isActive           Boolean  @default(true) @map("is_active")
+  mercadoPagoPlanId  String?  @map("mercadopago_plan_id") // Mercado Pago preapproval_plan ID
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   limits        PlanLimit[]
   subscriptions Subscription[]

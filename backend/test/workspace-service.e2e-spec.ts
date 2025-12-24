@@ -10,18 +10,27 @@ import {
 } from '@nestjs/common';
 import { WorkspaceService } from '../src/workspace/workspace.service';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { SubscriptionService } from '../src/subscription/subscription.service';
 import { createTestUser, createTestWorkspace, createTestUserWithWorkspace } from './helpers/database.helper';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
 
+  // Mock SubscriptionService to always allow (no limits enforced in tests)
+  const mockSubscriptionService = {
+    enforceFeatureLimit: jest.fn().mockResolvedValue(undefined),
+    checkFeatureLimit: jest.fn().mockResolvedValue({ allowed: true, limit: -1, current: 0, remaining: Infinity }),
+  };
+
   beforeEach(async () => {
     const prisma = jestPrisma.client;
+    jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WorkspaceService,
         { provide: PrismaService, useValue: prisma },
+        { provide: SubscriptionService, useValue: mockSubscriptionService },
       ],
     }).compile();
 
@@ -152,16 +161,25 @@ describe('WorkspaceService', () => {
       expect(workspace.name).toBe('Work');
     });
 
-    it('should throw BadRequestException when limit exceeded', async () => {
+    it('should throw ForbiddenException when subscription limit exceeded', async () => {
       const user = await createTestUser();
-      // Create 5 workspaces (max limit)
-      for (let i = 0; i < 5; i++) {
-        await createTestWorkspace(user.id, { name: `Workspace ${i}` });
-      }
+
+      // Mock subscription service to throw on limit check
+      mockSubscriptionService.enforceFeatureLimit.mockRejectedValueOnce(
+        new ForbiddenException('Limite de workspaces atingido. Faça upgrade para criar mais.'),
+      );
 
       await expect(
-        service.create(user.id, { name: 'Sixth Workspace' }),
-      ).rejects.toThrow(BadRequestException);
+        service.create(user.id, { name: 'New Workspace' }),
+      ).rejects.toThrow(ForbiddenException);
+
+      // Verify enforceFeatureLimit was called
+      expect(mockSubscriptionService.enforceFeatureLimit).toHaveBeenCalledWith(
+        user.id,
+        'max_workspaces',
+        expect.any(Number),
+        expect.any(String),
+      );
     });
   });
 

@@ -37,6 +37,9 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-5bMpeQmYI3f9NUyzvNyUIvJ1iInuXuP2riMu//DQcj8=}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-}
+      MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY:-}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET:-}
     volumes:
       - ./backend:/app
       - /app/node_modules
