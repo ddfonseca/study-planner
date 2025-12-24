@@ -26,6 +26,7 @@ import {
 import type { Workspace } from '@/types/api';
 import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
 import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
+import { PricingModal } from '@/components/subscription';
 
 interface WorkspaceManagerProps {
   isOpen: boolean;
@@ -68,6 +69,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [moveToDefault, setMoveToDefault] = useState(true);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -183,6 +185,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
   const deletingWorkspace = workspaces.find((w) => w.id === deletingId);
 
   return (
+    <>
     <ResponsiveDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <ResponsiveDialogContent className="sm:max-w-[500px]">
         <ResponsiveDialogHeader>
@@ -455,6 +458,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                 feature={FEATURES.MAX_WORKSPACES}
                 currentUsage={workspaces.length}
                 variant="inline"
+                onUpgradeClick={() => setPricingModalOpen(true)}
               />
             </div>
           )}
@@ -472,6 +476,8 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
+    <PricingModal open={pricingModalOpen} onOpenChange={setPricingModalOpen} />
+  </>
   );
 }
 

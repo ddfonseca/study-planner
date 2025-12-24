@@ -22,6 +22,7 @@ import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
 import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
 import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
+import { PricingModal } from '@/components/subscription';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -39,6 +40,7 @@ export function CycleSuggestionCard() {
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('edit');
   const [showAllItems, setShowAllItems] = useState(false);
   const [cycleSelectorOpen, setCycleSelectorOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   // Check cycle limit
   const cycleLimit = useCanUseFeature(FEATURES.MAX_CYCLES, cycles.length);
@@ -88,11 +90,13 @@ export function CycleSuggestionCard() {
                 feature={FEATURES.MAX_CYCLES}
                 currentUsage={cycles.length}
                 variant="inline"
+                onUpgradeClick={() => setPricingModalOpen(true)}
               />
             )}
           </CardContent>
         </Card>
         <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode="create" />
+        <PricingModal open={pricingModalOpen} onOpenChange={setPricingModalOpen} />
       </>
     );
   }
@@ -351,6 +355,7 @@ export function CycleSuggestionCard() {
         </CardContent>
       </Card>
       <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode={editorMode} />
+      <PricingModal open={pricingModalOpen} onOpenChange={setPricingModalOpen} />
     </>
   );
 }
