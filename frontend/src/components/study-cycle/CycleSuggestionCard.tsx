@@ -16,10 +16,12 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy } from 'lucide-react';
+import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock } from 'lucide-react';
 import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
+import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
+import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -38,6 +40,10 @@ export function CycleSuggestionCard() {
   const [showAllItems, setShowAllItems] = useState(false);
   const [cycleSelectorOpen, setCycleSelectorOpen] = useState(false);
 
+  // Check cycle limit
+  const cycleLimit = useCanUseFeature(FEATURES.MAX_CYCLES, cycles.length);
+  const canCreateCycle = cycleLimit.canUse;
+
   // Fetch cycle data when workspace changes
   useEffect(() => {
     if (currentWorkspaceId) {
@@ -54,21 +60,36 @@ export function CycleSuggestionCard() {
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
               Ciclo de Estudos
+              <LimitIndicator
+                feature={FEATURES.MAX_CYCLES}
+                currentUsage={cycles.length}
+                className="ml-auto"
+              />
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground mb-3">
-              Configure um ciclo para receber sugestões do que estudar
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => setEditorOpen(true)}
-            >
-              <Settings className="h-3.5 w-3.5 mr-1.5" />
-              Configurar Ciclo
-            </Button>
+            {canCreateCycle ? (
+              <>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Configure um ciclo para receber sugestões do que estudar
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setEditorOpen(true)}
+                >
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
+                  Configurar Ciclo
+                </Button>
+              </>
+            ) : (
+              <UpgradePrompt
+                feature={FEATURES.MAX_CYCLES}
+                currentUsage={cycles.length}
+                variant="inline"
+              />
+            )}
           </CardContent>
         </Card>
         <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode="create" />
@@ -153,11 +174,21 @@ export function CycleSuggestionCard() {
                           ))}
                           <CommandItem
                             value="new"
-                            onSelect={() => handleCycleSelect('new')}
-                            className="text-primary"
+                            onSelect={() => canCreateCycle && handleCycleSelect('new')}
+                            className={canCreateCycle ? 'text-primary' : 'text-muted-foreground opacity-60'}
+                            disabled={!canCreateCycle}
                           >
-                            <Plus className="mr-2 h-3 w-3" />
+                            {canCreateCycle ? (
+                              <Plus className="mr-2 h-3 w-3" />
+                            ) : (
+                              <Lock className="mr-2 h-3 w-3" />
+                            )}
                             Novo ciclo
+                            <LimitIndicator
+                              feature={FEATURES.MAX_CYCLES}
+                              currentUsage={cycles.length}
+                              className="ml-auto"
+                            />
                           </CommandItem>
                         </CommandGroup>
                       </CommandList>

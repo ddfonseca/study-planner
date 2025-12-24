@@ -21,8 +21,11 @@ import {
   Check,
   X,
   AlertTriangle,
+  Lock,
 } from 'lucide-react';
 import type { Workspace } from '@/types/api';
+import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
+import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
 
 interface WorkspaceManagerProps {
   isOpen: boolean;
@@ -50,8 +53,11 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
-    canCreateWorkspace,
   } = useWorkspaceStore();
+
+  // Check workspace limit from subscription
+  const workspaceLimit = useCanUseFeature(FEATURES.MAX_WORKSPACES, workspaces.length);
+  const canCreateMore = workspaceLimit.canUse;
 
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -415,21 +421,42 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                 </Button>
               </div>
             </div>
-          ) : (
+          ) : canCreateMore ? (
             <Button
               variant="outline"
               className="w-full"
               onClick={() => setIsCreating(true)}
-              disabled={!canCreateWorkspace() || isLoading}
+              disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
               Novo Workspace
-              {!canCreateWorkspace() && (
-                <span className="ml-2 text-xs text-muted-foreground">
-                  (máx. 5)
-                </span>
-              )}
+              <LimitIndicator
+                feature={FEATURES.MAX_WORKSPACES}
+                currentUsage={workspaces.length}
+                className="ml-auto"
+              />
             </Button>
+          ) : (
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full opacity-60"
+                disabled
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                Novo Workspace
+                <LimitIndicator
+                  feature={FEATURES.MAX_WORKSPACES}
+                  currentUsage={workspaces.length}
+                  className="ml-auto"
+                />
+              </Button>
+              <UpgradePrompt
+                feature={FEATURES.MAX_WORKSPACES}
+                currentUsage={workspaces.length}
+                variant="inline"
+              />
+            </div>
           )}
 
           {/* Error message */}

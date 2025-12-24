@@ -4,12 +4,14 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { Button } from '@/components/ui/button';
 import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
+  const { fetchCurrentSubscription } = useSubscriptionStore();
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => {
     // Check localStorage or system preference
@@ -31,6 +33,13 @@ export function AppLayout() {
       localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
+
+  // Fetch subscription data when authenticated
+  useEffect(() => {
+    if (user) {
+      fetchCurrentSubscription();
+    }
+  }, [user, fetchCurrentSubscription]);
 
   const toggleTheme = () => setIsDark(!isDark);
 

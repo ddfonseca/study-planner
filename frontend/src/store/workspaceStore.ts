@@ -7,8 +7,6 @@ import { persist } from 'zustand/middleware';
 import type { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '@/types/api';
 import { workspacesApi } from '@/lib/api/workspaces';
 
-const MAX_WORKSPACES = 5;
-
 interface WorkspaceState {
   workspaces: Workspace[];
   currentWorkspaceId: string | null; // null means "all" (consolidated view)
@@ -24,7 +22,6 @@ interface WorkspaceActions {
   deleteWorkspace: (id: string, moveToDefault: boolean) => Promise<void>;
   getCurrentWorkspace: () => Workspace | null;
   getDefaultWorkspace: () => Workspace | undefined;
-  canCreateWorkspace: () => boolean;
   clearWorkspaces: () => void;
 }
 
@@ -72,10 +69,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       createWorkspace: async (data) => {
         const { workspaces } = get();
-
-        if (workspaces.length >= MAX_WORKSPACES) {
-          throw new Error(`Maximum of ${MAX_WORKSPACES} workspaces allowed`);
-        }
 
         try {
           set({ isLoading: true, error: null });
@@ -161,11 +154,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       getDefaultWorkspace: () => {
         const { workspaces } = get();
         return workspaces.find((w) => w.isDefault);
-      },
-
-      canCreateWorkspace: () => {
-        const { workspaces } = get();
-        return workspaces.length < MAX_WORKSPACES;
       },
 
       clearWorkspaces: () => {

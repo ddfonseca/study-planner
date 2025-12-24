@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import {
   Target,
   BarChart3,
   Moon,
+  Sun,
   ChevronDown,
   BookOpen,
   Brain,
@@ -142,6 +143,26 @@ function CalendarPreview() {
 
 export function LandingPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   const benefits = [
     {
@@ -262,11 +283,21 @@ export function LandingPage() {
             <Clock className="h-6 w-6 text-primary" />
             <span className="font-semibold text-lg">Horas Líquidas</span>
           </div>
-          <Link to="/login">
-            <Button variant="outline" size="sm">
-              Entrar
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-          </Link>
+            <Link to="/login">
+              <Button variant="outline" size="sm">
+                Entrar
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
