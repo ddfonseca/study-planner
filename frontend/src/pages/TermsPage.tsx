@@ -25,7 +25,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">1. Aceitação dos Termos</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Ao acessar e usar o Study Planner, você concorda em cumprir estes Termos de Uso.
+              Ao acessar e usar o Horas Líquidas, você concorda em cumprir estes Termos de Uso.
               Se você não concordar com qualquer parte destes termos, não poderá acessar o serviço.
             </p>
           </section>
@@ -33,7 +33,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">2. Descrição do Serviço</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Study Planner é uma plataforma de gerenciamento de estudos que permite aos usuários:
+              O Horas Líquidas é uma plataforma de gerenciamento de estudos que permite aos usuários:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
               <li>Registrar sessões de estudo por matéria</li>
@@ -46,7 +46,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">3. Cadastro e Conta</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Para utilizar o Study Planner, você deve criar uma conta fornecendo informações
+              Para utilizar o Horas Líquidas, você deve criar uma conta fornecendo informações
               precisas e completas. Você é responsável por manter a confidencialidade de sua
               conta e senha, e por todas as atividades que ocorram em sua conta.
             </p>
@@ -55,7 +55,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">4. Uso Aceitável</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Você concorda em usar o Study Planner apenas para fins legais e de acordo com
+              Você concorda em usar o Horas Líquidas apenas para fins legais e de acordo com
               estes Termos. Você não deve:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
@@ -69,7 +69,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">5. Propriedade Intelectual</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Study Planner e seu conteúdo original, recursos e funcionalidades são de
+              O Horas Líquidas e seu conteúdo original, recursos e funcionalidades são de
               propriedade exclusiva dos desenvolvedores. O serviço é protegido por leis de
               direitos autorais e outras leis de propriedade intelectual.
             </p>
@@ -78,7 +78,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">6. Seus Dados</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Você mantém todos os direitos sobre os dados que insere no Study Planner,
+              Você mantém todos os direitos sobre os dados que insere no Horas Líquidas,
               incluindo suas sessões de estudo, matérias e configurações. Você pode exportar
               ou excluir seus dados a qualquer momento através das configurações da conta.
             </p>
@@ -87,7 +87,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">7. Limitação de Responsabilidade</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Study Planner é fornecido "como está", sem garantias de qualquer tipo.
+              O Horas Líquidas é fornecido "como está", sem garantias de qualquer tipo.
               Não garantimos que o serviço será ininterrupto, seguro ou livre de erros.
               Em nenhum caso seremos responsáveis por quaisquer danos indiretos, incidentais
               ou consequentes.

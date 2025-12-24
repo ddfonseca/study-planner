@@ -101,10 +101,10 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
       const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       document.title = `${timeStr} - ${subject}`;
     } else {
-      document.title = 'Study Planner';
+      document.title = 'Horas Líquidas';
     }
     return () => {
-      document.title = 'Study Planner';
+      document.title = 'Horas Líquidas';
     };
   }, [isRunning, seconds, subject]);
 

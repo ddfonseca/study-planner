@@ -13,7 +13,7 @@ export function AuthLayout() {
           <BookOpen className="h-8 w-8 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Study Planner</h1>
+          <h1 className="text-2xl font-bold text-foreground">Horas Líquidas</h1>
           <p className="text-sm text-muted-foreground">Organize seus estudos</p>
         </div>
       </div>

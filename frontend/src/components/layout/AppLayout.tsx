@@ -55,7 +55,7 @@ export function AppLayout() {
             <div className="flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />
               <span className="text-lg font-semibold text-foreground hidden sm:inline">
-                Study Planner
+                Horas Líquidas
               </span>
             </div>
 

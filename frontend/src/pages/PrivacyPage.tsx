@@ -25,7 +25,7 @@ export function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">1. Introdução</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Study Planner valoriza a privacidade dos seus usuários. Esta Política de
+              O Horas Líquidas valoriza a privacidade dos seus usuários. Esta Política de
               Privacidade explica como coletamos, usamos, armazenamos e protegemos suas
               informações pessoais quando você utiliza nosso serviço de gerenciamento de estudos.
             </p>
@@ -65,7 +65,7 @@ export function PrivacyPage() {
               Utilizamos suas informações para:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Fornecer e manter o serviço Study Planner</li>
+              <li>Fornecer e manter o serviço Horas Líquidas</li>
               <li>Personalizar sua experiência e exibir seu progresso</li>
               <li>Gerar estatísticas e dashboards de estudo</li>
               <li>Enviar notificações sobre suas metas (se habilitado)</li>
@@ -148,7 +148,7 @@ export function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">9. Menores de Idade</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Study Planner não é direcionado a menores de 13 anos. Não coletamos
+              O Horas Líquidas não é direcionado a menores de 13 anos. Não coletamos
               intencionalmente informações de crianças. Se você é pai/mãe ou responsável e
               acredita que seu filho nos forneceu informações, entre em contato para que
               possamos remover esses dados.

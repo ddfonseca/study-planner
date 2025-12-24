@@ -171,7 +171,7 @@ export function LandingPage() {
 
   const faqs = [
     {
-      question: 'O Study Planner é gratuito?',
+      question: 'O Horas Líquidas é gratuito?',
       answer:
         'Sim, oferecemos um plano gratuito com recursos essenciais para organizar seus estudos. Para funcionalidades avançadas como matérias ilimitadas e estatísticas detalhadas, temos o plano Pro.',
     },
@@ -259,7 +259,7 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Study Planner</span>
+            <span className="font-semibold text-lg">Horas Líquidas</span>
           </div>
           <Link to="/login">
             <Button variant="outline" size="sm">
@@ -528,7 +528,7 @@ export function LandingPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <span className="font-medium">Study Planner</span>
+              <span className="font-medium">Horas Líquidas</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <Link to="/terms" className="hover:text-foreground transition-colors">
@@ -539,7 +539,7 @@ export function LandingPage() {
               </Link>
             </div>
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Study Planner
+              © {new Date().getFullYear()} Horas Líquidas
             </div>
           </div>
         </div>

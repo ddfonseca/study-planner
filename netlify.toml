@@ -5,7 +5,7 @@
 
 [build.environment]
   VITE_API_BASE_URL = "https://study-planner-api.fly.dev"
-  VITE_FRONTEND_URL = "https://study-planner-front.netlify.app"
+  VITE_FRONTEND_URL = "https://horasliquidas.com.br"
 
 
 [[redirects]]
