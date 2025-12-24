@@ -2,7 +2,7 @@
  * Auth Layout for Login Page
  */
 import { Outlet } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 export function AuthLayout() {
   return (
@@ -10,7 +10,7 @@ export function AuthLayout() {
       {/* Logo */}
       <div className="flex items-center gap-3 mb-8">
         <div className="bg-primary p-3 rounded-xl">
-          <BookOpen className="h-8 w-8 text-primary-foreground" />
+          <Clock className="h-8 w-8 text-primary-foreground" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground">Horas Líquidas</h1>

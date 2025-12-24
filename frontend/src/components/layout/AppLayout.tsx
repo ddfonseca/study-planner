@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Calendar, BarChart3, Settings, LogOut, BookOpen, Moon, Sun } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 
 export function AppLayout() {
@@ -53,7 +53,7 @@ export function AppLayout() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <BookOpen className="h-6 w-6 text-primary" />
+              <Clock className="h-6 w-6 text-primary" />
               <span className="text-lg font-semibold text-foreground hidden sm:inline">
                 Horas Líquidas
               </span>

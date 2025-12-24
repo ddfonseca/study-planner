@@ -17,6 +17,7 @@ import {
   Check,
   Crown,
   Building2,
+  Clock,
 } from 'lucide-react';
 
 // FAQ Item component
@@ -258,7 +259,7 @@ export function LandingPage() {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" />
+            <Clock className="h-6 w-6 text-primary" />
             <span className="font-semibold text-lg">Horas Líquidas</span>
           </div>
           <Link to="/login">
@@ -527,7 +528,7 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
+              <Clock className="h-5 w-5 text-primary" />
               <span className="font-medium">Horas Líquidas</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
