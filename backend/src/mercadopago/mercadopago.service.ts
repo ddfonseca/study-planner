@@ -69,7 +69,8 @@ export class MercadoPagoService implements OnModuleInit {
       },
     });
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const backUrlBase = this.configService.get<string>('MERCADOPAGO_BACK_URL')
+      || this.configService.get<string>('FRONTEND_URL');
 
     for (const plan of plans) {
       try {
@@ -82,7 +83,7 @@ export class MercadoPagoService implements OnModuleInit {
             transaction_amount: plan.priceMonthly,
             currency_id: 'BRL',
           },
-          back_url: `${frontendUrl}/app/settings?subscription=success`,
+          back_url: `${backUrlBase}/app/settings?subscription=success`,
           external_reference: `plan_${plan.id}_monthly`,
         };
 
@@ -120,12 +121,21 @@ export class MercadoPagoService implements OnModuleInit {
       throw new Error('Cannot create subscription for free plan');
     }
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const backUrlBase = this.configService.get<string>('MERCADOPAGO_BACK_URL')
+      || this.configService.get<string>('FRONTEND_URL')
+      || 'http://localhost:5173';
     const amount = billingCycle === 'YEARLY' ? plan.priceYearly : plan.priceMonthly;
     const frequency = billingCycle === 'YEARLY' ? 12 : 1;
     const frequencyType = 'months';
+    const backUrl = `${backUrlBase}/app/settings?subscription=success`;
+
+    this.logger.log(`Creating subscription with back_url: ${backUrl}`);
 
     // Create subscription directly (without pre-created plan)
+    // Start date should be today or a future date
+    const startDate = new Date();
+    startDate.setMinutes(startDate.getMinutes() + 5); // Start 5 minutes from now
+
     const subscriptionData = {
       reason: `${plan.displayName} - ${billingCycle === 'YEARLY' ? 'Anual' : 'Mensal'}`,
       external_reference: `user_${userId}_plan_${planId}`,
@@ -135,12 +145,17 @@ export class MercadoPagoService implements OnModuleInit {
         frequency_type: frequencyType,
         transaction_amount: amount,
         currency_id: 'BRL',
+        start_date: startDate.toISOString(),
       },
-      back_url: `${frontendUrl}/app/settings?subscription=success`,
+      back_url: backUrl,
       status: 'pending' as const,
     };
 
+    this.logger.log(`Subscription data being sent: ${JSON.stringify(subscriptionData, null, 2)}`);
+
     const mpSubscription = await this.preApproval.create({ body: subscriptionData });
+
+    this.logger.log(`Mercado Pago response: ${JSON.stringify(mpSubscription, null, 2)}`);
 
     // Save pending subscription in our database
     await this.prisma.subscription.upsert({

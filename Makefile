@@ -1,4 +1,5 @@
-.PHONY: up down logs build test lint migrate prisma-generate deploy-front deploy-back deploy-all
+.PHONY: up down logs build test lint migrate prisma-generate \
+	deploy-front deploy-back deploy-all
 
 # Docker
 up:
@@ -33,9 +34,10 @@ migrate:
 prisma-generate:
 	docker-compose exec -T backend npx prisma generate
 
-# Deploy
+# Deploy - Production
 deploy-front:
-	netlify deploy --prod --filter frontend-new
+	cd frontend && npm run build
+	netlify deploy --prod --filter=frontend-new --dir=frontend/dist
 
 deploy-back:
 	cd backend && fly deploy

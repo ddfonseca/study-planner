@@ -1,12 +1,14 @@
 /**
- * Login Page with Google OAuth
+ * Login Page with Google OAuth and Email/Password (dev only)
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Mail } from 'lucide-react';
 
 // Google Icon SVG
 function GoogleIcon() {
@@ -33,9 +35,18 @@ function GoogleIcon() {
 }
 
 export function LoginPage() {
-  const { login, isAuthenticated, isLoading, checkSession } = useAuthStore();
+  const { login, loginWithEmail, signUpWithEmail, isAuthenticated, isLoading, error, isEmailAuthEnabled, checkSession } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Email auth state (dev only)
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const emailAuthEnabled = isEmailAuthEnabled();
 
   // Check session on mount
   useEffect(() => {
@@ -52,6 +63,22 @@ export function LoginPage() {
 
   const handleLogin = () => {
     login();
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    let success: boolean;
+
+    if (isSignUp) {
+      success = await signUpWithEmail(email, password, name);
+    } else {
+      success = await loginWithEmail(email, password);
+    }
+
+    if (success) {
+      // Check session after successful login
+      await checkSession();
+    }
   };
 
   return (
@@ -75,6 +102,92 @@ export function LoginPage() {
           )}
           <span className="ml-3 font-medium">Entrar com Google</span>
         </Button>
+
+        {/* Email/Password auth - DEV ONLY */}
+        {emailAuthEnabled && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Dev Only
+                </span>
+              </div>
+            </div>
+
+            {!showEmailForm ? (
+              <Button
+                variant="outline"
+                onClick={() => setShowEmailForm(true)}
+                className="w-full h-12"
+              >
+                <Mail className="h-5 w-5 mr-2" />
+                Entrar com Email (Dev)
+              </Button>
+            ) : (
+              <form onSubmit={handleEmailSubmit} className="space-y-3">
+                {isSignUp && (
+                  <div className="space-y-1">
+                    <Label htmlFor="name">Nome</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Seu nome"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                  />
+                </div>
+
+                {error && (
+                  <p className="text-sm text-destructive">{error}</p>
+                )}
+
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {isSignUp ? 'Criar conta' : 'Entrar'}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="w-full text-sm"
+                >
+                  {isSignUp ? 'Já tem conta? Entrar' : 'Não tem conta? Criar'}
+                </Button>
+              </form>
+            )}
+          </>
+        )}
 
         <div className="text-center text-sm text-muted-foreground">
           <p>Ao entrar, você concorda com nossos</p>

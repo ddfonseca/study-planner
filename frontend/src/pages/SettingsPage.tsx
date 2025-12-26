@@ -1,14 +1,16 @@
 /**
  * Settings Page - User configuration
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useConfigStore } from '@/store/configStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -16,20 +18,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers } from 'lucide-react';
+import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers, Crown } from 'lucide-react';
 import type { HeatmapStyle } from '@/store/configStore';
 import { useToast } from '@/hooks/use-toast';
 import { WorkspaceManager } from '@/components/workspace';
+import { PricingModal } from '@/components/subscription/PricingModal';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
   const { targetHours, weekStartDay, heatmapStyle, updateConfig, setHeatmapStyle, isLoading } = useConfigStore();
   const { workspaces } = useWorkspaceStore();
+  const { currentPlan, subscription, isFree, fetchCurrentSubscription } = useSubscriptionStore();
   const { toast } = useToast();
 
   const [localTargetHours, setLocalTargetHours] = useState(String(targetHours));
   const [localWeekStartDay, setLocalWeekStartDay] = useState(String(weekStartDay));
   const [isWorkspaceManagerOpen, setIsWorkspaceManagerOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  // Fetch subscription on mount
+  useEffect(() => {
+    fetchCurrentSubscription();
+  }, [fetchCurrentSubscription]);
 
   const handleHeatmapStyleChange = (value: string) => {
     setHeatmapStyle(value as HeatmapStyle);
@@ -101,6 +111,49 @@ export function SettingsPage() {
           ) : (
             <p className="text-muted-foreground">Carregando...</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Plan Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="h-5 w-5" />
+            Plano
+          </CardTitle>
+          <CardDescription>
+            Gerencie sua assinatura e veja os recursos disponíveis
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isFree ? 'bg-muted' : 'bg-primary/10'}`}>
+              <Crown className={`h-5 w-5 ${isFree ? 'text-muted-foreground' : 'text-primary'}`} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{currentPlan?.displayName || 'Gratuito'}</span>
+                {!isFree && subscription?.status === 'ACTIVE' && (
+                  <Badge variant="default" className="bg-green-500">Ativo</Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isFree
+                  ? 'Faça upgrade para desbloquear mais recursos'
+                  : subscription?.billingCycle === 'YEARLY'
+                    ? 'Cobrança anual'
+                    : 'Cobrança mensal'
+                }
+              </p>
+            </div>
+          </div>
+          <Button
+            variant={isFree ? 'default' : 'outline'}
+            onClick={() => setIsPricingModalOpen(true)}
+          >
+            <Crown className="h-4 w-4 mr-2" />
+            {isFree ? 'Fazer Upgrade' : 'Ver Planos'}
+          </Button>
         </CardContent>
       </Card>
 
@@ -246,6 +299,12 @@ export function SettingsPage() {
       <WorkspaceManager
         isOpen={isWorkspaceManagerOpen}
         onClose={() => setIsWorkspaceManagerOpen(false)}
+      />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        open={isPricingModalOpen}
+        onOpenChange={setIsPricingModalOpen}
       />
     </div>
   );

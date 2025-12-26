@@ -17,9 +17,9 @@ import {
   Repeat,
   Check,
   Crown,
-  Building2,
   Clock,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // FAQ Item component
 function FAQItem({
@@ -232,6 +232,7 @@ export function LandingPage() {
       ],
       cta: 'Começar grátis',
       highlighted: false,
+      discount: null,
     },
     {
       name: 'Pro',
@@ -249,24 +250,25 @@ export function LandingPage() {
         'Compartilhar com 5 pessoas',
       ],
       cta: 'Assinar Pro',
-      highlighted: true,
+      highlighted: false,
+      discount: null,
     },
     {
-      name: 'Business',
-      icon: Building2,
-      price: 'R$ 49,90',
-      period: '/mês',
-      description: 'Para equipes, escolas e instituições.',
+      name: 'Pro Anual',
+      icon: Crown,
+      price: 'R$ 167,16',
+      period: '/ano',
+      description: 'Economize 30% pagando anualmente.',
       features: [
         'Tudo do plano Pro',
-        'Ciclos ilimitados',
-        'Workspaces ilimitados',
-        'Histórico completo',
-        'Compartilhamentos ilimitados',
-        'Suporte prioritário',
+        'Equivale a R$ 13,93/mês',
+        'Cobrança única anual',
+        'Mesmo acesso completo',
+        'Melhor custo-benefício',
       ],
-      cta: 'Falar com vendas',
+      cta: 'Assinar Pro Anual',
       highlighted: false,
+      discount: '-30%',
     },
   ];
 
@@ -500,26 +502,42 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan, index) => {
               const IconComponent = plan.icon;
+              const isAnnual = plan.discount !== null;
+              const isPro = plan.name === 'Pro';
               return (
                 <Card
                   key={index}
                   className={`relative ${
-                    plan.highlighted
-                      ? 'border-primary shadow-lg shadow-primary/10 scale-105'
+                    isPro
+                      ? 'border-primary shadow-lg shadow-primary/10'
+                      : isAnnual
+                      ? 'border-green-500/50'
                       : 'border-border'
                   }`}
                 >
-                  {plan.highlighted && (
+                  {isAnnual && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                        Mais popular
-                      </span>
+                      <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                        {plan.discount} desconto
+                      </Badge>
                     </div>
                   )}
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className={`p-2 rounded-lg ${plan.highlighted ? 'bg-primary/10' : 'bg-muted'}`}>
-                        <IconComponent className={`h-5 w-5 ${plan.highlighted ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div className={`p-2 rounded-lg ${
+                        isPro
+                          ? 'bg-primary/10'
+                          : isAnnual
+                          ? 'bg-green-500/10'
+                          : 'bg-muted'
+                      }`}>
+                        <IconComponent className={`h-5 w-5 ${
+                          isPro
+                            ? 'text-primary'
+                            : isAnnual
+                            ? 'text-green-600'
+                            : 'text-muted-foreground'
+                        }`} />
                       </div>
                       <h3 className="text-xl font-semibold">{plan.name}</h3>
                     </div>
@@ -541,8 +559,8 @@ export function LandingPage() {
                     <Link to="/login" className="block">
                       <Button
                         size="lg"
-                        variant={plan.highlighted ? 'default' : 'outline'}
-                        className="w-full"
+                        variant={isPro || isAnnual ? 'default' : 'outline'}
+                        className={`w-full ${isAnnual ? 'bg-green-500 hover:bg-green-600 text-white border-green-500' : ''}`}
                       >
                         {plan.cta}
                       </Button>

@@ -34,6 +34,7 @@ services:
       NODE_ENV: development
       BACKEND_URL: http://localhost:3000
       FRONTEND_URL: http://localhost:5173
+      MERCADOPAGO_BACK_URL: https://horasliquidas.com.br
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-5bMpeQmYI3f9NUyzvNyUIvJ1iInuXuP2riMu//DQcj8=}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
@@ -60,7 +61,6 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # URL externa (acessível pelo navegador do usuário)
       VITE_API_BASE_URL: http://localhost:3000
       DOCKER_ENV: "true"
     volumes:
@@ -68,6 +68,23 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+    networks:
+      - study-planner-network
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: study-planner-ngrok
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command: start --all --config /etc/ngrok.yml --log stdout
+    ports:
+      - "4040:4040"  # ngrok web interface para ver as URLs
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml:ro
+    depends_on:
+      - backend
+      - frontend
     networks:
       - study-planner-network
 

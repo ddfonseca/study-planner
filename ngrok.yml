@@ -1,0 +1,6 @@
+version: 2
+tunnels:
+  backend:
+    addr: backend:3000
+    proto: http
+    domain: 79fc5238ef95-18152532938333394107.ngrok-free.app

@@ -1,7 +1,7 @@
 /**
  * PricingModal - Shows available subscription plans
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -12,8 +12,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { subscriptionApi } from '@/lib/api/subscription';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Crown, Building2, Check, Loader2 } from 'lucide-react';
+import { BookOpen, Crown, Check, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PricingModalProps {
   open: boolean;
@@ -24,7 +26,7 @@ interface PricingModalProps {
 const PLAN_ICONS: Record<string, typeof BookOpen> = {
   free: BookOpen,
   pro: Crown,
-  business: Building2,
+  pro_annual: Crown,
 };
 
 // Map feature keys to friendly labels
@@ -53,6 +55,8 @@ function formatLimitValue(feature: string, value: number): string {
 export function PricingModal({ open, onOpenChange }: PricingModalProps) {
   const { plans, fetchPlans, isLoading, currentPlan } = useSubscriptionStore();
   const { toast } = useToast();
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
 
   // Fetch plans when modal opens
   useEffect(() => {
@@ -61,16 +65,36 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
     }
   }, [open, plans.length, fetchPlans]);
 
-  const handleSelectPlan = (planName: string) => {
+  const handleSelectPlan = async (planId: string, planName: string) => {
     if (planName === 'free') {
       onOpenChange(false);
       return;
     }
 
-    toast({
-      title: 'Em breve!',
-      description: 'O pagamento online estará disponível em breve. Aguarde novidades!',
-    });
+    setIsSubscribing(true);
+    setSubscribingPlanId(planId);
+
+    try {
+      // Call the API to create subscription
+      const billingCycle = planName === 'pro_annual' ? 'YEARLY' : 'MONTHLY';
+      const response = await subscriptionApi.subscribe(planId, billingCycle);
+
+      if (response.success && response.initPoint) {
+        // Redirect to Mercado Pago checkout
+        window.location.href = response.initPoint;
+      } else {
+        throw new Error('Não foi possível iniciar o checkout');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast({
+        title: 'Erro ao assinar',
+        description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
+        variant: 'destructive',
+      });
+      setIsSubscribing(false);
+      setSubscribingPlanId(null);
+    }
   };
 
   return (
@@ -96,22 +120,28 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
               {plans.map((plan) => {
                 const Icon = PLAN_ICONS[plan.name] || BookOpen;
                 const isCurrentPlan = currentPlan?.id === plan.id;
-                const isHighlighted = plan.name === 'pro';
+                const isPro = plan.name === 'pro';
+                const isAnnual = plan.name === 'pro_annual';
+                const isFree = plan.name === 'free';
+
+                // Determine price to display
+                const price = isAnnual ? plan.priceYearly : plan.priceMonthly;
+                const priceLabel = isAnnual ? '/ano' : '/mês';
 
                 return (
                   <Card
                     key={plan.id}
                     className={`relative ${
-                      isHighlighted
+                      isPro
                         ? 'border-primary shadow-lg ring-1 ring-primary'
                         : ''
-                    } ${isCurrentPlan ? 'bg-primary/5' : ''}`}
+                    } ${isAnnual ? 'border-green-500/50' : ''} ${isCurrentPlan ? 'bg-primary/5' : ''}`}
                   >
-                    {isHighlighted && (
+                    {isAnnual && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                          Mais popular
-                        </span>
+                        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                          -30% desconto
+                        </Badge>
                       </div>
                     )}
                     <CardContent className="p-5 pt-6">
@@ -119,8 +149,10 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                       <div className="flex items-center gap-2 mb-2">
                         <div
                           className={`p-2 rounded-lg ${
-                            isHighlighted
+                            isPro
                               ? 'bg-primary/10 text-primary'
+                              : isAnnual
+                              ? 'bg-green-500/10 text-green-600'
                               : 'bg-muted text-muted-foreground'
                           }`}
                         >
@@ -132,12 +164,17 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                       {/* Price */}
                       <div className="mb-3">
                         <span className="text-2xl font-bold">
-                          {plan.priceMonthly === 0
+                          {isFree
                             ? 'Grátis'
-                            : `R$ ${plan.priceMonthly.toFixed(2).replace('.', ',')}`}
+                            : `R$ ${price.toFixed(2).replace('.', ',')}`}
                         </span>
-                        {plan.priceMonthly > 0 && (
-                          <span className="text-muted-foreground text-sm">/mês</span>
+                        {!isFree && (
+                          <span className="text-muted-foreground text-sm">{priceLabel}</span>
+                        )}
+                        {isAnnual && (
+                          <div className="text-xs text-green-600 mt-1">
+                            equivale a R$ {(price / 12).toFixed(2).replace('.', ',')}/mês
+                          </div>
                         )}
                       </div>
 
@@ -172,16 +209,23 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
 
                       {/* CTA Button */}
                       <Button
-                        className="w-full"
-                        variant={isHighlighted ? 'default' : 'outline'}
-                        onClick={() => handleSelectPlan(plan.name)}
-                        disabled={isCurrentPlan}
+                        className={`w-full ${isAnnual ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                        variant={isPro || isAnnual ? 'default' : 'outline'}
+                        onClick={() => handleSelectPlan(plan.id, plan.name)}
+                        disabled={isCurrentPlan || isSubscribing}
                       >
-                        {isCurrentPlan
-                          ? 'Plano atual'
-                          : plan.name === 'free'
-                            ? 'Plano atual'
-                            : 'Selecionar'}
+                        {subscribingPlanId === plan.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processando...
+                          </>
+                        ) : isCurrentPlan ? (
+                          'Plano atual'
+                        ) : plan.name === 'free' ? (
+                          'Plano gratuito'
+                        ) : (
+                          'Assinar agora'
+                        )}
                       </Button>
                     </CardContent>
                   </Card>

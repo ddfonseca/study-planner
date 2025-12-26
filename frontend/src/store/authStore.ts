@@ -16,10 +16,13 @@ interface AuthActions {
   setUser: (user: User) => void;
   clearAuth: () => void;
   login: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<boolean>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => Promise<void>;
   checkSession: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  isEmailAuthEnabled: () => boolean;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -58,6 +61,48 @@ export const useAuthStore = create<AuthStore>()((set) => ({
         error: error instanceof Error ? error.message : 'Failed to login',
       });
     }
+  },
+
+  loginWithEmail: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      const result = await authApi.loginWithEmail(email, password);
+      if (!result.success) {
+        set({ isLoading: false, error: result.error || 'Failed to login' });
+        return false;
+      }
+      // Session will be checked after redirect
+      return true;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to login',
+      });
+      return false;
+    }
+  },
+
+  signUpWithEmail: async (email: string, password: string, name: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      const result = await authApi.signUpWithEmail(email, password, name);
+      if (!result.success) {
+        set({ isLoading: false, error: result.error || 'Failed to sign up' });
+        return false;
+      }
+      // Session will be checked after redirect
+      return true;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to sign up',
+      });
+      return false;
+    }
+  },
+
+  isEmailAuthEnabled: () => {
+    return authApi.isEmailAuthEnabled();
   },
 
   logout: async () => {

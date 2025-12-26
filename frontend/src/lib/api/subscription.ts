@@ -92,6 +92,29 @@ export const subscriptionApi = {
       { immediate }
     );
   },
+
+  /**
+   * Subscribe to a plan (redirects to Mercado Pago checkout)
+   */
+  async subscribe(
+    planId: string,
+    billingCycle: 'MONTHLY' | 'YEARLY'
+  ): Promise<{ success: boolean; initPoint: string; subscriptionId: string }> {
+    return apiClient.post<
+      { success: boolean; initPoint: string; subscriptionId: string },
+      { planId: string; billingCycle: 'MONTHLY' | 'YEARLY' }
+    >('/api/mercadopago/subscribe', { planId, billingCycle });
+  },
+
+  /**
+   * Cancel subscription via Mercado Pago
+   */
+  async cancelMercadoPago(): Promise<{ success: boolean; message: string }> {
+    return apiClient.post<{ success: boolean; message: string }, Record<string, never>>(
+      '/api/mercadopago/cancel',
+      {}
+    );
+  },
 };
 
 export default subscriptionApi;

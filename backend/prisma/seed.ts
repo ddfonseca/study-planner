@@ -27,7 +27,7 @@ const plans = [
     displayName: 'Pro',
     description: 'Para estudantes dedicados que querem mais recursos',
     priceMonthly: 19.9,
-    priceYearly: 199.9,
+    priceYearly: 0, // Plano mensal apenas
     limits: [
       { feature: 'max_cycles', limitValue: 10 },
       { feature: 'max_workspaces', limitValue: 10 },
@@ -38,24 +38,34 @@ const plans = [
     ],
   },
   {
-    name: 'business',
-    displayName: 'Business',
-    description: 'Para equipes, escolas e instituições',
-    priceMonthly: 49.9,
-    priceYearly: 499.9,
+    name: 'pro_annual',
+    displayName: 'Pro Anual',
+    description: 'Economize 30% pagando anualmente',
+    priceMonthly: 0, // Plano anual apenas
+    priceYearly: 167.16, // R$ 19.90 * 12 * 0.70 = 30% desconto
     limits: [
-      { feature: 'max_cycles', limitValue: -1 },
-      { feature: 'max_workspaces', limitValue: -1 },
+      { feature: 'max_cycles', limitValue: 10 },
+      { feature: 'max_workspaces', limitValue: 10 },
       { feature: 'max_sessions_per_day', limitValue: -1 },
       { feature: 'export_data', limitValue: 1 },
-      { feature: 'shared_plans', limitValue: -1 },
-      { feature: 'history_days', limitValue: -1 },
+      { feature: 'shared_plans', limitValue: 5 },
+      { feature: 'history_days', limitValue: 365 },
     ],
   },
 ];
 
 async function seedPlans() {
   console.log('🌱 Seeding subscription plans...\n');
+
+  // Remove deprecated business plan
+  const businessPlan = await prisma.subscriptionPlan.findUnique({
+    where: { name: 'business' },
+  });
+  if (businessPlan) {
+    await prisma.planLimit.deleteMany({ where: { planId: businessPlan.id } });
+    await prisma.subscriptionPlan.delete({ where: { name: 'business' } });
+    console.log('🗑️  Removed deprecated business plan\n');
+  }
 
   for (const plan of plans) {
     const { limits, ...planData } = plan;
