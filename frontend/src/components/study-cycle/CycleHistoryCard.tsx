@@ -1,7 +1,7 @@
 /**
  * Cycle History Card - Shows recent advances and completions
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, ChevronRight, Trophy, ChevronDown } from 'lucide-react';
@@ -69,7 +69,7 @@ export function CycleHistoryCard() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     if (!currentWorkspaceId) return;
     setIsLoading(true);
     try {
@@ -80,13 +80,13 @@ export function CycleHistoryCard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentWorkspaceId]);
 
   useEffect(() => {
     if (currentWorkspaceId && isExpanded) {
       fetchHistory();
     }
-  }, [currentWorkspaceId, isExpanded]);
+  }, [currentWorkspaceId, isExpanded, fetchHistory]);
 
   if (!currentWorkspaceId) return null;
 

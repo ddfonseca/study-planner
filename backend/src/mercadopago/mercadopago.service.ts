@@ -117,7 +117,7 @@ export class MercadoPagoService implements OnModuleInit {
       throw new Error('Plan not found');
     }
 
-    if (plan.priceMonthly === 0) {
+    if (plan.priceMonthly === 0 && plan.priceYearly === 0) {
       throw new Error('Cannot create subscription for free plan');
     }
 

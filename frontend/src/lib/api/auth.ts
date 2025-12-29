@@ -5,9 +5,12 @@ import { createAuthClient } from 'better-auth/client';
 import type { User } from '@/types/api';
 
 // In production: empty string (uses Netlify proxy at same domain)
-// In development: localhost:3000
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'http://localhost:5173';
+// In development: undefined, so fallback to localhost
+const envApiUrl = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = envApiUrl !== undefined ? envApiUrl : 'http://localhost:3000';
+
+const envFrontendUrl = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL = envFrontendUrl !== undefined ? envFrontendUrl : 'http://localhost:5173';
 
 // Create Better Auth client
 export const authClient = createAuthClient({
