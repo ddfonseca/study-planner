@@ -92,6 +92,31 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
     };
   }, [isRunning]);
 
+  // Recalculate elapsed time when app returns from background (mobile fix)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const state: TimerState = JSON.parse(saved);
+            if (state.isRunning && state.startTime) {
+              const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+              setSeconds(elapsed);
+            }
+          } catch {
+            // Ignore parse errors
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   // Update page title when timer is running
   useEffect(() => {
     if (isRunning) {
