@@ -2,7 +2,7 @@
  * Study Sessions Store using Zustand
  */
 import { create } from 'zustand';
-import type { Session, CreateSessionDto, UpdateSessionDto } from '@/types/api';
+import type { Session, CreateSessionDto, UpdateSessionDto, StreakData, ReviewSuggestion } from '@/types/api';
 import type { SessionsMap, DayData } from '@/types/session';
 import { sessionsApi } from '@/lib/api/sessions';
 import { transformSessionsToAppFormat, getDayData } from '@/lib/utils/transform';
@@ -14,6 +14,10 @@ interface SessionState {
   isLoading: boolean; // Initial fetch loading
   isSaving: boolean;  // Add/update/delete operations
   error: string | null;
+  streak: StreakData | null;
+  isLoadingStreak: boolean;
+  reviewSuggestions: ReviewSuggestion[];
+  isLoadingReviewSuggestions: boolean;
 }
 
 interface SessionActions {
@@ -26,6 +30,8 @@ interface SessionActions {
   clearSessions: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  fetchStreak: (workspaceId: string) => Promise<void>;
+  fetchReviewSuggestions: (workspaceId: string) => Promise<void>;
 }
 
 type SessionStore = SessionState & SessionActions;
@@ -38,6 +44,10 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
   isLoading: false,
   isSaving: false,
   error: null,
+  streak: null,
+  isLoadingStreak: false,
+  reviewSuggestions: [],
+  isLoadingReviewSuggestions: false,
 
   // Actions
   fetchSessions: async (workspaceId, startDate, endDate) => {
@@ -161,6 +171,30 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
 
   setError: (error) => {
     set({ error });
+  },
+
+  fetchStreak: async (workspaceId) => {
+    try {
+      set({ isLoadingStreak: true });
+      const streak = await sessionsApi.getStreak(workspaceId);
+      set({ streak, isLoadingStreak: false });
+    } catch (error) {
+      set({ isLoadingStreak: false });
+      // Silently fail for streak - it's not critical
+      console.error('Failed to fetch streak:', error);
+    }
+  },
+
+  fetchReviewSuggestions: async (workspaceId) => {
+    try {
+      set({ isLoadingReviewSuggestions: true });
+      const reviewSuggestions = await sessionsApi.getReviewSuggestions(workspaceId);
+      set({ reviewSuggestions, isLoadingReviewSuggestions: false });
+    } catch (error) {
+      set({ isLoadingReviewSuggestions: false });
+      // Silently fail for review suggestions - not critical
+      console.error('Failed to fetch review suggestions:', error);
+    }
   },
 }));
 

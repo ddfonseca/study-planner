@@ -3,6 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useSessions } from '@/hooks/useSessions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,10 +15,22 @@ import {
   SubjectChart,
   DailyChart,
   AnnualHeatmap,
+  StreakCard,
+  ReviewSuggestions,
 } from '@/components/dashboard';
 
 export function DashboardPage() {
-  const { sessions, isLoading } = useSessionStore();
+  const {
+    sessions,
+    isLoading,
+    streak,
+    isLoadingStreak,
+    fetchStreak,
+    reviewSuggestions,
+    isLoadingReviewSuggestions,
+    fetchReviewSuggestions,
+  } = useSessionStore();
+  const { currentWorkspaceId } = useWorkspaceStore();
   const { fetchSessions } = useSessions();
   const {
     daysBack,
@@ -30,6 +43,13 @@ export function DashboardPage() {
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  // Fetch streak and review suggestions data
+  useEffect(() => {
+    const workspaceId = currentWorkspaceId || 'all';
+    fetchStreak(workspaceId);
+    fetchReviewSuggestions(workspaceId);
+  }, [fetchStreak, fetchReviewSuggestions, currentWorkspaceId]);
 
   if (isLoading) {
     return (
@@ -59,6 +79,15 @@ export function DashboardPage() {
         <DateRangeFilter
           currentDays={daysBack}
           onSelectPreset={setDateRangePreset}
+        />
+      </div>
+
+      {/* Streak and Review Suggestions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <StreakCard streak={streak} isLoading={isLoadingStreak} />
+        <ReviewSuggestions
+          suggestions={reviewSuggestions}
+          isLoading={isLoadingReviewSuggestions}
         />
       </div>
 

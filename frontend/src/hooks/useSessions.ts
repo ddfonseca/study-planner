@@ -20,6 +20,8 @@ export function useSessions() {
     deleteSession,
     selectDate,
     getSessionsForDate,
+    fetchStreak,
+    fetchReviewSuggestions,
   } = useSessionStore();
 
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -61,7 +63,7 @@ export function useSessions() {
   const handleAddSession = useCallback(
     async (date: string, subject: string, minutes: number) => {
       if (!currentWorkspaceId) {
-        throw new Error('Selecione um workspace para adicionar sessão');
+        throw new Error('Selecione um workspace para adicionar sessao');
       }
       const sessionData: CreateSessionDto = {
         workspaceId: currentWorkspaceId,
@@ -70,11 +72,13 @@ export function useSessions() {
         minutes,
       };
       const result = await addSession(sessionData);
-      // Refresh cycle suggestion to reflect new accumulated minutes
+      // Refresh cycle suggestion, streak, and review suggestions
       fetchSuggestion(currentWorkspaceId);
+      fetchStreak(currentWorkspaceId);
+      fetchReviewSuggestions(currentWorkspaceId);
       return result;
     },
-    [addSession, currentWorkspaceId, fetchSuggestion]
+    [addSession, currentWorkspaceId, fetchSuggestion, fetchStreak, fetchReviewSuggestions]
   );
 
   // Update a study session
@@ -98,13 +102,15 @@ export function useSessions() {
   const handleDeleteSession = useCallback(
     async (id: string) => {
       const result = await deleteSession(id);
-      // Refresh cycle suggestion to reflect deleted minutes
+      // Refresh cycle suggestion, streak, and review suggestions
       if (currentWorkspaceId) {
         fetchSuggestion(currentWorkspaceId);
+        fetchStreak(currentWorkspaceId);
+        fetchReviewSuggestions(currentWorkspaceId);
       }
       return result;
     },
-    [deleteSession, currentWorkspaceId, fetchSuggestion]
+    [deleteSession, currentWorkspaceId, fetchSuggestion, fetchStreak, fetchReviewSuggestions]
   );
 
   // Get weekly totals

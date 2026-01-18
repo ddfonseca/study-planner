@@ -2,7 +2,7 @@
  * Study Sessions API
  */
 import { apiClient } from './client';
-import type { Session, CreateSessionDto, UpdateSessionDto } from '@/types/api';
+import type { Session, CreateSessionDto, UpdateSessionDto, StreakData, ReviewSuggestion } from '@/types/api';
 
 export const sessionsApi = {
   /**
@@ -50,6 +50,26 @@ export const sessionsApi = {
    */
   async delete(id: string): Promise<void> {
     return apiClient.delete<void>(`/api/study-sessions/${id}`);
+  },
+
+  /**
+   * Get streak data (consecutive study days)
+   * @param workspaceId - Workspace ID or "all" for all workspaces
+   */
+  async getStreak(workspaceId: string): Promise<StreakData> {
+    const params = new URLSearchParams();
+    params.append('workspaceId', workspaceId);
+    return apiClient.get<StreakData>(`/api/study-sessions/streak?${params.toString()}`);
+  },
+
+  /**
+   * Get review suggestions based on spaced repetition
+   * @param workspaceId - Workspace ID or "all" for all workspaces
+   */
+  async getReviewSuggestions(workspaceId: string): Promise<ReviewSuggestion[]> {
+    const params = new URLSearchParams();
+    params.append('workspaceId', workspaceId);
+    return apiClient.get<ReviewSuggestion[]>(`/api/study-sessions/review-suggestions?${params.toString()}`);
   },
 };
 

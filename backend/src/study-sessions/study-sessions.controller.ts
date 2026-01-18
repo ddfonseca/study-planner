@@ -32,6 +32,34 @@ export class StudySessionsController {
   }
 
   /**
+   * GET /api/study-sessions/streak?workspaceId=xxx
+   * Retorna dados de streak (sequência de dias estudados)
+   * workspaceId pode ser "all" para considerar todos os workspaces
+   */
+  @Get('streak')
+  async getStreak(
+    @Session() session: UserSession,
+    @Query('workspaceId') workspaceId?: string,
+  ) {
+    const userId = session.user.id;
+    return this.studySessionsService.getStreak(userId, workspaceId);
+  }
+
+  /**
+   * GET /api/study-sessions/review-suggestions?workspaceId=xxx
+   * Retorna sugestões de revisão baseadas em repetição espaçada
+   * workspaceId pode ser "all" para considerar todos os workspaces
+   */
+  @Get('review-suggestions')
+  async getReviewSuggestions(
+    @Session() session: UserSession,
+    @Query('workspaceId') workspaceId?: string,
+  ) {
+    const userId = session.user.id;
+    return this.studySessionsService.getReviewSuggestions(userId, workspaceId);
+  }
+
+  /**
    * GET /api/study-sessions?workspaceId=xxx&startDate=2024-01-01&endDate=2024-01-31
    * Lista todas as sessões de estudo do usuário, filtradas por workspace e opcionalmente por data
    * workspaceId pode ser "all" para listar de todos os workspaces

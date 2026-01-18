@@ -213,3 +213,22 @@ export interface UpdateStudyCycleDto {
   currentItemIndex?: number;
   items?: CreateCycleItemDto[];
 }
+
+// Streak data - daily study streak tracking
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastStudyDate: string | null;
+  isActiveToday: boolean;
+  totalStudyDays: number;
+}
+
+// Review suggestion - spaced repetition reminders
+export interface ReviewSuggestion {
+  subject: string;
+  lastStudyDate: string;
+  daysSinceStudy: number;
+  totalMinutesStudied: number;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  suggestedReviewDate: string;
+}
