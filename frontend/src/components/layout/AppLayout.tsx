@@ -6,7 +6,7 @@ import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { Button } from '@/components/ui/button';
-import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 
 export function AppLayout() {
@@ -50,6 +50,7 @@ export function AppLayout() {
 
   const navItems = [
     { to: '/app/calendar', icon: Calendar, label: 'Calendário' },
+    { to: '/app/scratchpad', icon: FileText, label: 'Notas' },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard' },
     { to: '/app/settings', icon: Settings, label: 'Configurações' },
   ];

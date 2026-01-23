@@ -9,3 +9,4 @@ export { weeklyGoalsApi } from './weeklyGoals';
 export { workspacesApi } from './workspaces';
 export { studyCycleApi } from './studyCycle';
 export { subscriptionApi } from './subscription';
+export { scratchpadNotesApi } from './scratchpadNotes';

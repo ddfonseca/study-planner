@@ -14,6 +14,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { CalendarPage } from '@/pages/CalendarPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { ScratchpadPage } from '@/pages/ScratchpadPage';
 import { TermsPage } from '@/pages/TermsPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="scratchpad" element={<ScratchpadPage />} />
         </Route>
 
         {/* Landing page */}

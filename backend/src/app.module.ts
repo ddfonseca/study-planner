@@ -14,6 +14,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { StudyCycleModule } from './study-cycle/study-cycle.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { MercadoPagoModule } from './mercadopago/mercadopago.module';
+import { ScratchpadNotesModule } from './scratchpad-notes/scratchpad-notes.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { MercadoPagoModule } from './mercadopago/mercadopago.module';
     StudyCycleModule,
     SubscriptionModule,
     MercadoPagoModule,
+    ScratchpadNotesModule,
   ],
   providers: [
     {

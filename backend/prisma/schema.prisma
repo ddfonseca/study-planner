@@ -21,15 +21,16 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  studySessions StudySession[]
-  userConfig    UserConfig?
-  weeklyGoals   WeeklyGoal[]
-  workspaces    Workspace[]
-  sharedPlans   SharedPlan[]   @relation("SharedWith")
-  ownedShares   SharedPlan[]   @relation("Owner")
-  sessions      Session[]
-  accounts      Account[]
-  subscription  Subscription?
+  studySessions   StudySession[]
+  userConfig      UserConfig?
+  weeklyGoals     WeeklyGoal[]
+  workspaces      Workspace[]
+  sharedPlans     SharedPlan[]     @relation("SharedWith")
+  ownedShares     SharedPlan[]     @relation("Owner")
+  sessions        Session[]
+  accounts        Account[]
+  subscription    Subscription?
+  scratchpadNotes ScratchpadNote[]
 
   @@map("user")
 }
@@ -354,4 +355,23 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+// =====================================================
+// SCRATCHPAD NOTES
+// =====================================================
+
+// Scratchpad Note - user's personal notes
+model ScratchpadNote {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  title     String   @db.VarChar(200)
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("scratchpad_notes")
 }
