@@ -133,9 +133,9 @@ export function WeeklyProgress() {
                         day.isFuture
                           ? 'bg-muted/30'
                           : day.isToday
-                          ? 'bg-primary'
+                          ? 'bg-[#c17a5c]'
                           : day.minutes > 0
-                          ? 'bg-sky-300 dark:bg-sky-700'
+                          ? 'bg-amber-200 dark:bg-amber-700'
                           : 'bg-muted'
                       }`}
                       style={{

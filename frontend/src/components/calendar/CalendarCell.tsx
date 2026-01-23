@@ -4,7 +4,6 @@
 import { isToday } from 'date-fns';
 import type { DayData, CellIntensity } from '@/types/session';
 import { formatTime } from '@/lib/utils/time';
-import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useConfigStore } from '@/store/configStore';
 
@@ -23,7 +22,6 @@ interface CalendarCellProps {
   dayData: DayData;
   intensity: CellIntensity;
   onClick: () => void;
-  onDeleteSession: (id: string) => void;
 }
 
 // Dots indicator component
@@ -48,7 +46,6 @@ export function CalendarCell({
   dayData,
   intensity,
   onClick,
-  onDeleteSession,
 }: CalendarCellProps) {
   const heatmapStyle = useConfigStore((state) => state.heatmapStyle);
   const isCurrentMonth = date.getMonth() === currentMonth;
@@ -96,9 +93,9 @@ export function CalendarCell({
         </span>
         {dayData.totalMinutos > 0 && heatmapStyle === 'gradient' && (
           <span className={cn(
-            "text-[10px] px-1 py-0.5 rounded",
+            "text-[10px] px-1.5 py-0.5 rounded font-medium",
             needsLightText
-              ? "text-white/90 bg-black/20"
+              ? "text-white bg-black/30"
               : isHighIntensity
                 ? "text-foreground bg-background/90"
                 : "text-muted-foreground bg-background/80"
@@ -115,28 +112,28 @@ export function CalendarCell({
             <div
               key={materia.id}
               className={cn(
-                "flex items-center gap-1 text-[11px] rounded px-1.5 py-0.5 group min-w-0",
-                isHighIntensity ? "bg-background/90" : "bg-background/60"
+                "flex items-center gap-1 text-[11px] rounded px-1.5 py-0.5 min-w-0",
+                needsLightText
+                  ? "bg-black/20"
+                  : isHighIntensity
+                    ? "bg-background/90"
+                    : "bg-background/60"
               )}
-              onClick={(e) => e.stopPropagation()}
             >
-              <span className="truncate flex-1 text-foreground min-w-0">{materia.materia}</span>
+              <span className={cn(
+                "truncate flex-1 min-w-0",
+                needsLightText ? "text-white" : "text-foreground"
+              )}>{materia.materia}</span>
               <span className={cn(
                 "whitespace-nowrap text-[10px] shrink-0",
-                isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
+                needsLightText
+                  ? "text-white/80"
+                  : isHighIntensity
+                    ? "text-foreground/70"
+                    : "text-muted-foreground"
               )}>
                 {formatTime(materia.minutos)}
               </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteSession(materia.id);
-                }}
-                className="opacity-0 group-hover:opacity-100 text-danger hover:text-danger/80 transition-opacity"
-                aria-label="Remover sessão"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
             </div>
           ))}
           {dayData.materias.length > 2 && (

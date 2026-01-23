@@ -15,7 +15,6 @@ interface CalendarGridProps {
   currentMonth: number;
   dayNames: string[];
   onCellClick: (date: Date) => void;
-  onDeleteSession: (id: string) => void;
 }
 
 export function CalendarGrid({
@@ -23,7 +22,6 @@ export function CalendarGrid({
   currentMonth,
   dayNames,
   onCellClick,
-  onDeleteSession,
 }: CalendarGridProps) {
   const { sessions, getCellIntensity, getWeekTotals } = useSessions();
   const { getCachedGoalForWeek, prefetchGoals, calculateWeekStart } = useWeeklyGoals();
@@ -114,7 +112,6 @@ export function CalendarGrid({
                           dayData={dayData}
                           intensity={intensity}
                           onClick={() => onCellClick(date)}
-                          onDeleteSession={onDeleteSession}
                         />
                       </td>
                     );

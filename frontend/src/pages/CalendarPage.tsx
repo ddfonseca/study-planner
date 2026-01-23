@@ -227,7 +227,6 @@ export function CalendarPage() {
                 currentMonth={currentMonth}
                 dayNames={dayNames}
                 onCellClick={handleCellClick}
-                onDeleteSession={handleDeleteSessionSubmit}
               />
             </div>
 
