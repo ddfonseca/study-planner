@@ -239,7 +239,7 @@ export function CycleSuggestionCard() {
           {/* Status and actions */}
           {data.isCycleComplete ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <div className="flex items-center gap-2 text-accent">
                 <Trophy className="h-4 w-4" />
                 <span className="text-sm font-medium">Ciclo Completo!</span>
               </div>
@@ -255,7 +255,7 @@ export function CycleSuggestionCard() {
             </div>
           ) : data.isCurrentComplete ? (
             <div className="space-y-2">
-              <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+              <p className="text-xs text-accent font-medium">
                 Meta atingida!
               </p>
               <Button
@@ -337,7 +337,7 @@ export function CycleSuggestionCard() {
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className={`text-xs truncate ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
-                            {item.isComplete && <Check className="h-3 w-3 inline mr-1 text-green-500" />}
+                            {item.isComplete && <Check className="h-3 w-3 inline mr-1 text-accent" />}
                             {item.subject}
                           </span>
                           <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">

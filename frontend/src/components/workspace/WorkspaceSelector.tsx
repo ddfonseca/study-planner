@@ -86,7 +86,7 @@ export function WorkspaceSelector() {
               />
               <span className="truncate">{workspace.name}</span>
               {workspace.isDefault && (
-                <span className="text-xs text-muted-foreground ml-1">
+                <span className="text-xs opacity-50 ml-1">
                   (Padrão)
                 </span>
               )}

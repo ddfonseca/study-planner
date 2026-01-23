@@ -35,3 +35,26 @@ export interface StudyStats {
   mostStudiedSubject: string | null;
   subjectBreakdown: Record<string, number>;
 }
+
+// Subject-specific analytics
+export interface SubjectStats {
+  subject: string;
+  totalMinutes: number;
+  totalSessions: number;
+  averageSessionMinutes: number;
+  weeklyAverageMinutes: number;
+  percentageOfTotal: number;
+}
+
+// Trend data point for charts
+export interface TrendPoint {
+  date: string;
+  minutes: number;
+}
+
+// Weekday average for charts
+export interface WeekdayAverage {
+  weekday: string;
+  dayIndex: number;
+  averageMinutes: number;
+}

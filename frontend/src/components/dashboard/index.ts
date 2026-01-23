@@ -6,3 +6,7 @@ export { StatsCards } from './StatsCards';
 export { SubjectChart } from './SubjectChart';
 export { DailyChart } from './DailyChart';
 export { AnnualHeatmap } from './AnnualHeatmap';
+export { SubjectSelector } from './SubjectSelector';
+export { SubjectStatsCards } from './SubjectStatsCards';
+export { SubjectTrendChart } from './SubjectTrendChart';
+export { SubjectWeeklyChart } from './SubjectWeeklyChart';

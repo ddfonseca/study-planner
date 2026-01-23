@@ -13,6 +13,7 @@ import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { CalendarPage } from '@/pages/CalendarPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { SubjectAnalyticsPage } from '@/pages/SubjectAnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { ScratchpadPage } from '@/pages/ScratchpadPage';
 import { TermsPage } from '@/pages/TermsPage';
@@ -46,6 +47,7 @@ function App() {
           <Route index element={<Navigate to="calendar" replace />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="analytics" element={<SubjectAnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="scratchpad" element={<ScratchpadPage />} />
         </Route>
