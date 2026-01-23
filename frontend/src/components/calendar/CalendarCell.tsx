@@ -8,13 +8,13 @@ import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useConfigStore } from '@/store/configStore';
 
-// Gradient style: slate → sky → blue (smooth transition)
+// Gradient style: warm tones (stone → amber → terracotta)
 const gradientColors: Record<CellIntensity, string> = {
   0: 'bg-card',
-  1: 'bg-slate-100 dark:bg-slate-800',
-  2: 'bg-sky-100 dark:bg-sky-900',
-  3: 'bg-sky-200 dark:bg-sky-800',
-  4: 'bg-blue-300 dark:bg-blue-700',
+  1: 'bg-stone-100 dark:bg-stone-800',
+  2: 'bg-amber-100 dark:bg-amber-900/50',
+  3: 'bg-amber-200 dark:bg-amber-800/60',
+  4: 'bg-[#c17a5c] dark:bg-[#c17a5c]',
 };
 
 interface CalendarCellProps {
@@ -56,6 +56,8 @@ export function CalendarCell({
 
   // High intensity needs better text contrast
   const isHighIntensity = heatmapStyle === 'gradient' && intensity >= 3;
+  // Terracotta (level 4) needs white text for contrast
+  const needsLightText = heatmapStyle === 'gradient' && intensity === 4;
 
   // Background color based on intensity and style
   const getBgColor = () => {
@@ -67,9 +69,9 @@ export function CalendarCell({
   return (
     <div
       className={cn(
-        'h-[100px] p-2 border border-border rounded-md cursor-pointer transition-all hover:shadow-md overflow-hidden relative',
+        'h-[100px] p-2 border border-border/40 rounded-md cursor-pointer transition-all overflow-hidden relative',
         getBgColor(),
-        isTodayDate && 'ring-2 ring-primary ring-offset-1',
+        isTodayDate && 'ring-2 ring-accent ring-offset-1 ring-offset-background',
         !isCurrentMonth && 'opacity-50'
       )}
       onClick={onClick}
@@ -86,7 +88,7 @@ export function CalendarCell({
         <span
           className={cn(
             'text-sm font-medium',
-            isTodayDate ? 'text-primary font-bold' : 'text-foreground',
+            needsLightText ? 'text-white font-bold' : isTodayDate ? 'text-primary font-bold' : 'text-foreground',
             !isCurrentMonth && 'text-muted-foreground'
           )}
         >
@@ -95,9 +97,11 @@ export function CalendarCell({
         {dayData.totalMinutos > 0 && heatmapStyle === 'gradient' && (
           <span className={cn(
             "text-[10px] px-1 py-0.5 rounded",
-            isHighIntensity
-              ? "text-foreground bg-background/90"
-              : "text-muted-foreground bg-background/80"
+            needsLightText
+              ? "text-white/90 bg-black/20"
+              : isHighIntensity
+                ? "text-foreground bg-background/90"
+                : "text-muted-foreground bg-background/80"
           )}>
             {formatTime(dayData.totalMinutos)}
           </span>
@@ -138,7 +142,7 @@ export function CalendarCell({
           {dayData.materias.length > 2 && (
             <span className={cn(
               "text-[10px] pl-1",
-              isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
+              needsLightText ? "text-white/80" : isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
             )}>
               +{dayData.materias.length - 2} mais
             </span>

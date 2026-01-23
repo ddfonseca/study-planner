@@ -13,13 +13,13 @@ interface ActivityHeatmapProps {
 
 type Intensity = 0 | 1 | 2 | 3 | 4;
 
-// Gradient style: slate → sky → blue
+// Gradient style: warm tones (stone → amber → terracotta)
 const gradientColors: Record<Intensity, string> = {
   0: 'bg-muted',
-  1: 'bg-slate-200 dark:bg-slate-800',
-  2: 'bg-sky-200 dark:bg-sky-900',
-  3: 'bg-sky-300 dark:bg-sky-800',
-  4: 'bg-blue-400 dark:bg-blue-700',
+  1: 'bg-stone-200 dark:bg-stone-800',
+  2: 'bg-amber-200 dark:bg-amber-900/50',
+  3: 'bg-amber-300 dark:bg-amber-800/60',
+  4: 'bg-[#c17a5c] dark:bg-[#c17a5c]',
 };
 
 export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {

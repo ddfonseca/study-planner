@@ -48,12 +48,13 @@ export default {
         },
 
         // Static colors
+        terracotta: '#c17a5c',
         success: '#22c55e',
         warning: '#eab308',
         danger: '#ef4444',
         calendar: {
           green: 'var(--calendar-green)',
-          blue: 'var(--calendar-blue)',
+          warm: 'var(--calendar-warm)',
           today: 'var(--calendar-today)',
         },
         text: {
@@ -63,15 +64,22 @@ export default {
         },
       },
       boxShadow: {
-        'sm': '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08)',
-        'md': '0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
-        'lg': '0 10px 25px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.1)',
-        'dark-sm': '0 1px 3px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.05)',
-        'dark-md': '0 4px 6px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.05)',
-        'dark-lg': '0 10px 25px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.05)',
+        'sm': 'none',
+        'md': 'none',
+        'lg': 'none',
+        'dark-sm': 'none',
+        'dark-md': 'none',
+        'dark-lg': 'none',
+        'none': 'none',
       },
       fontFamily: {
-        sans: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+        sans: ['Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+      },
+      transitionDuration: {
+        DEFAULT: '150ms',
+      },
+      transitionTimingFunction: {
+        DEFAULT: 'ease-in-out',
       },
       borderRadius: {
         lg: "var(--radius)",

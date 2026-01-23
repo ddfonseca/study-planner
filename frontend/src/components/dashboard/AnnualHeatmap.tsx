@@ -46,13 +46,13 @@ function getIntensityLevel(minutes: number): 0 | 1 | 2 | 3 | 4 {
   return 4;
 }
 
-// Gradient style: slate → sky → blue
+// Gradient style: warm tones (stone → amber → terracotta)
 const gradientColors: Record<number, string> = {
   0: 'bg-muted',
-  1: 'bg-slate-200 dark:bg-slate-800',
-  2: 'bg-sky-200 dark:bg-sky-900',
-  3: 'bg-sky-300 dark:bg-sky-800',
-  4: 'bg-blue-400 dark:bg-blue-700',
+  1: 'bg-stone-200 dark:bg-stone-800',
+  2: 'bg-amber-200 dark:bg-amber-900/50',
+  3: 'bg-amber-300 dark:bg-amber-800/60',
+  4: 'bg-[#c17a5c] dark:bg-[#c17a5c]',
 };
 
 export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
@@ -259,10 +259,10 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
                 // Gradient legend
                 <>
                   <div className="w-[10px] h-[10px] rounded-sm bg-muted" />
-                  <div className="w-[10px] h-[10px] rounded-sm bg-slate-200 dark:bg-slate-800" />
-                  <div className="w-[10px] h-[10px] rounded-sm bg-sky-200 dark:bg-sky-900" />
-                  <div className="w-[10px] h-[10px] rounded-sm bg-sky-300 dark:bg-sky-800" />
-                  <div className="w-[10px] h-[10px] rounded-sm bg-blue-400 dark:bg-blue-700" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-stone-200 dark:bg-stone-800" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-amber-200 dark:bg-amber-900/50" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-amber-300 dark:bg-amber-800/60" />
+                  <div className="w-[10px] h-[10px] rounded-sm bg-[#c17a5c]" />
                 </>
               ) : (
                 // Dots legend

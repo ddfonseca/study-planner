@@ -37,29 +37,35 @@ function FAQItem({
     <div className="border-b border-border last:border-b-0">
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between py-4 text-left font-medium hover:text-primary transition-colors"
+        className="flex w-full items-center justify-between py-4 text-left font-medium hover:text-accent transition-colors duration-150"
       >
         {question}
         <ChevronDown
-          className={`h-5 w-5 text-muted-foreground transition-transform ${
+          className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ease-in-out ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
-      {isOpen && (
-        <p className="pb-4 text-muted-foreground">{answer}</p>
-      )}
+      <div
+        className={`grid transition-all duration-200 ease-in-out ${
+          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="pb-4 text-muted-foreground">{answer}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-// Gradient colors for landing page preview (slate → sky → blue)
+// Gradient colors for landing page preview (warm tones: stone → amber → terracotta)
 const previewGradientColors: Record<number, string> = {
   0: 'bg-card',
-  1: 'bg-slate-100 dark:bg-slate-800',
-  2: 'bg-sky-100 dark:bg-sky-900',
-  3: 'bg-sky-200 dark:bg-sky-800',
-  4: 'bg-blue-300 dark:bg-blue-700',
+  1: 'bg-stone-100 dark:bg-stone-800',
+  2: 'bg-amber-100 dark:bg-amber-900/50',
+  3: 'bg-amber-200 dark:bg-amber-800/60',
+  4: 'bg-[#c17a5c] dark:bg-[#c17a5c]',
 };
 
 // Calendar Preview component with gradient heatmap style
@@ -74,33 +80,38 @@ function CalendarPreview() {
     { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
   ];
 
-  // High intensity (3, 4) needs better text contrast
+  // High intensity needs better text contrast - level 4 (terracotta) needs white text
   const getTextClass = (intensity: number, isToday: boolean) => {
+    if (intensity === 4) return 'text-white';
     if (isToday) return 'text-primary';
     if (intensity >= 3) return 'text-foreground';
     return 'text-muted-foreground';
   };
+
+  // Check if intensity needs light text (terracotta background)
+  const needsLightText = (intensity: number) => intensity === 4;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
         {days.map((d, i) => {
           const isHighIntensity = d.intensity >= 3;
+          const lightText = needsLightText(d.intensity);
 
           return (
             <div
               key={i}
               className={`
-                relative rounded-xl p-3 sm:p-4 transition-all shadow-md hover:shadow-lg border border-border
+                relative rounded-xl p-3 sm:p-4 transition-all border border-border/30
                 ${d.isToday
-                  ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                  ? 'ring-2 ring-accent ring-offset-2 ring-offset-background'
                   : ''
                 }
                 ${previewGradientColors[d.intensity]}
               `}
             >
               {/* Day label */}
-              <div className={`text-[10px] sm:text-xs font-medium mb-1 ${isHighIntensity ? 'text-foreground/70' : 'text-muted-foreground'}`}>
+              <div className={`text-[10px] sm:text-xs font-medium mb-1 ${lightText ? 'text-white/80' : isHighIntensity ? 'text-foreground/70' : 'text-muted-foreground'}`}>
                 {d.label}
               </div>
               {/* Day number */}
@@ -109,12 +120,12 @@ function CalendarPreview() {
               </div>
               {/* Session info */}
               {d.session ? (
-                <div className={`mt-2 text-[10px] sm:text-xs ${isHighIntensity ? 'text-foreground/80' : 'text-muted-foreground'}`}>
+                <div className={`mt-2 text-[10px] sm:text-xs ${lightText ? 'text-white/90' : isHighIntensity ? 'text-foreground/80' : 'text-muted-foreground'}`}>
                   <div className="font-medium">{d.session}</div>
-                  <div className={`font-semibold ${isHighIntensity ? 'text-foreground' : 'text-primary'}`}>{d.time}</div>
+                  <div className={`font-semibold ${lightText ? 'text-white' : isHighIntensity ? 'text-foreground' : 'text-primary'}`}>{d.time}</div>
                 </div>
               ) : (
-                <div className={`mt-2 text-[10px] sm:text-xs ${isHighIntensity ? 'text-foreground/50' : 'text-muted-foreground/50'}`}>
+                <div className={`mt-2 text-[10px] sm:text-xs ${lightText ? 'text-white/50' : isHighIntensity ? 'text-foreground/50' : 'text-muted-foreground/50'}`}>
                   —
                 </div>
               )}
@@ -336,11 +347,11 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Card 1 - Distribuição estratégica */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+            <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500" />
               <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
-                  <Compass className="h-6 w-6 text-blue-500" />
+                <div className="w-12 h-12 rounded-xl bg-[#c17a5c]/10 flex items-center justify-center mb-4">
+                  <Compass className="h-6 w-6 text-[#c17a5c]" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Distribua seu esforço</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">

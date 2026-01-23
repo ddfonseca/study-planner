@@ -1,5 +1,5 @@
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* Google Fonts - Manrope for Clod design */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,77 +7,77 @@
 
 @layer base {
   :root {
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    /* Light mode colors */
-    --background: #f7f9fa;
-    --foreground: #333333;
+    /* Light mode colors (warm Clod-inspired) */
+    --background: #faf8f5;
+    --foreground: #1a1614;
     --container: #ffffff;
-    --border: #e0e5e9;
+    --border: #e8e0d8;
 
     --card: #ffffff;
-    --card-foreground: #333333;
+    --card-foreground: #1a1614;
 
-    --primary: #4a90e2;
-    --primary-foreground: #ffffff;
+    --primary: #1a1614;
+    --primary-foreground: #faf8f5;
 
-    --secondary: #f1f5f9;
-    --secondary-foreground: #333333;
+    --secondary: #f0ebe5;
+    --secondary-foreground: #1a1614;
 
-    --destructive: #d0021b;
+    --destructive: #dc5f4c;
     --destructive-foreground: #ffffff;
 
-    --accent: #f1f5f9;
-    --accent-foreground: #333333;
+    --accent: #c17a5c;
+    --accent-foreground: #ffffff;
 
-    --muted: #f1f5f9;
-    --muted-foreground: #999999;
+    --muted: #f0ebe5;
+    --muted-foreground: #6b5f55;
 
-    --ring: #4a90e2;
-    --input: #e0e5e9;
+    --ring: #c17a5c;
+    --input: #e8e0d8;
 
     --popover: #ffffff;
-    --popover-foreground: #333333;
+    --popover-foreground: #1a1614;
 
     --calendar-green: #dcfce7;
-    --calendar-blue: #dbeafe;
-    --calendar-today: #fef9c3;
+    --calendar-warm: #fef3e2;
+    --calendar-today: #fef3e2;
   }
 
   .dark {
-    /* Dark mode - cores com alto contraste */
-    --background: #0f172a;
-    --foreground: #f1f5f9;
-    --container: #1e293b;
-    --border: #334155;
+    /* Dark Warm mode - Clod-inspired */
+    --background: #1a1614;
+    --foreground: #e8e0d8;
+    --container: #252119;
+    --border: #3d352e;
 
-    --card: #1e293b;
-    --card-foreground: #f1f5f9;
+    --card: #252119;
+    --card-foreground: #e8e0d8;
 
-    --primary: #60a5fa;
-    --primary-foreground: #0f172a;
+    --primary: #e8e0d8;
+    --primary-foreground: #1a1614;
 
-    --secondary: #334155;
-    --secondary-foreground: #f1f5f9;
+    --secondary: #2d2722;
+    --secondary-foreground: #e8e0d8;
 
-    --destructive: #ef4444;
+    --destructive: #dc5f4c;
     --destructive-foreground: #ffffff;
 
-    --accent: #334155;
-    --accent-foreground: #f1f5f9;
+    --accent: #c17a5c;
+    --accent-foreground: #ffffff;
 
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
+    --muted: #2d2722;
+    --muted-foreground: #9a8f85;
 
-    --ring: #60a5fa;
-    --input: #334155;
+    --ring: #c17a5c;
+    --input: #3d352e;
 
-    --popover: #1e293b;
-    --popover-foreground: #f1f5f9;
+    --popover: #252119;
+    --popover-foreground: #e8e0d8;
 
-    --calendar-green: #166534;
-    --calendar-blue: #1e40af;
-    --calendar-today: #854d0e;
+    --calendar-green: #2d4a3a;
+    --calendar-warm: #4a3d2d;
+    --calendar-today: #4a3d2d;
   }
 
   * {
