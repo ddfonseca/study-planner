@@ -232,14 +232,13 @@ export function LandingPage() {
       ],
       cta: 'Começar grátis',
       highlighted: false,
-      discount: null,
     },
     {
-      name: 'Pro',
+      name: 'Pro Vitalício',
       icon: Crown,
       price: 'R$ 19,90',
-      period: '/mês',
-      description: 'Para quem leva os estudos a sério.',
+      period: 'pagamento único',
+      description: 'Acesso vitalício a todos os recursos premium.',
       features: [
         'Tudo do plano Gratuito',
         '10 ciclos de estudo',
@@ -248,27 +247,10 @@ export function LandingPage() {
         '1 ano de histórico',
         'Exportar dados',
         'Compartilhar com 5 pessoas',
+        'Acesso para sempre',
       ],
-      cta: 'Assinar Pro',
-      highlighted: false,
-      discount: null,
-    },
-    {
-      name: 'Pro Anual',
-      icon: Crown,
-      price: 'R$ 167,16',
-      period: '/ano',
-      description: 'Economize 30% pagando anualmente.',
-      features: [
-        'Tudo do plano Pro',
-        'Equivale a R$ 13,93/mês',
-        'Cobrança única anual',
-        'Mesmo acesso completo',
-        'Melhor custo-benefício',
-      ],
-      cta: 'Assinar Pro Anual',
-      highlighted: false,
-      discount: '-30%',
+      cta: 'Comprar acesso vitalício',
+      highlighted: true,
     },
   ];
 
@@ -492,51 +474,40 @@ export function LandingPage() {
 
       {/* Pricing Section */}
       <section id="pricing" className="py-16 md:py-24">
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
             Escolha seu plano
           </h2>
           <p className="text-muted-foreground text-center mb-12">
-            Comece grátis e evolua quando precisar de mais recursos.
+            Comece grátis ou desbloqueie tudo com um único pagamento.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {plans.map((plan, index) => {
               const IconComponent = plan.icon;
-              const isAnnual = plan.discount !== null;
-              const isPro = plan.name === 'Pro';
+              const isPro = plan.highlighted;
               return (
                 <Card
                   key={index}
                   className={`relative ${
                     isPro
-                      ? 'border-primary shadow-lg shadow-primary/10'
-                      : isAnnual
-                      ? 'border-green-500/50'
+                      ? 'border-primary shadow-lg shadow-primary/10 ring-2 ring-primary'
                       : 'border-border'
                   }`}
                 >
-                  {isAnnual && (
+                  {isPro && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                        {plan.discount} desconto
+                      <Badge className="bg-primary hover:bg-primary/90 text-white">
+                        Recomendado
                       </Badge>
                     </div>
                   )}
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 pt-8">
                     <div className="flex items-center gap-3 mb-4">
                       <div className={`p-2 rounded-lg ${
-                        isPro
-                          ? 'bg-primary/10'
-                          : isAnnual
-                          ? 'bg-green-500/10'
-                          : 'bg-muted'
+                        isPro ? 'bg-primary/10' : 'bg-muted'
                       }`}>
                         <IconComponent className={`h-5 w-5 ${
-                          isPro
-                            ? 'text-primary'
-                            : isAnnual
-                            ? 'text-green-600'
-                            : 'text-muted-foreground'
+                          isPro ? 'text-primary' : 'text-muted-foreground'
                         }`} />
                       </div>
                       <h3 className="text-xl font-semibold">{plan.name}</h3>
@@ -551,7 +522,7 @@ export function LandingPage() {
                     <ul className="space-y-2 mb-6">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <Check className={`h-4 w-4 flex-shrink-0 ${isPro ? 'text-primary' : 'text-green-500'}`} />
                           <span className="text-sm">{feature}</span>
                         </li>
                       ))}
@@ -559,8 +530,8 @@ export function LandingPage() {
                     <Link to="/login" className="block">
                       <Button
                         size="lg"
-                        variant={isPro || isAnnual ? 'default' : 'outline'}
-                        className={`w-full ${isAnnual ? 'bg-green-500 hover:bg-green-600 text-white border-green-500' : ''}`}
+                        variant={isPro ? 'default' : 'outline'}
+                        className="w-full"
                       >
                         {plan.cta}
                       </Button>

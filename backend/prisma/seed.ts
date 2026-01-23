@@ -13,6 +13,7 @@ const plans = [
     description: 'Perfeito para começar a organizar seus estudos',
     priceMonthly: 0,
     priceYearly: 0,
+    priceLifetime: 0,
     limits: [
       { feature: 'max_cycles', limitValue: 1 },
       { feature: 'max_workspaces', limitValue: 2 },
@@ -25,24 +26,10 @@ const plans = [
   {
     name: 'pro',
     displayName: 'Pro',
-    description: 'Para estudantes dedicados que querem mais recursos',
-    priceMonthly: 19.9,
-    priceYearly: 0, // Plano mensal apenas
-    limits: [
-      { feature: 'max_cycles', limitValue: 10 },
-      { feature: 'max_workspaces', limitValue: 10 },
-      { feature: 'max_sessions_per_day', limitValue: -1 },
-      { feature: 'export_data', limitValue: 1 },
-      { feature: 'shared_plans', limitValue: 5 },
-      { feature: 'history_days', limitValue: 365 },
-    ],
-  },
-  {
-    name: 'pro_annual',
-    displayName: 'Pro Anual',
-    description: 'Economize 30% pagando anualmente',
-    priceMonthly: 0, // Plano anual apenas
-    priceYearly: 167.16, // R$ 19.90 * 12 * 0.70 = 30% desconto
+    description: 'Acesso vitalício a todos os recursos premium',
+    priceMonthly: 0,
+    priceYearly: 0,
+    priceLifetime: 19.9,
     limits: [
       { feature: 'max_cycles', limitValue: 10 },
       { feature: 'max_workspaces', limitValue: 10 },
@@ -57,14 +44,19 @@ const plans = [
 async function seedPlans() {
   console.log('🌱 Seeding subscription plans...\n');
 
-  // Remove deprecated business plan
-  const businessPlan = await prisma.subscriptionPlan.findUnique({
-    where: { name: 'business' },
-  });
-  if (businessPlan) {
-    await prisma.planLimit.deleteMany({ where: { planId: businessPlan.id } });
-    await prisma.subscriptionPlan.delete({ where: { name: 'business' } });
-    console.log('🗑️  Removed deprecated business plan\n');
+  // Mark deprecated plans as inactive (business, pro_annual)
+  const deprecatedPlans = ['business', 'pro_annual'];
+  for (const planName of deprecatedPlans) {
+    const plan = await prisma.subscriptionPlan.findUnique({
+      where: { name: planName },
+    });
+    if (plan && plan.isActive) {
+      await prisma.subscriptionPlan.update({
+        where: { name: planName },
+        data: { isActive: false },
+      });
+      console.log(`📦 Marked ${planName} plan as inactive\n`);
+    }
   }
 
   for (const plan of plans) {
@@ -78,6 +70,7 @@ async function seedPlans() {
         description: planData.description,
         priceMonthly: planData.priceMonthly,
         priceYearly: planData.priceYearly,
+        priceLifetime: planData.priceLifetime,
       },
       create: planData,
     });
@@ -110,9 +103,53 @@ async function seedPlans() {
   console.log('\n✅ All plans seeded successfully!');
 }
 
+async function migrateExistingSubscribers() {
+  console.log('\n🔄 Migrating existing subscribers to lifetime...\n');
+
+  // Get the pro plan
+  const proPlan = await prisma.subscriptionPlan.findUnique({
+    where: { name: 'pro' },
+  });
+
+  if (!proPlan) {
+    console.log('   Pro plan not found, skipping migration.');
+    return;
+  }
+
+  // Find all active subscriptions that are not yet LIFETIME
+  const activeSubscriptions = await prisma.subscription.findMany({
+    where: {
+      status: 'ACTIVE',
+      billingCycle: { not: 'LIFETIME' },
+    },
+    include: { user: true, plan: true },
+  });
+
+  if (activeSubscriptions.length === 0) {
+    console.log('   No subscriptions to migrate.');
+    return;
+  }
+
+  for (const sub of activeSubscriptions) {
+    await prisma.subscription.update({
+      where: { id: sub.id },
+      data: {
+        planId: proPlan.id, // Move all to the main pro plan
+        billingCycle: 'LIFETIME',
+        currentPeriodEnd: new Date('9999-12-31'),
+        cancelAtPeriodEnd: false,
+      },
+    });
+    console.log(`   ✅ Migrated ${sub.user.email} from ${sub.plan.name} to Pro lifetime`);
+  }
+
+  console.log(`\n✅ Migrated ${activeSubscriptions.length} subscription(s) to lifetime!`);
+}
+
 async function main() {
   try {
     await seedPlans();
+    await migrateExistingSubscribers();
   } catch (error) {
     console.error('Error seeding plans:', error);
     process.exit(1);

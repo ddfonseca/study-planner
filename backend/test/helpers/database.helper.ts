@@ -83,6 +83,7 @@ export async function createTestSubscriptionPlan(data?: {
   displayName?: string;
   priceMonthly?: number;
   priceYearly?: number;
+  priceLifetime?: number;
   mercadoPagoPlanId?: string;
 }): Promise<{
   id: string;
@@ -90,14 +91,16 @@ export async function createTestSubscriptionPlan(data?: {
   displayName: string;
   priceMonthly: number;
   priceYearly: number;
+  priceLifetime: number | null;
 }> {
   const prisma = jestPrisma.client;
   const plan = await prisma.subscriptionPlan.create({
     data: {
       name: data?.name || `plan-${Date.now()}`,
       displayName: data?.displayName || 'Test Plan',
-      priceMonthly: data?.priceMonthly ?? 19.90,
-      priceYearly: data?.priceYearly ?? 199.90,
+      priceMonthly: data?.priceMonthly ?? 0,
+      priceYearly: data?.priceYearly ?? 0,
+      priceLifetime: data?.priceLifetime ?? 19.90,
       mercadoPagoPlanId: data?.mercadoPagoPlanId,
     },
   });
@@ -129,7 +132,7 @@ export async function createTestSubscription(
   planId: string,
   data?: {
     status?: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'TRIALING' | 'PAUSED';
-    billingCycle?: 'MONTHLY' | 'YEARLY';
+    billingCycle?: 'MONTHLY' | 'YEARLY' | 'LIFETIME';
     externalId?: string;
   },
 ): Promise<{
@@ -139,15 +142,16 @@ export async function createTestSubscription(
   status: string;
 }> {
   const prisma = jestPrisma.client;
+  const isLifetime = data?.billingCycle === 'LIFETIME';
   const subscription = await prisma.subscription.create({
     data: {
       userId,
       planId,
       status: data?.status || 'ACTIVE',
-      billingCycle: data?.billingCycle || 'MONTHLY',
+      billingCycle: data?.billingCycle || 'LIFETIME',
       externalId: data?.externalId,
       currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      currentPeriodEnd: isLifetime ? new Date('9999-12-31') : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
   });
   return subscription;

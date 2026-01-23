@@ -1,5 +1,5 @@
 /**
- * MercadoPago Controller - Endpoints for subscription management
+ * MercadoPago Controller - Endpoints for lifetime payment management
  */
 import {
   Controller,
@@ -26,7 +26,7 @@ export class MercadoPagoController {
   ) {}
 
   /**
-   * Create a new subscription
+   * Create a lifetime payment
    * Returns the init_point URL to redirect the user to Mercado Pago checkout
    */
   @Post('subscribe')
@@ -34,21 +34,20 @@ export class MercadoPagoController {
     @Session() session: UserSession,
     @Body() dto: CreateSubscriptionDto,
   ) {
-    const { planId, billingCycle } = dto;
+    const { planId } = dto;
     const userId = session.user.id;
     const userEmail = session.user.email;
 
-    const result = await this.mercadoPagoService.createSubscription({
+    const result = await this.mercadoPagoService.createLifetimePayment({
       planId,
       userId,
       userEmail,
-      billingCycle,
     });
 
     return {
       success: true,
       initPoint: result.initPoint,
-      subscriptionId: result.subscriptionId,
+      preferenceId: result.preferenceId,
     };
   }
 
@@ -67,7 +66,7 @@ export class MercadoPagoController {
 
   /**
    * Webhook endpoint for Mercado Pago notifications
-   * This is called by Mercado Pago when subscription status changes
+   * This is called by Mercado Pago when payment status changes
    */
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
@@ -78,10 +77,8 @@ export class MercadoPagoController {
     this.logger.log(`Received webhook: ${body.type}`);
 
     // TODO: Validate webhook signature for security
-    // For now, we'll process all webhooks
     const webhookSecret = this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET');
     if (webhookSecret) {
-      // Signature validation would go here
       this.logger.debug(`Webhook signature: ${signature}`);
     }
 
@@ -93,20 +90,5 @@ export class MercadoPagoController {
       // Return 200 anyway to prevent retries for non-critical errors
       return { success: false, error: 'Processing failed' };
     }
-  }
-
-  /**
-   * Sync plans with Mercado Pago (admin only - for initial setup)
-   */
-  @Post('sync-plans')
-  async syncPlans(@Session() session: UserSession) {
-    // TODO: Add admin role check
-    this.logger.log(`User ${session.user.id} syncing plans`);
-    await this.mercadoPagoService.syncPlansWithMercadoPago();
-
-    return {
-      success: true,
-      message: 'Planos sincronizados com Mercado Pago',
-    };
   }
 }

@@ -16,6 +16,7 @@ export interface SubscriptionPlan {
   description: string | null;
   priceMonthly: number;
   priceYearly: number;
+  priceLifetime: number | null;
   isActive: boolean;
   limits: PlanLimit[];
 }
@@ -25,7 +26,7 @@ export interface Subscription {
   userId: string;
   planId: string;
   status: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'TRIALING' | 'PAUSED';
-  billingCycle: 'MONTHLY' | 'YEARLY';
+  billingCycle: 'MONTHLY' | 'YEARLY' | 'LIFETIME';
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
@@ -94,16 +95,15 @@ export const subscriptionApi = {
   },
 
   /**
-   * Subscribe to a plan (redirects to Mercado Pago checkout)
+   * Subscribe to a plan (lifetime payment - redirects to Mercado Pago checkout)
    */
   async subscribe(
-    planId: string,
-    billingCycle: 'MONTHLY' | 'YEARLY'
-  ): Promise<{ success: boolean; initPoint: string; subscriptionId: string }> {
+    planId: string
+  ): Promise<{ success: boolean; initPoint: string; preferenceId: string }> {
     return apiClient.post<
-      { success: boolean; initPoint: string; subscriptionId: string },
-      { planId: string; billingCycle: 'MONTHLY' | 'YEARLY' }
-    >('/api/mercadopago/subscribe', { planId, billingCycle });
+      { success: boolean; initPoint: string; preferenceId: string },
+      { planId: string }
+    >('/api/mercadopago/subscribe', { planId });
   },
 
   /**

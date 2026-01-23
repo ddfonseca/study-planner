@@ -262,13 +262,14 @@ model StudyCycleCompletion {
 // Subscription Plan - available plans (free, pro, business)
 model SubscriptionPlan {
   id                 String   @id @default(cuid())
-  name               String   @unique @db.VarChar(50) // "free", "pro", "business"
+  name               String   @unique @db.VarChar(50) // "free", "pro"
   displayName        String   @map("display_name") @db.VarChar(100)
   description        String?
   priceMonthly       Float    @default(0) @map("price_monthly")
   priceYearly        Float    @default(0) @map("price_yearly")
+  priceLifetime      Float?   @default(0) @map("price_lifetime")
   isActive           Boolean  @default(true) @map("is_active")
-  mercadoPagoPlanId  String?  @map("mercadopago_plan_id") // Mercado Pago preapproval_plan ID
+  mercadoPagoPlanId  String?  @map("mercadopago_plan_id") // Mercado Pago preapproval_plan ID (deprecated)
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -345,6 +346,7 @@ enum SubscriptionStatus {
 enum BillingCycle {
   MONTHLY
   YEARLY
+  LIFETIME
 }
 
 enum PaymentStatus {

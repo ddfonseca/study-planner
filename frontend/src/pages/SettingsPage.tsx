@@ -140,20 +140,24 @@ export function SettingsPage() {
               <p className="text-sm text-muted-foreground">
                 {isFree
                   ? 'Faça upgrade para desbloquear mais recursos'
-                  : subscription?.billingCycle === 'YEARLY'
-                    ? 'Cobrança anual'
-                    : 'Cobrança mensal'
+                  : subscription?.billingCycle === 'LIFETIME'
+                    ? 'Acesso vitalício - nunca expira'
+                    : subscription?.billingCycle === 'YEARLY'
+                      ? 'Cobrança anual'
+                      : 'Cobrança mensal'
                 }
               </p>
             </div>
           </div>
-          <Button
-            variant={isFree ? 'default' : 'outline'}
-            onClick={() => setIsPricingModalOpen(true)}
-          >
-            <Crown className="h-4 w-4 mr-2" />
-            {isFree ? 'Fazer Upgrade' : 'Ver Planos'}
-          </Button>
+          {isFree && (
+            <Button
+              variant="default"
+              onClick={() => setIsPricingModalOpen(true)}
+            >
+              <Crown className="h-4 w-4 mr-2" />
+              Fazer Upgrade
+            </Button>
+          )}
         </CardContent>
       </Card>
 

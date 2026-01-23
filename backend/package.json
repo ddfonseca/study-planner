@@ -18,7 +18,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "DATABASE_URL='postgresql://test:test@localhost:5433/study_planner_test?schema=public' jest --config ./test/jest-e2e.json"
+    "test:e2e": "DATABASE_URL='postgresql://test:test@localhost:5433/study_planner_test?schema=public' jest --config ./test/jest-e2e.json",
+    "db:migrate:prod": "dotenv -e .env.prod -o -- npx prisma migrate deploy",
+    "db:status:prod": "dotenv -e .env.prod -o -- npx prisma migrate status",
+    "db:seed:prod": "dotenv -e .env.prod -o -- npx ts-node prisma/seed.ts",
+    "db:studio:prod": "dotenv -e .env.prod -o -- npx prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -42,6 +46,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "dotenv-cli": "^8.0.0",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",

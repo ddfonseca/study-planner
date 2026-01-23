@@ -16,24 +16,22 @@ import {
 jest.mock('mercadopago', () => {
   return {
     MercadoPagoConfig: jest.fn().mockImplementation(() => ({})),
-    PreApprovalPlan: jest.fn().mockImplementation(() => ({
+    Preference: jest.fn().mockImplementation(() => ({
       create: jest.fn(),
     })),
-    PreApproval: jest.fn().mockImplementation(() => ({
-      create: jest.fn(),
+    Payment: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
-      update: jest.fn(),
     })),
   };
 });
 
 // Import after mocking
-import { PreApprovalPlan, PreApproval } from 'mercadopago';
+import { Preference, Payment } from 'mercadopago';
 
 describe('MercadoPagoService', () => {
   let service: MercadoPagoService;
-  let mockPreApprovalPlan: jest.Mocked<{ create: jest.Mock }>;
-  let mockPreApproval: jest.Mocked<{ create: jest.Mock; get: jest.Mock; update: jest.Mock }>;
+  let mockPreference: jest.Mocked<{ create: jest.Mock }>;
+  let mockPayment: jest.Mocked<{ get: jest.Mock }>;
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
@@ -41,6 +39,7 @@ describe('MercadoPagoService', () => {
         MERCADOPAGO_ACCESS_TOKEN: 'TEST-fake-access-token',
         FRONTEND_URL: 'http://localhost:5173',
         MERCADOPAGO_WEBHOOK_SECRET: 'test-webhook-secret',
+        MERCADOPAGO_WEBHOOK_URL: 'http://localhost:3000/api/mercadopago/webhook',
       };
       return config[key];
     }),
@@ -53,19 +52,17 @@ describe('MercadoPagoService', () => {
     jest.clearAllMocks();
 
     // Setup mock implementations
-    mockPreApprovalPlan = {
+    mockPreference = {
       create: jest.fn(),
     };
 
-    mockPreApproval = {
-      create: jest.fn(),
+    mockPayment = {
       get: jest.fn(),
-      update: jest.fn(),
     };
 
     // Configure the mock constructors to return our mock objects
-    (PreApprovalPlan as jest.Mock).mockImplementation(() => mockPreApprovalPlan);
-    (PreApproval as jest.Mock).mockImplementation(() => mockPreApproval);
+    (Preference as jest.Mock).mockImplementation(() => mockPreference);
+    (Payment as jest.Mock).mockImplementation(() => mockPayment);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -81,48 +78,52 @@ describe('MercadoPagoService', () => {
     service.onModuleInit();
   });
 
-  describe('createSubscription', () => {
-    it('should create a subscription and return init_point', async () => {
+  describe('createLifetimePayment', () => {
+    it('should create a preference and return init_point', async () => {
       // Arrange
-      const user = await createTestUser({ email: 'subscriber@test.com' });
+      const user = await createTestUser({ email: 'buyer@test.com' });
       const plan = await createTestSubscriptionPlan({
         name: 'pro',
         displayName: 'Pro',
-        priceMonthly: 19.90,
-        priceYearly: 199.90,
+        priceLifetime: 19.90,
       });
 
-      mockPreApproval.create.mockResolvedValue({
-        id: 'mp-subscription-123',
-        init_point: 'https://www.mercadopago.com.br/subscriptions/checkout?preapproval_id=123',
-        status: 'pending',
+      mockPreference.create.mockResolvedValue({
+        id: 'preference-123',
+        init_point: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123',
       });
 
       // Act
-      const result = await service.createSubscription({
+      const result = await service.createLifetimePayment({
         planId: plan.id,
         userId: user.id,
         userEmail: user.email,
-        billingCycle: 'MONTHLY',
       });
 
       // Assert
-      expect(result.initPoint).toBe('https://www.mercadopago.com.br/subscriptions/checkout?preapproval_id=123');
-      expect(result.subscriptionId).toBe('mp-subscription-123');
+      expect(result.initPoint).toBe('https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123');
+      expect(result.preferenceId).toBe('preference-123');
 
       // Verify MP API was called correctly
-      expect(mockPreApproval.create).toHaveBeenCalledWith({
+      expect(mockPreference.create).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          reason: 'Pro - Mensal',
-          payer_email: 'subscriber@test.com',
-          auto_recurring: expect.objectContaining({
-            frequency: 1,
-            frequency_type: 'months',
-            transaction_amount: 19.90,
-            currency_id: 'BRL',
-          }),
-          back_url: 'http://localhost:5173/app/settings?subscription=success',
-          status: 'pending',
+          items: [
+            expect.objectContaining({
+              id: plan.id,
+              title: 'Pro - Acesso Vitalício',
+              quantity: 1,
+              currency_id: 'BRL',
+              unit_price: 19.90,
+            }),
+          ],
+          payer: { email: 'buyer@test.com' },
+          external_reference: `lifetime_${user.id}_${plan.id}`,
+          back_urls: {
+            success: 'http://localhost:5173/app/settings?subscription=success',
+            failure: 'http://localhost:5173/app/settings?subscription=failure',
+            pending: 'http://localhost:5173/app/settings?subscription=pending',
+          },
+          auto_return: 'approved',
         }),
       });
 
@@ -134,44 +135,9 @@ describe('MercadoPagoService', () => {
 
       expect(subscription).not.toBeNull();
       expect(subscription?.planId).toBe(plan.id);
-      expect(subscription?.externalId).toBe('mp-subscription-123');
+      expect(subscription?.externalId).toBe('preference-123');
       expect(subscription?.status).toBe('TRIALING');
-    });
-
-    it('should create yearly subscription with correct frequency', async () => {
-      // Arrange
-      const user = await createTestUser();
-      const plan = await createTestSubscriptionPlan({
-        name: 'pro-yearly',
-        displayName: 'Pro Anual',
-        priceMonthly: 19.90,
-        priceYearly: 199.90,
-      });
-
-      mockPreApproval.create.mockResolvedValue({
-        id: 'mp-yearly-123',
-        init_point: 'https://mp.com/checkout',
-        status: 'pending',
-      });
-
-      // Act
-      await service.createSubscription({
-        planId: plan.id,
-        userId: user.id,
-        userEmail: user.email,
-        billingCycle: 'YEARLY',
-      });
-
-      // Assert
-      expect(mockPreApproval.create).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          reason: 'Pro Anual - Anual',
-          auto_recurring: expect.objectContaining({
-            frequency: 12,
-            transaction_amount: 199.90,
-          }),
-        }),
-      });
+      expect(subscription?.billingCycle).toBe('LIFETIME');
     });
 
     it('should throw error for free plan', async () => {
@@ -180,19 +146,17 @@ describe('MercadoPagoService', () => {
       const freePlan = await createTestSubscriptionPlan({
         name: 'free',
         displayName: 'Gratuito',
-        priceMonthly: 0,
-        priceYearly: 0,
+        priceLifetime: 0,
       });
 
       // Act & Assert
       await expect(
-        service.createSubscription({
+        service.createLifetimePayment({
           planId: freePlan.id,
           userId: user.id,
           userEmail: user.email,
-          billingCycle: 'MONTHLY',
         }),
-      ).rejects.toThrow('Cannot create subscription for free plan');
+      ).rejects.toThrow('Cannot create payment for free plan');
     });
 
     it('should throw error for non-existent plan', async () => {
@@ -201,11 +165,10 @@ describe('MercadoPagoService', () => {
 
       // Act & Assert
       await expect(
-        service.createSubscription({
+        service.createLifetimePayment({
           planId: 'non-existent-plan-id',
           userId: user.id,
           userEmail: user.email,
-          billingCycle: 'MONTHLY',
         }),
       ).rejects.toThrow('Plan not found');
     });
@@ -214,22 +177,20 @@ describe('MercadoPagoService', () => {
       // Arrange
       const user = await createTestUser();
       const oldPlan = await createTestSubscriptionPlan({ name: 'old-plan' });
-      const newPlan = await createTestSubscriptionPlan({ name: 'new-plan', priceMonthly: 29.90 });
+      const newPlan = await createTestSubscriptionPlan({ name: 'new-plan', priceLifetime: 29.90 });
 
-      await createTestSubscription(user.id, oldPlan.id, { externalId: 'old-mp-id' });
+      await createTestSubscription(user.id, oldPlan.id, { externalId: 'old-pref-id' });
 
-      mockPreApproval.create.mockResolvedValue({
-        id: 'new-mp-id',
+      mockPreference.create.mockResolvedValue({
+        id: 'new-pref-id',
         init_point: 'https://mp.com/new',
-        status: 'pending',
       });
 
       // Act
-      await service.createSubscription({
+      await service.createLifetimePayment({
         planId: newPlan.id,
         userId: user.id,
         userEmail: user.email,
-        billingCycle: 'MONTHLY',
       });
 
       // Assert - should have updated, not created new
@@ -240,137 +201,119 @@ describe('MercadoPagoService', () => {
 
       expect(subscriptions).toHaveLength(1);
       expect(subscriptions[0].planId).toBe(newPlan.id);
-      expect(subscriptions[0].externalId).toBe('new-mp-id');
+      expect(subscriptions[0].externalId).toBe('new-pref-id');
+      expect(subscriptions[0].billingCycle).toBe('LIFETIME');
     });
   });
 
-  describe('processWebhook', () => {
-    it('should update subscription status on webhook', async () => {
+  describe('processWebhook - payment', () => {
+    it('should activate subscription when payment is approved', async () => {
       // Arrange
       const user = await createTestUser();
-      const plan = await createTestSubscriptionPlan();
+      const plan = await createTestSubscriptionPlan({ priceLifetime: 19.90 });
       await createTestSubscription(user.id, plan.id, {
-        externalId: 'mp-sub-webhook-test',
+        externalId: 'preference-id',
         status: 'TRIALING',
+        billingCycle: 'LIFETIME',
       });
 
-      mockPreApproval.get.mockResolvedValue({
-        id: 'mp-sub-webhook-test',
-        status: 'authorized',
-        date_created: '2024-12-24T10:00:00Z',
-        next_payment_date: '2025-01-24T10:00:00Z',
+      mockPayment.get.mockResolvedValue({
+        id: 'payment-123',
+        status: 'approved',
+        external_reference: `lifetime_${user.id}_${plan.id}`,
+        transaction_amount: 19.90,
+        currency_id: 'BRL',
       });
 
       // Act
-      await service.processWebhook('subscription_preapproval', { id: 'mp-sub-webhook-test' });
+      await service.processWebhook('payment', { id: 'payment-123' });
 
       // Assert
       const prisma = jestPrisma.client;
-      const subscription = await prisma.subscription.findFirst({
-        where: { externalId: 'mp-sub-webhook-test' },
+      const subscription = await prisma.subscription.findUnique({
+        where: { userId: user.id },
       });
 
       expect(subscription?.status).toBe('ACTIVE');
+      expect(subscription?.billingCycle).toBe('LIFETIME');
+      expect(subscription?.externalId).toBe('payment-123');
+
+      // Check payment was recorded
+      const payments = await prisma.payment.findMany({
+        where: { subscriptionId: subscription!.id },
+      });
+      expect(payments).toHaveLength(1);
+      expect(payments[0].amount).toBe(19.90);
+      expect(payments[0].status).toBe('COMPLETED');
     });
 
-    it('should handle cancelled status from webhook', async () => {
+    it('should handle rejected payment', async () => {
       // Arrange
       const user = await createTestUser();
       const plan = await createTestSubscriptionPlan();
       await createTestSubscription(user.id, plan.id, {
-        externalId: 'mp-sub-cancel',
-        status: 'ACTIVE',
+        externalId: 'preference-id',
+        status: 'TRIALING',
+        billingCycle: 'LIFETIME',
       });
 
-      mockPreApproval.get.mockResolvedValue({
-        id: 'mp-sub-cancel',
-        status: 'cancelled',
+      mockPayment.get.mockResolvedValue({
+        id: 'payment-rejected',
+        status: 'rejected',
+        external_reference: `lifetime_${user.id}_${plan.id}`,
       });
 
       // Act
-      await service.processWebhook('subscription_preapproval', { id: 'mp-sub-cancel' });
+      await service.processWebhook('payment', { id: 'payment-rejected' });
 
       // Assert
       const prisma = jestPrisma.client;
       const subscription = await prisma.subscription.findFirst({
-        where: { externalId: 'mp-sub-cancel' },
+        where: { userId: user.id },
       });
 
-      expect(subscription?.status).toBe('CANCELED');
+      // Status should still be TRIALING since we only update on exact match
+      expect(subscription?.status).toBe('TRIALING');
     });
 
-    it('should handle paused status from webhook', async () => {
+    it('should ignore payments with invalid external_reference', async () => {
       // Arrange
-      const user = await createTestUser();
-      const plan = await createTestSubscriptionPlan();
-      await createTestSubscription(user.id, plan.id, {
-        externalId: 'mp-sub-pause',
-        status: 'ACTIVE',
-      });
-
-      mockPreApproval.get.mockResolvedValue({
-        id: 'mp-sub-pause',
-        status: 'paused',
-      });
-
-      // Act
-      await service.processWebhook('subscription_preapproval', { id: 'mp-sub-pause' });
-
-      // Assert
-      const prisma = jestPrisma.client;
-      const subscription = await prisma.subscription.findFirst({
-        where: { externalId: 'mp-sub-pause' },
-      });
-
-      expect(subscription?.status).toBe('PAUSED');
-    });
-
-    it('should ignore webhook for unknown subscription', async () => {
-      // Arrange
-      mockPreApproval.get.mockResolvedValue({
-        id: 'unknown-mp-id',
-        status: 'authorized',
+      mockPayment.get.mockResolvedValue({
+        id: 'payment-other',
+        status: 'approved',
+        external_reference: 'some_other_reference',
       });
 
       // Act & Assert - should not throw
       await expect(
-        service.processWebhook('subscription_preapproval', { id: 'unknown-mp-id' }),
+        service.processWebhook('payment', { id: 'payment-other' }),
       ).resolves.not.toThrow();
     });
 
-    it('should ignore non-subscription webhook types', async () => {
+    it('should ignore non-payment webhook types', async () => {
       // Act
-      await service.processWebhook('payment', { id: 'some-payment-id' });
+      await service.processWebhook('subscription_preapproval', { id: 'some-id' });
 
       // Assert - get should not have been called
-      expect(mockPreApproval.get).not.toHaveBeenCalled();
+      expect(mockPayment.get).not.toHaveBeenCalled();
     });
   });
 
   describe('cancelSubscription', () => {
-    it('should cancel subscription in MP and update database', async () => {
+    it('should mark subscription as canceled in database', async () => {
       // Arrange
       const user = await createTestUser();
       const plan = await createTestSubscriptionPlan();
       await createTestSubscription(user.id, plan.id, {
-        externalId: 'mp-to-cancel',
+        externalId: 'payment-id',
         status: 'ACTIVE',
-      });
-
-      mockPreApproval.update.mockResolvedValue({
-        id: 'mp-to-cancel',
-        status: 'cancelled',
+        billingCycle: 'LIFETIME',
       });
 
       // Act
       await service.cancelSubscription(user.id);
 
       // Assert
-      expect(mockPreApproval.update).toHaveBeenCalledWith({
-        id: 'mp-to-cancel',
-        body: { status: 'cancelled' },
-      });
-
       const prisma = jestPrisma.client;
       const subscription = await prisma.subscription.findUnique({
         where: { userId: user.id },
@@ -378,6 +321,7 @@ describe('MercadoPagoService', () => {
 
       expect(subscription?.status).toBe('CANCELED');
       expect(subscription?.cancelAtPeriodEnd).toBe(true);
+      expect(subscription?.canceledAt).not.toBeNull();
     });
 
     it('should throw error if user has no subscription', async () => {
@@ -389,111 +333,27 @@ describe('MercadoPagoService', () => {
         'No active subscription found',
       );
     });
-
-    it('should throw error if subscription has no external ID', async () => {
-      // Arrange
-      const user = await createTestUser();
-      const plan = await createTestSubscriptionPlan();
-      await createTestSubscription(user.id, plan.id, {
-        externalId: undefined, // No MP ID
-        status: 'ACTIVE',
-      });
-
-      // Act & Assert
-      await expect(service.cancelSubscription(user.id)).rejects.toThrow(
-        'No active subscription found',
-      );
-    });
   });
 
-  describe('syncPlansWithMercadoPago', () => {
-    it('should sync plans that do not have MP ID yet', async () => {
+  describe('getPaymentStatus', () => {
+    it('should return payment status from MP', async () => {
       // Arrange
-      const plan1 = await createTestSubscriptionPlan({
-        name: 'plan-to-sync',
-        displayName: 'Plan to Sync',
-        priceMonthly: 29.90,
-        mercadoPagoPlanId: undefined, // Not synced
-      });
-
-      // Plan already synced - should be skipped
-      await createTestSubscriptionPlan({
-        name: 'already-synced',
-        displayName: 'Already Synced',
-        priceMonthly: 49.90,
-        mercadoPagoPlanId: 'existing-mp-plan-id',
-      });
-
-      // Free plan - should be skipped
-      await createTestSubscriptionPlan({
-        name: 'free-plan',
-        displayName: 'Free',
-        priceMonthly: 0,
-      });
-
-      mockPreApprovalPlan.create.mockResolvedValue({
-        id: 'new-mp-plan-id',
-        status: 'active',
+      mockPayment.get.mockResolvedValue({
+        id: 'payment-status-test',
+        status: 'approved',
+        transaction_amount: 19.90,
       });
 
       // Act
-      await service.syncPlansWithMercadoPago();
-
-      // Assert - should only sync plan1
-      expect(mockPreApprovalPlan.create).toHaveBeenCalledTimes(1);
-      expect(mockPreApprovalPlan.create).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          reason: 'Plan to Sync - Mensal',
-          auto_recurring: expect.objectContaining({
-            frequency: 1,
-            frequency_type: 'months',
-            transaction_amount: 29.90,
-          }),
-        }),
-      });
-
-      // Verify database was updated
-      const prisma = jestPrisma.client;
-      const updatedPlan = await prisma.subscriptionPlan.findUnique({
-        where: { id: plan1.id },
-      });
-
-      expect(updatedPlan?.mercadoPagoPlanId).toBe('new-mp-plan-id');
-    });
-
-    it('should handle API errors gracefully', async () => {
-      // Arrange
-      await createTestSubscriptionPlan({
-        name: 'plan-will-fail',
-        priceMonthly: 19.90,
-      });
-
-      mockPreApprovalPlan.create.mockRejectedValue(new Error('API Error'));
-
-      // Act & Assert - should not throw, just log error
-      await expect(service.syncPlansWithMercadoPago()).resolves.not.toThrow();
-    });
-  });
-
-  describe('getSubscriptionStatus', () => {
-    it('should return subscription status from MP', async () => {
-      // Arrange
-      mockPreApproval.get.mockResolvedValue({
-        id: 'mp-sub-status',
-        status: 'authorized',
-        payer_email: 'test@test.com',
-      });
-
-      // Act
-      const result = await service.getSubscriptionStatus('mp-sub-status');
+      const result = await service.getPaymentStatus('payment-status-test');
 
       // Assert
       expect(result).toEqual({
-        id: 'mp-sub-status',
-        status: 'authorized',
-        payer_email: 'test@test.com',
+        id: 'payment-status-test',
+        status: 'approved',
+        transaction_amount: 19.90,
       });
-      expect(mockPreApproval.get).toHaveBeenCalledWith({ id: 'mp-sub-status' });
+      expect(mockPayment.get).toHaveBeenCalledWith({ id: 'payment-status-test' });
     });
   });
 });

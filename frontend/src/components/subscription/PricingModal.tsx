@@ -1,5 +1,5 @@
 /**
- * PricingModal - Shows available subscription plans
+ * PricingModal - Shows available subscription plans (Free vs Pro Lifetime)
  */
 import { useEffect, useState } from 'react';
 import {
@@ -14,20 +14,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { subscriptionApi } from '@/lib/api/subscription';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Crown, Check, Loader2 } from 'lucide-react';
+import { BookOpen, Crown, Check, Loader2, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PricingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-// Map plan names to icons
-const PLAN_ICONS: Record<string, typeof BookOpen> = {
-  free: BookOpen,
-  pro: Crown,
-  pro_annual: Crown,
-};
 
 // Map feature keys to friendly labels
 const FEATURE_LABELS: Record<string, string> = {
@@ -65,6 +58,9 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
     }
   }, [open, plans.length, fetchPlans]);
 
+  // Filter to show only free and pro plans
+  const displayPlans = plans.filter(plan => plan.name === 'free' || plan.name === 'pro');
+
   const handleSelectPlan = async (planId: string, planName: string) => {
     if (planName === 'free') {
       onOpenChange(false);
@@ -75,9 +71,7 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
     setSubscribingPlanId(planId);
 
     try {
-      // Call the API to create subscription
-      const billingCycle = planName === 'pro_annual' ? 'YEARLY' : 'MONTHLY';
-      const response = await subscriptionApi.subscribe(planId, billingCycle);
+      const response = await subscriptionApi.subscribe(planId);
 
       if (response.success && response.initPoint) {
         // Redirect to Mercado Pago checkout
@@ -88,7 +82,7 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
     } catch (error) {
       console.error('Subscription error:', error);
       toast({
-        title: 'Erro ao assinar',
+        title: 'Erro ao processar pagamento',
         description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
         variant: 'destructive',
       });
@@ -99,14 +93,14 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <ResponsiveDialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-primary" />
             Escolha seu plano
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Desbloqueie mais recursos para potencializar seus estudos
+            Desbloqueie todos os recursos com um único pagamento
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -116,77 +110,75 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {plans.map((plan) => {
-                const Icon = PLAN_ICONS[plan.name] || BookOpen;
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {displayPlans.map((plan) => {
                 const isCurrentPlan = currentPlan?.id === plan.id;
                 const isPro = plan.name === 'pro';
-                const isAnnual = plan.name === 'pro_annual';
                 const isFree = plan.name === 'free';
-
-                // Determine price to display
-                const price = isAnnual ? plan.priceYearly : plan.priceMonthly;
-                const priceLabel = isAnnual ? '/ano' : '/mês';
+                const price = plan.priceLifetime || 0;
 
                 return (
                   <Card
                     key={plan.id}
                     className={`relative ${
                       isPro
-                        ? 'border-primary shadow-lg ring-1 ring-primary'
+                        ? 'border-primary shadow-lg ring-2 ring-primary'
                         : ''
-                    } ${isAnnual ? 'border-green-500/50' : ''} ${isCurrentPlan ? 'bg-primary/5' : ''}`}
+                    } ${isCurrentPlan ? 'bg-primary/5' : ''}`}
                   >
-                    {isAnnual && (
+                    {isPro && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                          -30% desconto
+                        <Badge variant="default" className="bg-primary flex items-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          Recomendado
                         </Badge>
                       </div>
                     )}
-                    <CardContent className="p-5 pt-6">
+                    <CardContent className="p-6 pt-8">
                       {/* Header */}
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <div
                           className={`p-2 rounded-lg ${
                             isPro
                               ? 'bg-primary/10 text-primary'
-                              : isAnnual
-                              ? 'bg-green-500/10 text-green-600'
                               : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          <Icon className="h-5 w-5" />
+                          {isPro ? <Crown className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
                         </div>
-                        <h3 className="text-lg font-semibold">{plan.displayName}</h3>
+                        <h3 className="text-xl font-semibold">{plan.displayName}</h3>
                       </div>
 
                       {/* Price */}
-                      <div className="mb-3">
-                        <span className="text-2xl font-bold">
-                          {isFree
-                            ? 'Grátis'
-                            : `R$ ${price.toFixed(2).replace('.', ',')}`}
-                        </span>
-                        {!isFree && (
-                          <span className="text-muted-foreground text-sm">{priceLabel}</span>
+                      <div className="mb-4">
+                        {isFree ? (
+                          <span className="text-3xl font-bold">Grátis</span>
+                        ) : (
+                          <>
+                            <span className="text-3xl font-bold">
+                              R$ {price.toFixed(2).replace('.', ',')}
+                            </span>
+                            <span className="text-muted-foreground text-sm ml-1">
+                              pagamento único
+                            </span>
+                          </>
                         )}
-                        {isAnnual && (
-                          <div className="text-xs text-green-600 mt-1">
-                            equivale a R$ {(price / 12).toFixed(2).replace('.', ',')}/mês
+                        {isPro && (
+                          <div className="text-sm text-primary mt-1 font-medium">
+                            Acesso vitalício
                           </div>
                         )}
                       </div>
 
                       {/* Description */}
                       {plan.description && (
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <p className="text-sm text-muted-foreground mb-5">
                           {plan.description}
                         </p>
                       )}
 
                       {/* Features */}
-                      <ul className="space-y-2 mb-5">
+                      <ul className="space-y-2.5 mb-6">
                         {plan.limits.map((limit) => {
                           const label = FEATURE_LABELS[limit.feature] || limit.feature;
                           const value = formatLimitValue(limit.feature, limit.limitValue);
@@ -196,7 +188,7 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                               key={limit.id}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <Check className="h-4 w-4 text-green-500 shrink-0" />
+                              <Check className={`h-4 w-4 shrink-0 ${isPro ? 'text-primary' : 'text-green-500'}`} />
                               <span>
                                 {value === 'Sim' || value === 'Não'
                                   ? label
@@ -209,8 +201,9 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
 
                       {/* CTA Button */}
                       <Button
-                        className={`w-full ${isAnnual ? 'bg-green-500 hover:bg-green-600' : ''}`}
-                        variant={isPro || isAnnual ? 'default' : 'outline'}
+                        className="w-full"
+                        variant={isPro ? 'default' : 'outline'}
+                        size="lg"
                         onClick={() => handleSelectPlan(plan.id, plan.name)}
                         disabled={isCurrentPlan || isSubscribing}
                       >
@@ -222,9 +215,12 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                         ) : isCurrentPlan ? (
                           'Plano atual'
                         ) : plan.name === 'free' ? (
-                          'Plano gratuito'
+                          'Continuar grátis'
                         ) : (
-                          'Assinar agora'
+                          <>
+                            <Crown className="h-4 w-4 mr-2" />
+                            Comprar acesso vitalício
+                          </>
                         )}
                       </Button>
                     </CardContent>
