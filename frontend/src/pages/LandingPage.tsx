@@ -5,16 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   Calendar,
   Target,
-  BarChart3,
   Moon,
   Sun,
   ChevronDown,
   BookOpen,
-  Brain,
   TrendingUp,
   Focus,
-  Compass,
-  Repeat,
   Check,
   Crown,
   Clock,
@@ -175,33 +171,6 @@ export function LandingPage() {
 
   const toggleTheme = () => setIsDark(!isDark);
 
-  const benefits = [
-    {
-      icon: Calendar,
-      title: 'Calendário Visual',
-      description:
-        'Visualize seu tempo de estudo em um calendário intuitivo com cores de intensidade.',
-    },
-    {
-      icon: Target,
-      title: 'Metas Semanais',
-      description:
-        'Defina metas de horas por semana e acompanhe seu progresso em tempo real.',
-    },
-    {
-      icon: BarChart3,
-      title: 'Análise de Padrões',
-      description:
-        'Entenda seus hábitos de estudo com estatísticas e gráficos detalhados.',
-    },
-    {
-      icon: Moon,
-      title: 'Modo Escuro',
-      description:
-        'Interface adaptável para estudar confortavelmente a qualquer hora do dia.',
-    },
-  ];
-
   const faqs = [
     {
       question: 'O Horas Líquidas é gratuito?',
@@ -300,17 +269,17 @@ export function LandingPage() {
       <section className="py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Organize seus estudos de forma{' '}
-            <span className="text-primary">inteligente</span>
+            Controle quanto tempo você{' '}
+            <span className="text-primary">realmente</span> estuda
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Acompanhe seu tempo de estudo, defina metas semanais e visualize seu
-            progresso com um calendário intuitivo.
+            Não quanto tempo passa na cadeira. Registre sessões de foco, visualize
+            padrões em um calendário heatmap e atinja suas metas semanais.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
               <Button size="lg" className="w-full sm:w-auto">
-                Começar grátis
+                Começar a medir meu foco
               </Button>
             </Link>
             <Button
@@ -335,134 +304,120 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Why Net Hours Section */}
-      <section className="py-16 md:py-24">
+      {/* Social Proof Section */}
+      <section className="py-8 border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-4">
+          <p className="text-center text-muted-foreground text-sm">
+            Usado por estudantes de <span className="font-medium text-foreground">medicina</span>, <span className="font-medium text-foreground">direito</span> e <span className="font-medium text-foreground">concursos públicos</span>
+          </p>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
-            Por que medir horas líquidas?
+            Tudo que você precisa para estudar melhor
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Não é sobre estudar mais. É sobre estudar melhor.
+            Não é sobre estudar mais. É sobre estudar com clareza.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Card 1 - Distribuição estratégica */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Feature 1 - Calendário Heatmap */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500" />
               <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-[#c17a5c]/10 flex items-center justify-center mb-4">
-                  <Compass className="h-6 w-6 text-[#c17a5c]" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#c17a5c]/10 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="h-6 w-6 text-[#c17a5c]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Calendário Heatmap</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Visualize seu esforço dia a dia com cores de intensidade. Identifique padrões e entenda seus hábitos de estudo.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Distribua seu esforço</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Tem 300 horas até a prova? Visualize como alocar seu tempo nas matérias que mais pesam no resultado.
-                </p>
               </CardContent>
             </Card>
 
-            {/* Card 2 - Foco real */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+            {/* Feature 2 - Foco Real */}
+            <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
               <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
-                  <Focus className="h-6 w-6 text-purple-500" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                    <Focus className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Foco Real</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Meça tempo de concentração, não tempo sentado. Num mundo de distrações, saber seu foco real é um superpoder.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Meça seu foco real</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Num mundo de notificações e distrações, saber quanto tempo você realmente manteve a mente no estudo é um superpoder.
-                </p>
               </CardContent>
             </Card>
 
-            {/* Card 3 - Consistência */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+            {/* Feature 3 - Metas Semanais */}
+            <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
               <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
-                  <Repeat className="h-6 w-6 text-green-500" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                    <Target className="h-6 w-6 text-green-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Metas Semanais</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Defina objetivos e acompanhe seu progresso em tempo real. Consistência de 1h por dia vale mais que 7h no domingo.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Consistência vence intensidade</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  1 hora por dia vale mais que 7 horas no domingo. Construa o hábito e os resultados virão.
-                </p>
               </CardContent>
             </Card>
 
-            {/* Card 4 - Compare consigo mesmo */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
+            {/* Feature 4 - Histórico e Padrões */}
+            <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
               <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
-                  <TrendingUp className="h-6 w-6 text-orange-500" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="h-6 w-6 text-orange-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Histórico e Padrões</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Acompanhe sua evolução semana a semana. Compare com você mesmo e supere seu eu de ontem.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Compare com você mesmo</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Sua evolução semana a semana é o que importa. Não se compare com os outros, supere seu eu de ontem.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 5 - Ferramenta, não obsessão */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/60" />
-              <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Brain className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Ferramenta, não obsessão</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Horas líquidas são uma bússola, não um chicote. Use os dados para ajustar sua rota, não para se cobrar.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 6 - Sem culpa */}
-            <Card className="relative overflow-hidden border-border group hover:shadow-lg transition-all">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-400" />
-              <CardContent className="p-6">
-                <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
-                  <Target className="h-6 w-6 text-rose-500" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Sem culpa nos dias ruins</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Todo mundo tem dias menos produtivos. O que importa é voltar no dia seguinte. Consistência, não perfeição.
-                </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section id="features" className="py-16 md:py-24">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
-            Tudo que você precisa para estudar melhor
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="border-border">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <benefit.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">{benefit.title}</h3>
-                      <p className="text-muted-foreground text-sm">
-                        {benefit.description}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* CTA Section */}
+      <section className="py-12 md:py-16 bg-muted/30">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h3 className="text-xl md:text-2xl font-semibold mb-4">
+            Pronto para estudar com mais clareza?
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            Comece gratuitamente e veja a diferença de medir seu foco real.
+          </p>
+          <Link to="/login">
+            <Button size="lg">
+              Começar grátis agora
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24 bg-muted/30">
+      <section className="py-16 md:py-24">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
             Perguntas frequentes
