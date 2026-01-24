@@ -31,6 +31,10 @@ interface SubjectPickerProps {
   emptyMessage?: string
   disabled?: boolean
   className?: string
+  /** Controlled open state */
+  open?: boolean
+  /** Callback when open state changes */
+  onOpenChange?: (open: boolean) => void
 }
 
 // Normalize string for search (remove accents, lowercase)
@@ -256,10 +260,22 @@ export function SubjectPicker({
   emptyMessage = "Nenhuma matéria encontrada.",
   disabled = false,
   className,
+  open: controlledOpen,
+  onOpenChange,
 }: SubjectPickerProps) {
-  const [open, setOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
   const isMobile = useIsMobile()
+
+  // Support controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = React.useCallback((newOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(newOpen)
+    }
+    onOpenChange?.(newOpen)
+  }, [isControlled, onOpenChange])
 
   const matchingOptions = React.useMemo(
     () =>

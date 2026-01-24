@@ -122,6 +122,17 @@ export function CalendarPage() {
     }
   }, [shouldOpenSessionModal, sessionsLoading, configLoading, setShouldOpenSessionModal]);
 
+  // Listen for keyboard shortcut to open new session
+  useEffect(() => {
+    const handleNewSession = () => {
+      setSelectedDate(new Date());
+      setIsModalOpen(true);
+    };
+
+    window.addEventListener('shortcut:newSession', handleNewSession);
+    return () => window.removeEventListener('shortcut:newSession', handleNewSession);
+  }, []);
+
   // Handle cell click - open modal
   const handleCellClick = useCallback((date: Date) => {
     setSelectedDate(date);

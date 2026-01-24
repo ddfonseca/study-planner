@@ -1,7 +1,7 @@
 /**
  * Study Timer - Simple stopwatch for tracking study sessions
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SubjectPicker } from '@/components/ui/subject-picker';
@@ -35,8 +35,14 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [subject, setSubject] = useState('');
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initializedRef = useRef(false);
+  const isRunningRef = useRef(isRunning);
+  const subjectRef = useRef(subject);
+  const handleStartRef = useRef<() => void>(() => {});
+  const handleStopRef = useRef<() => void>(() => {});
+  const openPickerRef = useRef<() => void>(() => {});
 
   // Load saved state from localStorage on mount
   /* eslint-disable react-hooks/set-state-in-effect -- Initialization from localStorage on mount is intentional */
@@ -78,7 +84,13 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   // Notify parent about running state changes
   useEffect(() => {
     onRunningChange?.(isRunning);
+    isRunningRef.current = isRunning;
   }, [isRunning, onRunningChange]);
+
+  // Keep subject ref in sync
+  useEffect(() => {
+    subjectRef.current = subject;
+  }, [subject]);
 
   // Timer interval
   useEffect(() => {
@@ -195,6 +207,35 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  // Keep refs in sync with handlers
+  useLayoutEffect(() => {
+    handleStartRef.current = handleStart;
+    handleStopRef.current = handleStop;
+    openPickerRef.current = () => setIsPickerOpen(true);
+  });
+
+  // Listen for keyboard shortcut to toggle timer (smart behavior)
+  // - If timer running: stop and save
+  // - If no subject selected: open the subject picker
+  // - If subject selected: start the timer
+  useEffect(() => {
+    const handleToggleTimer = () => {
+      if (isRunningRef.current) {
+        // Timer is running - stop it
+        handleStopRef.current();
+      } else if (!subjectRef.current.trim()) {
+        // No subject - open the picker
+        openPickerRef.current();
+      } else {
+        // Has subject - start the timer
+        handleStartRef.current();
+      }
+    };
+
+    window.addEventListener('shortcut:toggleTimer', handleToggleTimer);
+    return () => window.removeEventListener('shortcut:toggleTimer', handleToggleTimer);
+  }, []);
+
   return (
     <Card data-tour="study-timer">
       <CardHeader className="pb-2">
@@ -229,6 +270,8 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
           searchPlaceholder="Buscar..."
           emptyMessage="Nenhuma matéria"
           disabled={isRunning || !canModify}
+          open={isPickerOpen}
+          onOpenChange={setIsPickerOpen}
         />
 
         {/* Start/Stop button */}

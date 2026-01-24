@@ -12,6 +12,8 @@ import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } fro
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
+import { ShortcutsHelpFAB, ShortcutsModal } from '@/components/keyboard';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
@@ -19,6 +21,7 @@ export function AppLayout() {
   const { isFeatureNew, markFeatureSeen } = useFeatureBadgesStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isHelpOpen, setIsHelpOpen, pendingKey } = useKeyboardShortcuts();
   const [isDark, setIsDark] = useState(() => {
     // Check localStorage or system preference
     if (typeof window !== 'undefined') {
@@ -196,6 +199,16 @@ export function AppLayout() {
 
       {/* Onboarding Tour */}
       <OnboardingTour />
+
+      {/* Keyboard Shortcuts FAB and Modal */}
+      <ShortcutsHelpFAB
+        onClick={() => setIsHelpOpen(true)}
+        pendingKey={pendingKey}
+      />
+      <ShortcutsModal
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+      />
     </div>
   );
 }
