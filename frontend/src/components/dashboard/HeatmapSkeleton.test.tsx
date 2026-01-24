@@ -17,12 +17,12 @@ describe('HeatmapSkeleton', () => {
       // Icon skeleton
       const iconSkeleton = container.querySelector('.h-3\\.5.w-3\\.5');
       expect(iconSkeleton).toBeInTheDocument();
-      expect(iconSkeleton).toHaveClass('animate-pulse');
+      expect(iconSkeleton).toHaveClass('animate-pulse-soft');
 
       // Title skeleton
       const titleSkeleton = container.querySelector('.h-4.w-28');
       expect(titleSkeleton).toBeInTheDocument();
-      expect(titleSkeleton).toHaveClass('animate-pulse');
+      expect(titleSkeleton).toHaveClass('animate-pulse-soft');
     });
   });
 
@@ -31,7 +31,7 @@ describe('HeatmapSkeleton', () => {
       const { container } = render(<HeatmapSkeleton />);
 
       const monthLabelsContainer = container.querySelector('.pl-7.gap-1');
-      const monthLabels = monthLabelsContainer?.querySelectorAll('.animate-pulse.h-3.flex-1');
+      const monthLabels = monthLabelsContainer?.querySelectorAll('.animate-pulse-soft.h-3.flex-1');
       expect(monthLabels).toHaveLength(12);
     });
   });
@@ -79,7 +79,7 @@ describe('HeatmapSkeleton', () => {
     it('renders cells with skeleton animation', () => {
       const { container } = render(<HeatmapSkeleton />);
 
-      const cells = container.querySelectorAll('.aspect-square.rounded-sm.animate-pulse');
+      const cells = container.querySelectorAll('.aspect-square.rounded-sm.animate-pulse-soft');
       // 53 weeks × 7 days = 371 cells
       expect(cells.length).toBe(53 * 7);
     });
@@ -91,7 +91,7 @@ describe('HeatmapSkeleton', () => {
 
       // Find the monthly totals row (second pl-7 div with mt-1)
       const totalsRow = container.querySelector('.pl-7.mt-1');
-      const totalSkeletons = totalsRow?.querySelectorAll('.animate-pulse.h-3.flex-1');
+      const totalSkeletons = totalsRow?.querySelectorAll('.animate-pulse-soft.h-3.flex-1');
       expect(totalSkeletons).toHaveLength(12);
     });
   });
@@ -103,7 +103,7 @@ describe('HeatmapSkeleton', () => {
       const legendContainer = container.querySelector('.justify-between.pt-1');
       const yearSkeleton = legendContainer?.querySelector('.h-3.w-10');
       expect(yearSkeleton).toBeInTheDocument();
-      expect(yearSkeleton).toHaveClass('animate-pulse');
+      expect(yearSkeleton).toHaveClass('animate-pulse-soft');
     });
 
     it('renders intensity legend with 5 levels', () => {

@@ -17,7 +17,7 @@ describe('ChartSkeleton', () => {
       // Title skeleton should be in the CardHeader
       const titleSkeleton = container.querySelector('.h-6.w-40');
       expect(titleSkeleton).toBeInTheDocument();
-      expect(titleSkeleton).toHaveClass('animate-pulse');
+      expect(titleSkeleton).toHaveClass('animate-pulse-soft');
     });
 
     it('renders chart area with correct height', () => {
@@ -30,7 +30,7 @@ describe('ChartSkeleton', () => {
     it('renders Y-axis label skeletons', () => {
       const { container } = render(<ChartSkeleton />);
 
-      const yAxisLabels = container.querySelectorAll('.h-3.w-8.animate-pulse');
+      const yAxisLabels = container.querySelectorAll('.h-3.w-8.animate-pulse-soft');
       expect(yAxisLabels.length).toBeGreaterThanOrEqual(3);
     });
   });
@@ -76,7 +76,7 @@ describe('ChartSkeleton', () => {
       const xAxisContainer = container.querySelector('.pl-10.pt-2');
       expect(xAxisContainer).toBeInTheDocument();
 
-      const xAxisLabels = xAxisContainer?.querySelectorAll('.animate-pulse');
+      const xAxisLabels = xAxisContainer?.querySelectorAll('.animate-pulse-soft');
       expect(xAxisLabels?.length).toBeGreaterThan(0);
     });
   });

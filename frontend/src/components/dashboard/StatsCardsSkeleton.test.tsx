@@ -14,7 +14,7 @@ describe('StatsCardsSkeleton', () => {
     it('renders skeleton elements for icon and text in each card', () => {
       const { container } = render(<StatsCardsSkeleton />);
 
-      const skeletons = container.querySelectorAll('.animate-pulse');
+      const skeletons = container.querySelectorAll('.animate-pulse-soft');
       // Each card has 3 skeletons: icon, title, value
       expect(skeletons).toHaveLength(12);
     });
@@ -67,7 +67,7 @@ describe('StatsCardsSkeleton', () => {
     it('renders icon skeletons with responsive sizes', () => {
       const { container } = render(<StatsCardsSkeleton />);
 
-      const iconSkeletons = container.querySelectorAll('.rounded-lg.animate-pulse');
+      const iconSkeletons = container.querySelectorAll('.rounded-lg.animate-pulse-soft');
       expect(iconSkeletons).toHaveLength(4);
       iconSkeletons.forEach((skeleton) => {
         expect(skeleton).toHaveClass('h-8');

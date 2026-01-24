@@ -4,6 +4,8 @@
 export { DateRangeFilter } from './DateRangeFilter';
 export { StatsCards } from './StatsCards';
 export { StatsCardsSkeleton } from './StatsCardsSkeleton';
+export { ChartSkeleton } from './ChartSkeleton';
+export { HeatmapSkeleton } from './HeatmapSkeleton';
 export { SubjectChart } from './SubjectChart';
 export { DailyChart } from './DailyChart';
 export { AnnualHeatmap } from './AnnualHeatmap';
