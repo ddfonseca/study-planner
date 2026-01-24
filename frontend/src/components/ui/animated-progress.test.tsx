@@ -2,9 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { AnimatedProgress } from './animated-progress'
 
+// Helper to mock matchMedia for reduced motion tests
+const mockMatchMedia = (prefersReducedMotion: boolean) => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)' ? prefersReducedMotion : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 describe('AnimatedProgress', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Default: animations enabled
+    mockMatchMedia(false)
     // Mock requestAnimationFrame
     let frameId = 0
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -183,6 +202,49 @@ describe('AnimatedProgress', () => {
       unmount()
 
       expect(cancelSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('reduced motion', () => {
+    it('updates progress instantly when user prefers reduced motion', () => {
+      mockMatchMedia(true)
+
+      const { container, rerender } = render(<AnimatedProgress value={0} duration={500} />)
+
+      // Advance one frame to process initial render
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      rerender(<AnimatedProgress value={100} duration={500} />)
+
+      // With reduced motion, one RAF call should complete the update
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      // Progress should be at 100% after just one frame (offset = 0)
+      const progressCircle = container.querySelectorAll('circle')[1]
+      const offset = parseFloat(progressCircle.getAttribute('stroke-dashoffset') || '100')
+      expect(offset).toBeCloseTo(0, 0)
+    })
+
+    it('shows final progress after one frame when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+
+      const { container } = render(<AnimatedProgress value={50} />)
+
+      // One frame is enough with reduced motion
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      const progressCircle = container.querySelectorAll('circle')[1]
+      const circumference = parseFloat(progressCircle.getAttribute('stroke-dasharray') || '0')
+      const offset = parseFloat(progressCircle.getAttribute('stroke-dashoffset') || '0')
+
+      // At 50%, offset should be half of circumference
+      expect(offset).toBeCloseTo(circumference / 2, 0)
     })
   })
 })

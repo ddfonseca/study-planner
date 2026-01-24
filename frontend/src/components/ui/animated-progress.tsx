@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface AnimatedProgressProps {
   /** Current progress value (0-100) */
@@ -21,7 +22,13 @@ interface AnimatedProgressProps {
 }
 
 /**
- * AnimatedProgress provides a smooth animated circular progress indicator.
+ * AnimatedProgress provides a smooth animated circular progress indicator at 60fps.
+ *
+ * Features:
+ * - Uses requestAnimationFrame for smooth 60fps animation
+ * - SVG-based rendering (GPU accelerated, scale-independent)
+ * - Ease-out cubic easing for natural deceleration
+ * - Respects prefers-reduced-motion for accessibility
  *
  * Perfect for:
  * - Weekly/daily progress
@@ -38,6 +45,7 @@ export function AnimatedProgress({
   progressClassName,
   children,
 }: AnimatedProgressProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [displayValue, setDisplayValue] = useState(0);
   const previousValue = useRef(0);
   const animationRef = useRef<number | undefined>(undefined);
@@ -48,16 +56,34 @@ export function AnimatedProgress({
   const viewBox = `0 0 ${size} ${size}`;
   const center = size / 2;
 
+  // Handle immediate value updates for reduced motion
+  const effectiveDuration = prefersReducedMotion ? 0 : duration;
+
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = Math.min(100, Math.max(0, value));
+
+    // Skip animation if duration is 0 (reduced motion)
+    if (effectiveDuration === 0) {
+      // Use requestAnimationFrame to avoid synchronous setState in effect
+      animationRef.current = requestAnimationFrame(() => {
+        setDisplayValue(endValue);
+        previousValue.current = endValue;
+      });
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }
+
     const startTime = performance.now();
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min(elapsed / effectiveDuration, 1);
 
-      // Easing function: ease-out cubic
+      // Easing function: ease-out cubic for smooth 60fps deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
 
       const currentValue = startValue + (endValue - startValue) * eased;
@@ -78,7 +104,7 @@ export function AnimatedProgress({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [value, duration]);
+  }, [value, effectiveDuration]);
 
   const strokeDashoffset = circumference - (displayValue / 100) * circumference;
 

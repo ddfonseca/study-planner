@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 type TransitionState = 'entering' | 'entered' | 'exiting' | 'exited';
 
@@ -54,7 +55,13 @@ const animationStyles: Record<string, { enter: string; exit: string; base: strin
 
 /**
  * StateTransition provides smooth enter/exit animations for content
- * that changes visibility based on state.
+ * that changes visibility based on state at 60fps.
+ *
+ * Features:
+ * - GPU-accelerated CSS transitions (transform, opacity)
+ * - Cubic bezier easing for smooth 60fps animations
+ * - Respects prefers-reduced-motion for accessibility
+ * - Proper cleanup and unmount handling
  *
  * Perfect for:
  * - Banners that appear/disappear (offline, notifications)
@@ -72,12 +79,17 @@ export function StateTransition({
   onEntered,
   onExited,
 }: StateTransitionProps) {
+  const prefersReducedMotion = useReducedMotion();
   // Track transition state
   const [state, setState] = useState<TransitionState>(show ? 'entering' : 'exited');
   const [shouldRender, setShouldRender] = useState(show);
   // Track previous show value to detect changes
   const [prevShow, setPrevShow] = useState(show);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Use instant durations if user prefers reduced motion
+  const effectiveEnterDuration = prefersReducedMotion ? 0 : enterDuration;
+  const effectiveExitDuration = prefersReducedMotion ? 0 : exitDuration;
 
   // Detect when show changes and update state during render (React recommended pattern)
   if (show !== prevShow) {
@@ -105,14 +117,14 @@ export function StateTransition({
     timeoutRef.current = setTimeout(() => {
       setState('entered');
       onEntered?.();
-    }, enterDuration);
+    }, effectiveEnterDuration);
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [state, enterDuration, onEntered]);
+  }, [state, effectiveEnterDuration, onEntered]);
 
   useEffect(() => {
     if (state !== 'exiting') return;
@@ -129,20 +141,20 @@ export function StateTransition({
         setShouldRender(false);
       }
       onExited?.();
-    }, exitDuration);
+    }, effectiveExitDuration);
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [state, exitDuration, unmountOnExit, onExited]);
+  }, [state, effectiveExitDuration, unmountOnExit, onExited]);
 
-  // Derive animation duration
+  // Derive animation duration with cubic-bezier for smooth 60fps
   const transitionStyles = useMemo(() => ({
-    transitionDuration: `${state === 'entering' || state === 'entered' ? enterDuration : exitDuration}ms`,
+    transitionDuration: `${state === 'entering' || state === 'entered' ? effectiveEnterDuration : effectiveExitDuration}ms`,
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  }), [state, enterDuration, exitDuration]);
+  }), [state, effectiveEnterDuration, effectiveExitDuration]);
 
   if (!shouldRender && unmountOnExit) {
     return null;

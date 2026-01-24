@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface AnimatedNumberProps {
   /** The target value to animate to */
@@ -14,7 +15,13 @@ interface AnimatedNumberProps {
 }
 
 /**
- * AnimatedNumber smoothly transitions between numeric values.
+ * AnimatedNumber smoothly transitions between numeric values at 60fps.
+ *
+ * Features:
+ * - Uses requestAnimationFrame for smooth 60fps animation
+ * - Ease-out cubic easing for natural deceleration
+ * - Respects prefers-reduced-motion for accessibility
+ * - GPU-friendly (no layout thrashing)
  *
  * Perfect for:
  * - Progress percentages
@@ -29,25 +36,44 @@ export function AnimatedNumber({
   format,
   className,
 }: AnimatedNumberProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [displayValue, setDisplayValue] = useState(value);
   const previousValue = useRef(value);
   const animationRef = useRef<number | undefined>(undefined);
 
+  // Handle immediate value updates for reduced motion
+  const effectiveDuration = prefersReducedMotion ? 0 : duration;
+
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = value;
-    const startTime = performance.now();
 
     // Don't animate if values are the same
     if (startValue === endValue) {
       return;
     }
 
+    // Skip animation if duration is 0 (reduced motion)
+    if (effectiveDuration === 0) {
+      // Use requestAnimationFrame to avoid synchronous setState in effect
+      animationRef.current = requestAnimationFrame(() => {
+        setDisplayValue(endValue);
+        previousValue.current = endValue;
+      });
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }
+
+    const startTime = performance.now();
+
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min(elapsed / effectiveDuration, 1);
 
-      // Easing function: ease-out cubic
+      // Easing function: ease-out cubic for smooth 60fps deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
 
       const currentValue = startValue + (endValue - startValue) * eased;
@@ -68,7 +94,7 @@ export function AnimatedNumber({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [value, duration]);
+  }, [value, effectiveDuration]);
 
   const formattedValue = format
     ? format(displayValue)

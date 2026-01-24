@@ -2,9 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { AnimatedNumber } from './animated-number'
 
+// Helper to mock matchMedia for reduced motion tests
+const mockMatchMedia = (prefersReducedMotion: boolean) => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)' ? prefersReducedMotion : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 describe('AnimatedNumber', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Default: animations enabled
+    mockMatchMedia(false)
     // Mock requestAnimationFrame
     let frameId = 0
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -167,6 +186,48 @@ describe('AnimatedNumber', () => {
       unmount()
 
       expect(cancelSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('reduced motion', () => {
+    it('updates value instantly when user prefers reduced motion', () => {
+      mockMatchMedia(true) // Enable reduced motion preference
+
+      const { rerender } = render(<AnimatedNumber value={0} duration={500} />)
+
+      // Advance one frame to process initial render
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      rerender(<AnimatedNumber value={100} duration={500} />)
+
+      // With reduced motion, one RAF call should complete the update
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      // Value should be at target after just one frame
+      expect(screen.getByText('100')).toBeInTheDocument()
+    })
+
+    it('shows final value after one frame when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+
+      const { rerender } = render(<AnimatedNumber value={0} />)
+
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      rerender(<AnimatedNumber value={50} />)
+
+      // One frame is enough with reduced motion
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      expect(screen.getByText('50')).toBeInTheDocument()
     })
   })
 })

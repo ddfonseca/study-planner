@@ -107,6 +107,37 @@ export default {
           '0%': { opacity: '1' },
           '100%': { opacity: '0' },
         },
+        // Smooth 60fps slide animations
+        'slide-in-up': {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'slide-in-down': {
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-10px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(10px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        // Scale animations for interactive elements
+        'scale-in': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'scale-out': {
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '100%': { transform: 'scale(0.95)', opacity: '0' },
+        },
+        // Bounce effect for attention
+        'bounce-soft': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
       },
       animation: {
         'pulse-once': 'pulse-once 1s ease-in-out 2',
@@ -114,6 +145,21 @@ export default {
         'toast-progress': 'toast-progress linear forwards',
         'fade-in': 'fade-in 300ms ease-out forwards',
         'fade-out': 'fade-out 200ms ease-in forwards',
+        // Smooth 60fps animations using cubic-bezier(0.4, 0, 0.2, 1)
+        'slide-in-up': 'slide-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'slide-in-down': 'slide-in-down 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'slide-in-left': 'slide-in-left 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'slide-in-right': 'slide-in-right 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'scale-in': 'scale-in 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'scale-out': 'scale-out 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'bounce-soft': 'bounce-soft 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      // Custom transition timing functions for 60fps smoothness
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'smooth-in': 'cubic-bezier(0.4, 0, 1, 1)',
+        'smooth-out': 'cubic-bezier(0, 0, 0.2, 1)',
+        'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
     },
   },

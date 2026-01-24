@@ -2,13 +2,33 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { StateTransition } from './state-transition'
 
+// Helper to mock matchMedia for reduced motion tests
+const mockMatchMedia = (prefersReducedMotion: boolean) => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)' ? prefersReducedMotion : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 describe('StateTransition', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Default: animations enabled
+    mockMatchMedia(false)
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
   describe('visibility states', () => {
@@ -291,6 +311,64 @@ describe('StateTransition', () => {
 
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveAttribute('aria-hidden', 'true')
+    })
+  })
+
+  describe('reduced motion', () => {
+    it('uses instant durations when user prefers reduced motion', () => {
+      mockMatchMedia(true)
+      const onEntered = vi.fn()
+
+      render(
+        <StateTransition show={true} enterDuration={500} onEntered={onEntered}>
+          <div>Content</div>
+        </StateTransition>
+      )
+
+      // With reduced motion, callback should be called immediately (0ms duration)
+      act(() => {
+        vi.advanceTimersByTime(1)
+      })
+
+      expect(onEntered).toHaveBeenCalledTimes(1)
+    })
+
+    it('unmounts immediately on exit when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+      const onExited = vi.fn()
+
+      const { rerender } = render(
+        <StateTransition show={true} exitDuration={500} onExited={onExited}>
+          <div data-testid="content">Content</div>
+        </StateTransition>
+      )
+
+      rerender(
+        <StateTransition show={false} exitDuration={500} onExited={onExited}>
+          <div data-testid="content">Content</div>
+        </StateTransition>
+      )
+
+      // With reduced motion, exit should be instant
+      act(() => {
+        vi.advanceTimersByTime(1)
+      })
+
+      expect(onExited).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('content')).not.toBeInTheDocument()
+    })
+
+    it('sets transition duration to 0ms when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+
+      const { container } = render(
+        <StateTransition show={true} enterDuration={500}>
+          <div>Content</div>
+        </StateTransition>
+      )
+
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper.style.transitionDuration).toBe('0ms')
     })
   })
 })

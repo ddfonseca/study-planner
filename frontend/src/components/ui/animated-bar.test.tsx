@@ -2,9 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { AnimatedBar } from './animated-bar'
 
+// Helper to mock matchMedia for reduced motion tests
+const mockMatchMedia = (prefersReducedMotion: boolean) => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)' ? prefersReducedMotion : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 describe('AnimatedBar', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Default: animations enabled
+    mockMatchMedia(false)
     // Mock requestAnimationFrame
     let frameId = 0
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -227,6 +246,59 @@ describe('AnimatedBar', () => {
       unmount()
 
       expect(clearTimeoutSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('reduced motion', () => {
+    it('updates height instantly when user prefers reduced motion', () => {
+      mockMatchMedia(true)
+
+      const { container } = render(<AnimatedBar height={50} duration={500} />)
+
+      // With reduced motion, one RAF call should complete the update
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      // Height should be at target after just one frame
+      const bar = container.firstChild as HTMLElement
+      expect(bar).toHaveStyle({ height: '50%' })
+    })
+
+    it('shows final height after one frame when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+
+      const { container, rerender } = render(<AnimatedBar height={25} />)
+
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      let bar = container.firstChild as HTMLElement
+      expect(bar).toHaveStyle({ height: '25%' })
+
+      rerender(<AnimatedBar height={75} />)
+
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      bar = container.firstChild as HTMLElement
+      expect(bar).toHaveStyle({ height: '75%' })
+    })
+
+    it('ignores delay when reduced motion is preferred', () => {
+      mockMatchMedia(true)
+
+      const { container } = render(<AnimatedBar height={50} delay={500} />)
+
+      // With reduced motion, delay is skipped - one frame is enough
+      act(() => {
+        vi.advanceTimersByTime(16)
+      })
+
+      const bar = container.firstChild as HTMLElement
+      expect(bar).toHaveStyle({ height: '50%' })
     })
   })
 })

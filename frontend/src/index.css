@@ -158,6 +158,30 @@
   .safe-area-inset-right {
     padding-right: env(safe-area-inset-right);
   }
+
+  /* GPU acceleration hints for smooth 60fps animations */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  .will-change-transform-opacity {
+    will-change: transform, opacity;
+  }
+
+  /* Force GPU layer creation for complex animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Optimized transform origin for smoother animations */
+  .transform-gpu {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Touch device specific styles */
@@ -192,5 +216,36 @@
   .touch-active:active {
     transform: scale(0.98);
     opacity: 0.9;
+  }
+}
+
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Preserve essential non-decorative animations with instant transitions */
+  .motion-safe-only {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Enable animations only when motion is preferred */
+@media (prefers-reduced-motion: no-preference) {
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Animated elements get smooth transitions */
+  .animate-smooth {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
