@@ -1,5 +1,6 @@
 import { useRef, useCallback, useMemo } from 'react';
 import { SWIPE_THRESHOLDS, type SwipeThresholds } from '@/config/thresholds';
+import { useIsTouchDevice } from './useMediaQuery';
 
 interface SwipeHandlers {
   onSwipeLeft?: () => void;
@@ -11,6 +12,8 @@ interface SwipeConfig {
   maxSwipeTime?: number;
   /** Custom thresholds for swipe behavior */
   thresholds?: Partial<SwipeThresholds>;
+  /** Force enable swipe even on non-touch devices (for testing) */
+  forceEnable?: boolean;
 }
 
 interface TouchState {
@@ -22,11 +25,19 @@ interface TouchState {
 interface SwipeProps {
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
+  /** Whether swipe functionality is enabled (only on touch devices) */
+  isEnabled: boolean;
 }
+
+// No-op handlers for desktop devices
+const noopHandler = () => {};
 
 /**
  * Hook to detect horizontal swipe gestures
  * Returns touch event handlers to attach to the swipeable element
+ *
+ * Note: This hook only works on mobile/touch devices. On desktop,
+ * it returns no-op handlers and isEnabled: false.
  */
 export function useSwipe(
   handlers: SwipeHandlers,
@@ -36,7 +47,11 @@ export function useSwipe(
     minSwipeDistance = SWIPE_THRESHOLDS.minSwipeDistance,
     maxSwipeTime = SWIPE_THRESHOLDS.maxSwipeTime,
     thresholds,
+    forceEnable = false,
   } = config;
+
+  const isTouchDevice = useIsTouchDevice();
+  const isEnabled = forceEnable || isTouchDevice;
 
   // Merge custom thresholds with defaults
   const effectiveThresholds = useMemo(
@@ -51,17 +66,23 @@ export function useSwipe(
 
   const touchState = useRef<TouchState | null>(null);
 
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchState.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      startTime: Date.now(),
-    };
-  }, []);
+  const onTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isEnabled) return;
+
+      const touch = e.touches[0];
+      touchState.current = {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startTime: Date.now(),
+      };
+    },
+    [isEnabled]
+  );
 
   const onTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      if (!isEnabled) return;
       if (!touchState.current) return;
 
       const touch = e.changedTouches[0];
@@ -87,10 +108,15 @@ export function useSwipe(
         handlers.onSwipeLeft?.();
       }
     },
-    [handlers, effectiveThresholds]
+    [isEnabled, handlers, effectiveThresholds]
   );
 
-  return { onTouchStart, onTouchEnd };
+  // Return no-op handlers on desktop for cleaner API
+  if (!isEnabled) {
+    return { onTouchStart: noopHandler, onTouchEnd: noopHandler, isEnabled: false };
+  }
+
+  return { onTouchStart, onTouchEnd, isEnabled: true };
 }
 
 export default useSwipe;
