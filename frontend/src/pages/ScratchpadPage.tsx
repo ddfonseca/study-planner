@@ -19,6 +19,7 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -63,7 +64,8 @@ export function ScratchpadPage() {
   const [localContent, setLocalContent] = useState(currentNote?.content || '');
   const [localTitle, setLocalTitle] = useState(currentNote?.title || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [mobileListOpen, setMobileListOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -212,13 +214,16 @@ export function ScratchpadPage() {
   }, [createNote]);
 
   // Handle delete note
-  const handleDeleteNote = useCallback(
-    async (id: string) => {
-      await deleteNote(id);
-      setShowDeleteConfirm(null);
-    },
-    [deleteNote]
-  );
+  const handleDeleteNote = useCallback(async () => {
+    if (!noteToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteNote(noteToDelete);
+      setNoteToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [noteToDelete, deleteNote]);
 
   // Handle note selection
   const handleSelectNote = useCallback(
@@ -249,38 +254,17 @@ export function ScratchpadPage() {
     >
       <StickyNote className="h-4 w-4 flex-shrink-0" />
       <span className="flex-1 truncate text-sm">{note.title}</span>
-      {showDeleteConfirm === note.id ? (
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-            onClick={() => handleDeleteNote(note.id)}
-          >
-            Sim
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={() => setShowDeleteConfirm(null)}
-          >
-            Nao
-          </Button>
-        </div>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowDeleteConfirm(note.id);
-          }}
-        >
-          <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => {
+          e.stopPropagation();
+          setNoteToDelete(note.id);
+        }}
+      >
+        <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+      </Button>
     </div>
   );
 
@@ -480,6 +464,20 @@ Suporta markdown basico:
           </div>
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={!!noteToDelete}
+        onOpenChange={(open) => !open && setNoteToDelete(null)}
+        title="Excluir nota"
+        description="Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={handleDeleteNote}
+        isLoading={isDeleting}
+        variant="destructive"
+        icon={Trash2}
+      />
     </div>
   );
 }

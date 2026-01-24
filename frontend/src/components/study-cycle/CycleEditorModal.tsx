@@ -26,6 +26,7 @@ import {
   Save,
 } from 'lucide-react';
 import { useStudyCycleStore, formatDuration } from '@/store/studyCycleStore';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useSessions } from '@/hooks/useSessions';
 import type { CreateCycleItemDto } from '@/types/api';
@@ -57,6 +58,8 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const [newMinutes, setNewMinutes] = useState('');
   const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Determine if editing or creating
   const isEditing = mode === 'edit' && !!cycle;
@@ -152,16 +155,15 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const handleDelete = async () => {
     if (!currentWorkspaceId || !cycle) return;
 
-    if (!confirm('Tem certeza que deseja excluir este ciclo?')) return;
-
-    setIsSaving(true);
+    setIsDeleting(true);
     try {
       await deleteCycle(currentWorkspaceId);
+      setShowDeleteConfirm(false);
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to delete cycle:', error);
     } finally {
-      setIsSaving(false);
+      setIsDeleting(false);
     }
   };
 
@@ -315,7 +317,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           {cycle && (
             <Button
               variant="destructive"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving || isLoading}
               className="w-full sm:w-auto"
             >
@@ -323,6 +325,18 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
               Excluir
             </Button>
           )}
+          <ConfirmDialog
+            open={showDeleteConfirm}
+            onOpenChange={setShowDeleteConfirm}
+            title="Excluir ciclo"
+            description="Tem certeza que deseja excluir este ciclo? Esta ação não pode ser desfeita."
+            confirmText="Excluir"
+            cancelText="Cancelar"
+            onConfirm={handleDelete}
+            isLoading={isDeleting}
+            variant="destructive"
+            icon={Trash2}
+          />
           <div className="flex-1" />
           <Button
             variant="outline"
