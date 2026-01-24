@@ -2,10 +2,12 @@
  * Main App Layout with Header and Navigation
  */
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay } from '@/components/onboarding';
@@ -13,7 +15,9 @@ import { WelcomeOverlay } from '@/components/onboarding';
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
   const { fetchCurrentSubscription } = useSubscriptionStore();
+  const { isFeatureNew, markFeatureSeen } = useFeatureBadgesStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDark, setIsDark] = useState(() => {
     // Check localStorage or system preference
     if (typeof window !== 'undefined') {
@@ -42,6 +46,13 @@ export function AppLayout() {
     }
   }, [user, fetchCurrentSubscription]);
 
+  // Mark features as seen when user visits them
+  useEffect(() => {
+    if (location.pathname === '/app/dashboard' && isFeatureNew('dashboard')) {
+      markFeatureSeen('dashboard');
+    }
+  }, [location.pathname, isFeatureNew, markFeatureSeen]);
+
   const toggleTheme = () => setIsDark(!isDark);
 
   const handleLogout = async () => {
@@ -50,10 +61,10 @@ export function AppLayout() {
   };
 
   const navItems = [
-    { to: '/app/calendar', icon: Calendar, label: 'Calendário' },
-    { to: '/app/scratchpad', icon: FileText, label: 'Notas' },
-    { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard' },
-    { to: '/app/settings', icon: Settings, label: 'Configurações' },
+    { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null },
+    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: null },
+    { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const },
+    { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null },
   ];
 
   return (
@@ -75,7 +86,7 @@ export function AppLayout() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map(({ to, icon: Icon, label }) => (
+              {navItems.map(({ to, icon: Icon, label, badgeKey }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -90,6 +101,11 @@ export function AppLayout() {
                 >
                   <Icon className="h-4 w-4" />
                   {label}
+                  {badgeKey && isFeatureNew(badgeKey) && (
+                    <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] bg-primary/90">
+                      Novo
+                    </Badge>
+                  )}
                 </NavLink>
               ))}
             </nav>
@@ -137,12 +153,12 @@ export function AppLayout() {
         {/* Mobile Navigation */}
         <nav className="md:hidden border-t border-border">
           <div className="flex justify-around py-2">
-            {navItems.map(({ to, icon: Icon, label }) => (
+            {navItems.map(({ to, icon: Icon, label, badgeKey }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-colors
+                  `flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-colors relative
                   ${
                     isActive
                       ? 'text-primary'
@@ -150,7 +166,12 @@ export function AppLayout() {
                   }`
                 }
               >
-                <Icon className="h-5 w-5" />
+                <div className="relative">
+                  <Icon className="h-5 w-5" />
+                  {badgeKey && isFeatureNew(badgeKey) && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
+                  )}
+                </div>
                 {label}
               </NavLink>
             ))}

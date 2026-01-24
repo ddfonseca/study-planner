@@ -10,3 +10,4 @@ export {
   isGoalAchieved,
   calculateProgress,
 } from './weeklyGoalStore';
+export { useFeatureBadgesStore, type FeatureKey } from './featureBadgesStore';

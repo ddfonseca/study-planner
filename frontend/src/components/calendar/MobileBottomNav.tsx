@@ -3,6 +3,7 @@
  */
 import { Calendar, RefreshCw, TrendingUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useFeatureBadgesStore, type FeatureKey } from '@/store/featureBadgesStore';
 
 export type MobileTab = 'calendar' | 'cycle' | 'progress' | 'timer';
 
@@ -12,11 +13,11 @@ interface MobileBottomNavProps {
   timerActive?: boolean;
 }
 
-const tabs: { id: MobileTab; label: string; icon: typeof Calendar }[] = [
-  { id: 'calendar', label: 'Dia', icon: Calendar },
-  { id: 'cycle', label: 'Ciclo', icon: RefreshCw },
-  { id: 'progress', label: 'Progresso', icon: TrendingUp },
-  { id: 'timer', label: 'Timer', icon: Clock },
+const tabs: { id: MobileTab; label: string; icon: typeof Calendar; badgeKey: FeatureKey | null }[] = [
+  { id: 'calendar', label: 'Dia', icon: Calendar, badgeKey: null },
+  { id: 'cycle', label: 'Ciclo', icon: RefreshCw, badgeKey: 'cycles' },
+  { id: 'progress', label: 'Progresso', icon: TrendingUp, badgeKey: null },
+  { id: 'timer', label: 'Timer', icon: Clock, badgeKey: 'timer' },
 ];
 
 export function MobileBottomNav({
@@ -24,6 +25,17 @@ export function MobileBottomNav({
   onTabChange,
   timerActive = false,
 }: MobileBottomNavProps) {
+  const { isFeatureNew, markFeatureSeen } = useFeatureBadgesStore();
+
+  const handleTabChange = (tab: MobileTab) => {
+    // Mark feature as seen when user clicks on the tab
+    const tabConfig = tabs.find((t) => t.id === tab);
+    if (tabConfig?.badgeKey && isFeatureNew(tabConfig.badgeKey)) {
+      markFeatureSeen(tabConfig.badgeKey);
+    }
+    onTabChange(tab);
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-inset-bottom">
       <div className="flex items-center justify-around h-16 max-w-md mx-auto px-2">
@@ -31,11 +43,12 @@ export function MobileBottomNav({
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           const showPulse = tab.id === 'timer' && timerActive && !isActive;
+          const showNewBadge = tab.badgeKey && isFeatureNew(tab.badgeKey) && !isActive;
 
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={cn(
                 'flex flex-col items-center justify-center flex-1 h-full py-2 px-1 transition-all duration-200 relative',
                 'touch-manipulation active:scale-95',
@@ -47,6 +60,13 @@ export function MobileBottomNav({
               {/* Pulse indicator for active timer */}
               {showPulse && (
                 <span className="absolute top-2 right-1/4 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              )}
+
+              {/* New feature badge */}
+              {showNewBadge && (
+                <span className="absolute top-1 right-1/4 px-1 py-0 text-[8px] font-semibold bg-primary text-primary-foreground rounded">
+                  Novo
+                </span>
               )}
 
               {/* Icon with background pill when active */}
