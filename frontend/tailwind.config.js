@@ -91,6 +91,10 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.8' },
         },
+        'pulse-soft': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
+        },
         'toast-progress': {
           '0%': { transform: 'scaleX(1)' },
           '100%': { transform: 'scaleX(0)' },
@@ -98,6 +102,7 @@ export default {
       },
       animation: {
         'pulse-once': 'pulse-once 1s ease-in-out 2',
+        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'toast-progress': 'toast-progress linear forwards',
       },
     },
