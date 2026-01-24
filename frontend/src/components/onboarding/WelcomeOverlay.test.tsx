@@ -100,6 +100,21 @@ describe('WelcomeOverlay', () => {
       expect(useOnboardingStore.getState().hasSeenWelcome).toBe(true)
     })
 
+    it('closes overlay and sets hasSeenWelcome when clicking "Pular" (skip) button', async () => {
+      const user = userEvent.setup()
+
+      render(<WelcomeOverlay />)
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /pular/i }))
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      expect(useOnboardingStore.getState().hasSeenWelcome).toBe(true)
+    })
+
     it('closes overlay and sets hasSeenWelcome when dialog is dismissed', async () => {
       const user = userEvent.setup()
 

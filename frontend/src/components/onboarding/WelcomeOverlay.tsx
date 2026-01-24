@@ -84,8 +84,11 @@ export function WelcomeOverlay() {
           />
         </div>
 
-        <ResponsiveDialogFooter>
-          <Button onClick={handleClose} className="w-full">
+        <ResponsiveDialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button variant="ghost" onClick={handleClose} className="w-full sm:w-auto">
+            Pular
+          </Button>
+          <Button onClick={handleClose} className="w-full sm:flex-1">
             Começar
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
