@@ -5,10 +5,11 @@ import { isToday, addDays, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Plus, Trash2, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { formatTime } from '@/lib/utils/time';
 import type { DayData } from '@/types/session';
 import { cn } from '@/lib/utils';
+import { SwipeableSessionItem } from './SwipeableSessionItem';
 
 interface MobileDayViewProps {
   date: Date;
@@ -121,53 +122,13 @@ export function MobileDayView({
             </h3>
             <div className="space-y-2">
               {dayData.materias.map((materia) => (
-                <div
+                <SwipeableSessionItem
                   key={materia.id}
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg min-h-[56px]"
-                >
-                  <div
-                    className={cn(
-                      "flex-1 min-w-0 touch-action-manipulation",
-                      canModify && "cursor-pointer active:opacity-70"
-                    )}
-                    onClick={() => canModify && onEditSession()}
-                    role={canModify ? "button" : undefined}
-                    tabIndex={canModify ? 0 : undefined}
-                    onKeyDown={(e) => {
-                      if (canModify && (e.key === 'Enter' || e.key === ' ')) {
-                        e.preventDefault();
-                        onEditSession();
-                      }
-                    }}
-                  >
-                    <p className="font-medium text-foreground truncate">
-                      {materia.materia}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatTime(materia.minutos)}
-                    </p>
-                  </div>
-                  {canModify && (
-                    <div className="flex items-center gap-1 ml-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onEditSession}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDeleteSession(materia.id)}
-                        className="h-8 w-8 text-danger hover:text-danger hover:bg-danger/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                  session={materia}
+                  onEdit={onEditSession}
+                  onDelete={onDeleteSession}
+                  canModify={canModify}
+                />
               ))}
             </div>
           </CardContent>
