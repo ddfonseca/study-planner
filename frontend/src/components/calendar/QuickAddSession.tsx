@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Combobox } from '@/components/ui/combobox';
+import { SubjectPicker } from '@/components/ui/subject-picker';
+import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { Plus, Loader2 } from 'lucide-react';
 
 interface QuickAddSessionProps {
@@ -23,6 +24,7 @@ export function QuickAddSession({
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   // Show message when in "all" mode
   if (!canModify) {
@@ -71,10 +73,12 @@ export function QuickAddSession({
             <Label htmlFor="quick-subject" className="text-xs">
               Matéria
             </Label>
-            <Combobox
+            <SubjectPicker
               value={subject}
               onValueChange={setSubject}
-              options={subjects}
+              subjects={subjects}
+              recentSubjects={recentSubjects}
+              onSubjectUsed={addRecentSubject}
               placeholder="Selecione..."
               searchPlaceholder="Buscar..."
               emptyMessage="Nenhuma matéria"

@@ -12,7 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Combobox } from '@/components/ui/combobox';
+import { SubjectPicker } from '@/components/ui/subject-picker';
+import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
@@ -45,6 +46,7 @@ export function SessionModal({
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
+  const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const isEditing = editingSession !== null;
 
@@ -119,10 +121,12 @@ export function SessionModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="subject">Matéria</Label>
-                <Combobox
+                <SubjectPicker
                   value={subject}
                   onValueChange={setSubject}
-                  options={subjects}
+                  subjects={subjects}
+                  recentSubjects={recentSubjects}
+                  onSubjectUsed={addRecentSubject}
                   placeholder="Selecione ou digite..."
                   searchPlaceholder="Buscar matéria..."
                   emptyMessage="Nenhuma matéria encontrada"

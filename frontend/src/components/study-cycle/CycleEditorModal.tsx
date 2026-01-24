@@ -13,7 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Combobox } from '@/components/ui/combobox';
+import { SubjectPicker } from '@/components/ui/subject-picker';
+import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   RefreshCw,
@@ -48,6 +49,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } = useStudyCycleStore();
   const { getUniqueSubjects } = useSessions();
   const subjects = getUniqueSubjects();
+  const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const [items, setItems] = useState<CycleItemForm[]>([]);
   const [cycleName, setCycleName] = useState('');
@@ -215,10 +217,12 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             <Label>Adicionar matéria</Label>
             <div className="flex gap-2">
               <div className="flex-1">
-                <Combobox
+                <SubjectPicker
                   value={newSubject}
                   onValueChange={setNewSubject}
-                  options={subjects}
+                  subjects={subjects}
+                  recentSubjects={recentSubjects}
+                  onSubjectUsed={addRecentSubject}
                   placeholder="Matéria"
                   searchPlaceholder="Buscar..."
                   emptyMessage="Nenhuma encontrada"

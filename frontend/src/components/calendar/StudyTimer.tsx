@@ -4,7 +4,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
+import { SubjectPicker } from '@/components/ui/subject-picker';
+import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Square, Clock } from 'lucide-react';
@@ -26,6 +27,7 @@ interface StudyTimerProps {
 export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
+  const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -206,10 +208,12 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
         </div>
 
         {/* Subject input */}
-        <Combobox
+        <SubjectPicker
           value={subject}
           onValueChange={setSubject}
-          options={subjects}
+          subjects={subjects}
+          recentSubjects={recentSubjects}
+          onSubjectUsed={addRecentSubject}
           placeholder="Selecione a matéria..."
           searchPlaceholder="Buscar..."
           emptyMessage="Nenhuma matéria"
