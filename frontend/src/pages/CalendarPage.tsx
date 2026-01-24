@@ -15,6 +15,7 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import {
   CalendarHeader,
   CalendarGrid,
+  CalendarGridSkeleton,
   SessionModal,
   StudyTimer,
   WeeklyProgress,
@@ -195,11 +196,33 @@ export function CalendarPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-7 gap-2">
-          {Array.from({ length: 35 }).map((_, i) => (
-            <Skeleton key={i} className="h-24" />
-          ))}
+        {/* Header skeleton */}
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-6 w-6 rounded" />
+          <Skeleton className="h-7 w-48" />
+        </div>
+
+        {/* Calendar skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+          <div className="space-y-4">
+            {/* CalendarHeader skeleton */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-7 w-36 ml-2" />
+              </div>
+              <Skeleton className="h-9 w-20" />
+            </div>
+            <CalendarGridSkeleton />
+          </div>
+
+          {/* Sidebar skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full rounded-lg" />
+            <Skeleton className="h-32 w-full rounded-lg" />
+            <Skeleton className="h-48 w-full rounded-lg" />
+          </div>
         </div>
       </div>
     );
