@@ -30,7 +30,6 @@ export function DailyChart({ data }: DailyChartProps) {
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: false,
     plugins: {
       legend: {
         display: false,

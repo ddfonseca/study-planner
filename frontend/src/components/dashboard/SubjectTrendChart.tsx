@@ -42,7 +42,6 @@ export function SubjectTrendChart({ data }: SubjectTrendChartProps) {
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: false,
     plugins: {
       legend: {
         display: false,
