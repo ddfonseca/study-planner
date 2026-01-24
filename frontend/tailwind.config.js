@@ -138,6 +138,42 @@ export default {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' },
         },
+        // Achievement badge entrance animation
+        'achievement-enter': {
+          '0%': {
+            transform: 'scale(0)',
+            opacity: '0'
+          },
+          '50%': {
+            transform: 'scale(1.2)',
+            opacity: '1'
+          },
+          '70%': {
+            transform: 'scale(0.9)'
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '1'
+          },
+        },
+        // Achievement badge glow pulse
+        'achievement-glow': {
+          '0%': {
+            transform: 'scale(1)',
+            opacity: '0.6',
+            filter: 'blur(0px)'
+          },
+          '50%': {
+            transform: 'scale(1.5)',
+            opacity: '0.3',
+            filter: 'blur(8px)'
+          },
+          '100%': {
+            transform: 'scale(2)',
+            opacity: '0',
+            filter: 'blur(12px)'
+          },
+        },
       },
       animation: {
         'pulse-once': 'pulse-once 1s ease-in-out 2',
@@ -153,6 +189,8 @@ export default {
         'scale-in': 'scale-in 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
         'scale-out': 'scale-out 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
         'bounce-soft': 'bounce-soft 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+        'achievement-enter': 'achievement-enter 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'achievement-glow': 'achievement-glow 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards',
       },
       // Custom transition timing functions for 60fps smoothness
       transitionTimingFunction: {
