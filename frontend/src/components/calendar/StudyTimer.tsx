@@ -9,6 +9,7 @@ import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Square, Clock } from 'lucide-react';
+import { TimerOfflineWarning } from './TimerOfflineWarning';
 
 const STORAGE_KEY = 'studyTimer';
 
@@ -206,6 +207,9 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
             {formatTime(seconds)}
           </span>
         </div>
+
+        {/* Offline warning */}
+        <TimerOfflineWarning />
 
         {/* Subject input */}
         <SubjectPicker
