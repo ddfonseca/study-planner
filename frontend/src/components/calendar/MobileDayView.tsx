@@ -123,14 +123,22 @@ export function MobileDayView({
               {dayData.materias.map((materia) => (
                 <div
                   key={materia.id}
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg min-h-[56px]"
                 >
                   <div
                     className={cn(
-                      "flex-1 min-w-0",
-                      canModify && "cursor-pointer"
+                      "flex-1 min-w-0 touch-action-manipulation",
+                      canModify && "cursor-pointer active:opacity-70"
                     )}
                     onClick={() => canModify && onEditSession()}
+                    role={canModify ? "button" : undefined}
+                    tabIndex={canModify ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (canModify && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        onEditSession();
+                      }
+                    }}
                   >
                     <p className="font-medium text-foreground truncate">
                       {materia.materia}

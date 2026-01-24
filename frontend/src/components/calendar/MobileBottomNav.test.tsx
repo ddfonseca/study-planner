@@ -131,5 +131,67 @@ describe('MobileBottomNav', () => {
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBe(4)
     })
+
+    it('has aria-label for each tab button', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+
+      expect(screen.getByLabelText('Dia')).toBeInTheDocument()
+      expect(screen.getByLabelText('Ciclo')).toBeInTheDocument()
+      expect(screen.getByLabelText('Progresso')).toBeInTheDocument()
+      expect(screen.getByLabelText('Timer')).toBeInTheDocument()
+    })
+
+    it('has aria-current="page" for active tab', () => {
+      render(<MobileBottomNav {...defaultProps} activeTab="timer" />)
+
+      const timerButton = screen.getByLabelText('Timer')
+      expect(timerButton).toHaveAttribute('aria-current', 'page')
+    })
+
+    it('does not have aria-current for inactive tabs', () => {
+      render(<MobileBottomNav {...defaultProps} activeTab="calendar" />)
+
+      const timerButton = screen.getByLabelText('Timer')
+      expect(timerButton).not.toHaveAttribute('aria-current')
+    })
+  })
+
+  describe('touch-friendly features', () => {
+    it('has touch-action-manipulation class on buttons', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const buttons = screen.getAllByRole('button')
+
+      buttons.forEach(button => {
+        expect(button).toHaveClass('touch-action-manipulation')
+      })
+    })
+
+    it('has select-none class to prevent text selection', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const buttons = screen.getAllByRole('button')
+
+      buttons.forEach(button => {
+        expect(button).toHaveClass('select-none')
+      })
+    })
+
+    it('has active state classes for touch feedback', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const buttons = screen.getAllByRole('button')
+
+      buttons.forEach(button => {
+        expect(button).toHaveClass('active:scale-95')
+        expect(button).toHaveClass('active:opacity-80')
+      })
+    })
+
+    it('has minimum touch target height of 56px', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const buttons = screen.getAllByRole('button')
+
+      buttons.forEach(button => {
+        expect(button).toHaveClass('min-h-[56px]')
+      })
+    })
   })
 })

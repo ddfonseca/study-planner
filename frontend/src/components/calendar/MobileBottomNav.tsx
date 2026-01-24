@@ -50,12 +50,15 @@ export function MobileBottomNav({
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                'flex flex-col items-center justify-center flex-1 h-full py-2 px-1 transition-all duration-200 relative',
-                'touch-manipulation active:scale-95',
+                'flex flex-col items-center justify-center flex-1 h-full min-h-[56px] py-2 px-1 transition-all duration-200 relative',
+                'touch-action-manipulation select-none',
+                'active:scale-95 active:opacity-80',
                 isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground'
               )}
+              aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
             >
               {/* Pulse indicator for active timer */}
               {showPulse && (

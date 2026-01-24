@@ -110,3 +110,87 @@
     background-color: var(--muted-foreground);
   }
 }
+
+/* Touch-friendly utilities */
+@layer utilities {
+  /* Disable hover effects on touch devices to prevent sticky hover states */
+  .touch-device .touch-no-hover:hover {
+    @apply bg-transparent;
+  }
+
+  /* Ensure minimum touch target size (44x44px recommended by Apple/Google) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Large touch target for primary actions */
+  .touch-target-lg {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Touch manipulation for better touch response */
+  .touch-action-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Prevent text selection on touch interactions */
+  .touch-no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Touch device specific styles */
+@media (pointer: coarse) {
+  /* Larger tap targets on touch devices */
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+  }
+
+  /* Prevent double-tap zoom on interactive elements */
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+
+  /* Remove hover effects that cause sticky states on touch */
+  .hover\:bg-accent:hover:not(:active) {
+    background-color: transparent;
+  }
+}
+
+/* Active states for touch feedback */
+@media (pointer: coarse) {
+  /* Provide visual feedback on touch */
+  button:active,
+  [role="button"]:active,
+  .touch-active:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}

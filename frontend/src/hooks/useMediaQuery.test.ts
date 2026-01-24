@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useMediaQuery, useIsMobile, useIsTabletOrSmaller, useIsSmallMobile } from './useMediaQuery'
+import { useMediaQuery, useIsMobile, useIsTabletOrSmaller, useIsSmallMobile, useIsTouchDevice } from './useMediaQuery'
 
 describe('useMediaQuery', () => {
   let matchMediaMock: ReturnType<typeof vi.fn>
@@ -175,6 +175,135 @@ describe('useMediaQuery', () => {
       const { result } = renderHook(() => useIsSmallMobile())
 
       expect(result.current).toBe(false)
+    })
+  })
+
+  describe('useIsTouchDevice hook', () => {
+    let originalOntouchstart: PropertyDescriptor | undefined
+    let originalMaxTouchPoints: PropertyDescriptor | undefined
+
+    beforeEach(() => {
+      originalOntouchstart = Object.getOwnPropertyDescriptor(window, 'ontouchstart')
+      originalMaxTouchPoints = Object.getOwnPropertyDescriptor(navigator, 'maxTouchPoints')
+    })
+
+    afterEach(() => {
+      if (originalOntouchstart) {
+        Object.defineProperty(window, 'ontouchstart', originalOntouchstart)
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (window as any).ontouchstart
+      }
+      if (originalMaxTouchPoints) {
+        Object.defineProperty(navigator, 'maxTouchPoints', originalMaxTouchPoints)
+      }
+      document.documentElement.classList.remove('touch-device')
+    })
+
+    it('returns true when pointer is coarse (touch device)', () => {
+      matchMediaMock.mockImplementation((query: string) => ({
+        matches: query === '(pointer: coarse)',
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      const { result } = renderHook(() => useIsTouchDevice())
+
+      expect(result.current).toBe(true)
+    })
+
+    it('returns true when ontouchstart is available', () => {
+      matchMediaMock.mockImplementation(() => ({
+        matches: false,
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      Object.defineProperty(window, 'ontouchstart', {
+        value: null,
+        configurable: true,
+      })
+
+      const { result } = renderHook(() => useIsTouchDevice())
+
+      expect(result.current).toBe(true)
+    })
+
+    it('returns true when maxTouchPoints > 0', () => {
+      matchMediaMock.mockImplementation(() => ({
+        matches: false,
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      Object.defineProperty(navigator, 'maxTouchPoints', {
+        value: 5,
+        configurable: true,
+      })
+
+      const { result } = renderHook(() => useIsTouchDevice())
+
+      expect(result.current).toBe(true)
+    })
+
+    it('returns false for non-touch device', () => {
+      matchMediaMock.mockImplementation(() => ({
+        matches: false,
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      Object.defineProperty(navigator, 'maxTouchPoints', {
+        value: 0,
+        configurable: true,
+      })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).ontouchstart
+
+      const { result } = renderHook(() => useIsTouchDevice())
+
+      expect(result.current).toBe(false)
+    })
+
+    it('adds touch-device class to document when touch is detected', () => {
+      matchMediaMock.mockImplementation((query: string) => ({
+        matches: query === '(pointer: coarse)',
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      renderHook(() => useIsTouchDevice())
+
+      expect(document.documentElement.classList.contains('touch-device')).toBe(true)
+    })
+
+    it('detects touch on touchstart event', () => {
+      matchMediaMock.mockImplementation(() => ({
+        matches: false,
+        addEventListener: addEventListenerMock,
+        removeEventListener: removeEventListenerMock,
+      }))
+
+      Object.defineProperty(navigator, 'maxTouchPoints', {
+        value: 0,
+        configurable: true,
+      })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).ontouchstart
+
+      const { result } = renderHook(() => useIsTouchDevice())
+
+      expect(result.current).toBe(false)
+
+      // Simulate touchstart event
+      act(() => {
+        window.dispatchEvent(new Event('touchstart'))
+      })
+
+      expect(result.current).toBe(true)
+      expect(document.documentElement.classList.contains('touch-device')).toBe(true)
     })
   })
 })

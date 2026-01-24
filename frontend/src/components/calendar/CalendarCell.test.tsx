@@ -138,5 +138,69 @@ describe('CalendarCell', () => {
 
       expect(cell).toHaveClass('cursor-pointer')
     })
+
+    it('has role="button" for screen readers', () => {
+      render(<CalendarCell {...defaultProps} />)
+      const cell = screen.getByRole('button')
+
+      expect(cell).toBeInTheDocument()
+    })
+
+    it('has tabIndex for keyboard navigation', () => {
+      const { container } = render(<CalendarCell {...defaultProps} />)
+      const cell = container.firstChild as HTMLElement
+
+      expect(cell).toHaveAttribute('tabindex', '0')
+    })
+
+    it('calls onClick when Enter key is pressed', async () => {
+      const user = userEvent.setup()
+      const onClick = vi.fn()
+
+      render(<CalendarCell {...defaultProps} onClick={onClick} />)
+
+      const cell = screen.getByRole('button')
+      cell.focus()
+      await user.keyboard('{Enter}')
+
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls onClick when Space key is pressed', async () => {
+      const user = userEvent.setup()
+      const onClick = vi.fn()
+
+      render(<CalendarCell {...defaultProps} onClick={onClick} />)
+
+      const cell = screen.getByRole('button')
+      cell.focus()
+      await user.keyboard(' ')
+
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('touch-friendly features', () => {
+    it('has touch-action-manipulation class for better touch handling', () => {
+      const { container } = render(<CalendarCell {...defaultProps} />)
+      const cell = container.firstChild as HTMLElement
+
+      expect(cell).toHaveClass('touch-action-manipulation')
+    })
+
+    it('has select-none class to prevent text selection on touch', () => {
+      const { container } = render(<CalendarCell {...defaultProps} />)
+      const cell = container.firstChild as HTMLElement
+
+      expect(cell).toHaveClass('select-none')
+    })
+
+    it('has active state classes for touch feedback', () => {
+      const { container } = render(<CalendarCell {...defaultProps} />)
+      const cell = container.firstChild as HTMLElement
+
+      expect(cell).toHaveClass('active:scale-[0.98]')
+      expect(cell).toHaveClass('active:opacity-90')
+    })
   })
 })

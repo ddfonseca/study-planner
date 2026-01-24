@@ -67,11 +67,21 @@ export function CalendarCell({
     <div
       className={cn(
         'h-[80px] sm:h-[100px] p-1.5 sm:p-2 border border-border/40 rounded-md cursor-pointer transition-all overflow-hidden relative',
+        'touch-action-manipulation select-none',
+        'active:scale-[0.98] active:opacity-90',
         getBgColor(),
         isTodayDate && 'ring-2 ring-accent ring-offset-1 ring-offset-background',
         !isCurrentMonth && 'opacity-50'
       )}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
     >
       {/* Dots indicator (top-right) */}
       {heatmapStyle === 'dots' && isCurrentMonth && intensity > 0 && (
