@@ -172,7 +172,7 @@ export function CycleSuggestionCard() {
 
   return (
     <>
-      <Card>
+      <Card data-tour="cycle-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0 flex-1">

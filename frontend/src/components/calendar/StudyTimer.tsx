@@ -196,7 +196,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   };
 
   return (
-    <Card>
+    <Card data-tour="study-timer">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Clock className="h-4 w-4" />

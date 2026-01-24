@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
-import { WelcomeOverlay } from '@/components/onboarding';
+import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
 
 export function AppLayout() {
@@ -62,10 +62,10 @@ export function AppLayout() {
   };
 
   const navItems = [
-    { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null },
-    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: null },
-    { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const },
-    { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null },
+    { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null, tourId: null },
+    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: null, tourId: null },
+    { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
+    { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null, tourId: null },
   ];
 
   return (
@@ -90,7 +90,7 @@ export function AppLayout() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map(({ to, icon: Icon, label, badgeKey }) => (
+              {navItems.map(({ to, icon: Icon, label, badgeKey, tourId }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -102,6 +102,7 @@ export function AppLayout() {
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     }`
                   }
+                  {...(tourId && { 'data-tour': tourId })}
                 >
                   <Icon className="h-4 w-4" />
                   {label}
@@ -192,6 +193,9 @@ export function AppLayout() {
 
       {/* Welcome Overlay for new users */}
       <WelcomeOverlay />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour />
     </div>
   );
 }

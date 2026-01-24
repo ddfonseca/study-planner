@@ -72,7 +72,7 @@ export function CalendarGrid({
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" data-tour="calendar-grid">
         <table className="w-full border-collapse table-fixed">
           <thead>
             <tr>

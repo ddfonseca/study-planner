@@ -10,7 +10,7 @@ USER node
 
 # Install dependencies
 COPY --chown=node:node package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Expose Vite dev server port
 EXPOSE 5173

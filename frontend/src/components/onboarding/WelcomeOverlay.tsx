@@ -35,7 +35,7 @@ function FeatureItem({ icon, title, description }: FeatureItemProps) {
 }
 
 export function WelcomeOverlay() {
-  const { hasSeenWelcome, setHasSeenWelcome, setShouldOpenSessionModal } = useOnboardingStore();
+  const { hasSeenWelcome, setHasSeenWelcome, setShouldStartTour } = useOnboardingStore();
   const [open, setOpen] = useState(!hasSeenWelcome);
 
   const handleClose = () => {
@@ -44,7 +44,7 @@ export function WelcomeOverlay() {
   };
 
   const handleStart = () => {
-    setShouldOpenSessionModal(true);
+    setShouldStartTour(true);
     handleClose();
   };
 

@@ -50,7 +50,7 @@ export function MobileDayView({
   const displayDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-tour="mobile-day-view">
       {/* Navigation Header */}
       <Card>
         <CardContent className="p-4">
