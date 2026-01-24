@@ -4,13 +4,18 @@ import { useOnboardingStore } from './onboardingStore'
 describe('onboardingStore', () => {
   beforeEach(() => {
     // Reset store to initial state before each test
-    useOnboardingStore.setState({ hasSeenWelcome: false })
+    useOnboardingStore.setState({ hasSeenWelcome: false, shouldOpenSessionModal: false })
   })
 
   describe('initial state', () => {
     it('has hasSeenWelcome set to false by default', () => {
       const state = useOnboardingStore.getState()
       expect(state.hasSeenWelcome).toBe(false)
+    })
+
+    it('has shouldOpenSessionModal set to false by default', () => {
+      const state = useOnboardingStore.getState()
+      expect(state.shouldOpenSessionModal).toBe(false)
     })
   })
 
@@ -35,6 +40,27 @@ describe('onboardingStore', () => {
     })
   })
 
+  describe('setShouldOpenSessionModal', () => {
+    it('sets shouldOpenSessionModal to true', () => {
+      const { setShouldOpenSessionModal } = useOnboardingStore.getState()
+
+      setShouldOpenSessionModal(true)
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(true)
+    })
+
+    it('sets shouldOpenSessionModal to false', () => {
+      // First set to true
+      useOnboardingStore.setState({ shouldOpenSessionModal: true })
+
+      const { setShouldOpenSessionModal } = useOnboardingStore.getState()
+
+      setShouldOpenSessionModal(false)
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(false)
+    })
+  })
+
   describe('resetOnboarding', () => {
     it('resets hasSeenWelcome to false', () => {
       // First set to true
@@ -45,6 +71,17 @@ describe('onboardingStore', () => {
       resetOnboarding()
 
       expect(useOnboardingStore.getState().hasSeenWelcome).toBe(false)
+    })
+
+    it('resets shouldOpenSessionModal to false', () => {
+      // First set to true
+      useOnboardingStore.setState({ shouldOpenSessionModal: true })
+
+      const { resetOnboarding } = useOnboardingStore.getState()
+
+      resetOnboarding()
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(false)
     })
   })
 

@@ -7,10 +7,12 @@ import { persist } from 'zustand/middleware';
 
 interface OnboardingState {
   hasSeenWelcome: boolean;
+  shouldOpenSessionModal: boolean;
 }
 
 interface OnboardingActions {
   setHasSeenWelcome: (seen: boolean) => void;
+  setShouldOpenSessionModal: (shouldOpen: boolean) => void;
   resetOnboarding: () => void;
 }
 
@@ -20,10 +22,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
   persist(
     (set) => ({
       hasSeenWelcome: false,
+      shouldOpenSessionModal: false,
 
       setHasSeenWelcome: (seen: boolean) => set({ hasSeenWelcome: seen }),
 
-      resetOnboarding: () => set({ hasSeenWelcome: false }),
+      setShouldOpenSessionModal: (shouldOpen: boolean) => set({ shouldOpenSessionModal: shouldOpen }),
+
+      resetOnboarding: () => set({ hasSeenWelcome: false, shouldOpenSessionModal: false }),
     }),
     {
       name: 'onboarding-storage',

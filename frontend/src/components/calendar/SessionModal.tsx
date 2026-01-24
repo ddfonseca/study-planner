@@ -29,6 +29,7 @@ interface SessionModalProps {
   onUpdateSession: (id: string, subject: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
   canModify?: boolean;
+  highlighted?: boolean;
 }
 
 export function SessionModal({
@@ -41,6 +42,7 @@ export function SessionModal({
   onUpdateSession,
   onDeleteSession,
   canModify = true,
+  highlighted = false,
 }: SessionModalProps) {
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -101,7 +103,9 @@ export function SessionModal({
 
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <ResponsiveDialogContent className="sm:max-w-md">
+      <ResponsiveDialogContent
+        className={`sm:max-w-md ${highlighted ? 'ring-2 ring-primary ring-offset-2 ring-offset-background animate-pulse-once' : ''}`}
+      >
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />

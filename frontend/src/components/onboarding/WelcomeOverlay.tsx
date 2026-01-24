@@ -35,12 +35,17 @@ function FeatureItem({ icon, title, description }: FeatureItemProps) {
 }
 
 export function WelcomeOverlay() {
-  const { hasSeenWelcome, setHasSeenWelcome } = useOnboardingStore();
+  const { hasSeenWelcome, setHasSeenWelcome, setShouldOpenSessionModal } = useOnboardingStore();
   const [open, setOpen] = useState(!hasSeenWelcome);
 
   const handleClose = () => {
     setHasSeenWelcome(true);
     setOpen(false);
+  };
+
+  const handleStart = () => {
+    setShouldOpenSessionModal(true);
+    handleClose();
   };
 
   if (hasSeenWelcome) {
@@ -88,7 +93,7 @@ export function WelcomeOverlay() {
           <Button variant="ghost" onClick={handleClose} className="w-full sm:w-auto">
             Pular
           </Button>
-          <Button onClick={handleClose} className="w-full sm:flex-1">
+          <Button onClick={handleStart} className="w-full sm:flex-1">
             Começar
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>

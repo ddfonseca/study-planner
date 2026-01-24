@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
+import { useOnboardingStore } from '@/store/onboardingStore';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +29,7 @@ import type { DayData } from '@/types/session';
 export function CalendarPage() {
   const { isLoading: sessionsLoading } = useSessionStore();
   const { fetchConfig, isLoading: configLoading } = useConfigStore();
+  const { shouldOpenSessionModal, setShouldOpenSessionModal } = useOnboardingStore();
   const {
     handleAddSession,
     handleUpdateSession,
@@ -56,12 +58,26 @@ export function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [mobileTab, setMobileTab] = useState<MobileTab>('calendar');
   const [timerActive, setTimerActive] = useState(false);
+  const [isModalHighlighted, setIsModalHighlighted] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
     fetchSessions();
     fetchConfig();
   }, [fetchSessions, fetchConfig]);
+
+  // Open SessionModal with highlight after onboarding "Começar"
+  useEffect(() => {
+    if (shouldOpenSessionModal && !sessionsLoading && !configLoading) {
+      // Use queueMicrotask to avoid synchronous setState within effect
+      queueMicrotask(() => {
+        setSelectedDate(new Date());
+        setIsModalOpen(true);
+        setIsModalHighlighted(true);
+        setShouldOpenSessionModal(false);
+      });
+    }
+  }, [shouldOpenSessionModal, sessionsLoading, configLoading, setShouldOpenSessionModal]);
 
   // Handle cell click - open modal
   const handleCellClick = useCallback((date: Date) => {
@@ -242,7 +258,10 @@ export function CalendarPage() {
         {/* Session Modal */}
         <SessionModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setIsModalHighlighted(false);
+          }}
           date={selectedDate}
           dayData={selectedDayData}
           subjects={getUniqueSubjects()}
@@ -250,6 +269,7 @@ export function CalendarPage() {
           onUpdateSession={handleUpdateSessionSubmit}
           onDeleteSession={handleDeleteSessionSubmit}
           canModify={canModify}
+          highlighted={isModalHighlighted}
         />
       </div>
 

@@ -25,7 +25,7 @@ vi.mock('@/components/ui/responsive-dialog', () => ({
 describe('WelcomeOverlay', () => {
   beforeEach(() => {
     // Reset onboarding store before each test
-    useOnboardingStore.setState({ hasSeenWelcome: false })
+    useOnboardingStore.setState({ hasSeenWelcome: false, shouldOpenSessionModal: false })
   })
 
   afterEach(() => {
@@ -100,6 +100,18 @@ describe('WelcomeOverlay', () => {
       expect(useOnboardingStore.getState().hasSeenWelcome).toBe(true)
     })
 
+    it('sets shouldOpenSessionModal to true when clicking "Começar" button', async () => {
+      const user = userEvent.setup()
+
+      render(<WelcomeOverlay />)
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(false)
+
+      await user.click(screen.getByRole('button', { name: /começar/i }))
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(true)
+    })
+
     it('closes overlay and sets hasSeenWelcome when clicking "Pular" (skip) button', async () => {
       const user = userEvent.setup()
 
@@ -113,6 +125,18 @@ describe('WelcomeOverlay', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
       })
       expect(useOnboardingStore.getState().hasSeenWelcome).toBe(true)
+    })
+
+    it('does not set shouldOpenSessionModal when clicking "Pular" (skip) button', async () => {
+      const user = userEvent.setup()
+
+      render(<WelcomeOverlay />)
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(false)
+
+      await user.click(screen.getByRole('button', { name: /pular/i }))
+
+      expect(useOnboardingStore.getState().shouldOpenSessionModal).toBe(false)
     })
 
     it('closes overlay and sets hasSeenWelcome when dialog is dismissed', async () => {
