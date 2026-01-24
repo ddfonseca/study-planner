@@ -19,6 +19,7 @@ import {
 import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock, Layers } from 'lucide-react';
 import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useConfigStore } from '@/store/configStore';
 import { CycleEditorModal } from './CycleEditorModal';
 import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
 import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
@@ -31,6 +32,7 @@ import { useAchievementsStore } from '@/store/achievementsStore';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
+  const { celebrationsEnabled } = useConfigStore();
   const {
     cycle,
     cycles,
@@ -66,7 +68,7 @@ export function CycleSuggestionCard() {
 
   // Trigger confetti when cycle becomes complete
   useEffect(() => {
-    if (!_hasHydrated) return;
+    if (!_hasHydrated || !celebrationsEnabled) return;
 
     const isCycleComplete = suggestion?.suggestion?.isCycleComplete ?? false;
 
@@ -88,7 +90,7 @@ export function CycleSuggestionCard() {
     }
 
     previousCycleCompleteRef.current = isCycleComplete;
-  }, [suggestion?.suggestion?.isCycleComplete, cycle, fireConfetti, triggerPattern, _hasHydrated, hasAchievementBeenShown, markAchievementShown]);
+  }, [suggestion?.suggestion?.isCycleComplete, cycle, fireConfetti, triggerPattern, _hasHydrated, celebrationsEnabled, hasAchievementBeenShown, markAchievementShown]);
 
   // No cycle configured
   if (!suggestion?.hasCycle) {

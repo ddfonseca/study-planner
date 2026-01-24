@@ -10,6 +10,33 @@ vi.mock('@/store/workspaceStore', () => ({
   })),
 }))
 
+vi.mock('@/store/configStore', () => ({
+  useConfigStore: vi.fn(() => ({
+    celebrationsEnabled: true,
+  })),
+}))
+
+vi.mock('@/hooks/useConfetti', () => ({
+  useConfetti: vi.fn(() => ({
+    fire: vi.fn(),
+    confettiProps: { active: false },
+  })),
+}))
+
+vi.mock('@/hooks/useHaptic', () => ({
+  useHaptic: vi.fn(() => ({
+    triggerPattern: vi.fn(),
+  })),
+}))
+
+vi.mock('@/store/achievementsStore', () => ({
+  useAchievementsStore: vi.fn(() => ({
+    hasAchievementBeenShown: vi.fn(() => false),
+    markAchievementShown: vi.fn(),
+    _hasHydrated: true,
+  })),
+}))
+
 vi.mock('@/store/studyCycleStore', () => ({
   useStudyCycleStore: vi.fn(),
   formatDuration: vi.fn((minutes: number) => `${minutes}m`),
@@ -52,13 +79,37 @@ vi.mock('@/components/subscription/UpgradePrompt', () => ({
 
 import { useStudyCycleStore } from '@/store/studyCycleStore'
 import { useCanUseFeature } from '@/hooks/useSubscriptionLimits'
+import { useConfigStore } from '@/store/configStore'
+import { useConfetti } from '@/hooks/useConfetti'
+import { useAchievementsStore } from '@/store/achievementsStore'
 
 const mockUseStudyCycleStore = vi.mocked(useStudyCycleStore)
 const mockUseCanUseFeature = vi.mocked(useCanUseFeature)
+const mockUseConfigStore = vi.mocked(useConfigStore)
+const mockUseConfetti = vi.mocked(useConfetti)
+const mockUseAchievementsStore = vi.mocked(useAchievementsStore)
 
 describe('CycleSuggestionCard', () => {
+  const mockFireConfetti = vi.fn()
+
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // Default mocks
+    mockUseConfigStore.mockReturnValue({
+      celebrationsEnabled: true,
+    } as unknown as ReturnType<typeof useConfigStore>)
+
+    mockUseConfetti.mockReturnValue({
+      fire: mockFireConfetti,
+      confettiProps: { active: false },
+    } as unknown as ReturnType<typeof useConfetti>)
+
+    mockUseAchievementsStore.mockReturnValue({
+      hasAchievementBeenShown: vi.fn(() => false),
+      markAchievementShown: vi.fn(),
+      _hasHydrated: true,
+    } as unknown as ReturnType<typeof useAchievementsStore>)
   })
 
   describe('empty state', () => {
@@ -197,6 +248,82 @@ describe('CycleSuggestionCard', () => {
 
       expect(screen.getByText('Matemática')).toBeInTheDocument()
       expect(screen.queryByText('Nenhum ciclo configurado')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('celebrationsEnabled setting', () => {
+    it('does not fire confetti when celebrationsEnabled is false', () => {
+      mockUseConfigStore.mockReturnValue({
+        celebrationsEnabled: false,
+      } as unknown as ReturnType<typeof useConfigStore>)
+
+      mockUseStudyCycleStore.mockReturnValue({
+        cycle: { id: '1', name: 'Meu Ciclo', updatedAt: '2024-01-15' },
+        cycles: [{ id: '1', name: 'Meu Ciclo' }],
+        suggestion: {
+          hasCycle: true,
+          suggestion: {
+            currentSubject: 'Matemática',
+            currentPosition: 2,
+            totalItems: 3,
+            currentAccumulatedMinutes: 60,
+            currentTargetMinutes: 60,
+            remainingMinutes: 0,
+            isCurrentComplete: true,
+            isCycleComplete: true,
+            nextSubject: 'Português',
+            nextTargetMinutes: 45,
+            allItemsProgress: [],
+          },
+        },
+        isLoading: false,
+        refresh: vi.fn(),
+        advanceToNext: vi.fn(),
+        activateCycle: vi.fn(),
+        resetCycle: vi.fn(),
+      } as unknown as ReturnType<typeof useStudyCycleStore>)
+
+      render(<CycleSuggestionCard />)
+
+      expect(mockFireConfetti).not.toHaveBeenCalled()
+    })
+
+    it('renders cycle complete UI even when celebrations are disabled', () => {
+      mockUseConfigStore.mockReturnValue({
+        celebrationsEnabled: false,
+      } as unknown as ReturnType<typeof useConfigStore>)
+
+      mockUseStudyCycleStore.mockReturnValue({
+        cycle: { id: '1', name: 'Meu Ciclo', updatedAt: '2024-01-15' },
+        cycles: [{ id: '1', name: 'Meu Ciclo' }],
+        suggestion: {
+          hasCycle: true,
+          suggestion: {
+            currentSubject: 'Matemática',
+            currentPosition: 2,
+            totalItems: 3,
+            currentAccumulatedMinutes: 60,
+            currentTargetMinutes: 60,
+            remainingMinutes: 0,
+            isCurrentComplete: true,
+            isCycleComplete: true,
+            nextSubject: 'Português',
+            nextTargetMinutes: 45,
+            allItemsProgress: [],
+          },
+        },
+        isLoading: false,
+        refresh: vi.fn(),
+        advanceToNext: vi.fn(),
+        activateCycle: vi.fn(),
+        resetCycle: vi.fn(),
+      } as unknown as ReturnType<typeof useStudyCycleStore>)
+
+      render(<CycleSuggestionCard />)
+
+      // The cycle complete UI should still show
+      expect(screen.getByText('Ciclo Completo!')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /reiniciar ciclo/i })).toBeInTheDocument()
     })
   })
 })

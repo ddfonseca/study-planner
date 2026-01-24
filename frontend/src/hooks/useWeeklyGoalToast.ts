@@ -6,6 +6,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useWeeklyGoals } from '@/hooks/useWeeklyGoals';
 import { useSessionStore } from '@/store/sessionStore';
+import { useConfigStore } from '@/store/configStore';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useConfetti } from '@/hooks/useConfetti';
 import { useAchievementsStore } from '@/store/achievementsStore';
@@ -39,6 +40,9 @@ export function useWeeklyGoalToast(
   options: UseWeeklyGoalToastOptions = {}
 ): UseWeeklyGoalToastReturn {
   const { enabled = true } = options;
+
+  const { celebrationsEnabled } = useConfigStore();
+  const isEnabled = enabled && celebrationsEnabled;
 
   const { toast } = useToast();
   const { getWeekStatus, calculateWeekStart } = useWeeklyGoals();
@@ -78,7 +82,7 @@ export function useWeeklyGoalToast(
 
   // Effect to detect goal achievement transition
   useEffect(() => {
-    if (!enabled || !_hasHydrated) return;
+    if (!isEnabled || !_hasHydrated) return;
 
     const { achieved } = weekStatus;
 
@@ -96,7 +100,7 @@ export function useWeeklyGoalToast(
 
     // Update previous state
     previousAchievedRef.current = achieved;
-  }, [enabled, weekStatus, currentWeekStart, showWeeklyGoalToast, _hasHydrated, hasAchievementBeenShown, markAchievementShown]);
+  }, [isEnabled, weekStatus, currentWeekStart, showWeeklyGoalToast, _hasHydrated, hasAchievementBeenShown, markAchievementShown]);
 
   return {
     isGoalAchieved: weekStatus.achieved,
