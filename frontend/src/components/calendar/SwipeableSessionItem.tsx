@@ -75,6 +75,9 @@ export function SwipeableSessionItem({
     }
 
     if (touchState.current.isDragging) {
+      // Prevent vertical scroll interference during horizontal swipe
+      e.preventDefault();
+
       touchState.current.currentX = touch.clientX;
 
       // Calculate new position based on whether already revealed
@@ -182,7 +185,7 @@ export function SwipeableSessionItem({
       {/* Main content (slides to reveal delete) */}
       <div
         className={cn(
-          "flex items-center justify-between p-3 bg-muted/50 min-h-[56px] touch-no-select",
+          "flex items-center justify-between p-3 bg-muted/50 min-h-[56px] touch-no-select touch-action-pan-y",
           "transition-transform duration-200 ease-out",
           isDragging && "transition-none"
         )}

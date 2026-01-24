@@ -275,11 +275,74 @@ describe('SwipeableSessionItem', () => {
       expect(content).toHaveClass('touch-no-select');
     });
 
+    it('has touch-action-pan-y class to allow vertical scroll', () => {
+      render(<SwipeableSessionItem {...defaultProps} />);
+
+      const content = screen.getByTestId('session-content');
+      expect(content).toHaveClass('touch-action-pan-y');
+    });
+
     it('has touch-action-manipulation on content area', () => {
       render(<SwipeableSessionItem {...defaultProps} />);
 
       const contentInner = screen.getByText('Mathematics').closest('.touch-action-manipulation');
       expect(contentInner).toBeInTheDocument();
+    });
+  });
+
+  describe('vertical scroll non-interference', () => {
+    it('allows vertical scrolling when movement is primarily vertical', () => {
+      render(<SwipeableSessionItem {...defaultProps} />);
+
+      const content = screen.getByTestId('session-content');
+
+      // Start touch
+      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
+
+      // Move vertically (user is scrolling - deltaY > deltaX)
+      fireEvent.touchMove(content, createTouchEvent('touchmove', 210, 200));
+
+      // End touch
+      fireEvent.touchEnd(content, createTouchEvent('touchend', 210, 200));
+
+      // Should not have moved (vertical scroll was detected and swipe was cancelled)
+      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
+    });
+
+    it('captures horizontal swipe when movement is primarily horizontal', () => {
+      render(<SwipeableSessionItem {...defaultProps} />);
+
+      const content = screen.getByTestId('session-content');
+
+      // Start touch
+      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
+
+      // Move horizontally (user is swiping - deltaX > deltaY)
+      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 110));
+
+      // End touch
+      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 110));
+
+      // Should have moved (horizontal swipe was captured)
+      expect(content).toHaveStyle({ transform: 'translateX(-72px)' });
+    });
+
+    it('does not interfere with scroll when canModify is false', () => {
+      render(<SwipeableSessionItem {...defaultProps} canModify={false} />);
+
+      const content = screen.getByTestId('session-content');
+
+      // Start touch
+      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
+
+      // Move horizontally
+      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
+
+      // End touch
+      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
+
+      // Should not have moved when canModify is false
+      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
     });
   });
 });

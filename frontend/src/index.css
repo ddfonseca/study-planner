@@ -135,6 +135,11 @@
     touch-action: manipulation;
   }
 
+  /* Allow vertical scrolling but handle horizontal gestures in JS */
+  .touch-action-pan-y {
+    touch-action: pan-y;
+  }
+
   /* Prevent text selection on touch interactions */
   .touch-no-select {
     -webkit-user-select: none;
