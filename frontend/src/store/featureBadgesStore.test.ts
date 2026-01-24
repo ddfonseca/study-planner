@@ -145,12 +145,92 @@ describe('featureBadgesStore', () => {
   });
 
   describe('persistence', () => {
+    const STORAGE_KEY = 'feature-badges-storage';
+
+    beforeEach(() => {
+      localStorage.clear();
+      useFeatureBadgesStore.setState({
+        seenFeatures: {
+          timer: false,
+          cycles: false,
+          dashboard: false,
+        },
+        _hasHydrated: true,
+      });
+    });
+
     it('store name is set to feature-badges-storage', () => {
       // The persist middleware uses 'feature-badges-storage' as the storage key
       // We verify the store is correctly configured by checking it exists
       expect(useFeatureBadgesStore).toBeDefined();
       expect(typeof useFeatureBadgesStore.getState).toBe('function');
       expect(typeof useFeatureBadgesStore.setState).toBe('function');
+    });
+
+    it('persists seenFeatures to localStorage', () => {
+      const { markFeatureSeen } = useFeatureBadgesStore.getState();
+
+      markFeatureSeen('timer');
+      markFeatureSeen('dashboard');
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).not.toBeNull();
+
+      const parsed = JSON.parse(stored!);
+      expect(parsed.state.seenFeatures.timer).toBe(true);
+      expect(parsed.state.seenFeatures.cycles).toBe(false);
+      expect(parsed.state.seenFeatures.dashboard).toBe(true);
+    });
+
+    it('does not persist _hasHydrated to localStorage', () => {
+      const { markFeatureSeen } = useFeatureBadgesStore.getState();
+
+      markFeatureSeen('timer');
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).not.toBeNull();
+
+      const parsed = JSON.parse(stored!);
+      // _hasHydrated should not be in persisted state
+      expect(parsed.state._hasHydrated).toBeUndefined();
+    });
+
+    it('has correct persist options configured', () => {
+      // Verify the persist middleware is configured with correct options
+      const persistOptions = useFeatureBadgesStore.persist.getOptions();
+
+      expect(persistOptions.name).toBe(STORAGE_KEY);
+
+      // partialize should only include seenFeatures
+      const mockState = {
+        seenFeatures: { timer: true, cycles: false, dashboard: true },
+        _hasHydrated: true,
+        markFeatureSeen: () => {},
+        isFeatureNew: () => false,
+        resetBadges: () => {},
+        setHasHydrated: () => {},
+      };
+
+      const partialized = persistOptions.partialize?.(mockState);
+      expect(partialized).toEqual({
+        seenFeatures: { timer: true, cycles: false, dashboard: true },
+      });
+      expect(partialized).not.toHaveProperty('_hasHydrated');
+    });
+
+    it('uses localStorage as storage mechanism', () => {
+      // Verify the store uses localStorage
+      const persistOptions = useFeatureBadgesStore.persist.getOptions();
+      // Zustand wraps localStorage with getItem/setItem/removeItem methods
+      expect(persistOptions.storage).toBeDefined();
+      expect(typeof persistOptions.storage?.getItem).toBe('function');
+      expect(typeof persistOptions.storage?.setItem).toBe('function');
+    });
+
+    it('has onRehydrateStorage callback configured', () => {
+      // Verify onRehydrateStorage is set up to handle hydration
+      const persistOptions = useFeatureBadgesStore.persist.getOptions();
+      expect(persistOptions.onRehydrateStorage).toBeDefined();
     });
   });
 

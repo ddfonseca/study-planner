@@ -86,6 +86,12 @@ describe('onboardingStore', () => {
   })
 
   describe('persistence', () => {
+    const STORAGE_KEY = 'onboarding-storage'
+
+    beforeEach(() => {
+      localStorage.clear()
+    })
+
     it('store name is set to onboarding-storage', () => {
       // The persist middleware uses 'onboarding-storage' as the storage key
       // This is configured in the store definition
@@ -93,6 +99,57 @@ describe('onboardingStore', () => {
       expect(useOnboardingStore).toBeDefined()
       expect(typeof useOnboardingStore.getState).toBe('function')
       expect(typeof useOnboardingStore.setState).toBe('function')
+    })
+
+    it('persists hasSeenWelcome to localStorage', () => {
+      const { setHasSeenWelcome } = useOnboardingStore.getState()
+
+      setHasSeenWelcome(true)
+
+      const stored = localStorage.getItem(STORAGE_KEY)
+      expect(stored).not.toBeNull()
+
+      const parsed = JSON.parse(stored!)
+      expect(parsed.state.hasSeenWelcome).toBe(true)
+    })
+
+    it('does not persist shouldOpenSessionModal to localStorage', () => {
+      const { setShouldOpenSessionModal } = useOnboardingStore.getState()
+
+      setShouldOpenSessionModal(true)
+
+      const stored = localStorage.getItem(STORAGE_KEY)
+      expect(stored).not.toBeNull()
+
+      const parsed = JSON.parse(stored!)
+      // shouldOpenSessionModal should not be in persisted state
+      expect(parsed.state.shouldOpenSessionModal).toBeUndefined()
+    })
+
+    it('has correct persist options configured', () => {
+      // Verify the persist middleware is configured with correct options
+      const persistOptions = useOnboardingStore.persist.getOptions()
+
+      expect(persistOptions.name).toBe(STORAGE_KEY)
+      // partialize should only include hasSeenWelcome
+      const partialized = persistOptions.partialize?.({
+        hasSeenWelcome: true,
+        shouldOpenSessionModal: true,
+        setHasSeenWelcome: () => {},
+        setShouldOpenSessionModal: () => {},
+        resetOnboarding: () => {},
+      })
+      expect(partialized).toEqual({ hasSeenWelcome: true })
+      expect(partialized).not.toHaveProperty('shouldOpenSessionModal')
+    })
+
+    it('uses localStorage as storage mechanism', () => {
+      // Verify the store uses localStorage
+      const persistOptions = useOnboardingStore.persist.getOptions()
+      // Zustand wraps localStorage with getItem/setItem/removeItem methods
+      expect(persistOptions.storage).toBeDefined()
+      expect(typeof persistOptions.storage?.getItem).toBe('function')
+      expect(typeof persistOptions.storage?.setItem).toBe('function')
     })
   })
 })
