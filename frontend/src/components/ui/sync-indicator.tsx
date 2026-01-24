@@ -63,6 +63,12 @@ export interface SyncIndicatorProps
     success?: string
     error?: string
   }
+  /** Callback when retry button is clicked (only shown in error state) */
+  onRetry?: () => void
+  /** Whether retry is currently in progress */
+  isRetrying?: boolean
+  /** Custom retry button text */
+  retryText?: string
 }
 
 const defaultLabels = {
@@ -96,6 +102,9 @@ const SyncIndicator = React.forwardRef<HTMLDivElement, SyncIndicatorProps>(
       size,
       showLabel = true,
       labels,
+      onRetry,
+      isRetrying = false,
+      retryText = "Tentar novamente",
       ...props
     },
     ref
@@ -104,6 +113,8 @@ const SyncIndicator = React.forwardRef<HTMLDivElement, SyncIndicatorProps>(
     const currentLabel = mergedLabels[state]
 
     const ariaLabel = `Sync status: ${currentLabel}`
+
+    const showRetryButton = state === "error" && onRetry && !isRetrying
 
     return (
       <div
@@ -116,6 +127,19 @@ const SyncIndicator = React.forwardRef<HTMLDivElement, SyncIndicatorProps>(
       >
         <StateIcon state={state} size={size} />
         {showLabel && <span>{currentLabel}</span>}
+        {showRetryButton && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="ml-1 underline hover:no-underline focus:outline-none focus:ring-1 focus:ring-current rounded px-1"
+            aria-label={retryText}
+          >
+            {retryText}
+          </button>
+        )}
+        {isRetrying && (
+          <RefreshCw className={cn(iconVariants({ state: "syncing", size }))} aria-hidden="true" />
+        )}
       </div>
     )
   }

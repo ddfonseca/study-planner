@@ -20,6 +20,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { SyncIndicator, type SyncState } from '@/components/ui/sync-indicator';
+import { useAutoSave, type AutoSaveStatus } from '@/hooks/useAutoSave';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -42,6 +44,18 @@ interface OldStorageFormat {
   };
   version?: number;
 }
+
+// Map AutoSaveStatus to SyncState
+const mapStatusToSyncState = (status: AutoSaveStatus): SyncState => {
+  switch (status) {
+    case 'saving':
+      return 'syncing';
+    case 'saved':
+      return 'success';
+    default:
+      return status;
+  }
+};
 
 export function ScratchpadPage() {
   const {
@@ -68,9 +82,39 @@ export function ScratchpadPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [mobileListOpen, setMobileListOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const hasFetchedRef = useRef(false);
+  const currentNoteIdRef = useRef<string | null>(currentNoteId);
+
+  // Keep ref in sync with currentNoteId
+  useEffect(() => {
+    currentNoteIdRef.current = currentNoteId;
+  }, [currentNoteId]);
+
+  // Auto-save with retry
+  const {
+    status: saveStatus,
+    lastSavedAt,
+    retry: retrySave,
+    save: triggerSave,
+    saveNow,
+    isOnline,
+  } = useAutoSave<{ id: string; content: string }>({
+    onSave: async (data) => {
+      await scratchpadNotesApi.update(data.id, { content: data.content });
+      // Update local store with optimistic update
+      useScratchpadStore.getState().setNotes(
+        notes.map((note) =>
+          note.id === data.id
+            ? { ...note, content: data.content, updatedAt: new Date().toISOString() }
+            : note
+        )
+      );
+    },
+    debounceMs: 1000,
+    maxRetries: 3,
+    retryDelayMs: 1000,
+  });
 
   // Migrate old localStorage data to backend
   const migrateLocalStorageData = useCallback(async () => {
@@ -133,6 +177,7 @@ export function ScratchpadPage() {
   }, [fetchNotes, migrateLocalStorageData]);
 
   // Sync local content with current note
+  // Only sync when specific properties change (id, content, title)
   useEffect(() => {
     if (currentNote) {
       setLocalContent(currentNote.content);
@@ -141,6 +186,7 @@ export function ScratchpadPage() {
       setLocalContent('');
       setLocalTitle('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentNote?.id, currentNote?.content, currentNote?.title]);
 
   // Focus title input when editing
@@ -151,30 +197,14 @@ export function ScratchpadPage() {
     }
   }, [isEditingTitle]);
 
-  // Debounced auto-save for content
+  // Debounced auto-save for content using useAutoSave hook
   const saveContent = useCallback(
     (newContent: string) => {
-      if (!currentNoteId) return;
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        updateNote(currentNoteId, { content: newContent });
-      }, 1000);
+      if (!currentNoteIdRef.current) return;
+      triggerSave({ id: currentNoteIdRef.current, content: newContent });
     },
-    [currentNoteId, updateNote]
+    [triggerSave]
   );
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   // Handle content change
   const handleContentChange = useCallback(
@@ -227,18 +257,15 @@ export function ScratchpadPage() {
 
   // Handle note selection
   const handleSelectNote = useCallback(
-    (id: string) => {
-      // Save current content before switching
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+    async (id: string) => {
+      // Save current content immediately before switching
       if (currentNoteId && localContent !== currentNote?.content) {
-        updateNote(currentNoteId, { content: localContent });
+        await saveNow({ id: currentNoteId, content: localContent });
       }
       setCurrentNote(id);
       setMobileListOpen(false);
     },
-    [currentNoteId, localContent, currentNote?.content, updateNote, setCurrentNote]
+    [currentNoteId, localContent, currentNote?.content, saveNow, setCurrentNote]
   );
 
   // Note list item component
@@ -315,8 +342,18 @@ export function ScratchpadPage() {
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
           <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">Scratchpad</h1>
-          {isSaving && (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
+          {currentNote && (
+            <SyncIndicator
+              state={mapStatusToSyncState(saveStatus)}
+              size="sm"
+              onRetry={retrySave}
+              labels={{
+                idle: isOnline ? 'Salvo' : 'Offline',
+                syncing: 'Salvando...',
+                success: 'Salvo',
+                error: 'Erro ao salvar',
+              }}
+            />
           )}
         </div>
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -423,7 +460,9 @@ Suporta markdown basico:
 
                 {/* Footer - Desktop only */}
                 <p className="hidden md:block text-xs text-muted-foreground text-center mt-3">
-                  {currentNote.updatedAt
+                  {lastSavedAt
+                    ? `Ultimo save: ${format(lastSavedAt, "HH:mm 'de' dd/MM", { locale: ptBR })}`
+                    : currentNote.updatedAt
                     ? `Ultimo save: ${format(new Date(currentNote.updatedAt), "HH:mm 'de' dd/MM", { locale: ptBR })}`
                     : `Criado em: ${format(new Date(currentNote.createdAt), "HH:mm 'de' dd/MM", { locale: ptBR })}`}
                 </p>
