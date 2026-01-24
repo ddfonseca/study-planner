@@ -8,6 +8,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { Button } from '@/components/ui/button';
 import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
+import { WelcomeOverlay } from '@/components/onboarding';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
@@ -161,6 +162,9 @@ export function AppLayout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Outlet />
       </main>
+
+      {/* Welcome Overlay for new users */}
+      <WelcomeOverlay />
     </div>
   );
 }
