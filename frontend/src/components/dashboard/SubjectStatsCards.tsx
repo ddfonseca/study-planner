@@ -46,14 +46,14 @@ export function SubjectStatsCards({ stats }: SubjectStatsCardsProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map(({ title, value, icon: Icon, color, bgColor }) => (
         <Card key={title}>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg ${bgColor}`}>
-                <Icon className={`h-6 w-6 ${color}`} />
+          <CardContent className="p-3 sm:pt-6 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`p-2 sm:p-3 rounded-lg ${bgColor}`}>
+                <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${color}`} />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{title}</p>
-                <p className="text-2xl font-bold text-foreground truncate max-w-[150px]">
+                <p className="text-xl sm:text-2xl font-bold text-foreground truncate max-w-[100px] sm:max-w-[150px]">
                   {value}
                 </p>
               </div>

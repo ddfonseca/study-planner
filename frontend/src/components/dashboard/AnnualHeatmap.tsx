@@ -159,7 +159,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
       <CardContent className="space-y-2 px-3 sm:px-6">
         {/* Heatmap container - horizontal scroll on mobile */}
         <div className="w-full overflow-x-auto pb-2 -mx-1 px-1">
-          <div className="min-w-[600px] flex flex-col">
+          <div className="min-w-[320px] sm:min-w-[450px] lg:min-w-[600px] flex flex-col">
           {/* Month labels row */}
           <div className="flex pl-7">
             {monthsData.map((m, i) => {

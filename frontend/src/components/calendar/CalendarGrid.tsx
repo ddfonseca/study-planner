@@ -122,7 +122,7 @@ export function CalendarGrid({
                   <td className="p-1">
                     <button
                       onClick={() => handleTotalClick(week, weekTotal)}
-                      className={`w-full h-[100px] flex flex-col items-center justify-center rounded-md border transition-colors hover:opacity-80 cursor-pointer px-2 ${statusStyles}`}
+                      className={`w-full h-[80px] sm:h-[100px] flex flex-col items-center justify-center rounded-md border transition-colors hover:opacity-80 cursor-pointer px-1 sm:px-2 ${statusStyles}`}
                     >
                       <span className="text-sm font-medium">
                         {weekTotal > 0 ? formatTime(weekTotal) : '-'}

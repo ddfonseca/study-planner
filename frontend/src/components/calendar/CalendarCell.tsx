@@ -66,7 +66,7 @@ export function CalendarCell({
   return (
     <div
       className={cn(
-        'h-[100px] p-2 border border-border/40 rounded-md cursor-pointer transition-all overflow-hidden relative',
+        'h-[80px] sm:h-[100px] p-1.5 sm:p-2 border border-border/40 rounded-md cursor-pointer transition-all overflow-hidden relative',
         getBgColor(),
         isTodayDate && 'ring-2 ring-accent ring-offset-1 ring-offset-background',
         !isCurrentMonth && 'opacity-50'
@@ -107,7 +107,7 @@ export function CalendarCell({
 
       {/* Sessions list - compact */}
       {dayData.materias.length > 0 && (
-        <div className="space-y-0.5 max-h-[55px] overflow-hidden">
+        <div className="space-y-0.5 max-h-[35px] sm:max-h-[55px] overflow-hidden">
           {dayData.materias.slice(0, 2).map((materia) => (
             <div
               key={materia.id}
