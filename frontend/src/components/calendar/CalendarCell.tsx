@@ -1,7 +1,8 @@
 /**
  * Calendar Cell - Individual day in the calendar (heatmap style)
  */
-import { isToday } from 'date-fns';
+import { isToday, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import type { DayData, CellIntensity } from '@/types/session';
 import { formatTime } from '@/lib/utils/time';
 import { cn } from '@/lib/utils';
@@ -63,6 +64,16 @@ export function CalendarCell({
     return gradientColors[intensity];
   };
 
+  // Generate accessible label for the day cell
+  const getAriaLabel = () => {
+    const dateStr = format(date, "d 'de' MMMM", { locale: ptBR });
+    const todayStr = isTodayDate ? ', hoje' : '';
+    const sessionsStr = dayData.totalMinutos > 0
+      ? `, ${formatTime(dayData.totalMinutos)} de estudo`
+      : ', sem sessões';
+    return `${dateStr}${todayStr}${sessionsStr}`;
+  };
+
   return (
     <div
       className={cn(
@@ -76,6 +87,7 @@ export function CalendarCell({
       onClick={onClick}
       role="button"
       tabIndex={0}
+      aria-label={getAriaLabel()}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

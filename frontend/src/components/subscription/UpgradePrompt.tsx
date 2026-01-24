@@ -47,6 +47,7 @@ export function UpgradePrompt({
         <button
           onClick={onUpgradeClick}
           className="underline hover:no-underline font-medium"
+          aria-label={`Fazer upgrade para aumentar limite de ${featureLabel}`}
         >
           Fazer upgrade
         </button>
@@ -63,13 +64,13 @@ export function UpgradePrompt({
         )}
       >
         <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-amber-500" />
+          <Zap className="h-4 w-4 text-amber-500" aria-hidden="true" />
           <span className="text-sm">
             Você atingiu o limite de {limit} {featureLabel}
           </span>
         </div>
-        <Button size="sm" variant="outline" onClick={onUpgradeClick}>
-          <Crown className="h-3 w-3 mr-1" />
+        <Button size="sm" variant="outline" onClick={onUpgradeClick} aria-label={`Fazer upgrade para aumentar limite de ${featureLabel}`}>
+          <Crown className="h-3 w-3 mr-1" aria-hidden="true" />
           Upgrade
         </Button>
       </div>
@@ -82,7 +83,7 @@ export function UpgradePrompt({
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="p-2 bg-amber-500/10 rounded-full">
-            <Crown className="h-5 w-5 text-amber-500" />
+            <Crown className="h-5 w-5 text-amber-500" aria-hidden="true" />
           </div>
           <div className="flex-1">
             <h4 className="font-medium text-foreground">
@@ -96,8 +97,9 @@ export function UpgradePrompt({
               size="sm"
               className="mt-3"
               onClick={onUpgradeClick}
+              aria-label="Ver planos de upgrade disponíveis"
             >
-              <Zap className="h-4 w-4 mr-2" />
+              <Zap className="h-4 w-4 mr-2" aria-hidden="true" />
               Ver planos
             </Button>
           </div>

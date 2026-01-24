@@ -29,7 +29,7 @@ function HistoryEntry({ entry }: { entry: CycleHistoryEntry }) {
   if (entry.type === 'completion') {
     return (
       <div className="flex items-start gap-2 p-2 rounded-md bg-green-500/10 border border-green-500/20">
-        <Trophy className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+        <Trophy className="h-4 w-4 text-green-500 mt-0.5 shrink-0" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-green-700 dark:text-green-400">
             Ciclo completo!
@@ -47,7 +47,7 @@ function HistoryEntry({ entry }: { entry: CycleHistoryEntry }) {
 
   return (
     <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-      <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+      <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <p className="text-xs">
           <span className="text-muted-foreground">De </span>
@@ -97,13 +97,16 @@ export function CycleHistoryCard() {
           type="button"
           className="flex items-center justify-between w-full"
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? 'Recolher histórico do ciclo' : 'Expandir histórico do ciclo'}
         >
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <History className="h-4 w-4" />
+            <History className="h-4 w-4" aria-hidden="true" />
             Histórico do Ciclo
           </CardTitle>
           <ChevronDown
             className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            aria-hidden="true"
           />
         </button>
       </CardHeader>

@@ -122,8 +122,9 @@ export function AppLayout() {
                 size="icon"
                 onClick={toggleTheme}
                 className="text-muted-foreground hover:text-foreground"
+                aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
               >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {isDark ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
               </Button>
 
               {user && (
@@ -146,8 +147,9 @@ export function AppLayout() {
                 onClick={handleLogout}
                 disabled={isLoading}
                 className="text-muted-foreground hover:text-destructive"
+                aria-label="Sair da conta"
               >
-                <LogOut className="h-4 w-4 mr-2" />
+                <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
                 Sair
               </Button>
             </div>

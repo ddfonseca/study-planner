@@ -20,16 +20,18 @@ export function DateRangeFilter({ currentDays, onSelectPreset }: DateRangeFilter
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-2 text-muted-foreground">
-        <Calendar className="h-4 w-4" />
-        <span className="text-sm">Período:</span>
+        <Calendar className="h-4 w-4" aria-hidden="true" />
+        <span className="text-sm" id="date-range-label">Período:</span>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2" role="group" aria-labelledby="date-range-label">
         {presets.map(({ days, label }) => (
           <Button
             key={days}
             variant={currentDays === days ? 'default' : 'outline'}
             size="sm"
             onClick={() => onSelectPreset(days)}
+            aria-current={currentDays === days ? 'true' : undefined}
+            aria-label={`Filtrar últimos ${label}`}
           >
             {label}
           </Button>

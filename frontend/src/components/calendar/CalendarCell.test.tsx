@@ -153,6 +153,34 @@ describe('CalendarCell', () => {
       expect(cell).toHaveAttribute('tabindex', '0')
     })
 
+    it('has descriptive aria-label with date and session info', () => {
+      render(<CalendarCell {...defaultProps} />)
+      const cell = screen.getByRole('button')
+
+      expect(cell).toHaveAttribute('aria-label')
+      expect(cell.getAttribute('aria-label')).toContain('15 de janeiro')
+      expect(cell.getAttribute('aria-label')).toContain('sem sessões')
+    })
+
+    it('aria-label includes study time when there are sessions', () => {
+      const propsWithSessions = {
+        ...defaultProps,
+        dayData: {
+          totalMinutos: 90,
+          materias: [
+            { id: '1', materia: 'Math', minutos: 90 },
+          ],
+        },
+        intensity: 1 as CellIntensity,
+      }
+
+      render(<CalendarCell {...propsWithSessions} />)
+      const cell = screen.getByRole('button')
+
+      expect(cell).toHaveAttribute('aria-label')
+      expect(cell.getAttribute('aria-label')).toContain('de estudo')
+    })
+
     it('calls onClick when Enter key is pressed', async () => {
       const user = userEvent.setup()
       const onClick = vi.fn()

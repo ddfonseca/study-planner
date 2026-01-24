@@ -54,7 +54,7 @@ export function ConfigPanel() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Settings className="h-4 w-4" />
+          <Settings className="h-4 w-4" aria-hidden="true" />
           Meta Semanal Padrão
         </CardTitle>
       </CardHeader>
@@ -80,9 +80,11 @@ export function ConfigPanel() {
           disabled={isLoading}
           size="sm"
           className="w-full"
+          aria-busy={isLoading}
+          aria-label="Salvar configurações"
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
             'Salvar'
           )}

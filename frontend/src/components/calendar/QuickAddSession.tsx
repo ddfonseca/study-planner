@@ -32,7 +32,7 @@ export function QuickAddSession({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Adicionar Estudo de Hoje
           </CardTitle>
         </CardHeader>
@@ -63,7 +63,7 @@ export function QuickAddSession({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Adicionar Estudo de Hoje
         </CardTitle>
       </CardHeader>
@@ -106,11 +106,13 @@ export function QuickAddSession({
             type="submit"
             disabled={!subject.trim() || !minutes || isSubmitting}
             className="w-full"
+            aria-busy={isSubmitting}
+            aria-label="Adicionar sessão de estudo"
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
             ) : (
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             )}
             Adicionar
           </Button>
