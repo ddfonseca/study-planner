@@ -11,6 +11,7 @@ import {
 import type { ChartData, ChartOptions } from 'chart.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatTime } from '@/lib/utils/time';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -21,19 +22,20 @@ interface SubjectChartProps {
 
 export function SubjectChart({ data }: SubjectChartProps) {
   const hasData = data.labels && data.labels.length > 0;
+  const isMobile = useIsMobile();
 
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right',
+        position: isMobile ? 'bottom' : 'right',
         labels: {
-          padding: 20,
+          padding: isMobile ? 12 : 20,
           usePointStyle: true,
           font: {
-            family: 'Poppins',
-            size: 12,
+            family: 'Manrope',
+            size: isMobile ? 11 : 12,
           },
         },
       },
@@ -50,17 +52,17 @@ export function SubjectChart({ data }: SubjectChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg">Tempo por Matéria</CardTitle>
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="text-base sm:text-lg">Tempo por Matéria</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         {hasData ? (
-          <div className="h-[300px]">
+          <div className="h-[280px] sm:h-[300px]">
             <Doughnut data={data} options={options} />
           </div>
         ) : (
-          <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Nenhum dado disponível</p>
+          <div className="h-[280px] sm:h-[300px] flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Nenhum dado disponível</p>
           </div>
         )}
       </CardContent>

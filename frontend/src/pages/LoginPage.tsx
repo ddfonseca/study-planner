@@ -13,7 +13,7 @@ import { Loader2, Mail } from 'lucide-react';
 // Google Icon SVG
 function GoogleIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24">
+    <svg className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -83,24 +83,24 @@ export function LoginPage() {
 
   return (
     <Card className="bg-container shadow-lg">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Bem-vindo!</CardTitle>
-        <CardDescription>
+      <CardHeader className="text-center px-4 sm:px-6">
+        <CardTitle className="text-xl sm:text-2xl">Bem-vindo!</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
           Entre com sua conta Google para começar a organizar seus estudos
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 sm:px-6">
         <Button
           onClick={handleLogin}
           disabled={isLoading}
-          className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm"
+          className="w-full h-11 sm:h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm text-sm sm:text-base"
         >
           {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin mr-2" />
           ) : (
             <GoogleIcon />
           )}
-          <span className="ml-3 font-medium">Entrar com Google</span>
+          <span className="ml-2 sm:ml-3 font-medium">Entrar com Google</span>
         </Button>
 
         {/* Email/Password auth - DEV ONLY */}
@@ -189,7 +189,7 @@ export function LoginPage() {
           </>
         )}
 
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-xs sm:text-sm text-muted-foreground">
           <p>Ao entrar, você concorda com nossos</p>
           <p>
             <Link to="/terms" className="text-primary hover:underline">

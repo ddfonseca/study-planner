@@ -14,6 +14,7 @@ import {
 import type { ChartData, ChartOptions } from 'chart.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatTime } from '@/lib/utils/time';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -24,6 +25,7 @@ interface DailyChartProps {
 
 export function DailyChart({ data }: DailyChartProps) {
   const hasData = data.labels && data.labels.length > 0;
+  const isMobile = useIsMobile();
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
@@ -55,7 +57,9 @@ export function DailyChart({ data }: DailyChartProps) {
           callback: function (_value, index) {
             // Show only every nth label to avoid overcrowding
             const labels = data.labels as string[];
-            if (labels.length <= 14 || index % 2 === 0) {
+            // On mobile, show fewer labels
+            const skipInterval = isMobile ? 3 : 2;
+            if (labels.length <= 14 || index % skipInterval === 0) {
               const date = labels[index];
               const parts = date.split('-');
               return `${parts[2]}/${parts[1]}`;
@@ -63,9 +67,10 @@ export function DailyChart({ data }: DailyChartProps) {
             return '';
           },
           font: {
-            family: 'Poppins',
-            size: 10,
+            family: 'Manrope',
+            size: isMobile ? 9 : 10,
           },
+          maxRotation: isMobile ? 45 : 0,
         },
       },
       y: {
@@ -75,8 +80,8 @@ export function DailyChart({ data }: DailyChartProps) {
             return formatTime(Number(value));
           },
           font: {
-            family: 'Poppins',
-            size: 10,
+            family: 'Manrope',
+            size: isMobile ? 9 : 10,
           },
         },
       },
@@ -85,17 +90,17 @@ export function DailyChart({ data }: DailyChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg">Tempo por Dia</CardTitle>
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="text-base sm:text-lg">Tempo por Dia</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         {hasData ? (
-          <div className="h-[300px]">
+          <div className="h-[280px] sm:h-[300px]">
             <Bar data={data} options={options} />
           </div>
         ) : (
-          <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Nenhum dado disponível</p>
+          <div className="h-[280px] sm:h-[300px] flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Nenhum dado disponível</p>
           </div>
         )}
       </CardContent>

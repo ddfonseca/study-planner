@@ -14,6 +14,7 @@ import {
 import type { ChartData, ChartOptions } from 'chart.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatTime } from '@/lib/utils/time';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -25,6 +26,7 @@ interface SubjectWeeklyChartProps {
 export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
   const hasData = data.labels && data.labels.length > 0;
   const hasNonZeroData = data.datasets[0]?.data.some((value) => (value as number) > 0);
+  const isMobile = useIsMobile();
 
   const options: ChartOptions<'bar'> = {
     indexAxis: 'y' as const,
@@ -50,8 +52,8 @@ export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
             return formatTime(Number(value));
           },
           font: {
-            family: 'Poppins',
-            size: 10,
+            family: 'Manrope',
+            size: isMobile ? 9 : 10,
           },
         },
       },
@@ -61,8 +63,8 @@ export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
         },
         ticks: {
           font: {
-            family: 'Poppins',
-            size: 12,
+            family: 'Manrope',
+            size: isMobile ? 10 : 12,
           },
         },
       },
@@ -71,17 +73,17 @@ export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg">Media por Dia da Semana</CardTitle>
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="text-base sm:text-lg">Media por Dia da Semana</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         {hasData && hasNonZeroData ? (
-          <div className="h-[300px]">
+          <div className="h-[280px] sm:h-[300px]">
             <Bar data={data} options={options} />
           </div>
         ) : (
-          <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Nenhum dado disponivel</p>
+          <div className="h-[280px] sm:h-[300px] flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Nenhum dado disponivel</p>
           </div>
         )}
       </CardContent>
