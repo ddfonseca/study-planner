@@ -9,6 +9,7 @@ import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ToastAction } from '@/components/ui/toast';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
 import {
@@ -33,7 +34,7 @@ export function CalendarPage() {
   const {
     handleAddSession,
     handleUpdateSession,
-    handleDeleteSession,
+    handleSoftDeleteSession,
     getSessionsForDate,
     getUniqueSubjects,
     fetchSessions,
@@ -142,24 +143,46 @@ export function CalendarPage() {
     [handleUpdateSession, toast]
   );
 
-  // Handle delete session
+  // Handle delete session with undo support
   const handleDeleteSessionSubmit = useCallback(
     async (id: string) => {
-      try {
-        await handleDeleteSession(id);
-        toast({
-          title: 'Sucesso',
-          description: 'Sessão removida!',
-        });
-      } catch {
+      const result = handleSoftDeleteSession(id);
+
+      if (!result) {
         toast({
           title: 'Erro',
-          description: 'Falha ao remover sessão',
+          description: 'Sessão não encontrada',
           variant: 'destructive',
         });
+        return;
       }
+
+      const { session, undo } = result;
+
+      const { dismiss } = toast({
+        title: 'Sessão removida',
+        description: `"${session.subject}" foi removida`,
+        duration: 5000,
+        action: (
+          <ToastAction
+            altText="Desfazer remoção da sessão"
+            onClick={() => {
+              const restored = undo();
+              if (restored) {
+                dismiss();
+                toast({
+                  title: 'Sessão restaurada',
+                  description: `"${session.subject}" foi restaurada`,
+                });
+              }
+            }}
+          >
+            Desfazer
+          </ToastAction>
+        ),
+      });
     },
-    [handleDeleteSession, toast]
+    [handleSoftDeleteSession, toast]
   );
 
   // Get day data for selected date

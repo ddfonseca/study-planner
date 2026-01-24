@@ -5,8 +5,14 @@ import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useStudyCycleStore } from '@/store/studyCycleStore';
-import type { CreateSessionDto, UpdateSessionDto } from '@/types/api';
+import type { CreateSessionDto, UpdateSessionDto, Session } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
+
+export interface UndoDeleteResult {
+  session: Session;
+  undo: () => boolean;
+  confirmDelete: () => Promise<void>;
+}
 
 export function useSessions() {
   const {
@@ -18,6 +24,9 @@ export function useSessions() {
     addSession,
     updateSession,
     deleteSession,
+    softDeleteSession,
+    undoDeleteSession,
+    confirmDeleteSession,
     selectDate,
     getSessionsForDate,
   } = useSessionStore();
@@ -94,7 +103,7 @@ export function useSessions() {
     [updateSession, currentWorkspaceId, fetchSuggestion]
   );
 
-  // Delete a study session
+  // Delete a study session (immediate, no undo)
   const handleDeleteSession = useCallback(
     async (id: string) => {
       const result = await deleteSession(id);
@@ -105,6 +114,36 @@ export function useSessions() {
       return result;
     },
     [deleteSession, currentWorkspaceId, fetchSuggestion]
+  );
+
+  // Soft delete with undo support - returns undo/confirm functions
+  const handleSoftDeleteSession = useCallback(
+    (id: string): UndoDeleteResult | null => {
+      const confirmDelete = async () => {
+        await confirmDeleteSession(id);
+        // Refresh cycle suggestion after confirmed deletion
+        if (currentWorkspaceId) {
+          fetchSuggestion(currentWorkspaceId);
+        }
+      };
+
+      const session = softDeleteSession(id, confirmDelete);
+      if (!session) return null;
+
+      return {
+        session,
+        undo: () => {
+          const restored = undoDeleteSession(id);
+          // Refresh cycle suggestion after undo
+          if (restored && currentWorkspaceId) {
+            fetchSuggestion(currentWorkspaceId);
+          }
+          return restored;
+        },
+        confirmDelete,
+      };
+    },
+    [softDeleteSession, undoDeleteSession, confirmDeleteSession, currentWorkspaceId, fetchSuggestion]
   );
 
   // Get weekly totals
@@ -167,6 +206,7 @@ export function useSessions() {
     handleAddSession,
     handleUpdateSession,
     handleDeleteSession,
+    handleSoftDeleteSession,
     getWeekTotals,
     getUniqueSubjects,
     hasSessionsInMonth,
