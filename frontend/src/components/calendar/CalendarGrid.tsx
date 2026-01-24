@@ -2,8 +2,10 @@
  * Calendar Grid - Main calendar view with cells (heatmap style)
  */
 import { useState, useEffect } from 'react';
+import { CalendarOff } from 'lucide-react';
 import { CalendarCell } from './CalendarCell';
 import { WeeklyGoalEditor } from './WeeklyGoalEditor';
+import { EmptyState } from '@/components/ui/empty-state';
 import { formatDateKey } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { useSessions } from '@/hooks/useSessions';
@@ -23,7 +25,7 @@ export function CalendarGrid({
   dayNames,
   onCellClick,
 }: CalendarGridProps) {
-  const { sessions, getCellIntensity, getWeekTotals } = useSessions();
+  const { sessions, getCellIntensity, getWeekTotals, hasSessionsInMonth } = useSessions();
   const { getCachedGoalForWeek, prefetchGoals, calculateWeekStart } = useWeeklyGoals();
 
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
@@ -146,6 +148,16 @@ export function CalendarGrid({
             })}
           </tbody>
         </table>
+
+        {!hasSessionsInMonth(weeks) && (
+          <EmptyState
+            icon={CalendarOff}
+            title="Nenhuma sessão neste mês"
+            description="Clique em um dia para adicionar sua primeira sessão de estudo"
+            variant="subtle"
+            size="sm"
+          />
+        )}
       </div>
 
       {selectedWeekStart && (

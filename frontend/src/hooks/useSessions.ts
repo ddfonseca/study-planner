@@ -136,6 +136,23 @@ export function useSessions() {
     );
   }, [sessions, cycle]);
 
+  // Check if a month has any sessions
+  const hasSessionsInMonth = useCallback(
+    (weeks: Date[][]): boolean => {
+      for (const week of weeks) {
+        for (const date of week) {
+          const dateKey = date.toISOString().split('T')[0];
+          const dayData = sessions[dateKey];
+          if (dayData && dayData.totalMinutos > 0) {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    [sessions]
+  );
+
   return {
     sessions,
     selectedDate,
@@ -152,6 +169,7 @@ export function useSessions() {
     handleDeleteSession,
     getWeekTotals,
     getUniqueSubjects,
+    hasSessionsInMonth,
   };
 }
 
