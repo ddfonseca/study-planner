@@ -8,7 +8,8 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { useSessions } from '@/hooks/useSessions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { BarChart3, PieChart } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BarChart3, PieChart, CalendarOff } from 'lucide-react';
 
 import {
   DateRangeFilter,
@@ -72,14 +73,25 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <StatsCards stats={stats} />
+      {stats.totalMinutes === 0 ? (
+        <EmptyState
+          icon={CalendarOff}
+          title="Nenhuma sessão neste período"
+          description="Selecione outro período ou adicione sessões de estudo para visualizar estatísticas"
+          variant="card"
+        />
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <StatsCards stats={stats} />
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SubjectChart data={subjectChartData} />
-        <DailyChart data={dailyChartData} />
-      </div>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SubjectChart data={subjectChartData} />
+            <DailyChart data={dailyChartData} />
+          </div>
+        </>
+      )}
 
       {/* Annual Heatmap */}
       <AnnualHeatmap sessions={sessions} />
