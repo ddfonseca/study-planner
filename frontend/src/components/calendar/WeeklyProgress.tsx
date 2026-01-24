@@ -8,6 +8,9 @@ import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
 import { formatTime } from '@/lib/utils/time';
 import { getDayNames } from '@/lib/utils/date';
+import { AnimatedProgress } from '@/components/ui/animated-progress';
+import { AnimatedNumber } from '@/components/ui/animated-number';
+import { AnimatedBar } from '@/components/ui/animated-bar';
 
 export function WeeklyProgress() {
   const { sessions } = useSessionStore();
@@ -72,37 +75,16 @@ export function WeeklyProgress() {
       <CardContent className="space-y-4">
         {/* Circular Progress */}
         <div className="flex items-center gap-4">
-          <div className="relative w-16 h-16">
-            <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
-              {/* Background circle */}
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                className="text-muted"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray={`${weeklyStats.progress} 100`}
-                className="text-primary"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-bold">
-                {Math.round(weeklyStats.progress)}%
-              </span>
-            </div>
-          </div>
+          <AnimatedProgress
+            value={weeklyStats.progress}
+            size={64}
+            strokeWidth={3}
+            duration={600}
+          >
+            <span className="text-xs font-bold">
+              <AnimatedNumber value={Math.round(weeklyStats.progress)} duration={600} />%
+            </span>
+          </AnimatedProgress>
           <div className="flex-1">
             <p className="text-lg font-semibold">
               {formatTime(weeklyStats.totalMinutes)}
@@ -125,11 +107,15 @@ export function WeeklyProgress() {
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-1">
                   <div
-                    className="w-full relative group"
+                    className="w-full relative group flex items-end"
                     style={{ height: '48px' }}
                   >
-                    <div
-                      className={`absolute bottom-0 w-full rounded-t transition-all ${
+                    <AnimatedBar
+                      height={day.isFuture ? 8 : day.minutes > 0 ? Math.max(height, 8) : 8}
+                      duration={400}
+                      delay={index * 50}
+                      minHeight={8}
+                      className={`rounded-t ${
                         day.isFuture
                           ? 'bg-muted/30'
                           : day.isToday
@@ -138,9 +124,6 @@ export function WeeklyProgress() {
                           ? 'bg-amber-200 dark:bg-amber-700'
                           : 'bg-muted'
                       }`}
-                      style={{
-                        height: day.isFuture ? '4px' : day.minutes > 0 ? `${Math.max(height, 8)}%` : '4px'
-                      }}
                     />
                     {/* Tooltip */}
                     {day.minutes > 0 && !day.isFuture && (

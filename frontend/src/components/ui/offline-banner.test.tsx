@@ -7,9 +7,11 @@ describe('OfflineBanner', () => {
 
   beforeEach(() => {
     originalNavigatorOnLine = navigator.onLine
+    vi.useFakeTimers()
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
     Object.defineProperty(navigator, 'onLine', {
       value: originalNavigatorOnLine,
@@ -98,6 +100,11 @@ describe('OfflineBanner', () => {
 
       act(() => {
         window.dispatchEvent(new Event('offline'))
+      })
+
+      // Advance past the enter animation to make aria-hidden false
+      act(() => {
+        vi.advanceTimersByTime(350)
       })
 
       expect(screen.getByRole('alert')).toBeInTheDocument()
