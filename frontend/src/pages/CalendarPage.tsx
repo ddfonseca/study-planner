@@ -27,7 +27,10 @@ import type { MobileTab } from '@/components/calendar';
 import { CycleSuggestionCard } from '@/components/study-cycle';
 import { formatDateKey } from '@/lib/utils/date';
 import { useIsSmallMobile } from '@/hooks/useMediaQuery';
+import { useSwipe } from '@/hooks/useSwipe';
 import type { DayData } from '@/types/session';
+
+const MOBILE_TABS: MobileTab[] = ['calendar', 'cycle', 'progress', 'timer'];
 
 export function CalendarPage() {
   const { isLoading: sessionsLoading } = useSessionStore();
@@ -62,6 +65,32 @@ export function CalendarPage() {
   const [mobileTab, setMobileTab] = useState<MobileTab>('calendar');
   const [timerActive, setTimerActive] = useState(false);
   const [isModalHighlighted, setIsModalHighlighted] = useState(false);
+
+  // Swipe handlers for tab navigation
+  const handleSwipeLeft = useCallback(() => {
+    setMobileTab((current) => {
+      const currentIndex = MOBILE_TABS.indexOf(current);
+      if (currentIndex < MOBILE_TABS.length - 1) {
+        return MOBILE_TABS[currentIndex + 1];
+      }
+      return current;
+    });
+  }, []);
+
+  const handleSwipeRight = useCallback(() => {
+    setMobileTab((current) => {
+      const currentIndex = MOBILE_TABS.indexOf(current);
+      if (currentIndex > 0) {
+        return MOBILE_TABS[currentIndex - 1];
+      }
+      return current;
+    });
+  }, []);
+
+  const swipeProps = useSwipe({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+  });
 
   // Fetch data on mount
   useEffect(() => {
@@ -271,8 +300,14 @@ export function CalendarPage() {
         </div>
 
         {isMobile ? (
-          /* Mobile: Tab-based content */
-          renderMobileContent()
+          /* Mobile: Tab-based content with swipe support */
+          <div
+            className="touch-action-pan-y"
+            onTouchStart={swipeProps.onTouchStart}
+            onTouchEnd={swipeProps.onTouchEnd}
+          >
+            {renderMobileContent()}
+          </div>
         ) : (
           /* Desktop: Full Calendar with Sidebar */
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
