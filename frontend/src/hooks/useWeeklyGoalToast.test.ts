@@ -8,12 +8,16 @@ const {
   mockTriggerPattern,
   mockCalculateWeekStart,
   mockGetWeekStatus,
+  mockHasAchievementBeenShown,
+  mockMarkAchievementShown,
 } = vi.hoisted(() => ({
   mockToast: vi.fn(),
   mockFireConfetti: vi.fn(),
   mockTriggerPattern: vi.fn(),
   mockCalculateWeekStart: vi.fn(() => '2024-01-15'),
   mockGetWeekStatus: vi.fn(),
+  mockHasAchievementBeenShown: vi.fn(() => false),
+  mockMarkAchievementShown: vi.fn(),
 }));
 
 // Mock dependencies
@@ -65,6 +69,14 @@ vi.mock('./useConfetti', () => ({
   }),
 }));
 
+vi.mock('@/store/achievementsStore', () => ({
+  useAchievementsStore: () => ({
+    hasAchievementBeenShown: mockHasAchievementBeenShown,
+    markAchievementShown: mockMarkAchievementShown,
+    _hasHydrated: true,
+  }),
+}));
+
 // Import after mocks are set up
 import { useWeeklyGoalToast } from './useWeeklyGoalToast';
 
@@ -73,7 +85,7 @@ describe('useWeeklyGoalToast', () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
 
-    // Default mock return value
+    // Default mock return values
     mockGetWeekStatus.mockReturnValue({
       goal: { targetHours: 10 },
       totalMinutes: 300,
@@ -82,6 +94,9 @@ describe('useWeeklyGoalToast', () => {
       progress: 50,
       isLoading: false,
     });
+
+    // Default: no achievement has been shown yet
+    mockHasAchievementBeenShown.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -232,6 +247,9 @@ describe('useWeeklyGoalToast', () => {
 
       expect(mockFireConfetti).toHaveBeenCalledTimes(1);
 
+      // Simulate persistence: achievement was marked as shown
+      mockHasAchievementBeenShown.mockReturnValue(true);
+
       // Go back to not achieved (maybe goal was updated)
       mockGetWeekStatus.mockReturnValue({
         goal: { targetHours: 15 },
@@ -260,7 +278,7 @@ describe('useWeeklyGoalToast', () => {
         rerender();
       });
 
-      // Should not fire again for same week
+      // Should not fire again for same week (persisted)
       expect(mockFireConfetti).toHaveBeenCalledTimes(1);
     });
   });
@@ -366,6 +384,74 @@ describe('useWeeklyGoalToast', () => {
           duration: 6000,
         })
       );
+    });
+  });
+
+  describe('persistence', () => {
+    it('marks achievement as shown when goal is achieved', () => {
+      // Start with not achieved
+      mockGetWeekStatus.mockReturnValue({
+        goal: { targetHours: 10 },
+        totalMinutes: 300,
+        totalHours: 5,
+        achieved: false,
+        progress: 50,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useWeeklyGoalToast());
+
+      // Transition to achieved
+      mockGetWeekStatus.mockReturnValue({
+        goal: { targetHours: 10 },
+        totalMinutes: 600,
+        totalHours: 10,
+        achieved: true,
+        progress: 100,
+        isLoading: false,
+      });
+
+      act(() => {
+        rerender();
+      });
+
+      // Should mark achievement as shown in the store
+      expect(mockMarkAchievementShown).toHaveBeenCalledWith('weekly_goal', '2024-01-15');
+    });
+
+    it('does not show toast if achievement was already shown (persisted)', () => {
+      // Achievement was already shown in a previous session
+      mockHasAchievementBeenShown.mockReturnValue(true);
+
+      // Start with not achieved
+      mockGetWeekStatus.mockReturnValue({
+        goal: { targetHours: 10 },
+        totalMinutes: 300,
+        totalHours: 5,
+        achieved: false,
+        progress: 50,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useWeeklyGoalToast());
+
+      // Transition to achieved
+      mockGetWeekStatus.mockReturnValue({
+        goal: { targetHours: 10 },
+        totalMinutes: 600,
+        totalHours: 10,
+        achieved: true,
+        progress: 100,
+        isLoading: false,
+      });
+
+      act(() => {
+        rerender();
+      });
+
+      // Should not show toast or confetti since achievement was already shown
+      expect(mockToast).not.toHaveBeenCalled();
+      expect(mockFireConfetti).not.toHaveBeenCalled();
     });
   });
 });

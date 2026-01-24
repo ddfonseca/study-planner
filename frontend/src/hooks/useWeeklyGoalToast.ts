@@ -8,6 +8,7 @@ import { useWeeklyGoals } from '@/hooks/useWeeklyGoals';
 import { useSessionStore } from '@/store/sessionStore';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useConfetti } from '@/hooks/useConfetti';
+import { useAchievementsStore } from '@/store/achievementsStore';
 import type { ConfettiProps } from '@/components/ui/confetti';
 
 interface UseWeeklyGoalToastOptions {
@@ -48,10 +49,11 @@ export function useWeeklyGoalToast(
     particleCount: 200,
   });
 
+  // Use persistent achievements store to prevent showing achievements on page refresh
+  const { hasAchievementBeenShown, markAchievementShown, _hasHydrated } = useAchievementsStore();
+
   // Track previous achievement state to detect transitions
   const previousAchievedRef = useRef<boolean | null>(null);
-  // Track if we've shown toast for this week to prevent duplicates
-  const shownForWeekRef = useRef<string | null>(null);
 
   // Get current week status
   const today = new Date();
@@ -76,31 +78,25 @@ export function useWeeklyGoalToast(
 
   // Effect to detect goal achievement transition
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !_hasHydrated) return;
 
     const { achieved } = weekStatus;
+
+    // Check if this achievement has already been shown (persisted)
+    const alreadyShownPersisted = hasAchievementBeenShown('weekly_goal', currentWeekStart);
 
     // Check if this is a transition from not-achieved to achieved
     const wasNotAchieved = previousAchievedRef.current === false;
     const isNowAchieved = achieved;
-    const notShownForThisWeek = shownForWeekRef.current !== currentWeekStart;
 
-    if (wasNotAchieved && isNowAchieved && notShownForThisWeek) {
+    if (wasNotAchieved && isNowAchieved && !alreadyShownPersisted) {
       showWeeklyGoalToast();
-      shownForWeekRef.current = currentWeekStart;
+      markAchievementShown('weekly_goal', currentWeekStart);
     }
 
     // Update previous state
     previousAchievedRef.current = achieved;
-  }, [enabled, weekStatus, currentWeekStart, showWeeklyGoalToast]);
-
-  // Reset shown flag when week changes
-  useEffect(() => {
-    if (shownForWeekRef.current && shownForWeekRef.current !== currentWeekStart) {
-      shownForWeekRef.current = null;
-      previousAchievedRef.current = null;
-    }
-  }, [currentWeekStart]);
+  }, [enabled, weekStatus, currentWeekStart, showWeeklyGoalToast, _hasHydrated, hasAchievementBeenShown, markAchievementShown]);
 
   return {
     isGoalAchieved: weekStatus.achieved,

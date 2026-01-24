@@ -11,3 +11,4 @@ export {
   calculateProgress,
 } from './weeklyGoalStore';
 export { useFeatureBadgesStore, type FeatureKey } from './featureBadgesStore';
+export { useAchievementsStore, type AchievementType } from './achievementsStore';

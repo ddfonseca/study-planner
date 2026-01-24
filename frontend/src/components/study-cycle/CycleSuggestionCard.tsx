@@ -27,6 +27,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Confetti } from '@/components/ui/confetti';
 import { useConfetti } from '@/hooks/useConfetti';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useAchievementsStore } from '@/store/achievementsStore';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -49,6 +50,9 @@ export function CycleSuggestionCard() {
   const { triggerPattern } = useHaptic();
   const previousCycleCompleteRef = useRef<boolean | null>(null);
 
+  // Use persistent achievements store to prevent showing achievements on page refresh
+  const { hasAchievementBeenShown, markAchievementShown, _hasHydrated } = useAchievementsStore();
+
   // Check cycle limit
   const cycleLimit = useCanUseFeature(FEATURES.MAX_CYCLES, cycles.length);
   const canCreateCycle = cycleLimit.canUse;
@@ -62,16 +66,29 @@ export function CycleSuggestionCard() {
 
   // Trigger confetti when cycle becomes complete
   useEffect(() => {
+    if (!_hasHydrated) return;
+
     const isCycleComplete = suggestion?.suggestion?.isCycleComplete ?? false;
 
+    // Create unique identifier using cycle id and updatedAt timestamp
+    // This ensures a new celebration triggers after the cycle is reset
+    const cycleIdentifier = cycle ? `${cycle.id}:${cycle.updatedAt}` : null;
+
+    // Check if this achievement has already been shown (persisted)
+    const alreadyShownPersisted = cycleIdentifier
+      ? hasAchievementBeenShown('cycle_complete', cycleIdentifier)
+      : false;
+
     // Only fire confetti when transitioning from incomplete to complete
-    if (isCycleComplete && previousCycleCompleteRef.current === false) {
+    // and achievement hasn't been shown yet
+    if (isCycleComplete && previousCycleCompleteRef.current === false && !alreadyShownPersisted && cycleIdentifier) {
       fireConfetti();
       triggerPattern('success');
+      markAchievementShown('cycle_complete', cycleIdentifier);
     }
 
     previousCycleCompleteRef.current = isCycleComplete;
-  }, [suggestion?.suggestion?.isCycleComplete, fireConfetti, triggerPattern]);
+  }, [suggestion?.suggestion?.isCycleComplete, cycle, fireConfetti, triggerPattern, _hasHydrated, hasAchievementBeenShown, markAchievementShown]);
 
   // No cycle configured
   if (!suggestion?.hasCycle) {
