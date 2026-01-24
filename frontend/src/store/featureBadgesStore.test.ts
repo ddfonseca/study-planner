@@ -4,12 +4,14 @@ import { useFeatureBadgesStore } from './featureBadgesStore';
 describe('featureBadgesStore', () => {
   beforeEach(() => {
     // Reset store to initial state before each test
+    // Set _hasHydrated to true to simulate completed hydration
     useFeatureBadgesStore.setState({
       seenFeatures: {
         timer: false,
         cycles: false,
         dashboard: false,
       },
+      _hasHydrated: true,
     });
   });
 
@@ -149,6 +151,101 @@ describe('featureBadgesStore', () => {
       expect(useFeatureBadgesStore).toBeDefined();
       expect(typeof useFeatureBadgesStore.getState).toBe('function');
       expect(typeof useFeatureBadgesStore.setState).toBe('function');
+    });
+  });
+
+  describe('hydration', () => {
+    beforeEach(() => {
+      // Reset to non-hydrated state for hydration tests
+      useFeatureBadgesStore.setState({
+        seenFeatures: {
+          timer: false,
+          cycles: false,
+          dashboard: false,
+        },
+        _hasHydrated: false,
+      });
+    });
+
+    it('isFeatureNew returns false before hydration', () => {
+      const { isFeatureNew } = useFeatureBadgesStore.getState();
+
+      expect(isFeatureNew('timer')).toBe(false);
+      expect(isFeatureNew('cycles')).toBe(false);
+      expect(isFeatureNew('dashboard')).toBe(false);
+    });
+
+    it('markFeatureSeen does nothing before hydration', () => {
+      const { markFeatureSeen } = useFeatureBadgesStore.getState();
+
+      markFeatureSeen('timer');
+      markFeatureSeen('cycles');
+      markFeatureSeen('dashboard');
+
+      const state = useFeatureBadgesStore.getState();
+      // Features should still be false (not marked as seen)
+      expect(state.seenFeatures.timer).toBe(false);
+      expect(state.seenFeatures.cycles).toBe(false);
+      expect(state.seenFeatures.dashboard).toBe(false);
+    });
+
+    it('isFeatureNew returns true after hydration for unseen features', () => {
+      // Simulate hydration completing
+      useFeatureBadgesStore.getState().setHasHydrated(true);
+
+      const { isFeatureNew } = useFeatureBadgesStore.getState();
+
+      expect(isFeatureNew('timer')).toBe(true);
+      expect(isFeatureNew('cycles')).toBe(true);
+      expect(isFeatureNew('dashboard')).toBe(true);
+    });
+
+    it('markFeatureSeen works after hydration', () => {
+      // Simulate hydration completing
+      useFeatureBadgesStore.getState().setHasHydrated(true);
+
+      const { markFeatureSeen } = useFeatureBadgesStore.getState();
+      markFeatureSeen('timer');
+
+      const state = useFeatureBadgesStore.getState();
+      expect(state.seenFeatures.timer).toBe(true);
+      expect(state.seenFeatures.cycles).toBe(false);
+    });
+
+    it('setHasHydrated updates hydration state', () => {
+      expect(useFeatureBadgesStore.getState()._hasHydrated).toBe(false);
+
+      useFeatureBadgesStore.getState().setHasHydrated(true);
+
+      expect(useFeatureBadgesStore.getState()._hasHydrated).toBe(true);
+    });
+
+    it('prevents race condition where feature is marked seen before hydration', () => {
+      // This test simulates the bug scenario:
+      // 1. Store starts with _hasHydrated = false
+      // 2. Component tries to mark feature as seen (should be ignored)
+      // 3. Hydration completes with different state
+      // 4. Feature should reflect hydrated state, not be marked as seen
+
+      const { markFeatureSeen } = useFeatureBadgesStore.getState();
+
+      // Attempt to mark feature before hydration (should be ignored)
+      markFeatureSeen('dashboard');
+      expect(useFeatureBadgesStore.getState().seenFeatures.dashboard).toBe(false);
+
+      // Simulate hydration completing with dashboard still unseen
+      useFeatureBadgesStore.setState({
+        seenFeatures: {
+          timer: false,
+          cycles: false,
+          dashboard: false,
+        },
+        _hasHydrated: true,
+      });
+
+      // Dashboard should still be new (not seen)
+      const { isFeatureNew } = useFeatureBadgesStore.getState();
+      expect(isFeatureNew('dashboard')).toBe(true);
     });
   });
 });

@@ -9,12 +9,14 @@ export type FeatureKey = 'timer' | 'cycles' | 'dashboard';
 
 interface FeatureBadgesState {
   seenFeatures: Record<FeatureKey, boolean>;
+  _hasHydrated: boolean;
 }
 
 interface FeatureBadgesActions {
   markFeatureSeen: (feature: FeatureKey) => void;
   isFeatureNew: (feature: FeatureKey) => boolean;
   resetBadges: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 type FeatureBadgesStore = FeatureBadgesState & FeatureBadgesActions;
@@ -29,22 +31,42 @@ export const useFeatureBadgesStore = create<FeatureBadgesStore>()(
   persist(
     (set, get) => ({
       seenFeatures: { ...initialSeenFeatures },
+      _hasHydrated: false,
 
-      markFeatureSeen: (feature: FeatureKey) =>
+      markFeatureSeen: (feature: FeatureKey) => {
+        // Only allow marking features as seen after hydration is complete
+        // This prevents race conditions where features get marked before
+        // the persisted state is loaded from localStorage
+        if (!get()._hasHydrated) {
+          return;
+        }
         set((state) => ({
           seenFeatures: {
             ...state.seenFeatures,
             [feature]: true,
           },
-        })),
+        }));
+      },
 
-      isFeatureNew: (feature: FeatureKey) => !get().seenFeatures[feature],
+      isFeatureNew: (feature: FeatureKey) => {
+        // Before hydration, return false to hide badges and prevent
+        // accidental marking of features as seen
+        if (!get()._hasHydrated) {
+          return false;
+        }
+        return !get().seenFeatures[feature];
+      },
 
       resetBadges: () => set({ seenFeatures: { ...initialSeenFeatures } }),
+
+      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
     }),
     {
       name: 'feature-badges-storage',
       partialize: (state) => ({ seenFeatures: state.seenFeatures }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
