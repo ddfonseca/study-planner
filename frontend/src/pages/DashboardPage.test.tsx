@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { DashboardPage } from './DashboardPage'
+
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
 
 // Mock the hooks
 vi.mock('@/store/sessionStore', () => ({
@@ -130,6 +140,48 @@ describe('DashboardPage', () => {
       renderWithRouter(<DashboardPage />)
 
       expect(screen.getByTestId('annual-heatmap')).toBeInTheDocument()
+    })
+
+    it('shows CTA button to navigate to calendar in empty state', () => {
+      mockUseSessionStore.mockReturnValue({
+        sessions: {},
+        isLoading: false,
+      } as ReturnType<typeof useSessionStore>)
+
+      mockUseDashboard.mockReturnValue({
+        daysBack: 30,
+        stats: { totalMinutes: 0, totalDays: 0, averageMinutesPerDay: 0, mostStudiedSubject: null, subjectBreakdown: {} },
+        subjectChartData: { labels: [], datasets: [] },
+        dailyChartData: { labels: [], datasets: [] },
+        setDateRangePreset: vi.fn(),
+      } as unknown as ReturnType<typeof useDashboard>)
+
+      renderWithRouter(<DashboardPage />)
+
+      expect(screen.getByRole('button', { name: /ir para calendário/i })).toBeInTheDocument()
+    })
+
+    it('navigates to calendar when CTA button is clicked', async () => {
+      const user = userEvent.setup()
+
+      mockUseSessionStore.mockReturnValue({
+        sessions: {},
+        isLoading: false,
+      } as ReturnType<typeof useSessionStore>)
+
+      mockUseDashboard.mockReturnValue({
+        daysBack: 30,
+        stats: { totalMinutes: 0, totalDays: 0, averageMinutesPerDay: 0, mostStudiedSubject: null, subjectBreakdown: {} },
+        subjectChartData: { labels: [], datasets: [] },
+        dailyChartData: { labels: [], datasets: [] },
+        setDateRangePreset: vi.fn(),
+      } as unknown as ReturnType<typeof useDashboard>)
+
+      renderWithRouter(<DashboardPage />)
+
+      await user.click(screen.getByRole('button', { name: /ir para calendário/i }))
+
+      expect(mockNavigate).toHaveBeenCalledWith('/app/calendar')
     })
   })
 

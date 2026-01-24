@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { CalendarGrid } from './CalendarGrid'
 
 // Mock the hooks
@@ -121,6 +122,77 @@ describe('CalendarGrid', () => {
       )
 
       expect(screen.queryByText('Nenhuma sessão neste mês')).not.toBeInTheDocument()
+    })
+
+    it('shows CTA button to add session in empty state', () => {
+      mockUseSessions.mockReturnValue({
+        sessions: {},
+        selectedDate: null,
+        isLoading: false,
+        error: null,
+        currentWorkspaceId: 'workspace-1',
+        canModify: true,
+        fetchSessions: vi.fn(),
+        selectDate: vi.fn(),
+        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getCellIntensity: vi.fn(() => 0),
+        handleAddSession: vi.fn(),
+        handleUpdateSession: vi.fn(),
+        handleDeleteSession: vi.fn(),
+        getWeekTotals: vi.fn(() => 0),
+        getUniqueSubjects: vi.fn(() => []),
+        hasSessionsInMonth: vi.fn(() => false),
+      })
+
+      render(
+        <CalendarGrid
+          weeks={createWeeks()}
+          currentMonth={0}
+          dayNames={defaultDayNames}
+          onCellClick={mockOnCellClick}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /adicionar sessão/i })).toBeInTheDocument()
+    })
+
+    it('calls onCellClick with today date when CTA button is clicked', async () => {
+      const user = userEvent.setup()
+
+      mockUseSessions.mockReturnValue({
+        sessions: {},
+        selectedDate: null,
+        isLoading: false,
+        error: null,
+        currentWorkspaceId: 'workspace-1',
+        canModify: true,
+        fetchSessions: vi.fn(),
+        selectDate: vi.fn(),
+        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getCellIntensity: vi.fn(() => 0),
+        handleAddSession: vi.fn(),
+        handleUpdateSession: vi.fn(),
+        handleDeleteSession: vi.fn(),
+        getWeekTotals: vi.fn(() => 0),
+        getUniqueSubjects: vi.fn(() => []),
+        hasSessionsInMonth: vi.fn(() => false),
+      })
+
+      render(
+        <CalendarGrid
+          weeks={createWeeks()}
+          currentMonth={0}
+          dayNames={defaultDayNames}
+          onCellClick={mockOnCellClick}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /adicionar sessão/i }))
+
+      expect(mockOnCellClick).toHaveBeenCalledTimes(1)
+      // Verify it was called with a Date object (today's date)
+      const callArg = mockOnCellClick.mock.calls[0][0]
+      expect(callArg).toBeInstanceOf(Date)
     })
   })
 

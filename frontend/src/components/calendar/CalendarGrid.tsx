@@ -2,10 +2,11 @@
  * Calendar Grid - Main calendar view with cells (heatmap style)
  */
 import { useState, useEffect } from 'react';
-import { CalendarOff } from 'lucide-react';
+import { CalendarOff, Plus } from 'lucide-react';
 import { CalendarCell } from './CalendarCell';
 import { WeeklyGoalEditor } from './WeeklyGoalEditor';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Button } from '@/components/ui/button';
 import { formatDateKey } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { useSessions } from '@/hooks/useSessions';
@@ -156,6 +157,16 @@ export function CalendarGrid({
             description="Clique em um dia para adicionar sua primeira sessão de estudo"
             variant="subtle"
             size="sm"
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onCellClick(new Date())}
+              >
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Adicionar sessão
+              </Button>
+            }
           />
         )}
       </div>

@@ -2,7 +2,7 @@
  * Dashboard Page - Analytics and statistics
  */
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSessionStore } from '@/store/sessionStore';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useSessions } from '@/hooks/useSessions';
@@ -10,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { BarChart3, PieChart, CalendarOff } from 'lucide-react';
-
 import {
   DateRangeFilter,
   StatsCards,
@@ -20,6 +19,7 @@ import {
 } from '@/components/dashboard';
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const { sessions, isLoading } = useSessionStore();
   const { fetchSessions } = useSessions();
   const {
@@ -79,6 +79,15 @@ export function DashboardPage() {
           title="Nenhuma sessão neste período"
           description="Selecione outro período ou adicione sessões de estudo para visualizar estatísticas"
           variant="card"
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/app/calendar')}
+            >
+              Ir para calendário
+            </Button>
+          }
         />
       ) : (
         <>
