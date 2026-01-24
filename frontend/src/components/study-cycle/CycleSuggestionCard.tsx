@@ -1,7 +1,7 @@
 /**
  * Cycle Suggestion Card - Shows current study suggestion from the cycle
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -24,6 +24,9 @@ import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
 import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
 import { PricingModal } from '@/components/subscription';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Confetti } from '@/components/ui/confetti';
+import { useConfetti } from '@/hooks/useConfetti';
+import { useHaptic } from '@/hooks/useHaptic';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -42,6 +45,9 @@ export function CycleSuggestionCard() {
   const [showAllItems, setShowAllItems] = useState(false);
   const [cycleSelectorOpen, setCycleSelectorOpen] = useState(false);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const { fire: fireConfetti, confettiProps } = useConfetti({ duration: 3000, particleCount: 150 });
+  const { triggerPattern } = useHaptic();
+  const previousCycleCompleteRef = useRef<boolean | null>(null);
 
   // Check cycle limit
   const cycleLimit = useCanUseFeature(FEATURES.MAX_CYCLES, cycles.length);
@@ -53,6 +59,19 @@ export function CycleSuggestionCard() {
       refresh(currentWorkspaceId);
     }
   }, [currentWorkspaceId, refresh]);
+
+  // Trigger confetti when cycle becomes complete
+  useEffect(() => {
+    const isCycleComplete = suggestion?.suggestion?.isCycleComplete ?? false;
+
+    // Only fire confetti when transitioning from incomplete to complete
+    if (isCycleComplete && previousCycleCompleteRef.current === false) {
+      fireConfetti();
+      triggerPattern('success');
+    }
+
+    previousCycleCompleteRef.current = isCycleComplete;
+  }, [suggestion?.suggestion?.isCycleComplete, fireConfetti, triggerPattern]);
 
   // No cycle configured
   if (!suggestion?.hasCycle) {
@@ -348,6 +367,7 @@ export function CycleSuggestionCard() {
       </Card>
       <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode={editorMode} />
       <PricingModal open={pricingModalOpen} onOpenChange={setPricingModalOpen} />
+      <Confetti {...confettiProps} />
     </>
   );
 }
