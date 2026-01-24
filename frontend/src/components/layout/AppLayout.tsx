@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay } from '@/components/onboarding';
+import { OfflineBanner } from '@/components/ui/offline-banner';
 
 export function AppLayout() {
   const { user, logout, isLoading } = useAuthStore();
@@ -69,6 +70,9 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Offline Banner */}
+      <OfflineBanner />
+
       {/* Header */}
       <header className="bg-container border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
