@@ -277,6 +277,82 @@ describe('usePullToRefresh', () => {
 
       expect(result.current.pullDistance).toBeLessThanOrEqual(50);
     });
+
+    it('respects custom thresholds object', async () => {
+      const onRefresh = vi.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() =>
+        usePullToRefresh({
+          onRefresh,
+          thresholds: {
+            threshold: 20,
+            maxPull: 40,
+            resistance: 0.8,
+          },
+        })
+      );
+
+      act(() => {
+        result.current.containerProps.onTouchStart(createTouchEvent(0));
+      });
+
+      // With resistance 0.8, pulling 30px should give 24px (> 20 threshold)
+      act(() => {
+        result.current.containerProps.onTouchMove(createTouchEvent(30));
+      });
+
+      await act(async () => {
+        result.current.containerProps.onTouchEnd(createTouchEvent(30));
+      });
+
+      await waitFor(() => {
+        expect(onRefresh).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('thresholds object overrides individual threshold/maxPull params', async () => {
+      const onRefresh = vi.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() =>
+        usePullToRefresh({
+          onRefresh,
+          threshold: 100, // Should be overridden
+          maxPull: 200, // Should be overridden
+          thresholds: {
+            threshold: 20,
+            maxPull: 30,
+          },
+        })
+      );
+
+      act(() => {
+        result.current.containerProps.onTouchStart(createTouchEvent(0));
+      });
+
+      // Pull far - maxPull should cap at 30, not 200
+      act(() => {
+        result.current.containerProps.onTouchMove(createTouchEvent(200));
+      });
+
+      expect(result.current.pullDistance).toBeLessThanOrEqual(30);
+    });
+
+    it('uses default scrollTopThreshold from config', () => {
+      const onRefresh = vi.fn().mockResolvedValue(undefined);
+      // Set scrollY to 4 (below default threshold of 5)
+      Object.defineProperty(window, 'scrollY', { value: 4, writable: true });
+
+      const { result } = renderHook(() => usePullToRefresh({ onRefresh }));
+
+      act(() => {
+        result.current.containerProps.onTouchStart(createTouchEvent(0));
+      });
+
+      act(() => {
+        result.current.containerProps.onTouchMove(createTouchEvent(100));
+      });
+
+      // Should allow pull since scrollY (4) <= scrollTopThreshold (5)
+      expect(result.current.pullDistance).toBeGreaterThan(0);
+    });
   });
 
   describe('edge cases', () => {

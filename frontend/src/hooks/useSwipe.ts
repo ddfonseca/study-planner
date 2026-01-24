@@ -1,4 +1,5 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
+import { SWIPE_THRESHOLDS, type SwipeThresholds } from '@/config/thresholds';
 
 interface SwipeHandlers {
   onSwipeLeft?: () => void;
@@ -8,6 +9,8 @@ interface SwipeHandlers {
 interface SwipeConfig {
   minSwipeDistance?: number;
   maxSwipeTime?: number;
+  /** Custom thresholds for swipe behavior */
+  thresholds?: Partial<SwipeThresholds>;
 }
 
 interface TouchState {
@@ -29,7 +32,23 @@ export function useSwipe(
   handlers: SwipeHandlers,
   config: SwipeConfig = {}
 ): SwipeProps {
-  const { minSwipeDistance = 50, maxSwipeTime = 300 } = config;
+  const {
+    minSwipeDistance = SWIPE_THRESHOLDS.minSwipeDistance,
+    maxSwipeTime = SWIPE_THRESHOLDS.maxSwipeTime,
+    thresholds,
+  } = config;
+
+  // Merge custom thresholds with defaults
+  const effectiveThresholds = useMemo(
+    () => ({
+      ...SWIPE_THRESHOLDS,
+      ...thresholds,
+      minSwipeDistance: thresholds?.minSwipeDistance ?? minSwipeDistance,
+      maxSwipeTime: thresholds?.maxSwipeTime ?? maxSwipeTime,
+    }),
+    [minSwipeDistance, maxSwipeTime, thresholds]
+  );
+
   const touchState = useRef<TouchState | null>(null);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
@@ -54,13 +73,13 @@ export function useSwipe(
       touchState.current = null;
 
       // Ignore if swipe took too long
-      if (deltaTime > maxSwipeTime) return;
+      if (deltaTime > effectiveThresholds.maxSwipeTime) return;
 
       // Ignore if vertical movement is greater than horizontal (scrolling)
       if (Math.abs(deltaY) > Math.abs(deltaX)) return;
 
       // Check for minimum swipe distance
-      if (Math.abs(deltaX) < minSwipeDistance) return;
+      if (Math.abs(deltaX) < effectiveThresholds.minSwipeDistance) return;
 
       if (deltaX > 0) {
         handlers.onSwipeRight?.();
@@ -68,7 +87,7 @@ export function useSwipe(
         handlers.onSwipeLeft?.();
       }
     },
-    [handlers, minSwipeDistance, maxSwipeTime]
+    [handlers, effectiveThresholds]
   );
 
   return { onTouchStart, onTouchEnd };

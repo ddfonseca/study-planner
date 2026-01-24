@@ -207,4 +207,102 @@ describe('useHaptic', () => {
       expect(result.current.triggerPattern).toBe(firstTriggerPattern);
     });
   });
+
+  describe('custom configuration', () => {
+    it('uses custom durations when provided', () => {
+      const { result } = renderHook(() =>
+        useHaptic({
+          durations: {
+            light: 5,
+            medium: 15,
+            heavy: 25,
+          },
+        })
+      );
+
+      act(() => {
+        result.current.trigger('light');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith(5);
+
+      act(() => {
+        result.current.trigger('medium');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith(15);
+
+      act(() => {
+        result.current.trigger('heavy');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith(25);
+    });
+
+    it('uses custom patterns when provided', () => {
+      const customPatterns = {
+        success: [5, 10, 5],
+        error: [100, 50, 100],
+        warning: [20, 20],
+      };
+
+      const { result } = renderHook(() =>
+        useHaptic({ patterns: customPatterns })
+      );
+
+      act(() => {
+        result.current.triggerPattern('success');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith([5, 10, 5]);
+
+      act(() => {
+        result.current.triggerPattern('error');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith([100, 50, 100]);
+
+      act(() => {
+        result.current.triggerPattern('warning');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith([20, 20]);
+    });
+
+    it('merges partial custom durations with defaults', () => {
+      const { result } = renderHook(() =>
+        useHaptic({
+          durations: {
+            light: 5, // Only override light
+          },
+        })
+      );
+
+      act(() => {
+        result.current.trigger('light');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith(5);
+
+      act(() => {
+        result.current.trigger('medium');
+      });
+      // Should use default value (30)
+      expect(mockVibrate).toHaveBeenCalledWith(30);
+    });
+
+    it('merges partial custom patterns with defaults', () => {
+      const { result } = renderHook(() =>
+        useHaptic({
+          patterns: {
+            success: [1, 2, 3], // Only override success
+          },
+        })
+      );
+
+      act(() => {
+        result.current.triggerPattern('success');
+      });
+      expect(mockVibrate).toHaveBeenCalledWith([1, 2, 3]);
+
+      act(() => {
+        result.current.triggerPattern('error');
+      });
+      // Should use default pattern
+      expect(mockVibrate).toHaveBeenCalledWith([50, 30, 50, 30, 50]);
+    });
+  });
 });

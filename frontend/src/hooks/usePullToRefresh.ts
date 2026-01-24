@@ -1,5 +1,10 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useIsTouchDevice } from './useMediaQuery';
+import {
+  PULL_TO_REFRESH_THRESHOLDS,
+  HAPTIC_DURATIONS,
+  type PullToRefreshThresholds,
+} from '@/config/thresholds';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>;
@@ -9,6 +14,8 @@ interface UsePullToRefreshOptions {
   maxPull?: number;
   /** Whether pull-to-refresh is enabled (default: true) */
   enabled?: boolean;
+  /** Custom thresholds for pull-to-refresh behavior */
+  thresholds?: Partial<PullToRefreshThresholds>;
 }
 
 interface UsePullToRefreshReturn {
@@ -49,10 +56,21 @@ function triggerHaptic(duration: number): void {
  */
 export function usePullToRefresh({
   onRefresh,
-  threshold = 80,
-  maxPull = 120,
+  threshold = PULL_TO_REFRESH_THRESHOLDS.threshold,
+  maxPull = PULL_TO_REFRESH_THRESHOLDS.maxPull,
   enabled = true,
+  thresholds,
 }: UsePullToRefreshOptions): UsePullToRefreshReturn {
+  // Merge custom thresholds with defaults
+  const effectiveThresholds = useMemo(
+    () => ({
+      ...PULL_TO_REFRESH_THRESHOLDS,
+      ...thresholds,
+      threshold: thresholds?.threshold ?? threshold,
+      maxPull: thresholds?.maxPull ?? maxPull,
+    }),
+    [threshold, maxPull, thresholds]
+  );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const touchState = useRef<TouchState | null>(null);
@@ -68,7 +86,7 @@ export function usePullToRefresh({
 
       // Only start if at the top of the page
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      if (scrollTop > 5) return;
+      if (scrollTop > effectiveThresholds.scrollTopThreshold) return;
 
       const touch = e.touches[0];
       touchState.current = {
@@ -78,7 +96,7 @@ export function usePullToRefresh({
         hasTriggeredThresholdHaptic: false,
       };
     },
-    [enabled, isRefreshing]
+    [enabled, isRefreshing, effectiveThresholds.scrollTopThreshold]
   );
 
   const onTouchMove = useCallback(
@@ -97,7 +115,7 @@ export function usePullToRefresh({
 
       // Check if we're at the top of the page
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      if (scrollTop > 5) {
+      if (scrollTop > effectiveThresholds.scrollTopThreshold) {
         touchState.current.isPulling = false;
         setPullDistance(0);
         return;
@@ -107,22 +125,24 @@ export function usePullToRefresh({
       touchState.current.currentY = touch.clientY;
 
       // Apply resistance to the pull (diminishing returns)
-      const resistance = 0.5;
-      const resistedPull = Math.min(deltaY * resistance, maxPull);
+      const resistedPull = Math.min(
+        deltaY * effectiveThresholds.resistance,
+        effectiveThresholds.maxPull
+      );
 
       // Haptic feedback when crossing threshold (only once per pull)
       if (
         hapticEnabled &&
         !touchState.current.hasTriggeredThresholdHaptic &&
-        resistedPull >= threshold
+        resistedPull >= effectiveThresholds.threshold
       ) {
         touchState.current.hasTriggeredThresholdHaptic = true;
-        triggerHaptic(10); // Light haptic
+        triggerHaptic(HAPTIC_DURATIONS.light);
       }
 
       setPullDistance(resistedPull);
     },
-    [enabled, isRefreshing, maxPull, threshold, hapticEnabled]
+    [enabled, isRefreshing, effectiveThresholds, hapticEnabled]
   );
 
   const onTouchEnd = useCallback(async () => {
@@ -131,14 +151,14 @@ export function usePullToRefresh({
       return;
     }
 
-    const shouldRefresh = pullDistance >= threshold;
+    const shouldRefresh = pullDistance >= effectiveThresholds.threshold;
     touchState.current = null;
 
     if (shouldRefresh && !isRefreshing) {
       setIsRefreshing(true);
       // Medium haptic when refresh starts
       if (hapticEnabled) {
-        triggerHaptic(30);
+        triggerHaptic(HAPTIC_DURATIONS.medium);
       }
       try {
         await onRefresh();
@@ -149,7 +169,7 @@ export function usePullToRefresh({
     } else {
       setPullDistance(0);
     }
-  }, [enabled, pullDistance, threshold, isRefreshing, onRefresh, hapticEnabled]);
+  }, [enabled, pullDistance, effectiveThresholds, isRefreshing, onRefresh, hapticEnabled]);
 
   return {
     isRefreshing,

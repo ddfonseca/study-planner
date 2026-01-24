@@ -1,12 +1,16 @@
 /**
  * Swipeable Session Item - Session item with swipe-to-reveal delete action
  */
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { formatTime } from '@/lib/utils/time';
 import { cn } from '@/lib/utils';
 import { useHaptic } from '@/hooks/useHaptic';
+import {
+  SWIPEABLE_ITEM_THRESHOLDS,
+  type SwipeableItemThresholds,
+} from '@/config/thresholds';
 import type { StudySession } from '@/types/session';
 
 interface SwipeableSessionItemProps {
@@ -14,6 +18,8 @@ interface SwipeableSessionItemProps {
   onEdit: () => void;
   onDelete: (id: string) => void;
   canModify?: boolean;
+  /** Custom thresholds for swipe behavior */
+  thresholds?: Partial<SwipeableItemThresholds>;
 }
 
 interface TouchState {
@@ -23,15 +29,21 @@ interface TouchState {
   isDragging: boolean;
 }
 
-const DELETE_BUTTON_WIDTH = 72; // Width of the delete action area
-const SWIPE_THRESHOLD = 40; // Minimum swipe distance to reveal delete
-
 export function SwipeableSessionItem({
   session,
   onEdit,
   onDelete,
   canModify = true,
+  thresholds,
 }: SwipeableSessionItemProps) {
+  // Merge custom thresholds with defaults
+  const effectiveThresholds = useMemo(
+    () => ({
+      ...SWIPEABLE_ITEM_THRESHOLDS,
+      ...thresholds,
+    }),
+    [thresholds]
+  );
   const [translateX, setTranslateX] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -63,12 +75,12 @@ export function SwipeableSessionItem({
     // If not yet dragging, check if this is a horizontal swipe
     if (!touchState.current.isDragging) {
       // Ignore if vertical movement is greater (user is scrolling)
-      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > effectiveThresholds.verticalScrollThreshold) {
         touchState.current = null;
         return;
       }
       // Start dragging if horizontal movement exceeds threshold
-      if (Math.abs(deltaX) > 10) {
+      if (Math.abs(deltaX) > effectiveThresholds.horizontalDragThreshold) {
         touchState.current.isDragging = true;
         setIsDragging(true);
       }
@@ -81,21 +93,21 @@ export function SwipeableSessionItem({
       touchState.current.currentX = touch.clientX;
 
       // Calculate new position based on whether already revealed
-      const basePosition = isRevealed ? -DELETE_BUTTON_WIDTH : 0;
+      const basePosition = isRevealed ? -effectiveThresholds.deleteButtonWidth : 0;
       let newTranslateX = basePosition + deltaX;
 
       // Limit the swipe range
-      newTranslateX = Math.max(-DELETE_BUTTON_WIDTH, Math.min(0, newTranslateX));
+      newTranslateX = Math.max(-effectiveThresholds.deleteButtonWidth, Math.min(0, newTranslateX));
 
       // Trigger haptic when crossing reveal threshold (only once per swipe)
-      if (!isRevealed && !hasTriggeredRevealHaptic.current && deltaX < -SWIPE_THRESHOLD) {
+      if (!isRevealed && !hasTriggeredRevealHaptic.current && deltaX < -effectiveThresholds.revealThreshold) {
         hasTriggeredRevealHaptic.current = true;
         triggerHaptic('light');
       }
 
       setTranslateX(newTranslateX);
     }
-  }, [canModify, isRevealed, triggerHaptic]);
+  }, [canModify, isRevealed, triggerHaptic, effectiveThresholds]);
 
   const handleTouchEnd = useCallback(() => {
     if (!touchState.current || !canModify) return;
@@ -106,16 +118,16 @@ export function SwipeableSessionItem({
       // Determine final state based on swipe direction and threshold
       if (isRevealed) {
         // If already revealed, swipe right to close
-        if (deltaX > SWIPE_THRESHOLD) {
+        if (deltaX > effectiveThresholds.revealThreshold) {
           setTranslateX(0);
           setIsRevealed(false);
         } else {
-          setTranslateX(-DELETE_BUTTON_WIDTH);
+          setTranslateX(-effectiveThresholds.deleteButtonWidth);
         }
       } else {
         // If not revealed, swipe left to reveal
-        if (deltaX < -SWIPE_THRESHOLD) {
-          setTranslateX(-DELETE_BUTTON_WIDTH);
+        if (deltaX < -effectiveThresholds.revealThreshold) {
+          setTranslateX(-effectiveThresholds.deleteButtonWidth);
           setIsRevealed(true);
         } else {
           setTranslateX(0);
@@ -125,7 +137,7 @@ export function SwipeableSessionItem({
 
     touchState.current = null;
     setIsDragging(false);
-  }, [canModify, isRevealed]);
+  }, [canModify, isRevealed, effectiveThresholds]);
 
   const handleDelete = useCallback(() => {
     // Haptic feedback for destructive action
@@ -167,7 +179,7 @@ export function SwipeableSessionItem({
       {canModify && (
         <div
           className="absolute inset-y-0 right-0 flex items-center justify-center bg-destructive"
-          style={{ width: DELETE_BUTTON_WIDTH }}
+          style={{ width: effectiveThresholds.deleteButtonWidth }}
           data-testid="delete-action"
         >
           <Button
