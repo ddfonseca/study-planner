@@ -7,6 +7,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { useSessions } from '@/hooks/useSessions';
 import { useSubjectAnalytics } from '@/hooks/useSubjectAnalytics';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonTransition } from '@/components/ui/skeleton-transition';
 import { Button } from '@/components/ui/button';
 import { PieChart, ArrowLeft } from 'lucide-react';
 
@@ -36,24 +37,23 @@ export function SubjectAnalyticsPage() {
     fetchSessions();
   }, [fetchSessions]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
-        </div>
+  const skeletonContent = (
+    <div className="space-y-6">
+      <Skeleton className="h-10 w-64" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-32" />
+        ))}
       </div>
-    );
-  }
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Skeleton className="h-96" />
+        <Skeleton className="h-96" />
+      </div>
+    </div>
+  );
 
   return (
+    <SkeletonTransition isLoading={isLoading} skeleton={skeletonContent}>
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:gap-4">
@@ -108,6 +108,7 @@ export function SubjectAnalyticsPage() {
         </>
       )}
     </div>
+    </SkeletonTransition>
   );
 }
 

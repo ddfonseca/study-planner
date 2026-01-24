@@ -9,6 +9,7 @@ import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonTransition } from '@/components/ui/skeleton-transition';
 import { ToastAction } from '@/components/ui/toast';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -193,40 +194,38 @@ export function CalendarPage() {
 
   const isLoading = sessionsLoading || configLoading;
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-6 w-6 rounded" />
-          <Skeleton className="h-7 w-48" />
+  const skeletonContent = (
+    <div className="space-y-6">
+      {/* Header skeleton */}
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-6 w-6 rounded" />
+        <Skeleton className="h-7 w-48" />
+      </div>
+
+      {/* Calendar skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+        <div className="space-y-4">
+          {/* CalendarHeader skeleton */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-9 w-9" />
+              <Skeleton className="h-9 w-9" />
+              <Skeleton className="h-7 w-36 ml-2" />
+            </div>
+            <Skeleton className="h-9 w-20" />
+          </div>
+          <CalendarGridSkeleton />
         </div>
 
-        {/* Calendar skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
-          <div className="space-y-4">
-            {/* CalendarHeader skeleton */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-7 w-36 ml-2" />
-              </div>
-              <Skeleton className="h-9 w-20" />
-            </div>
-            <CalendarGridSkeleton />
-          </div>
-
-          {/* Sidebar skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-32 w-full rounded-lg" />
-            <Skeleton className="h-32 w-full rounded-lg" />
-            <Skeleton className="h-48 w-full rounded-lg" />
-          </div>
+        {/* Sidebar skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   // Render mobile content based on active tab
   const renderMobileContent = () => {
@@ -260,6 +259,7 @@ export function CalendarPage() {
   };
 
   return (
+    <SkeletonTransition isLoading={isLoading} skeleton={skeletonContent}>
     <div className={isMobile ? 'pb-20' : ''}>
       <div className="space-y-6">
         {/* Header */}
@@ -328,6 +328,7 @@ export function CalendarPage() {
         />
       )}
     </div>
+    </SkeletonTransition>
   );
 }
 

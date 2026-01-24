@@ -99,11 +99,21 @@ export default {
           '0%': { transform: 'scaleX(1)' },
           '100%': { transform: 'scaleX(0)' },
         },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'fade-out': {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
       },
       animation: {
         'pulse-once': 'pulse-once 1s ease-in-out 2',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'toast-progress': 'toast-progress linear forwards',
+        'fade-in': 'fade-in 300ms ease-out forwards',
+        'fade-out': 'fade-out 200ms ease-in forwards',
       },
     },
   },
