@@ -16,13 +16,14 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock } from 'lucide-react';
+import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock, Layers } from 'lucide-react';
 import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
 import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
 import { LimitIndicator, UpgradePrompt } from '@/components/subscription/UpgradePrompt';
 import { PricingModal } from '@/components/subscription';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function CycleSuggestionCard() {
   const { currentWorkspaceId } = useWorkspaceStore();
@@ -58,41 +59,32 @@ export function CycleSuggestionCard() {
     return (
       <>
         <Card className="border-dashed">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Ciclo de Estudos
-              <LimitIndicator
-                feature={FEATURES.MAX_CYCLES}
-                currentUsage={cycles.length}
-                className="ml-auto"
-              />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {canCreateCycle ? (
-              <>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Configure um ciclo para receber sugestões do que estudar
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setEditorOpen(true)}
-                >
-                  <Settings className="h-3.5 w-3.5 mr-1.5" />
-                  Configurar Ciclo
-                </Button>
-              </>
-            ) : (
-              <UpgradePrompt
-                feature={FEATURES.MAX_CYCLES}
-                currentUsage={cycles.length}
-                variant="inline"
-                onUpgradeClick={() => setPricingModalOpen(true)}
-              />
-            )}
+          <CardContent className="p-0">
+            <EmptyState
+              icon={Layers}
+              title="Nenhum ciclo configurado"
+              description="Organize seus estudos com um ciclo de rotação entre matérias"
+              size="sm"
+              action={
+                canCreateCycle ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditorOpen(true)}
+                  >
+                    <Settings className="h-3.5 w-3.5 mr-1.5" />
+                    Configurar Ciclo
+                  </Button>
+                ) : (
+                  <UpgradePrompt
+                    feature={FEATURES.MAX_CYCLES}
+                    currentUsage={cycles.length}
+                    variant="inline"
+                    onUpgradeClick={() => setPricingModalOpen(true)}
+                  />
+                )
+              }
+            />
           </CardContent>
         </Card>
         <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode="create" />
