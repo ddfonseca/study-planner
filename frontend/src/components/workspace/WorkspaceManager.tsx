@@ -232,18 +232,38 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="flex gap-1">
-                      {PRESET_COLORS.map((color) => (
+                    <div className="flex gap-1" role="radiogroup" aria-label="Cor do workspace">
+                      {PRESET_COLORS.map((color, index) => (
                         <button
                           key={color}
                           type="button"
-                          className={`h-6 w-6 rounded-full border-2 transition-all ${
+                          role="radio"
+                          aria-checked={editColor === color}
+                          aria-label={`Cor ${index + 1}`}
+                          className={`h-6 w-6 rounded-full border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                             editColor === color
                               ? 'border-foreground scale-110'
                               : 'border-transparent'
                           }`}
                           style={{ backgroundColor: color }}
                           onClick={() => setEditColor(color)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setEditColor(color);
+                            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              const nextIndex = (index + 1) % PRESET_COLORS.length;
+                              setEditColor(PRESET_COLORS[nextIndex]);
+                              (e.currentTarget.nextElementSibling as HTMLElement)?.focus();
+                            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              const prevIndex = (index - 1 + PRESET_COLORS.length) % PRESET_COLORS.length;
+                              setEditColor(PRESET_COLORS[prevIndex]);
+                              (e.currentTarget.previousElementSibling as HTMLElement)?.focus();
+                            }
+                          }}
+                          tabIndex={editColor === color ? 0 : -1}
                           disabled={isSaving}
                         />
                       ))}
@@ -383,18 +403,38 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
 
               <div className="space-y-2">
                 <Label>Cor</Label>
-                <div className="flex gap-1">
-                  {PRESET_COLORS.map((color) => (
+                <div className="flex gap-1" role="radiogroup" aria-label="Cor do workspace">
+                  {PRESET_COLORS.map((color, index) => (
                     <button
                       key={color}
                       type="button"
-                      className={`h-6 w-6 rounded-full border-2 transition-all ${
+                      role="radio"
+                      aria-checked={newColor === color}
+                      aria-label={`Cor ${index + 1}`}
+                      className={`h-6 w-6 rounded-full border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         newColor === color
                           ? 'border-foreground scale-110'
                           : 'border-transparent'
                       }`}
                       style={{ backgroundColor: color }}
                       onClick={() => setNewColor(color)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setNewColor(color);
+                        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          const nextIndex = (index + 1) % PRESET_COLORS.length;
+                          setNewColor(PRESET_COLORS[nextIndex]);
+                          (e.currentTarget.nextElementSibling as HTMLElement)?.focus();
+                        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          const prevIndex = (index - 1 + PRESET_COLORS.length) % PRESET_COLORS.length;
+                          setNewColor(PRESET_COLORS[prevIndex]);
+                          (e.currentTarget.previousElementSibling as HTMLElement)?.focus();
+                        }
+                      }}
+                      tabIndex={newColor === color ? 0 : -1}
                       disabled={isSaving}
                     />
                   ))}

@@ -149,13 +149,22 @@ function SubjectPickerContent({
             <p className="text-xs font-medium text-muted-foreground mb-2 px-1">
               RECENTES
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Matérias recentes">
               {filteredRecents.map((subject) => (
                 <Badge
                   key={subject}
                   variant={value === subject ? "default" : "secondary"}
-                  className="cursor-pointer hover:bg-accent transition-colors"
+                  className="cursor-pointer hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   onClick={() => onSelect(subject)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSelect(subject)
+                    }
+                  }}
+                  role="option"
+                  tabIndex={0}
+                  aria-selected={value === subject}
                 >
                   {subject}
                   {value === subject && (
@@ -169,19 +178,28 @@ function SubjectPickerContent({
 
         {/* Grouped list A-Z */}
         {matchingOptions.length > 0 ? (
-          <div className="p-1">
+          <div className="p-1" role="listbox" aria-label="Lista de matérias">
             {Array.from(grouped.entries()).map(([letter, items]) => (
-              <div key={letter}>
-                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover">
+              <div key={letter} role="group" aria-label={`Matérias com letra ${letter}`}>
+                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover" aria-hidden="true">
                   {letter}
                 </p>
                 {items.map((subject) => (
                   <button
                     key={subject}
                     onClick={() => onSelect(subject)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onSelect(subject)
+                      }
+                    }}
+                    role="option"
+                    aria-selected={value === subject}
                     className={cn(
                       "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors",
                       "hover:bg-accent hover:text-accent-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                       value === subject && "bg-accent"
                     )}
                   >
@@ -209,7 +227,14 @@ function SubjectPickerContent({
         )}>
           <button
             onClick={onCreateNew}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onCreateNew()
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={`Criar nova matéria: ${inputValue.trim()}`}
           >
             <Plus className="h-4 w-4" />
             Criar "{inputValue.trim()}"

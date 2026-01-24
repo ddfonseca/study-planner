@@ -193,12 +193,22 @@ export function SessionModal({
               Sessões do dia:{' '}
               {canModify && <span className="text-xs">(clique para editar)</span>}
             </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
               {dayData.materias.map((materia) => (
                 <div
                   key={materia.id}
                   onClick={() => canModify && handleStartEdit(materia)}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                  onKeyDown={(e) => {
+                    if (!canModify) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleStartEdit(materia);
+                    }
+                  }}
+                  role={canModify ? 'button' : 'listitem'}
+                  tabIndex={canModify ? 0 : undefined}
+                  aria-label={canModify ? `Editar sessão: ${materia.materia}, ${formatTime(materia.minutos)}` : undefined}
+                  className={`flex items-center justify-between p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                     canModify ? 'cursor-pointer' : 'cursor-default'
                   } ${
                     editingSession?.id === materia.id
@@ -224,6 +234,7 @@ export function SessionModal({
                       }}
                       disabled={isSubmitting}
                       className="text-danger hover:text-danger hover:bg-danger/10"
+                      aria-label={`Excluir sessão: ${materia.materia}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

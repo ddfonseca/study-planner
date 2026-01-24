@@ -121,15 +121,22 @@ describe('MobileBottomNav', () => {
   })
 
   describe('accessibility', () => {
-    it('renders navigation element', () => {
+    it('renders navigation element with aria-label', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      expect(screen.getByRole('navigation')).toBeInTheDocument()
+      const nav = screen.getByRole('navigation')
+      expect(nav).toBeInTheDocument()
+      expect(nav).toHaveAttribute('aria-label', 'Navegação principal')
     })
 
-    it('renders buttons for each tab', () => {
+    it('renders tablist role for tab container', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      const buttons = screen.getAllByRole('button')
-      expect(buttons.length).toBe(4)
+      expect(screen.getByRole('tablist')).toBeInTheDocument()
+    })
+
+    it('renders tabs with role="tab"', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const tabs = screen.getAllByRole('tab')
+      expect(tabs.length).toBe(4)
     })
 
     it('has aria-label for each tab button', () => {
@@ -141,56 +148,157 @@ describe('MobileBottomNav', () => {
       expect(screen.getByLabelText('Timer')).toBeInTheDocument()
     })
 
-    it('has aria-current="page" for active tab', () => {
+    it('has aria-selected="true" for active tab', () => {
       render(<MobileBottomNav {...defaultProps} activeTab="timer" />)
 
       const timerButton = screen.getByLabelText('Timer')
-      expect(timerButton).toHaveAttribute('aria-current', 'page')
+      expect(timerButton).toHaveAttribute('aria-selected', 'true')
     })
 
-    it('does not have aria-current for inactive tabs', () => {
+    it('has aria-selected="false" for inactive tabs', () => {
       render(<MobileBottomNav {...defaultProps} activeTab="calendar" />)
 
       const timerButton = screen.getByLabelText('Timer')
-      expect(timerButton).not.toHaveAttribute('aria-current')
+      expect(timerButton).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('has tabIndex=0 for active tab and tabIndex=-1 for inactive tabs', () => {
+      render(<MobileBottomNav {...defaultProps} activeTab="calendar" />)
+
+      const diaButton = screen.getByLabelText('Dia')
+      const timerButton = screen.getByLabelText('Timer')
+
+      expect(diaButton).toHaveAttribute('tabindex', '0')
+      expect(timerButton).toHaveAttribute('tabindex', '-1')
+    })
+  })
+
+  describe('keyboard navigation', () => {
+    it('moves to next tab on ArrowRight', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} onTabChange={onTabChange} />)
+
+      const diaButton = screen.getByLabelText('Dia')
+      diaButton.focus()
+      await user.keyboard('{ArrowRight}')
+
+      expect(onTabChange).toHaveBeenCalledWith('cycle')
+    })
+
+    it('moves to previous tab on ArrowLeft', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} activeTab="cycle" onTabChange={onTabChange} />)
+
+      const cicloButton = screen.getByLabelText('Ciclo')
+      cicloButton.focus()
+      await user.keyboard('{ArrowLeft}')
+
+      expect(onTabChange).toHaveBeenCalledWith('calendar')
+    })
+
+    it('wraps to first tab when pressing ArrowRight on last tab', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} activeTab="timer" onTabChange={onTabChange} />)
+
+      const timerButton = screen.getByLabelText('Timer')
+      timerButton.focus()
+      await user.keyboard('{ArrowRight}')
+
+      expect(onTabChange).toHaveBeenCalledWith('calendar')
+    })
+
+    it('wraps to last tab when pressing ArrowLeft on first tab', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} activeTab="calendar" onTabChange={onTabChange} />)
+
+      const diaButton = screen.getByLabelText('Dia')
+      diaButton.focus()
+      await user.keyboard('{ArrowLeft}')
+
+      expect(onTabChange).toHaveBeenCalledWith('timer')
+    })
+
+    it('moves to first tab on Home key', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} activeTab="timer" onTabChange={onTabChange} />)
+
+      const timerButton = screen.getByLabelText('Timer')
+      timerButton.focus()
+      await user.keyboard('{Home}')
+
+      expect(onTabChange).toHaveBeenCalledWith('calendar')
+    })
+
+    it('moves to last tab on End key', async () => {
+      const user = userEvent.setup()
+      const onTabChange = vi.fn()
+
+      render(<MobileBottomNav {...defaultProps} activeTab="calendar" onTabChange={onTabChange} />)
+
+      const diaButton = screen.getByLabelText('Dia')
+      diaButton.focus()
+      await user.keyboard('{End}')
+
+      expect(onTabChange).toHaveBeenCalledWith('timer')
+    })
+
+    it('has focus-visible ring styles', () => {
+      render(<MobileBottomNav {...defaultProps} />)
+      const tabs = screen.getAllByRole('tab')
+
+      tabs.forEach(tab => {
+        expect(tab).toHaveClass('focus-visible:outline-none')
+        expect(tab).toHaveClass('focus-visible:ring-2')
+        expect(tab).toHaveClass('focus-visible:ring-ring')
+      })
     })
   })
 
   describe('touch-friendly features', () => {
-    it('has touch-action-manipulation class on buttons', () => {
+    it('has touch-action-manipulation class on tabs', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      const buttons = screen.getAllByRole('button')
+      const tabs = screen.getAllByRole('tab')
 
-      buttons.forEach(button => {
-        expect(button).toHaveClass('touch-action-manipulation')
+      tabs.forEach(tab => {
+        expect(tab).toHaveClass('touch-action-manipulation')
       })
     })
 
     it('has select-none class to prevent text selection', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      const buttons = screen.getAllByRole('button')
+      const tabs = screen.getAllByRole('tab')
 
-      buttons.forEach(button => {
-        expect(button).toHaveClass('select-none')
+      tabs.forEach(tab => {
+        expect(tab).toHaveClass('select-none')
       })
     })
 
     it('has active state classes for touch feedback', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      const buttons = screen.getAllByRole('button')
+      const tabs = screen.getAllByRole('tab')
 
-      buttons.forEach(button => {
-        expect(button).toHaveClass('active:scale-95')
-        expect(button).toHaveClass('active:opacity-80')
+      tabs.forEach(tab => {
+        expect(tab).toHaveClass('active:scale-95')
+        expect(tab).toHaveClass('active:opacity-80')
       })
     })
 
     it('has minimum touch target height of 56px', () => {
       render(<MobileBottomNav {...defaultProps} />)
-      const buttons = screen.getAllByRole('button')
+      const tabs = screen.getAllByRole('tab')
 
-      buttons.forEach(button => {
-        expect(button).toHaveClass('min-h-[56px]')
+      tabs.forEach(tab => {
+        expect(tab).toHaveClass('min-h-[56px]')
       })
     })
   })
