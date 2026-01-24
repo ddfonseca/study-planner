@@ -3,6 +3,7 @@ import {
   Toast,
   ToastClose,
   ToastDescription,
+  ToastProgress,
   ToastProvider,
   ToastTitle,
   ToastViewport,
@@ -13,9 +14,9 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, duration, variant, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} variant={variant} {...props}>
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
@@ -24,6 +25,7 @@ export function Toaster() {
             </div>
             {action}
             <ToastClose />
+            {duration && <ToastProgress duration={duration} variant={variant ?? undefined} />}
           </Toast>
         )
       })}

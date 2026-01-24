@@ -91,9 +91,14 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.8' },
         },
+        'toast-progress': {
+          '0%': { transform: 'scaleX(1)' },
+          '100%': { transform: 'scaleX(0)' },
+        },
       },
       animation: {
         'pulse-once': 'pulse-once 1s ease-in-out 2',
+        'toast-progress': 'toast-progress linear forwards',
       },
     },
   },
