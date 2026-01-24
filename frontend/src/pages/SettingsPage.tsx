@@ -77,67 +77,67 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Settings className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Configurações</h1>
       </div>
 
       {/* User Profile Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <User className="h-4 w-4 sm:h-5 sm:w-5" />
             Perfil
           </CardTitle>
-          <CardDescription>Informações da sua conta</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Informações da sua conta</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {user.image && (
                 <img
                   src={user.image}
                   alt={user.name || 'User'}
-                  className="h-16 w-16 rounded-full"
+                  className="h-12 w-12 sm:h-16 sm:w-16 rounded-full"
                 />
               )}
-              <div>
-                <p className="text-lg font-medium text-foreground">{user.name}</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-lg font-medium text-foreground truncate">{user.name}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{user.email}</p>
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground">Carregando...</p>
+            <p className="text-muted-foreground text-sm">Carregando...</p>
           )}
         </CardContent>
       </Card>
 
       {/* Plan Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
             Plano
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Gerencie sua assinatura e veja os recursos disponíveis
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isFree ? 'bg-muted' : 'bg-primary/10'}`}>
-              <Crown className={`h-5 w-5 ${isFree ? 'text-muted-foreground' : 'text-primary'}`} />
+        <CardContent className="space-y-3 sm:space-y-4 pt-0">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`p-1.5 sm:p-2 rounded-lg ${isFree ? 'bg-muted' : 'bg-primary/10'}`}>
+              <Crown className={`h-4 w-4 sm:h-5 sm:w-5 ${isFree ? 'text-muted-foreground' : 'text-primary'}`} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{currentPlan?.displayName || 'Gratuito'}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-sm sm:text-base">{currentPlan?.displayName || 'Gratuito'}</span>
                 {!isFree && subscription?.status === 'ACTIVE' && (
-                  <Badge variant="default" className="bg-green-500">Ativo</Badge>
+                  <Badge variant="default" className="bg-green-500 text-xs">Ativo</Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {isFree
                   ? 'Faça upgrade para desbloquear mais recursos'
                   : subscription?.billingCycle === 'LIFETIME'
@@ -152,7 +152,9 @@ export function SettingsPage() {
           {isFree && (
             <Button
               variant="default"
+              size="sm"
               onClick={() => setIsPricingModalOpen(true)}
+              className="w-full sm:w-auto"
             >
               <Crown className="h-4 w-4 mr-2" />
               Fazer Upgrade
@@ -163,36 +165,38 @@ export function SettingsPage() {
 
       {/* Workspaces Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layers className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
             Workspaces
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Organize suas sessões de estudo em diferentes contextos
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+        <CardContent className="space-y-3 sm:space-y-4 pt-0">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {workspaces.map((workspace) => (
               <div
                 key={workspace.id}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-muted text-xs sm:text-sm"
               >
                 <div
-                  className="h-3 w-3 rounded-full"
+                  className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: workspace.color || '#6366f1' }}
                 />
-                {workspace.name}
+                <span className="truncate max-w-[100px] sm:max-w-none">{workspace.name}</span>
                 {workspace.isDefault && (
-                  <span className="text-xs text-muted-foreground">(Padrão)</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">(Padrão)</span>
                 )}
               </div>
             ))}
           </div>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setIsWorkspaceManagerOpen(true)}
+            className="w-full sm:w-auto"
           >
             <Layers className="h-4 w-4 mr-2" />
             Gerenciar Workspaces
@@ -202,18 +206,18 @@ export function SettingsPage() {
 
       {/* Weekly Goals Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
             Meta Semanal Padrão
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Configure o padrão de horas para novas semanas. Você pode personalizar semanas individuais clicando na coluna "Total" do calendário.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2 max-w-xs">
-            <Label htmlFor="targetHours">
+        <CardContent className="space-y-4 sm:space-y-6 pt-0">
+          <div className="space-y-2 max-w-full sm:max-w-xs">
+            <Label htmlFor="targetHours" className="text-sm">
               Horas por Semana
             </Label>
             <Input
@@ -226,7 +230,7 @@ export function SettingsPage() {
               onChange={(e) => setLocalTargetHours(e.target.value)}
               className="w-full"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Semanas que atingirem esta meta ficam verdes no calendário
             </p>
           </div>
@@ -235,60 +239,62 @@ export function SettingsPage() {
 
       {/* Calendar Settings Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
             Calendário
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Configure como o calendário é exibido
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2 max-w-xs">
-            <Label htmlFor="weekStartDay">
-              Início da Semana
-            </Label>
-            <Select
-              value={localWeekStartDay}
-              onValueChange={setLocalWeekStartDay}
-            >
-              <SelectTrigger id="weekStartDay" className="w-full">
-                <SelectValue placeholder="Selecione o dia" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">Domingo</SelectItem>
-                <SelectItem value="1">Segunda-feira</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Define qual dia aparece primeiro no calendário
-            </p>
+        <CardContent className="space-y-4 sm:space-y-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="weekStartDay" className="text-sm">
+                Início da Semana
+              </Label>
+              <Select
+                value={localWeekStartDay}
+                onValueChange={setLocalWeekStartDay}
+              >
+                <SelectTrigger id="weekStartDay" className="w-full">
+                  <SelectValue placeholder="Selecione o dia" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Domingo</SelectItem>
+                  <SelectItem value="1">Segunda-feira</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                Define qual dia aparece primeiro no calendário
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="heatmapStyle" className="flex items-center gap-2 text-sm">
+                <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Estilo do Calendário
+              </Label>
+              <Select
+                value={heatmapStyle}
+                onValueChange={handleHeatmapStyleChange}
+              >
+                <SelectTrigger id="heatmapStyle" className="w-full">
+                  <SelectValue placeholder="Selecione o estilo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gradient">Gradiente (cores)</SelectItem>
+                  <SelectItem value="dots">Pontos (minimalista)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                Como a intensidade de estudo é exibida nas células
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-2 max-w-xs">
-            <Label htmlFor="heatmapStyle" className="flex items-center gap-2">
-              <Palette className="h-4 w-4" />
-              Estilo do Calendário
-            </Label>
-            <Select
-              value={heatmapStyle}
-              onValueChange={handleHeatmapStyleChange}
-            >
-              <SelectTrigger id="heatmapStyle" className="w-full">
-                <SelectValue placeholder="Selecione o estilo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gradient">Gradiente (cores)</SelectItem>
-                <SelectItem value="dots">Pontos (minimalista)</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Como a intensidade de estudo é exibida nas células
-            </p>
-          </div>
-
-          <Button onClick={handleSave} disabled={isLoading} className="w-full sm:w-auto">
+          <Button onClick={handleSave} disabled={isLoading} size="sm" className="w-full sm:w-auto">
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (

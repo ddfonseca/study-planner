@@ -242,22 +242,22 @@ export function LandingPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Horas Líquidas</span>
+            <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <span className="font-semibold text-base sm:text-lg">Horas Líquidas</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground"
             >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {isDark ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
             </Button>
             <Link to="/login">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                 Entrar
               </Button>
             </Link>
@@ -266,19 +266,19 @@ export function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+      <section className="py-10 sm:py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
             Controle quanto tempo você{' '}
             <span className="text-primary">realmente</span> estuda
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
             Não quanto tempo passa na cadeira. Registre sessões de foco, visualize
             padrões em um calendário heatmap e atinja suas metas semanais.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/login">
-              <Button size="lg" className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+            <Link to="/login" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
                 Começar a medir meu foco
               </Button>
             </Link>
@@ -286,7 +286,7 @@ export function LandingPage() {
               variant="outline"
               size="lg"
               onClick={scrollToFeatures}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               Saiba mais
             </Button>
@@ -295,9 +295,9 @@ export function LandingPage() {
       </section>
 
       {/* Calendar Preview Section */}
-      <section className="py-12 md:py-16 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-8">
+      <section className="py-8 sm:py-12 md:py-16 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6 sm:mb-8">
             Visualize seu progresso
           </h2>
           <CalendarPreview />
@@ -314,16 +314,16 @@ export function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
+      <section id="features" className="py-12 sm:py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
             Tudo que você precisa para estudar melhor
           </h2>
-          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
             Não é sobre estudar mais. É sobre estudar com clareza.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Feature 1 - Calendário Heatmap */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500" />
@@ -400,16 +400,16 @@ export function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h3 className="text-xl md:text-2xl font-semibold mb-4">
+      <section className="py-10 sm:py-12 md:py-16 bg-muted/30">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">
             Pronto para estudar com mais clareza?
           </h3>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
             Comece gratuitamente e veja a diferença de medir seu foco real.
           </p>
           <Link to="/login">
-            <Button size="lg">
+            <Button size="lg" className="text-sm sm:text-base">
               Começar grátis agora
             </Button>
           </Link>
@@ -417,9 +417,9 @@ export function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
+      <section className="py-12 sm:py-16 md:py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-8 sm:mb-12">
             Perguntas frequentes
           </h2>
           <Card>
@@ -439,15 +439,15 @@ export function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-16 md:py-24">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-4">
+      <section id="pricing" className="py-12 sm:py-16 md:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
             Escolha seu plano
           </h2>
-          <p className="text-muted-foreground text-center mb-12">
+          <p className="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12">
             Comece grátis ou desbloqueie tudo com um único pagamento.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {plans.map((plan, index) => {
               const IconComponent = plan.icon;
               const isPro = plan.highlighted;
@@ -510,14 +510,14 @@ export function LandingPage() {
         </div>
       </section>
       {/* Footer */}
-      <footer className="py-8 border-t border-border">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="py-6 sm:py-8 border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <span className="font-medium">Horas Líquidas</span>
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="font-medium text-sm sm:text-base">Horas Líquidas</span>
             </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
+            <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
               <Link to="/terms" className="hover:text-foreground transition-colors">
                 Termos de Uso
               </Link>
@@ -525,7 +525,7 @@ export function LandingPage() {
                 Política de Privacidade
               </Link>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               © {new Date().getFullYear()} Horas Líquidas
             </div>
           </div>

@@ -54,16 +54,16 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <BarChart3 className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard</h1>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Link to="/app/analytics">
-            <Button variant="outline" size="sm">
-              <PieChart className="h-4 w-4 mr-2" />
-              Ver por Materia
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm h-8 sm:h-9">
+              <PieChart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden xs:inline">Ver por</span> Materia
             </Button>
           </Link>
           <DateRangeFilter

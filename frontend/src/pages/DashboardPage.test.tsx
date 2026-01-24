@@ -228,7 +228,8 @@ describe('DashboardPage', () => {
 
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
       expect(screen.getByTestId('date-range-filter')).toBeInTheDocument()
-      expect(screen.getByText('Ver por Materia')).toBeInTheDocument()
+      // Text is split for responsive design: "Ver por" (hidden on mobile) + " Materia"
+      expect(screen.getByText(/Materia/)).toBeInTheDocument()
     })
   })
 })

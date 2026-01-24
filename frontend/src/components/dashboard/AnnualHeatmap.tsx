@@ -151,14 +151,15 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
+        <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-2">
+          <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Atividade do Ano
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {/* Heatmap container */}
-        <div className="w-full flex flex-col">
+      <CardContent className="space-y-2 px-3 sm:px-6">
+        {/* Heatmap container - horizontal scroll on mobile */}
+        <div className="w-full overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="min-w-[600px] flex flex-col">
           {/* Month labels row */}
           <div className="flex pl-7">
             {monthsData.map((m, i) => {
@@ -246,6 +247,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
                 </div>
               );
             })}
+          </div>
           </div>
         </div>
 

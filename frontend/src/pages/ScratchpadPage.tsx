@@ -311,13 +311,13 @@ export function ScratchpadPage() {
 
   // Empty state
   const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center p-8">
-      <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-      <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma nota ainda</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+    <div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center p-4 sm:p-8">
+      <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/50 mb-3 sm:mb-4" />
+      <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">Nenhuma nota ainda</h3>
+      <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 max-w-xs">
         Crie sua primeira nota para comecar a organizar seus pensamentos.
       </p>
-      <Button onClick={handleNewNote} className="gap-2" disabled={isSaving}>
+      <Button onClick={handleNewNote} className="gap-2" size="sm" disabled={isSaving}>
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Nova nota
       </Button>
@@ -327,20 +327,20 @@ export function ScratchpadPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Scratchpad</h1>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">Scratchpad</h1>
           {isSaving && (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={handleNewNote}
-            className="gap-2"
+            className="gap-1 sm:gap-2 h-8 px-2 sm:px-3"
             disabled={isSaving}
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
@@ -351,7 +351,7 @@ export function ScratchpadPage() {
               variant="ghost"
               size="sm"
               onClick={() => setShowSource(!showSource)}
-              className="gap-2"
+              className="gap-1 sm:gap-2 h-8 px-2 sm:px-3"
             >
               {showSource ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
               <span className="hidden sm:inline">{showSource ? 'Preview' : 'Codigo'}</span>
@@ -378,7 +378,7 @@ export function ScratchpadPage() {
             {currentNote ? (
               <>
                 {/* Editable title */}
-                <div className="mb-3">
+                <div className="mb-2 sm:mb-3">
                   {isEditingTitle ? (
                     <input
                       ref={titleInputRef}
@@ -387,11 +387,11 @@ export function ScratchpadPage() {
                       onChange={(e) => setLocalTitle(e.target.value)}
                       onBlur={handleTitleSave}
                       onKeyDown={handleTitleKeyDown}
-                      className="text-xl font-semibold bg-transparent border-b border-primary outline-none w-full"
+                      className="text-lg sm:text-xl font-semibold bg-transparent border-b border-primary outline-none w-full"
                     />
                   ) : (
                     <h2
-                      className="text-xl font-semibold cursor-pointer hover:text-primary transition-colors"
+                      className="text-lg sm:text-xl font-semibold cursor-pointer hover:text-primary transition-colors truncate"
                       onClick={() => setIsEditingTitle(true)}
                       title="Clique para editar o titulo"
                     >
@@ -414,12 +414,12 @@ Suporta markdown basico:
 **negrito**
 *italico*
 - lista"
-                      className="h-full min-h-[50vh] font-mono text-base resize-none"
+                      className="h-full min-h-[40vh] sm:min-h-[50vh] font-mono text-sm sm:text-base resize-none"
                       autoFocus
                     />
                   ) : (
                     <div
-                      className="h-full min-h-[50vh] p-4 rounded-[var(--radius)] border border-input bg-transparent cursor-text overflow-y-auto"
+                      className="h-full min-h-[40vh] sm:min-h-[50vh] p-3 sm:p-4 rounded-[var(--radius)] border border-input bg-transparent cursor-text overflow-y-auto"
                       onClick={() => setShowSource(true)}
                     >
                       {localContent ? (
@@ -429,7 +429,7 @@ Suporta markdown basico:
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Clique para comecar a escrever...
                         </p>
                       )}
