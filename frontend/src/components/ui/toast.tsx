@@ -30,6 +30,8 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success:
+          "success group border-accent bg-accent/10 text-accent-foreground",
       },
     },
     defaultVariants: {
@@ -112,7 +114,7 @@ ToastDescription.displayName = ToastPrimitives.Description.displayName
 
 interface ToastProgressProps {
   duration: number
-  variant?: "default" | "destructive"
+  variant?: "default" | "destructive" | "success"
 }
 
 const ToastProgress = ({ duration, variant = "default" }: ToastProgressProps) => {
@@ -123,6 +125,8 @@ const ToastProgress = ({ duration, variant = "default" }: ToastProgressProps) =>
           "h-full origin-left animate-toast-progress",
           variant === "destructive"
             ? "bg-destructive-foreground/30"
+            : variant === "success"
+            ? "bg-accent/50"
             : "bg-foreground/20"
         )}
         style={{

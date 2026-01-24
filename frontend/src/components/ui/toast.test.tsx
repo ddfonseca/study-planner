@@ -19,6 +19,15 @@ describe('ToastProgress', () => {
     expect(progressBar).toHaveClass('bg-destructive-foreground/30')
   })
 
+  it('renders progress bar with success variant', () => {
+    const { container } = render(
+      <ToastProgress duration={5000} variant="success" />
+    )
+    const progressBar = container.querySelector('.animate-toast-progress')
+    expect(progressBar).toBeInTheDocument()
+    expect(progressBar).toHaveClass('bg-accent/50')
+  })
+
   it('applies correct animation duration', () => {
     const { container } = render(<ToastProgress duration={3000} />)
     const progressBar = container.querySelector('.animate-toast-progress')

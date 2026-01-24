@@ -8,10 +8,12 @@ import { useOnboardingStore } from '@/store/onboardingStore';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
+import { useWeeklyGoalToast } from '@/hooks/useWeeklyGoalToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonTransition } from '@/components/ui/skeleton-transition';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { ToastAction } from '@/components/ui/toast';
+import { Confetti } from '@/components/ui/confetti';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
 import {
@@ -57,6 +59,9 @@ export function CalendarPage() {
     goToPreviousMonth,
     goToToday,
   } = useCalendar();
+
+  // Weekly goal achievement toast with confetti
+  const { confettiProps } = useWeeklyGoalToast();
 
   const isMobile = useIsSmallMobile();
 
@@ -370,6 +375,9 @@ export function CalendarPage() {
           timerActive={timerActive}
         />
       )}
+
+      {/* Weekly Goal Achievement Confetti */}
+      <Confetti {...confettiProps} />
     </div>
     </SkeletonTransition>
   );
