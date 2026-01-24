@@ -28,6 +28,10 @@ vi.mock('@/hooks/useSessions', () => ({
   })),
 }))
 
+vi.mock('@/hooks/useMediaQuery', () => ({
+  useIsSmallMobile: vi.fn(() => false),
+}))
+
 // Mock dashboard components
 vi.mock('@/components/dashboard', () => ({
   DateRangeFilter: vi.fn(({ currentDays }) => (

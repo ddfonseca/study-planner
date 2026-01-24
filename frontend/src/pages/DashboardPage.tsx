@@ -1,16 +1,18 @@
 /**
  * Dashboard Page - Analytics and statistics
  */
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSessionStore } from '@/store/sessionStore';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useSessions } from '@/hooks/useSessions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonTransition } from '@/components/ui/skeleton-transition';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { BarChart3, PieChart, CalendarOff } from 'lucide-react';
+import { useIsSmallMobile } from '@/hooks/useMediaQuery';
 import {
   DateRangeFilter,
   StatsCards,
@@ -21,6 +23,7 @@ import {
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const isMobile = useIsSmallMobile();
   const { sessions, isLoading } = useSessionStore();
   const { fetchSessions } = useSessions();
   const {
@@ -33,6 +36,11 @@ export function DashboardPage() {
 
   useEffect(() => {
     fetchSessions();
+  }, [fetchSessions]);
+
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    await fetchSessions();
   }, [fetchSessions]);
 
   const skeletonContent = (
@@ -50,8 +58,7 @@ export function DashboardPage() {
     </div>
   );
 
-  return (
-    <SkeletonTransition isLoading={isLoading} skeleton={skeletonContent}>
+  const content = (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -105,6 +112,17 @@ export function DashboardPage() {
       {/* Annual Heatmap */}
       <AnnualHeatmap sessions={sessions} />
     </div>
+  );
+
+  return (
+    <SkeletonTransition isLoading={isLoading} skeleton={skeletonContent}>
+      {isMobile ? (
+        <PullToRefresh onRefresh={handleRefresh} enabled={!isLoading}>
+          {content}
+        </PullToRefresh>
+      ) : (
+        content
+      )}
     </SkeletonTransition>
   );
 }

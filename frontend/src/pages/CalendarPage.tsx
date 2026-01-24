@@ -10,6 +10,7 @@ import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonTransition } from '@/components/ui/skeleton-transition';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { ToastAction } from '@/components/ui/toast';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -91,6 +92,11 @@ export function CalendarPage() {
     onSwipeLeft: handleSwipeLeft,
     onSwipeRight: handleSwipeRight,
   });
+
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([fetchSessions(), fetchConfig()]);
+  }, [fetchSessions, fetchConfig]);
 
   // Fetch data on mount
   useEffect(() => {
@@ -300,14 +306,16 @@ export function CalendarPage() {
         </div>
 
         {isMobile ? (
-          /* Mobile: Tab-based content with swipe support */
-          <div
-            className="touch-action-pan-y"
-            onTouchStart={swipeProps.onTouchStart}
-            onTouchEnd={swipeProps.onTouchEnd}
-          >
-            {renderMobileContent()}
-          </div>
+          /* Mobile: Tab-based content with swipe and pull-to-refresh support */
+          <PullToRefresh onRefresh={handleRefresh} enabled={!sessionsLoading}>
+            <div
+              className="touch-action-pan-y"
+              onTouchStart={swipeProps.onTouchStart}
+              onTouchEnd={swipeProps.onTouchEnd}
+            >
+              {renderMobileContent()}
+            </div>
+          </PullToRefresh>
         ) : (
           /* Desktop: Full Calendar with Sidebar */
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
