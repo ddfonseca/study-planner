@@ -22,6 +22,9 @@ type TransitionPhase = 'skeleton' | 'transitioning' | 'content';
  *
  * The skeleton fades out while the content fades in, creating
  * a polished loading experience.
+ *
+ * IMPORTANT: Content is always mounted to prevent remounting issues
+ * with components like Chart.js that have their own animations.
  */
 export function SkeletonTransition({
   isLoading,
@@ -31,7 +34,7 @@ export function SkeletonTransition({
   duration = 300,
 }: SkeletonTransitionProps) {
   // Track whether we've ever finished loading
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(!isLoading);
   // Track the current phase of transition
   const [phase, setPhase] = useState<TransitionPhase>(isLoading ? 'skeleton' : 'content');
   // Track the previous isLoading value to detect changes
@@ -66,40 +69,39 @@ export function SkeletonTransition({
     animationDuration: `${duration}ms`,
   }), [duration]);
 
-  // Initial loading state - no animation
-  if (phase === 'skeleton' && !hasLoadedOnce) {
-    return <div className={className}>{skeleton}</div>;
-  }
+  const showSkeleton = phase === 'skeleton' || phase === 'transitioning';
+  const showContent = phase === 'transitioning' || phase === 'content';
+  const isTransitioning = phase === 'transitioning';
 
-  // Re-loading after having loaded before
-  if (phase === 'skeleton' && hasLoadedOnce) {
-    return <div className={className}>{skeleton}</div>;
-  }
-
-  // Transitioning - show both with fade animations
-  if (phase === 'transitioning') {
-    return (
-      <div className={cn('relative', className)}>
-        <div className="animate-fade-out" style={animationStyles}>
+  return (
+    <div className={cn('relative', className)}>
+      {/* Skeleton layer */}
+      {showSkeleton && (
+        <div
+          className={cn(isTransitioning && 'animate-fade-out')}
+          style={isTransitioning ? animationStyles : undefined}
+        >
           {skeleton}
         </div>
-        <div className="absolute inset-0 animate-fade-in" style={animationStyles}>
-          {children}
-        </div>
-      </div>
-    );
-  }
-
-  // Content phase - show content with fade-in on first load
-  return (
-    <div
-      className={cn(
-        !hasLoadedOnce && 'animate-fade-in',
-        className
       )}
-      style={!hasLoadedOnce ? animationStyles : undefined}
-    >
-      {children}
+
+      {/* Content layer - always mounted once loading completes to prevent remount */}
+      <div
+        className={cn(
+          // Position absolutely during transition, then normal flow after
+          isTransitioning && 'absolute inset-0',
+          // Fade in animation during transition
+          isTransitioning && 'animate-fade-in',
+          // Hide completely during skeleton phase (but keep mounted after first load)
+          phase === 'skeleton' && hasLoadedOnce && 'invisible'
+        )}
+        style={isTransitioning ? animationStyles : undefined}
+        // Hide from screen readers when not visible
+        aria-hidden={phase === 'skeleton'}
+      >
+        {/* Only render children after first load starts completing, or if already loaded */}
+        {(showContent || hasLoadedOnce) && children}
+      </div>
     </div>
   );
 }
