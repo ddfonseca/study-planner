@@ -27,6 +27,23 @@ vi.mock('remark-gfm', () => ({
   default: () => {},
 }))
 
+// Mock useAutoSave - to control save status for SyncIndicator tests
+const mockRetry = vi.fn()
+const mockSave = vi.fn()
+const mockSaveNow = vi.fn()
+let mockAutoSaveStatus = 'idle'
+
+vi.mock('@/hooks/useAutoSave', () => ({
+  useAutoSave: () => ({
+    status: mockAutoSaveStatus,
+    lastSavedAt: new Date('2024-01-01T12:00:00Z'),
+    retry: mockRetry,
+    save: mockSave,
+    saveNow: mockSaveNow,
+    isOnline: true,
+  }),
+}))
+
 vi.mock('@/store/scratchpadStore', () => {
   const mockStoreState = {
     notes: [
@@ -62,6 +79,7 @@ vi.mock('@/store/scratchpadStore', () => {
       updatedAt: '2024-01-01T12:00:00Z',
     }),
     clearError: vi.fn(),
+    setNotes: vi.fn(),
   }
 
   const mockUseScratchpadStore = Object.assign(
@@ -79,6 +97,7 @@ vi.mock('@/lib/api/scratchpadNotes', () => ({
   scratchpadNotesApi: {
     create: vi.fn(),
     getAll: vi.fn(),
+    update: vi.fn(),
   },
 }))
 
@@ -87,6 +106,8 @@ describe('ScratchpadPage', () => {
     vi.clearAllMocks()
     // Clear localStorage before each test
     localStorage.clear()
+    // Reset mock status to idle
+    mockAutoSaveStatus = 'idle'
   })
 
   describe('delete confirmation dialog', () => {
@@ -220,6 +241,79 @@ describe('ScratchpadPage', () => {
         const confirmButton = excluirButtons.find(btn => btn.classList.contains('bg-destructive'))
         expect(confirmButton).toBeInTheDocument()
       })
+    })
+  })
+
+  describe('SyncIndicator integration', () => {
+    it('renders SyncIndicator when a note is selected', () => {
+      render(<ScratchpadPage />)
+
+      // SyncIndicator should be present with role="status"
+      const syncIndicator = screen.getByRole('status')
+      expect(syncIndicator).toBeInTheDocument()
+    })
+
+    it('shows idle state label when not saving', () => {
+      mockAutoSaveStatus = 'idle'
+      render(<ScratchpadPage />)
+
+      expect(screen.getByText('Salvo')).toBeInTheDocument()
+    })
+
+    it('shows saving state when auto-save is in progress', () => {
+      mockAutoSaveStatus = 'saving'
+      render(<ScratchpadPage />)
+
+      expect(screen.getByText('Salvando...')).toBeInTheDocument()
+    })
+
+    it('shows success state after successful save', () => {
+      mockAutoSaveStatus = 'saved'
+      render(<ScratchpadPage />)
+
+      expect(screen.getByText('Salvo')).toBeInTheDocument()
+    })
+
+    it('shows error state when save fails', () => {
+      mockAutoSaveStatus = 'error'
+      render(<ScratchpadPage />)
+
+      expect(screen.getByText('Erro ao salvar')).toBeInTheDocument()
+    })
+
+    it('shows retry button when in error state', async () => {
+      mockAutoSaveStatus = 'error'
+      render(<ScratchpadPage />)
+
+      const retryButton = screen.getByRole('button', { name: /tentar novamente/i })
+      expect(retryButton).toBeInTheDocument()
+    })
+
+    it('calls retry function when retry button is clicked', async () => {
+      const user = userEvent.setup()
+      mockAutoSaveStatus = 'error'
+      render(<ScratchpadPage />)
+
+      const retryButton = screen.getByRole('button', { name: /tentar novamente/i })
+      await user.click(retryButton)
+
+      expect(mockRetry).toHaveBeenCalled()
+    })
+
+    it('triggers auto-save when content changes', async () => {
+      const user = userEvent.setup()
+      mockAutoSaveStatus = 'idle'
+      render(<ScratchpadPage />)
+
+      // Click to switch to source view
+      const codeButton = screen.getByRole('button', { name: /codigo/i })
+      await user.click(codeButton)
+
+      // Find the textarea and type in it
+      const textarea = screen.getByRole('textbox')
+      await user.type(textarea, 'New content')
+
+      expect(mockSave).toHaveBeenCalled()
     })
   })
 })
