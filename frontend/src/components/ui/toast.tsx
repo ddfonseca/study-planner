@@ -122,7 +122,7 @@ const ToastProgress = ({ duration, variant = "default" }: ToastProgressProps) =>
     <div className="absolute bottom-0 left-0 right-0 h-1 overflow-hidden">
       <div
         className={cn(
-          "h-full origin-left animate-toast-progress",
+          "h-full origin-left animate-toast-progress will-change-transform",
           variant === "destructive"
             ? "bg-destructive-foreground/30"
             : variant === "success"

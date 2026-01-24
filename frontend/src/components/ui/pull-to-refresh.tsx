@@ -50,18 +50,21 @@ export function PullToRefresh({
     return pullText;
   };
 
+  // Calculate indicator translateY for GPU-accelerated animation
+  const indicatorTranslateY = isRefreshing ? 60 : pullDistance;
+
   return (
     <div className={cn('relative', className)} {...containerProps}>
-      {/* Pull indicator */}
+      {/* Pull indicator - uses transform for GPU acceleration */}
       <div
         className={cn(
-          'absolute left-0 right-0 flex flex-col items-center justify-end overflow-hidden transition-opacity duration-200',
+          'absolute left-0 right-0 top-0 flex flex-col items-center justify-end will-change-transform',
+          'transition-opacity duration-200',
           showIndicator ? 'opacity-100' : 'opacity-0'
         )}
         style={{
-          height: isRefreshing ? 60 : pullDistance,
-          top: 0,
-          transform: 'translateY(-100%)',
+          height: 60, // Fixed height, use transform for animation
+          transform: `translateY(${indicatorTranslateY - 60}px)`,
           paddingBottom: 8,
         }}
         aria-hidden={!showIndicator}
@@ -69,7 +72,8 @@ export function PullToRefresh({
         <div className="flex flex-col items-center gap-1">
           <div
             className={cn(
-              'rounded-full bg-secondary p-2 transition-transform duration-200',
+              'rounded-full bg-secondary p-2 will-change-transform',
+              'transition-transform duration-200',
               shouldTrigger && !isRefreshing && 'scale-110'
             )}
             style={{
@@ -102,9 +106,9 @@ export function PullToRefresh({
         </div>
       </div>
 
-      {/* Content container with pull translation */}
+      {/* Content container with pull translation - GPU accelerated */}
       <div
-        className="transition-transform duration-200 ease-out"
+        className="will-change-transform transition-transform duration-200 ease-out"
         style={{
           transform:
             pullDistance > 0 || isRefreshing

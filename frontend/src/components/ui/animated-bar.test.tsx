@@ -19,6 +19,13 @@ const mockMatchMedia = (prefersReducedMotion: boolean) => {
   })
 }
 
+// Helper to extract scaleY value from transform style
+const getScaleY = (element: HTMLElement): number => {
+  const transform = element.style.transform
+  const match = transform.match(/scaleY\(([^)]+)\)/)
+  return match ? parseFloat(match[1]) : 0
+}
+
 describe('AnimatedBar', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -42,14 +49,14 @@ describe('AnimatedBar', () => {
   })
 
   describe('initial render', () => {
-    it('renders with initial height of 0', () => {
+    it('renders with initial scaleY of 0', () => {
       const { container } = render(<AnimatedBar height={50} />)
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '0%' })
+      expect(getScaleY(bar)).toBe(0)
     })
 
-    it('animates to target height', () => {
+    it('animates to target scale (height/100)', () => {
       const { container } = render(<AnimatedBar height={50} duration={400} />)
 
       // Complete animation
@@ -58,7 +65,26 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '50%' })
+      expect(getScaleY(bar)).toBe(0.5) // 50% = 0.5 scale
+    })
+
+    it('uses GPU-accelerated scaleY transform instead of height', () => {
+      const { container } = render(<AnimatedBar height={50} duration={100} />)
+
+      act(() => {
+        vi.advanceTimersByTime(200)
+      })
+
+      const bar = container.firstChild as HTMLElement
+      expect(bar.style.transform).toContain('scaleY')
+      expect(bar.style.transformOrigin).toBe('bottom')
+    })
+
+    it('includes will-change-transform for GPU acceleration', () => {
+      const { container } = render(<AnimatedBar height={50} />)
+
+      const bar = container.firstChild as HTMLElement
+      expect(bar).toHaveClass('will-change-transform')
     })
   })
 
@@ -72,14 +98,14 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '0%' })
+      expect(getScaleY(bar)).toBe(0)
 
       // After delay + animation
       act(() => {
         vi.advanceTimersByTime(600)
       })
 
-      expect(bar).toHaveStyle({ height: '50%' })
+      expect(getScaleY(bar)).toBe(0.5)
     })
 
     it('only applies delay on initial mount', () => {
@@ -99,7 +125,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '75%' })
+      expect(getScaleY(bar)).toBe(0.75)
     })
   })
 
@@ -112,7 +138,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '10%' })
+      expect(getScaleY(bar)).toBe(0.1) // 10% = 0.1 scale
     })
 
     it('allows height above minimum', () => {
@@ -123,7 +149,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '50%' })
+      expect(getScaleY(bar)).toBe(0.5)
     })
   })
 
@@ -136,7 +162,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '100%' })
+      expect(getScaleY(bar)).toBe(1) // 100% = 1 scale
     })
   })
 
@@ -149,16 +175,17 @@ describe('AnimatedBar', () => {
       expect(bar).toHaveClass('bg-blue-500')
     })
 
-    it('always includes w-full class', () => {
+    it('always includes w-full and h-full classes', () => {
       const { container } = render(<AnimatedBar height={50} />)
 
       const bar = container.firstChild as HTMLElement
       expect(bar).toHaveClass('w-full')
+      expect(bar).toHaveClass('h-full')
     })
   })
 
   describe('height updates', () => {
-    it('animates from current height to new height', () => {
+    it('animates from current scale to new scale', () => {
       const { container, rerender } = render(<AnimatedBar height={25} duration={400} />)
 
       // Complete first animation
@@ -167,7 +194,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '25%' })
+      expect(getScaleY(bar)).toBe(0.25)
 
       // Update to new height
       rerender(<AnimatedBar height={75} duration={400} />)
@@ -177,7 +204,7 @@ describe('AnimatedBar', () => {
         vi.advanceTimersByTime(500)
       })
 
-      expect(bar).toHaveStyle({ height: '75%' })
+      expect(getScaleY(bar)).toBe(0.75)
     })
 
     it('can animate from high to low', () => {
@@ -194,7 +221,7 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '25%' })
+      expect(getScaleY(bar)).toBe(0.25)
     })
   })
 
@@ -208,16 +235,16 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      const height = parseFloat(bar.style.height)
-      expect(height).toBeLessThan(100)
-      expect(height).toBeGreaterThan(0)
+      const scale = getScaleY(bar)
+      expect(scale).toBeLessThan(1)
+      expect(scale).toBeGreaterThan(0)
 
       // After full duration
       act(() => {
         vi.advanceTimersByTime(600)
       })
 
-      expect(bar).toHaveStyle({ height: '100%' })
+      expect(getScaleY(bar)).toBe(1)
     })
   })
 
@@ -250,7 +277,7 @@ describe('AnimatedBar', () => {
   })
 
   describe('reduced motion', () => {
-    it('updates height instantly when user prefers reduced motion', () => {
+    it('updates scale instantly when user prefers reduced motion', () => {
       mockMatchMedia(true)
 
       const { container } = render(<AnimatedBar height={50} duration={500} />)
@@ -260,12 +287,12 @@ describe('AnimatedBar', () => {
         vi.advanceTimersByTime(16)
       })
 
-      // Height should be at target after just one frame
+      // Scale should be at target after just one frame
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '50%' })
+      expect(getScaleY(bar)).toBe(0.5)
     })
 
-    it('shows final height after one frame when reduced motion is preferred', () => {
+    it('shows final scale after one frame when reduced motion is preferred', () => {
       mockMatchMedia(true)
 
       const { container, rerender } = render(<AnimatedBar height={25} />)
@@ -275,7 +302,7 @@ describe('AnimatedBar', () => {
       })
 
       let bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '25%' })
+      expect(getScaleY(bar)).toBe(0.25)
 
       rerender(<AnimatedBar height={75} />)
 
@@ -284,7 +311,7 @@ describe('AnimatedBar', () => {
       })
 
       bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '75%' })
+      expect(getScaleY(bar)).toBe(0.75)
     })
 
     it('ignores delay when reduced motion is preferred', () => {
@@ -298,7 +325,25 @@ describe('AnimatedBar', () => {
       })
 
       const bar = container.firstChild as HTMLElement
-      expect(bar).toHaveStyle({ height: '50%' })
+      expect(getScaleY(bar)).toBe(0.5)
+    })
+  })
+
+  describe('60fps performance', () => {
+    it('uses transform property for GPU acceleration', () => {
+      const { container } = render(<AnimatedBar height={50} />)
+
+      const bar = container.firstChild as HTMLElement
+      // Verify it uses transform instead of height
+      expect(bar.style.height).toBe('')
+      expect(bar.style.transform).toBeDefined()
+    })
+
+    it('sets transformOrigin to bottom for bar chart behavior', () => {
+      const { container } = render(<AnimatedBar height={50} />)
+
+      const bar = container.firstChild as HTMLElement
+      expect(bar.style.transformOrigin).toBe('bottom')
     })
   })
 })

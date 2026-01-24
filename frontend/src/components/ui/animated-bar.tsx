@@ -20,10 +20,10 @@ interface AnimatedBarProps {
  *
  * Features:
  * - Uses requestAnimationFrame for smooth 60fps animation
+ * - GPU-accelerated using scaleY transform (avoids layout thrashing)
  * - Staggered entrance with configurable delay
  * - Ease-out cubic easing for natural deceleration
  * - Respects prefers-reduced-motion for accessibility
- * - Uses transform for GPU acceleration
  *
  * Perfect for:
  * - Bar charts with data updates
@@ -38,15 +38,18 @@ export function AnimatedBar({
   minHeight = 0,
 }: AnimatedBarProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [displayHeight, setDisplayHeight] = useState(0);
+  const [displayScale, setDisplayScale] = useState(0);
   const [hasInitialized, setHasInitialized] = useState(false);
-  const previousHeight = useRef(0);
+  const previousScale = useRef(0);
   const animationRef = useRef<number | undefined>(undefined);
   const delayRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Handle immediate value updates for reduced motion
   const effectiveDuration = prefersReducedMotion ? 0 : duration;
   const effectiveDelay = prefersReducedMotion ? 0 : delay;
+
+  // Convert height percentage to scale (0-1)
+  const targetScale = Math.max(minHeight, Math.min(100, height)) / 100;
 
   useEffect(() => {
     // Clear any existing animation/delay
@@ -57,14 +60,12 @@ export function AnimatedBar({
       clearTimeout(delayRef.current);
     }
 
-    const targetHeight = Math.max(minHeight, Math.min(100, height));
-
     // Skip animation if duration is 0 (reduced motion)
     if (effectiveDuration === 0) {
       // Use requestAnimationFrame to avoid synchronous setState in effect
       animationRef.current = requestAnimationFrame(() => {
-        setDisplayHeight(targetHeight);
-        previousHeight.current = targetHeight;
+        setDisplayScale(targetScale);
+        previousScale.current = targetScale;
         setHasInitialized(true);
       });
       return () => {
@@ -75,7 +76,7 @@ export function AnimatedBar({
     }
 
     const startAnimation = () => {
-      const startHeight = previousHeight.current;
+      const startScale = previousScale.current;
       const startTime = performance.now();
 
       const animate = (currentTime: number) => {
@@ -85,14 +86,14 @@ export function AnimatedBar({
         // Easing function: ease-out cubic for smooth 60fps deceleration
         const eased = 1 - Math.pow(1 - progress, 3);
 
-        const currentHeight = startHeight + (targetHeight - startHeight) * eased;
-        setDisplayHeight(currentHeight);
+        const currentScale = startScale + (targetScale - startScale) * eased;
+        setDisplayScale(currentScale);
 
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          setDisplayHeight(targetHeight);
-          previousHeight.current = targetHeight;
+          setDisplayScale(targetScale);
+          previousScale.current = targetScale;
         }
       };
 
@@ -117,12 +118,15 @@ export function AnimatedBar({
         clearTimeout(delayRef.current);
       }
     };
-  }, [height, effectiveDuration, effectiveDelay, minHeight, hasInitialized]);
+  }, [targetScale, effectiveDuration, effectiveDelay, hasInitialized]);
 
   return (
     <div
-      className={cn('w-full', className)}
-      style={{ height: `${displayHeight}%` }}
+      className={cn('w-full h-full will-change-transform', className)}
+      style={{
+        transform: `scaleY(${displayScale})`,
+        transformOrigin: 'bottom',
+      }}
     />
   );
 }

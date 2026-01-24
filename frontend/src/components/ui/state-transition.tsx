@@ -27,27 +27,27 @@ interface StateTransitionProps {
 
 const animationStyles: Record<string, { enter: string; exit: string; base: string }> = {
   'fade': {
-    base: 'transition-opacity',
+    base: 'transition-opacity will-change-opacity',
     enter: 'opacity-100',
     exit: 'opacity-0',
   },
   'slide-down': {
-    base: 'transition-all',
+    base: 'transition-all will-change-transform-opacity',
     enter: 'opacity-100 translate-y-0',
     exit: 'opacity-0 -translate-y-2',
   },
   'slide-up': {
-    base: 'transition-all',
+    base: 'transition-all will-change-transform-opacity',
     enter: 'opacity-100 translate-y-0',
     exit: 'opacity-0 translate-y-2',
   },
   'scale': {
-    base: 'transition-all',
+    base: 'transition-all will-change-transform-opacity',
     enter: 'opacity-100 scale-100',
     exit: 'opacity-0 scale-95',
   },
   'fade-scale': {
-    base: 'transition-all',
+    base: 'transition-all will-change-transform-opacity',
     enter: 'opacity-100 scale-100',
     exit: 'opacity-0 scale-95',
   },
