@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   checked?: boolean;
@@ -12,12 +13,19 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ className, checked, onCheckedChange, ...props }, ref) => {
+    const { trigger: triggerHaptic } = useHaptic();
+
+    const handleClick = () => {
+      triggerHaptic('light');
+      onCheckedChange?.(!checked);
+    };
+
     return (
       <button
         type="button"
         role="checkbox"
         aria-checked={checked}
-        onClick={() => onCheckedChange?.(!checked)}
+        onClick={handleClick}
         className={cn(
           'peer h-6 w-6 min-h-[24px] min-w-[24px] shrink-0 rounded-sm border border-primary ring-offset-background',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',

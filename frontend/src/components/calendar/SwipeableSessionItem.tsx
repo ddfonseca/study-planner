@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { formatTime } from '@/lib/utils/time';
 import { cn } from '@/lib/utils';
+import { useHaptic } from '@/hooks/useHaptic';
 import type { StudySession } from '@/types/session';
 
 interface SwipeableSessionItemProps {
@@ -36,6 +37,8 @@ export function SwipeableSessionItem({
   const [isDragging, setIsDragging] = useState(false);
   const touchState = useRef<TouchState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredRevealHaptic = useRef(false);
+  const { trigger: triggerHaptic } = useHaptic();
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (!canModify) return;
@@ -47,6 +50,7 @@ export function SwipeableSessionItem({
       currentX: touch.clientX,
       isDragging: false,
     };
+    hasTriggeredRevealHaptic.current = false;
   }, [canModify]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -80,9 +84,15 @@ export function SwipeableSessionItem({
       // Limit the swipe range
       newTranslateX = Math.max(-DELETE_BUTTON_WIDTH, Math.min(0, newTranslateX));
 
+      // Trigger haptic when crossing reveal threshold (only once per swipe)
+      if (!isRevealed && !hasTriggeredRevealHaptic.current && deltaX < -SWIPE_THRESHOLD) {
+        hasTriggeredRevealHaptic.current = true;
+        triggerHaptic('light');
+      }
+
       setTranslateX(newTranslateX);
     }
-  }, [canModify, isRevealed]);
+  }, [canModify, isRevealed, triggerHaptic]);
 
   const handleTouchEnd = useCallback(() => {
     if (!touchState.current || !canModify) return;
@@ -115,11 +125,13 @@ export function SwipeableSessionItem({
   }, [canModify, isRevealed]);
 
   const handleDelete = useCallback(() => {
+    // Haptic feedback for destructive action
+    triggerHaptic('heavy');
     // Reset swipe state before deleting
     setTranslateX(0);
     setIsRevealed(false);
     onDelete(session.id);
-  }, [onDelete, session.id]);
+  }, [onDelete, session.id, triggerHaptic]);
 
   const handleContentClick = useCallback(() => {
     if (!canModify) return;

@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
+import { useIsTouchDevice } from './useMediaQuery';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>;
@@ -24,6 +25,22 @@ interface TouchState {
   startY: number;
   currentY: number;
   isPulling: boolean;
+  hasTriggeredThresholdHaptic: boolean;
+}
+
+// Check if vibration is supported
+function isVibrationSupported(): boolean {
+  return typeof navigator !== 'undefined' && 'vibrate' in navigator;
+}
+
+// Trigger haptic feedback
+function triggerHaptic(duration: number): void {
+  if (!isVibrationSupported()) return;
+  try {
+    navigator.vibrate(duration);
+  } catch {
+    // Silently fail
+  }
 }
 
 /**
@@ -39,6 +56,11 @@ export function usePullToRefresh({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const touchState = useRef<TouchState | null>(null);
+  const isTouchDevice = useIsTouchDevice();
+  const hapticEnabled = useMemo(
+    () => isTouchDevice && isVibrationSupported(),
+    [isTouchDevice]
+  );
 
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -53,6 +75,7 @@ export function usePullToRefresh({
         startY: touch.clientY,
         currentY: touch.clientY,
         isPulling: false,
+        hasTriggeredThresholdHaptic: false,
       };
     },
     [enabled, isRefreshing]
@@ -86,9 +109,20 @@ export function usePullToRefresh({
       // Apply resistance to the pull (diminishing returns)
       const resistance = 0.5;
       const resistedPull = Math.min(deltaY * resistance, maxPull);
+
+      // Haptic feedback when crossing threshold (only once per pull)
+      if (
+        hapticEnabled &&
+        !touchState.current.hasTriggeredThresholdHaptic &&
+        resistedPull >= threshold
+      ) {
+        touchState.current.hasTriggeredThresholdHaptic = true;
+        triggerHaptic(10); // Light haptic
+      }
+
       setPullDistance(resistedPull);
     },
-    [enabled, isRefreshing, maxPull]
+    [enabled, isRefreshing, maxPull, threshold, hapticEnabled]
   );
 
   const onTouchEnd = useCallback(async () => {
@@ -102,6 +136,10 @@ export function usePullToRefresh({
 
     if (shouldRefresh && !isRefreshing) {
       setIsRefreshing(true);
+      // Medium haptic when refresh starts
+      if (hapticEnabled) {
+        triggerHaptic(30);
+      }
       try {
         await onRefresh();
       } finally {
@@ -111,7 +149,7 @@ export function usePullToRefresh({
     } else {
       setPullDistance(0);
     }
-  }, [enabled, pullDistance, threshold, isRefreshing, onRefresh]);
+  }, [enabled, pullDistance, threshold, isRefreshing, onRefresh, hapticEnabled]);
 
   return {
     isRefreshing,

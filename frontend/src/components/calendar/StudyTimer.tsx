@@ -8,6 +8,7 @@ import { SubjectPicker } from '@/components/ui/subject-picker';
 import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
+import { useHaptic } from '@/hooks/useHaptic';
 import { Play, Square, Clock } from 'lucide-react';
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 
@@ -29,6 +30,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
+  const { trigger: triggerHaptic, triggerPattern } = useHaptic();
 
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -145,6 +147,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
 
   const handleStart = () => {
     if (!subject.trim()) {
+      triggerPattern('error');
       toast({
         title: 'Atenção',
         description: 'Digite a matéria antes de iniciar',
@@ -152,6 +155,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
       });
       return;
     }
+    triggerHaptic('medium');
     setIsRunning(true);
   };
 
@@ -164,11 +168,13 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
       try {
         const today = new Date().toISOString().split('T')[0];
         await handleAddSession(today, subject.trim(), minutes);
+        triggerPattern('success');
         toast({
           title: 'Sessão salva!',
           description: `${minutes} minutos de ${subject} registrados`,
         });
       } catch (err) {
+        triggerPattern('error');
         toast({
           title: 'Erro',
           description: err instanceof Error ? err.message : 'Falha ao salvar sessão',
@@ -176,6 +182,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
         });
       }
     } else {
+      triggerPattern('warning');
       toast({
         title: 'Tempo muito curto',
         description: 'Estude pelo menos 1 minuto para registrar',

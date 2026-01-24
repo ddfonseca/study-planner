@@ -4,6 +4,7 @@
 import { Calendar, RefreshCw, TrendingUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFeatureBadgesStore, type FeatureKey } from '@/store/featureBadgesStore';
+import { useHaptic } from '@/hooks/useHaptic';
 
 export type MobileTab = 'calendar' | 'cycle' | 'progress' | 'timer';
 
@@ -26,8 +27,13 @@ export function MobileBottomNav({
   timerActive = false,
 }: MobileBottomNavProps) {
   const { isFeatureNew, markFeatureSeen } = useFeatureBadgesStore();
+  const { trigger: triggerHaptic } = useHaptic();
 
   const handleTabChange = (tab: MobileTab) => {
+    // Haptic feedback for tab change
+    if (tab !== activeTab) {
+      triggerHaptic('light');
+    }
     // Mark feature as seen when user clicks on the tab
     const tabConfig = tabs.find((t) => t.id === tab);
     if (tabConfig?.badgeKey && isFeatureNew(tabConfig.badgeKey)) {
