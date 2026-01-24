@@ -32,6 +32,7 @@ export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
     indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
     plugins: {
       legend: {
         display: false,

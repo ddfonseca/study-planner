@@ -27,6 +27,7 @@ export function SubjectChart({ data }: SubjectChartProps) {
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
     plugins: {
       legend: {
         position: isMobile ? 'bottom' : 'right',
