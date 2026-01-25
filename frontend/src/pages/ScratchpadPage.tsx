@@ -18,7 +18,10 @@ import {
   StickyNote,
   Loader2,
   AlertCircle,
+  Timer,
 } from 'lucide-react';
+import { StudyTimer } from '@/components/calendar';
+import { useSessions } from '@/hooks/useSessions';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { SyncIndicator, type SyncState } from '@/components/ui/sync-indicator';
 import { useAutoSave, type AutoSaveStatus } from '@/hooks/useAutoSave';
@@ -82,9 +85,14 @@ export function ScratchpadPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [mobileListOpen, setMobileListOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'notes' | 'timer'>('notes');
+  const [timerActive, setTimerActive] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const hasFetchedRef = useRef(false);
   const currentNoteIdRef = useRef<string | null>(currentNoteId);
+
+  // Get subjects for timer
+  const { getUniqueSubjects } = useSessions();
 
   // Keep ref in sync with currentNoteId
   useEffect(() => {
@@ -384,9 +392,17 @@ export function ScratchpadPage() {
       {notes.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="flex gap-4 flex-1 min-h-0 md:h-[calc(100vh-12rem)] pb-16 md:pb-0">
+        <div className="flex gap-4 flex-1 min-h-0 md:h-[calc(100vh-12rem)] pb-28 md:pb-0">
           {/* Sidebar - Desktop */}
           <div className="hidden md:flex flex-col w-56 flex-shrink-0">
+            {/* Timer */}
+            <div className="mb-4">
+              <StudyTimer
+                subjects={getUniqueSubjects()}
+                onRunningChange={setTimerActive}
+              />
+            </div>
+            {/* Notes list */}
             <div className="flex-1 overflow-y-auto space-y-1 pr-2">
               {notes.map((note) => (
                 <NoteListItem key={note.id} note={note} />
@@ -476,30 +492,74 @@ Suporta markdown basico:
         </div>
       )}
 
-      {/* Mobile note selector - Fixed footer */}
+      {/* Mobile tabs and content - Fixed footer */}
       {notes.length > 0 && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-3 z-40">
-          <div className="relative">
-            {mobileListOpen && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {notes.map((note) => (
-                  <NoteListItem key={note.id} note={note} />
-                ))}
-              </div>
-            )}
-            <Button
-              variant="outline"
-              className="w-full justify-between"
-              onClick={() => setMobileListOpen(!mobileListOpen)}
-            >
-              <div className="flex items-center gap-2 truncate">
-                <StickyNote className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{currentNote?.title || 'Selecione uma nota'}</span>
-              </div>
-              <ChevronDown
-                className={cn('h-4 w-4 transition-transform flex-shrink-0', mobileListOpen && 'rotate-180')}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-40">
+          {/* Timer content when timer tab is active */}
+          {mobileTab === 'timer' && (
+            <div className="p-3 border-b">
+              <StudyTimer
+                subjects={getUniqueSubjects()}
+                onRunningChange={setTimerActive}
               />
-            </Button>
+            </div>
+          )}
+
+          {/* Note selector when notes tab is active */}
+          {mobileTab === 'notes' && (
+            <div className="relative p-3">
+              {mobileListOpen && (
+                <div className="absolute bottom-full left-3 right-3 mb-2 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {notes.map((note) => (
+                    <NoteListItem key={note.id} note={note} />
+                  ))}
+                </div>
+              )}
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={() => setMobileListOpen(!mobileListOpen)}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <StickyNote className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{currentNote?.title || 'Selecione uma nota'}</span>
+                </div>
+                <ChevronDown
+                  className={cn('h-4 w-4 transition-transform flex-shrink-0', mobileListOpen && 'rotate-180')}
+                />
+              </Button>
+            </div>
+          )}
+
+          {/* Tab navigation */}
+          <div className="flex border-t">
+            <button
+              onClick={() => setMobileTab('notes')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors',
+                mobileTab === 'notes'
+                  ? 'text-primary border-t-2 border-primary -mt-[2px]'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <StickyNote className="h-4 w-4" />
+              Notas
+            </button>
+            <button
+              onClick={() => setMobileTab('timer')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors relative',
+                mobileTab === 'timer'
+                  ? 'text-primary border-t-2 border-primary -mt-[2px]'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Timer className="h-4 w-4" />
+              Timer
+              {timerActive && mobileTab !== 'timer' && (
+                <span className="absolute top-2 right-[calc(50%-24px)] h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              )}
+            </button>
           </div>
         </div>
       )}
