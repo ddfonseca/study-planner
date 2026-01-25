@@ -328,14 +328,12 @@ export function SubjectPicker({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
-        <button
-          type="button"
+        <div
           onClick={() => !disabled && setOpen(true)}
-          disabled={disabled}
           className="w-full"
         >
           {triggerButton}
-        </button>
+        </div>
         <DrawerContent className="h-[85vh] max-h-[85vh]">
           <DrawerHeader className="border-b pb-2">
             <div className="flex items-center justify-between">
