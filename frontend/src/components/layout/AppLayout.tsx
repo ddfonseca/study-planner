@@ -8,7 +8,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, Users } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, Users, BookOpen } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
@@ -120,6 +120,20 @@ export function AppLayout() {
 
             {/* User Menu */}
             <div className="flex items-center gap-2">
+              {/* Blog Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Blog"
+                title="Blog - Dicas de estudo e produtividade"
+              >
+                <a href="/blog">
+                  <BookOpen className="h-5 w-5" aria-hidden="true" />
+                </a>
+              </Button>
+
               {/* Community Button */}
               <Button
                 variant="ghost"
