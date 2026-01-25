@@ -8,7 +8,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, HelpCircle } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
@@ -120,6 +120,19 @@ export function AppLayout() {
 
             {/* User Menu */}
             <div className="flex items-center gap-2">
+              {/* Help Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Precisa de ajuda? Envie um email"
+              >
+                <a href="mailto:davidfonseca@proton.me?subject=Ajuda - Horas Líquidas">
+                  <HelpCircle className="h-5 w-5" aria-hidden="true" />
+                </a>
+              </Button>
+
               {/* Theme Toggle */}
               <Button
                 variant="ghost"
