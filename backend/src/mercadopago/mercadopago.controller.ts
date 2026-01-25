@@ -10,7 +10,7 @@ import {
   Logger,
   Headers,
 } from '@nestjs/common';
-import { Session } from '@thallesp/nestjs-better-auth';
+import { Session, AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { MercadoPagoService } from './mercadopago.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -69,6 +69,7 @@ export class MercadoPagoController {
    * This is called by Mercado Pago when payment status changes
    */
   @Post('webhook')
+  @AllowAnonymous()
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
     @Body() body: { type: string; data: { id: string } },
