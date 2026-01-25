@@ -74,8 +74,15 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
       const response = await subscriptionApi.subscribe(planId);
 
       if (response.success && response.initPoint) {
-        // Redirect to Mercado Pago checkout
-        window.location.href = response.initPoint;
+        // Open Mercado Pago checkout in new tab
+        window.open(response.initPoint, '_blank');
+        onOpenChange(false);
+        toast({
+          title: 'Checkout aberto',
+          description: 'Complete o pagamento na nova aba do Mercado Pago',
+        });
+        setIsSubscribing(false);
+        setSubscribingPlanId(null);
       } else {
         throw new Error('Não foi possível iniciar o checkout');
       }
