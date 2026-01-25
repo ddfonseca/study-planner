@@ -10,7 +10,6 @@ const {
   mockGetWeekStatus,
   mockHasAchievementBeenShown,
   mockMarkAchievementShown,
-  mockCelebrationsEnabled,
 } = vi.hoisted(() => ({
   mockToast: vi.fn(),
   mockFireConfetti: vi.fn(),
@@ -19,7 +18,6 @@ const {
   mockGetWeekStatus: vi.fn(),
   mockHasAchievementBeenShown: vi.fn(() => false),
   mockMarkAchievementShown: vi.fn(),
-  mockCelebrationsEnabled: { value: true },
 }));
 
 // Mock dependencies
@@ -47,12 +45,6 @@ vi.mock('./useWeeklyGoals', () => ({
 
 vi.mock('@/store/sessionStore', () => ({
   useSessionStore: () => [],
-}));
-
-vi.mock('@/store/configStore', () => ({
-  useConfigStore: () => ({
-    celebrationsEnabled: mockCelebrationsEnabled.value,
-  }),
 }));
 
 vi.mock('./useHaptic', () => ({
@@ -105,9 +97,6 @@ describe('useWeeklyGoalToast', () => {
 
     // Default: no achievement has been shown yet
     mockHasAchievementBeenShown.mockReturnValue(false);
-
-    // Default: celebrations are enabled
-    mockCelebrationsEnabled.value = true;
   });
 
   afterEach(() => {
@@ -352,111 +341,6 @@ describe('useWeeklyGoalToast', () => {
       });
 
       expect(mockFireConfetti).toHaveBeenCalled();
-    });
-  });
-
-  describe('celebrationsEnabled setting', () => {
-    it('does not show toast when celebrationsEnabled is false in config', () => {
-      // Disable celebrations in config
-      mockCelebrationsEnabled.value = false;
-
-      // Start with not achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 300,
-        totalHours: 5,
-        achieved: false,
-        progress: 50,
-        isLoading: false,
-      });
-
-      const { rerender } = renderHook(() => useWeeklyGoalToast());
-
-      // Transition to achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 600,
-        totalHours: 10,
-        achieved: true,
-        progress: 100,
-        isLoading: false,
-      });
-
-      act(() => {
-        rerender();
-      });
-
-      expect(mockToast).not.toHaveBeenCalled();
-      expect(mockFireConfetti).not.toHaveBeenCalled();
-    });
-
-    it('shows toast when celebrationsEnabled is true in config', () => {
-      // Enable celebrations in config
-      mockCelebrationsEnabled.value = true;
-
-      // Start with not achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 300,
-        totalHours: 5,
-        achieved: false,
-        progress: 50,
-        isLoading: false,
-      });
-
-      const { rerender } = renderHook(() => useWeeklyGoalToast());
-
-      // Transition to achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 600,
-        totalHours: 10,
-        achieved: true,
-        progress: 100,
-        isLoading: false,
-      });
-
-      act(() => {
-        rerender();
-      });
-
-      expect(mockFireConfetti).toHaveBeenCalled();
-      expect(mockTriggerPattern).toHaveBeenCalledWith('success');
-      expect(mockToast).toHaveBeenCalled();
-    });
-
-    it('does not show toast when both enabled option and celebrationsEnabled are false', () => {
-      // Disable celebrations in config
-      mockCelebrationsEnabled.value = false;
-
-      // Start with not achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 300,
-        totalHours: 5,
-        achieved: false,
-        progress: 50,
-        isLoading: false,
-      });
-
-      const { rerender } = renderHook(() => useWeeklyGoalToast({ enabled: false }));
-
-      // Transition to achieved
-      mockGetWeekStatus.mockReturnValue({
-        goal: { targetHours: 10 },
-        totalMinutes: 600,
-        totalHours: 10,
-        achieved: true,
-        progress: 100,
-        isLoading: false,
-      });
-
-      act(() => {
-        rerender();
-      });
-
-      expect(mockToast).not.toHaveBeenCalled();
-      expect(mockFireConfetti).not.toHaveBeenCalled();
     });
   });
 

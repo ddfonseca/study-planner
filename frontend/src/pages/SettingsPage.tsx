@@ -18,8 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers, Crown, PartyPopper } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers, Crown } from 'lucide-react';
 import type { HeatmapStyle } from '@/store/configStore';
 import { useToast } from '@/hooks/use-toast';
 import { WorkspaceManager } from '@/components/workspace';
@@ -27,7 +26,7 @@ import { PricingModal } from '@/components/subscription/PricingModal';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const { targetHours, weekStartDay, heatmapStyle, celebrationsEnabled, updateConfig, setHeatmapStyle, setCelebrationsEnabled, isLoading } = useConfigStore();
+  const { targetHours, weekStartDay, heatmapStyle, updateConfig, setHeatmapStyle, isLoading } = useConfigStore();
   const { workspaces } = useWorkspaceStore();
   const { currentPlan, subscription, isFree, fetchCurrentSubscription } = useSubscriptionStore();
   const { toast } = useToast();
@@ -303,34 +302,6 @@ export function SettingsPage() {
             )}
             Salvar Configurações
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Celebrations Card */}
-      <Card>
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <PartyPopper className="h-4 w-4 sm:h-5 sm:w-5" />
-            Celebrações
-          </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
-            Configure animações e efeitos visuais ao completar metas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id="celebrationsEnabled"
-              checked={celebrationsEnabled}
-              onCheckedChange={(checked) => setCelebrationsEnabled(checked)}
-            />
-            <Label htmlFor="celebrationsEnabled" className="text-sm cursor-pointer">
-              Ativar celebrações (confetes e notificações)
-            </Label>
-          </div>
-          <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
-            Quando desativado, não serão exibidos confetes nem toasts de celebração ao completar metas semanais ou ciclos de estudo
-          </p>
         </CardContent>
       </Card>
 
