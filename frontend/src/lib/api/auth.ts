@@ -21,6 +21,27 @@ export const authClient = createAuthClient({
   },
 });
 
+// Error messages in Portuguese
+const errorMessages: Record<string, string> = {
+  'Invalid email or password': 'Email ou senha inválidos',
+  'User not found': 'Usuário não encontrado',
+  'User already exists': 'Este email já está cadastrado',
+  'Invalid password': 'Senha inválida',
+  'Invalid email': 'Email inválido',
+  'Email not verified': 'Email não verificado',
+  'Password too short': 'A senha deve ter no mínimo 8 caracteres',
+  'Password too long': 'A senha deve ter no máximo 128 caracteres',
+  'Invalid credentials': 'Credenciais inválidas',
+  'Account not found': 'Conta não encontrada',
+  'Session expired': 'Sessão expirada',
+  'Too many requests': 'Muitas tentativas. Aguarde um momento.',
+};
+
+function translateError(message: string | undefined): string {
+  if (!message) return 'Erro desconhecido';
+  return errorMessages[message] || message;
+}
+
 export const authApi = {
   /**
    * Check if email/password auth is available
@@ -50,7 +71,7 @@ export const authApi = {
     });
 
     if (result.error) {
-      return { success: false, error: result.error.message };
+      return { success: false, error: translateError(result.error.message) };
     }
 
     return { success: true };
@@ -68,7 +89,7 @@ export const authApi = {
     });
 
     if (result.error) {
-      return { success: false, error: result.error.message };
+      return { success: false, error: translateError(result.error.message) };
     }
 
     return { success: true };
