@@ -232,47 +232,36 @@ export class MercadoPagoService implements OnModuleInit {
    * Handle refund - revert user to free plan
    */
   private async handleRefund(userId: string, paymentId: string, refundAmount: number): Promise<void> {
-    // Find the free plan
-    const freePlan = await this.prisma.subscriptionPlan.findFirst({
-      where: { name: 'free' },
-    });
-
-    if (!freePlan) {
-      this.logger.error('Free plan not found in database');
-      throw new Error('Free plan not configured');
-    }
-
-    // Revert subscription to free plan
-    await this.prisma.subscription.updateMany({
-      where: { userId },
-      data: {
-        planId: freePlan.id,
-        status: 'ACTIVE',
-        billingCycle: 'MONTHLY',
-        externalId: null,
-        currentPeriodEnd: new Date('9999-12-31'),
-        cancelAtPeriodEnd: false,
-        canceledAt: null,
-      },
-    });
-
-    // Record the refund in payment history
     const subscription = await this.prisma.subscription.findUnique({
       where: { userId },
     });
 
-    if (subscription) {
-      await this.prisma.payment.create({
-        data: {
-          subscriptionId: subscription.id,
-          amount: -refundAmount, // Negative amount indicates refund
-          currency: 'BRL',
-          status: 'REFUNDED',
-          externalId: `refund_${paymentId}`,
-          paidAt: new Date(),
-        },
-      });
+    if (!subscription) {
+      this.logger.warn(`No subscription found for user ${userId} during refund`);
+      return;
     }
+
+    // Record the refund in payment history
+    await this.prisma.payment.create({
+      data: {
+        subscriptionId: subscription.id,
+        amount: -refundAmount, // Negative amount indicates refund
+        currency: 'BRL',
+        status: 'REFUNDED',
+        externalId: `refund_${paymentId}`,
+        paidAt: new Date(),
+      },
+    });
+
+    // Mark subscription as canceled - user reverts to free plan
+    await this.prisma.subscription.update({
+      where: { userId },
+      data: {
+        status: 'CANCELED',
+        canceledAt: new Date(),
+        externalId: null,
+      },
+    });
 
     this.logger.log(`User ${userId} reverted to free plan after refund`);
   }

@@ -23,12 +23,13 @@ export class SubscriptionController {
     const subscription = await this.subscriptionService.getUserSubscription(
       session.user.id,
     );
+    const freePlan = await this.subscriptionService.getFreePlan();
 
-    // Only consider ACTIVE subscriptions as paid
+    // Only consider ACTIVE subscriptions with non-free plan as paid
     const isActiveSubscription = subscription && subscription.status === 'ACTIVE';
+    const isFreePlan = !subscription || subscription.planId === freePlan.id;
 
-    if (!isActiveSubscription) {
-      const freePlan = await this.subscriptionService.getFreePlan();
+    if (!isActiveSubscription || isFreePlan) {
       return {
         plan: freePlan,
         subscription: subscription || null,
