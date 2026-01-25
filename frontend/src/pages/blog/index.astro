@@ -1,0 +1,139 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import '@/index.css';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Blog - Horas Líquidas" description="Dicas de produtividade, técnicas de estudo e como aproveitar melhor seu tempo de foco.">
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <header class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 sm:h-6 sm:w-6 text-primary">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
+        </a>
+        <nav class="flex items-center gap-4">
+          <a href="/blog" class="text-sm font-medium text-foreground">
+            Blog
+          </a>
+          <a href="/login">
+            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md px-3 text-xs sm:text-sm">
+              Entrar
+            </button>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <!-- Page header -->
+      <header class="mb-10">
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Blog</h1>
+        <p class="text-lg text-muted-foreground">
+          Dicas de produtividade, técnicas de estudo e como aproveitar melhor seu tempo de foco.
+        </p>
+      </header>
+
+      <!-- Posts list -->
+      <div class="space-y-8">
+        {posts.map((post) => {
+          const formattedDate = post.data.pubDate.toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+
+          return (
+            <article class="group">
+              <a href={`/blog/${post.slug}`} class="block">
+                <div class="rounded-xl border border-border bg-card p-6 transition-all hover:border-accent/50 hover:bg-card/80">
+                  <div class="flex flex-col gap-3">
+                    <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                      <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+                      {post.data.tags.length > 0 && (
+                        <>
+                          <span>•</span>
+                          <div class="flex gap-2">
+                            {post.data.tags.slice(0, 2).map((tag) => (
+                              <span class="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <h2 class="text-xl font-semibold group-hover:text-primary transition-colors">
+                      {post.data.title}
+                    </h2>
+                    <p class="text-muted-foreground line-clamp-2">
+                      {post.data.description}
+                    </p>
+                    <div class="flex items-center gap-2 text-sm text-primary">
+                      <span>Ler artigo</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 transition-transform group-hover:translate-x-1">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </article>
+          );
+        })}
+      </div>
+
+      {posts.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-muted-foreground">Nenhum artigo publicado ainda.</p>
+        </div>
+      )}
+
+      <!-- RSS link -->
+      <div class="mt-12 pt-8 border-t border-border">
+        <a
+          href="/rss.xml"
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="M4 11a9 9 0 0 1 9 9"></path>
+            <path d="M4 4a16 16 0 0 1 16 16"></path>
+            <circle cx="5" cy="19" r="1"></circle>
+          </svg>
+          Assinar via RSS
+        </a>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 sm:py-8 border-t border-border">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 sm:h-5 sm:w-5 text-primary">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span class="font-medium text-sm sm:text-base">Horas Líquidas</span>
+          </div>
+          <div class="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+            <a href="/terms" class="hover:text-foreground transition-colors">
+              Termos de Uso
+            </a>
+            <a href="/privacy" class="hover:text-foreground transition-colors">
+              Política de Privacidade
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

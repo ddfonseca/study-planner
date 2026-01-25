@@ -1,5 +1,5 @@
 /**
- * Main App Component with Router Configuration
+ * SPA App Component - Used within Astro pages for protected routes
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -9,20 +9,17 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
 // Pages
-import { LandingPage } from '@/views/LandingPage';
 import { LoginPage } from '@/views/LoginPage';
 import { CalendarPage } from '@/views/CalendarPage';
 import { DashboardPage } from '@/views/DashboardPage';
 import { SubjectAnalyticsPage } from '@/views/SubjectAnalyticsPage';
 import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
-import { TermsPage } from '@/views/TermsPage';
-import { PrivacyPage } from '@/views/PrivacyPage';
 
 // Toast notifications
 import { Toaster } from '@/components/ui/toaster';
 
-function App() {
+export function SpaApp() {
   return (
     <BrowserRouter>
       <Routes>
@@ -30,10 +27,6 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
-
-        {/* Public legal pages */}
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
 
         {/* Protected routes with App Layout */}
         <Route
@@ -52,10 +45,7 @@ function App() {
           <Route path="scratchpad" element={<ScratchpadPage />} />
         </Route>
 
-        {/* Landing page */}
-        <Route path="/" element={<LandingPage />} />
-
-        {/* 404 - Redirect to app */}
+        {/* Redirect unknown routes to app */}
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
       <Toaster />
@@ -63,4 +53,4 @@ function App() {
   );
 }
 
-export default App;
+export default SpaApp;

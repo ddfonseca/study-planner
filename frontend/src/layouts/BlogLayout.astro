@@ -1,0 +1,130 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import '@/index.css';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  author?: string;
+}
+
+const { title, description, pubDate, updatedDate, author = 'Equipe Horas Líquidas' } = Astro.props;
+
+const formattedPubDate = pubDate.toLocaleDateString('pt-BR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const formattedUpdatedDate = updatedDate?.toLocaleDateString('pt-BR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={`${title} - Blog Horas Líquidas`} description={description}>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <header class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 sm:h-6 sm:w-6 text-primary">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
+        </a>
+        <nav class="flex items-center gap-4">
+          <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Blog
+          </a>
+          <a href="/login">
+            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md px-3 text-xs sm:text-sm">
+              Entrar
+            </button>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <article>
+        <!-- Back link -->
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="m12 19-7-7 7-7"></path>
+            <path d="M19 12H5"></path>
+          </svg>
+          Voltar ao blog
+        </a>
+
+        <!-- Article header -->
+        <header class="mb-8">
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">{title}</h1>
+          <p class="text-lg text-muted-foreground mb-4">{description}</p>
+          <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <span>{author}</span>
+            <span>•</span>
+            <time datetime={pubDate.toISOString()}>{formattedPubDate}</time>
+            {updatedDate && (
+              <>
+                <span>•</span>
+                <span>Atualizado em {formattedUpdatedDate}</span>
+              </>
+            )}
+          </div>
+        </header>
+
+        <!-- Article content -->
+        <div class="prose prose-neutral dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-h2:text-xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:font-medium prose-h3:mt-6 prose-h3:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+          <slot />
+        </div>
+
+        <!-- CTA -->
+        <div class="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
+          <h3 class="text-lg font-semibold mb-2">Comece a estudar com mais clareza</h3>
+          <p class="text-muted-foreground mb-4">
+            Use o Horas Líquidas para acompanhar seu tempo de foco real e atingir suas metas semanais.
+          </p>
+          <a href="/login">
+            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6">
+              Começar grátis
+            </button>
+          </a>
+        </div>
+      </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 sm:py-8 border-t border-border">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 sm:h-5 sm:w-5 text-primary">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span class="font-medium text-sm sm:text-base">Horas Líquidas</span>
+          </div>
+          <div class="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+            <a href="/terms" class="hover:text-foreground transition-colors">
+              Termos de Uso
+            </a>
+            <a href="/privacy" class="hover:text-foreground transition-colors">
+              Política de Privacidade
+            </a>
+            <a href="/blog" class="hover:text-foreground transition-colors">
+              Blog
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

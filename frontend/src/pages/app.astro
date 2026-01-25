@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SpaApp } from '@/components/SpaApp';
+import '@/index.css';
+---
+
+<BaseLayout title="Horas Líquidas">
+  <div id="root"></div>
+  <SpaApp client:only="react" />
+</BaseLayout>

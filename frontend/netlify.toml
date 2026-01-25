@@ -16,8 +16,13 @@
   force = true
   headers = {X-Forwarded-Host = "horasliquidas.com.br"}
 
-# SPA fallback (catch-all for client-side routing)
+# SPA routes - redirect to their respective Astro-generated pages
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/login/index.html"
   status = 200
