@@ -212,14 +212,14 @@ export function SessionModal({
                   role={canModify ? 'button' : 'listitem'}
                   tabIndex={canModify ? 0 : undefined}
                   aria-label={canModify ? `Editar sessão: ${materia.materia}, ${formatTime(materia.minutos)}` : undefined}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  className={`flex items-center justify-between p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border-2 ${
                     canModify ? 'cursor-pointer' : 'cursor-default'
                   } ${
                     editingSession?.id === materia.id
-                      ? 'bg-primary/20 ring-2 ring-primary'
+                      ? 'bg-primary/20 border-primary'
                       : canModify
-                        ? 'bg-muted hover:bg-muted/80'
-                        : 'bg-muted'
+                        ? 'bg-muted hover:bg-muted/80 border-transparent'
+                        : 'bg-muted border-transparent'
                   }`}
                 >
                   <div className="flex-1">
