@@ -1,7 +1,7 @@
 /**
- * Study Timer - Simple stopwatch for tracking study sessions
+ * Study Timer - Stopwatch and Pomodoro timer for tracking study sessions
  */
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SubjectPicker } from '@/components/ui/subject-picker';
@@ -9,14 +9,25 @@ import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { useHaptic } from '@/hooks/useHaptic';
-import { Play, Square, Clock } from 'lucide-react';
+import { Play, Square, Clock, Timer, Infinity as InfinityIcon } from 'lucide-react';
 import { TimerOfflineWarning } from './TimerOfflineWarning';
+import { cn } from '@/lib/utils';
 
 const STORAGE_KEY = 'studyTimer';
 
+type TimerMode = 'pomodoro-25' | 'pomodoro-50' | 'stopwatch';
+
+const TIMER_PRESETS: { mode: TimerMode; label: string; sublabel: string; seconds: number }[] = [
+  { mode: 'pomodoro-25', label: '25 min', sublabel: 'Pomodoro', seconds: 25 * 60 },
+  { mode: 'pomodoro-50', label: '50 min', sublabel: 'Deep Work', seconds: 50 * 60 },
+  { mode: 'stopwatch', label: 'Livre', sublabel: 'Cronômetro', seconds: 0 },
+];
+
 interface TimerState {
+  mode: TimerMode;
   isRunning: boolean;
   seconds: number;
+  targetSeconds: number;
   subject: string;
   startTime: number | null;
 }
@@ -32,16 +43,20 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
   const { trigger: triggerHaptic, triggerPattern } = useHaptic();
 
+  const [mode, setMode] = useState<TimerMode>('pomodoro-25');
   const [isRunning, setIsRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(25 * 60);
+  const [targetSeconds, setTargetSeconds] = useState(25 * 60);
   const [subject, setSubject] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initializedRef = useRef(false);
   const isRunningRef = useRef(isRunning);
   const subjectRef = useRef(subject);
+  const modeRef = useRef(mode);
   const handleStartRef = useRef<() => void>(() => {});
   const handleStopRef = useRef<() => void>(() => {});
+  const handleCompleteRef = useRef<() => void>(() => {});
   const openPickerRef = useRef<() => void>(() => {});
 
   // Load saved state from localStorage on mount
@@ -54,9 +69,17 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
     if (saved) {
       try {
         const state: TimerState = JSON.parse(saved);
+        setMode(state.mode || 'stopwatch');
+        setTargetSeconds(state.targetSeconds || 0);
         if (state.isRunning && state.startTime) {
           const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-          setSeconds(elapsed);
+          // For countdown modes, calculate remaining time
+          if (state.mode === 'pomodoro-25' || state.mode === 'pomodoro-50') {
+            const remaining = Math.max(0, state.targetSeconds - elapsed);
+            setSeconds(remaining);
+          } else {
+            setSeconds(elapsed);
+          }
           setSubject(state.subject);
           setIsRunning(true);
         } else {
@@ -72,14 +95,24 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
 
   // Save state to localStorage
   useEffect(() => {
+    // For countdown modes, startTime tracks when we started the countdown
+    // elapsed = targetSeconds - seconds (remaining)
+    const elapsedForCountdown = mode === 'stopwatch' ? seconds : targetSeconds - seconds;
     const state: TimerState = {
+      mode,
       isRunning,
       seconds,
+      targetSeconds,
       subject,
-      startTime: isRunning ? Date.now() - seconds * 1000 : null,
+      startTime: isRunning ? Date.now() - elapsedForCountdown * 1000 : null,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [isRunning, seconds, subject]);
+  }, [mode, isRunning, seconds, targetSeconds, subject]);
+
+  // Keep mode ref in sync
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   // Notify parent about running state changes
   useEffect(() => {
@@ -96,7 +129,19 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
-        setSeconds((s) => s + 1);
+        setSeconds((s) => {
+          if (modeRef.current === 'stopwatch') {
+            // Stopwatch: count up
+            return s + 1;
+          } else {
+            // Pomodoro: count down
+            if (s <= 1) {
+              // Timer complete - will be handled by separate effect
+              return 0;
+            }
+            return s - 1;
+          }
+        });
       }, 1000);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -119,7 +164,13 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
             const state: TimerState = JSON.parse(saved);
             if (state.isRunning && state.startTime) {
               const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-              setSeconds(elapsed);
+              if (state.mode === 'stopwatch') {
+                setSeconds(elapsed);
+              } else {
+                // Countdown mode: calculate remaining
+                const remaining = Math.max(0, state.targetSeconds - elapsed);
+                setSeconds(remaining);
+              }
             }
           } catch {
             // Ignore parse errors
@@ -137,24 +188,51 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   // Update page title when timer is running
   useEffect(() => {
     if (isRunning) {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
-      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      document.title = `${timeStr} - ${subject}`;
+      const displaySeconds = mode === 'stopwatch' ? seconds : seconds;
+      const hours = Math.floor(displaySeconds / 3600);
+      const minutes = Math.floor((displaySeconds % 3600) / 60);
+      const secs = displaySeconds % 60;
+      const timeStr = hours > 0
+        ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+        : `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      const modeIcon = mode === 'stopwatch' ? '⏱️' : '🍅';
+      document.title = `${modeIcon} ${timeStr} - ${subject}`;
     } else {
       document.title = 'Horas Líquidas';
     }
     return () => {
       document.title = 'Horas Líquidas';
     };
-  }, [isRunning, seconds, subject]);
+  }, [isRunning, seconds, subject, mode]);
 
-  const formatTime = (totalSeconds: number): string => {
+  // Handle Pomodoro completion (when countdown reaches 0)
+  useEffect(() => {
+    if (isRunning && mode !== 'stopwatch' && seconds === 0) {
+      handleCompleteRef.current();
+    }
+  }, [isRunning, mode, seconds]);
+
+  const formatTime = (totalSeconds: number, showHours = true): string => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    if (showHours || hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const selectMode = (selectedMode: TimerMode) => {
+    const preset = TIMER_PRESETS.find(p => p.mode === selectedMode);
+    setMode(selectedMode);
+    if (preset && preset.seconds > 0) {
+      setSeconds(preset.seconds);
+      setTargetSeconds(preset.seconds);
+    } else {
+      setSeconds(0);
+      setTargetSeconds(0);
+    }
+    triggerHaptic('light');
   };
 
   const handleStart = () => {
@@ -162,28 +240,84 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
       triggerPattern('error');
       toast({
         title: 'Atenção',
-        description: 'Digite a matéria antes de iniciar',
+        description: 'Selecione a matéria antes de iniciar',
         variant: 'destructive',
       });
       return;
+    }
+    // For pomodoro modes, make sure we have the correct starting time
+    if (mode !== 'stopwatch' && seconds === 0) {
+      const preset = TIMER_PRESETS.find(p => p.mode === mode);
+      if (preset) {
+        setSeconds(preset.seconds);
+        setTargetSeconds(preset.seconds);
+      }
     }
     triggerHaptic('medium');
     setIsRunning(true);
   };
 
-  const handleStop = async () => {
+  // Called when Pomodoro countdown reaches 0
+  const handleComplete = useCallback(async () => {
     setIsRunning(false);
 
-    const minutes = Math.floor(seconds / 60);
+    // Calculate studied minutes from targetSeconds (full duration)
+    const minutes = Math.floor(targetSeconds / 60);
 
+    // Notify user
+    triggerPattern('success');
+
+    // Try to show browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🍅 Pomodoro completo!', {
+        body: `${minutes} minutos de ${subject} finalizados. Hora da pausa!`,
+        icon: '/favicon.png',
+      });
+    }
+
+    // Save session
     if (minutes > 0) {
       try {
         const today = new Date().toISOString().split('T')[0];
         await handleAddSession(today, subject.trim(), minutes);
+        toast({
+          title: '🍅 Pomodoro completo!',
+          description: `${minutes} minutos de ${subject} registrados. Hora da pausa!`,
+        });
+      } catch (err) {
+        triggerPattern('error');
+        toast({
+          title: 'Erro',
+          description: err instanceof Error ? err.message : 'Falha ao salvar sessão',
+          variant: 'destructive',
+        });
+      }
+    }
+
+    // Reset to initial state for selected mode
+    const preset = TIMER_PRESETS.find(p => p.mode === mode);
+    setSeconds(preset?.seconds || 0);
+    setSubject('');
+    localStorage.removeItem(STORAGE_KEY);
+  }, [mode, targetSeconds, subject, handleAddSession, toast, triggerPattern]);
+
+  const handleStop = async () => {
+    setIsRunning(false);
+
+    // For stopwatch: minutes = seconds elapsed
+    // For pomodoro: minutes = targetSeconds - seconds remaining (time studied)
+    const studiedMinutes = mode === 'stopwatch'
+      ? Math.floor(seconds / 60)
+      : Math.floor((targetSeconds - seconds) / 60);
+
+    if (studiedMinutes > 0) {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        await handleAddSession(today, subject.trim(), studiedMinutes);
         triggerPattern('success');
         toast({
           title: 'Sessão salva!',
-          description: `${minutes} minutos de ${subject} registrados`,
+          description: `${studiedMinutes} minutos de ${subject} registrados`,
         });
       } catch (err) {
         triggerPattern('error');
@@ -201,8 +335,9 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
       });
     }
 
-    // Reset
-    setSeconds(0);
+    // Reset to initial state for selected mode
+    const preset = TIMER_PRESETS.find(p => p.mode === mode);
+    setSeconds(preset?.seconds || 0);
     setSubject('');
     localStorage.removeItem(STORAGE_KEY);
   };
@@ -211,6 +346,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   useLayoutEffect(() => {
     handleStartRef.current = handleStart;
     handleStopRef.current = handleStop;
+    handleCompleteRef.current = handleComplete;
     openPickerRef.current = () => setIsPickerOpen(true);
   });
 
@@ -236,43 +372,100 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
     return () => window.removeEventListener('shortcut:toggleTimer', handleToggleTimer);
   }, []);
 
+  // Calculate progress for Pomodoro modes (0-100%)
+  const progress = mode !== 'stopwatch' && targetSeconds > 0
+    ? Math.round(((targetSeconds - seconds) / targetSeconds) * 100)
+    : 0;
+
   return (
     <Card data-tour="study-timer">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Clock className="h-4 w-4" />
+          {mode === 'stopwatch' ? (
+            <Clock className="h-4 w-4" />
+          ) : (
+            <Timer className="h-4 w-4" />
+          )}
           Estudar Agora
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Mode selection - only show when not running */}
+        {!isRunning && (
+          <div className="grid grid-cols-3 gap-2">
+            {TIMER_PRESETS.map((preset) => (
+              <button
+                key={preset.mode}
+                onClick={() => selectMode(preset.mode)}
+                disabled={!canModify}
+                className={cn(
+                  'flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all',
+                  'hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20',
+                  mode === preset.mode
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-muted bg-muted/30 text-muted-foreground',
+                  !canModify && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                {preset.mode === 'stopwatch' ? (
+                  <InfinityIcon className="h-4 w-4 mb-1" />
+                ) : (
+                  <span className="text-sm mb-1">🍅</span>
+                )}
+                <span className="text-sm font-medium">{preset.label}</span>
+                <span className="text-[10px] opacity-70">{preset.sublabel}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Timer display */}
-        <div className="text-center">
+        <div className="text-center space-y-2">
+          {isRunning && subject && (
+            <p className="text-sm text-muted-foreground font-medium">{subject}</p>
+          )}
           <span
-            className={`text-3xl font-mono font-bold ${
+            className={cn(
+              'text-4xl font-mono font-bold tabular-nums',
               isRunning ? 'text-primary' : 'text-muted-foreground'
-            }`}
+            )}
           >
-            {formatTime(seconds)}
+            {mode === 'stopwatch' ? formatTime(seconds, true) : formatTime(seconds, false)}
           </span>
+
+          {/* Progress bar for Pomodoro modes */}
+          {isRunning && mode !== 'stopwatch' && (
+            <div className="space-y-1">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-1000 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">{progress}% concluído</p>
+            </div>
+          )}
         </div>
 
         {/* Offline warning */}
         <TimerOfflineWarning />
 
-        {/* Subject input */}
-        <SubjectPicker
-          value={subject}
-          onValueChange={setSubject}
-          subjects={subjects}
-          recentSubjects={recentSubjects}
-          onSubjectUsed={addRecentSubject}
-          placeholder="Selecione a matéria..."
-          searchPlaceholder="Buscar..."
-          emptyMessage="Nenhuma matéria"
-          disabled={isRunning || !canModify}
-          open={isPickerOpen}
-          onOpenChange={setIsPickerOpen}
-        />
+        {/* Subject input - only show when not running */}
+        {!isRunning && (
+          <SubjectPicker
+            value={subject}
+            onValueChange={setSubject}
+            subjects={subjects}
+            recentSubjects={recentSubjects}
+            onSubjectUsed={addRecentSubject}
+            placeholder="Selecione a matéria..."
+            searchPlaceholder="Buscar..."
+            emptyMessage="Nenhuma matéria"
+            disabled={isRunning || !canModify}
+            open={isPickerOpen}
+            onOpenChange={setIsPickerOpen}
+          />
+        )}
 
         {/* Start/Stop button */}
         {!canModify ? (
@@ -282,7 +475,7 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
         ) : !isRunning ? (
           <Button onClick={handleStart} className="w-full" size="lg">
             <Play className="h-4 w-4 mr-2" />
-            Iniciar
+            {mode === 'stopwatch' ? 'Iniciar' : 'Iniciar Pomodoro'}
           </Button>
         ) : (
           <Button
