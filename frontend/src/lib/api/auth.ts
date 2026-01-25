@@ -21,15 +21,12 @@ export const authClient = createAuthClient({
   },
 });
 
-// Check if email auth is enabled (dev only - for testing with ngrok)
-const IS_DEV = import.meta.env.DEV;
-
 export const authApi = {
   /**
-   * Check if email/password auth is available (dev only)
+   * Check if email/password auth is available
    */
   isEmailAuthEnabled(): boolean {
-    return IS_DEV;
+    return true;
   },
 
   /**
@@ -43,13 +40,9 @@ export const authApi = {
   },
 
   /**
-   * Sign in with email and password (dev only)
+   * Sign in with email and password
    */
   async loginWithEmail(email: string, password: string): Promise<{ success: boolean; error?: string }> {
-    if (!IS_DEV) {
-      return { success: false, error: 'Email auth not available in production' };
-    }
-
     const result = await authClient.signIn.email({
       email,
       password,
@@ -64,13 +57,9 @@ export const authApi = {
   },
 
   /**
-   * Sign up with email and password (dev only)
+   * Sign up with email and password
    */
   async signUpWithEmail(email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> {
-    if (!IS_DEV) {
-      return { success: false, error: 'Email auth not available in production' };
-    }
-
     const result = await authClient.signUp.email({
       email,
       password,

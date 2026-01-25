@@ -1,5 +1,5 @@
 /**
- * Login Page with Google OAuth and Email/Password (dev only)
+ * Login Page with Google OAuth and Email/Password
  */
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -39,7 +39,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Email auth state (dev only)
+  // Email auth state
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -103,7 +103,7 @@ export function LoginPage() {
           <span className="ml-2 sm:ml-3 font-medium">Entrar com Google</span>
         </Button>
 
-        {/* Email/Password auth - DEV ONLY */}
+        {/* Email/Password auth */}
         {emailAuthEnabled && (
           <>
             <div className="relative">
@@ -112,7 +112,7 @@ export function LoginPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  Dev Only
+                  ou
                 </span>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function LoginPage() {
                 className="w-full h-12"
               >
                 <Mail className="h-5 w-5 mr-2" />
-                Entrar com Email (Dev)
+                Entrar com Email
               </Button>
             ) : (
               <form onSubmit={handleEmailSubmit} className="space-y-3">

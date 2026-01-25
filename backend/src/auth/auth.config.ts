@@ -8,22 +8,15 @@ const prisma = new PrismaClient();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Backend URL for internal reference
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-// Check if we're in development mode
-const IS_DEV = process.env.NODE_ENV !== 'production';
-
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
-  // Email/password auth - only enabled in development for testing
-  emailAndPassword: IS_DEV
-    ? {
-        enabled: true,
-        autoSignIn: true,
-      }
-    : {
-        enabled: false,
-      },
+  // Email/password auth - enabled for all environments
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
