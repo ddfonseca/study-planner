@@ -4,18 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { SwipeableSessionItem } from './SwipeableSessionItem';
 import type { StudySession } from '@/types/session';
 
-function createTouchEvent(
-  type: 'touchstart' | 'touchmove' | 'touchend',
-  clientX: number,
-  clientY: number
-): Partial<React.TouchEvent> {
-  const touch = { clientX, clientY };
-  return {
-    touches: type !== 'touchend' ? [touch] : [],
-    changedTouches: [touch],
-  } as Partial<React.TouchEvent>;
-}
-
 describe('SwipeableSessionItem', () => {
   const mockSession: StudySession = {
     id: 'session-1',
@@ -42,33 +30,16 @@ describe('SwipeableSessionItem', () => {
       expect(screen.getByText('1h')).toBeInTheDocument();
     });
 
-    it('renders delete action button', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      expect(screen.getByLabelText('Excluir sessão')).toBeInTheDocument();
-    });
-
     it('renders with test id', () => {
       render(<SwipeableSessionItem {...defaultProps} />);
 
       expect(screen.getByTestId('swipeable-session-item')).toBeInTheDocument();
     });
-  });
 
-  describe('when canModify is false', () => {
-    it('does not render delete action', () => {
-      render(<SwipeableSessionItem {...defaultProps} canModify={false} />);
+    it('does not render delete button (delete is now in modal only)', () => {
+      render(<SwipeableSessionItem {...defaultProps} />);
 
       expect(screen.queryByLabelText('Excluir sessão')).not.toBeInTheDocument();
-    });
-
-    it('does not have clickable content', () => {
-      render(<SwipeableSessionItem {...defaultProps} canModify={false} />);
-
-      const content = screen.getByTestId('session-content');
-      const contentInner = content.querySelector('[role="button"]');
-
-      expect(contentInner).not.toBeInTheDocument();
     });
   });
 
@@ -84,15 +55,15 @@ describe('SwipeableSessionItem', () => {
       expect(onEdit).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onDelete when delete button is clicked', async () => {
+    it('calls onEdit when canModify is false (navigates to view mode)', async () => {
       const user = userEvent.setup();
-      const onDelete = vi.fn();
+      const onEdit = vi.fn();
 
-      render(<SwipeableSessionItem {...defaultProps} onDelete={onDelete} />);
+      render(<SwipeableSessionItem {...defaultProps} onEdit={onEdit} canModify={false} />);
 
-      await user.click(screen.getByLabelText('Excluir sessão'));
+      await user.click(screen.getByText('Mathematics'));
 
-      expect(onDelete).toHaveBeenCalledWith('session-1');
+      expect(onEdit).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -120,133 +91,8 @@ describe('SwipeableSessionItem', () => {
     });
   });
 
-  describe('swipe gestures', () => {
-    it('reveals delete button on swipe left', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Start touch
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-
-      // Move left (revealing delete)
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-
-      // End touch
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      // Check transform style - should be translated left
-      expect(content).toHaveStyle({ transform: 'translateX(-72px)' });
-    });
-
-    it('hides delete button on swipe right after revealed', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // First, reveal the delete button
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      expect(content).toHaveStyle({ transform: 'translateX(-72px)' });
-
-      // Now swipe right to hide
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 100, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 200, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 200, 100));
-
-      // Should be back to original position
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-
-    it('does not reveal on small swipe (below threshold)', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Small swipe that doesn't meet threshold (40px)
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 180, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 180, 100));
-
-      // Should remain at original position
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-
-    it('ignores swipe when vertical movement is greater (scrolling)', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Vertical scroll movement
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 180, 200));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 180, 200));
-
-      // Should not have moved
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-
-    it('does not respond to swipe when canModify is false', () => {
-      render(<SwipeableSessionItem {...defaultProps} canModify={false} />);
-
-      const content = screen.getByTestId('session-content');
-
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-  });
-
-  describe('delete action after swipe reveal', () => {
-    it('clicking content while revealed closes the swipe', async () => {
-      const user = userEvent.setup();
-      const onEdit = vi.fn();
-
-      render(<SwipeableSessionItem {...defaultProps} onEdit={onEdit} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Reveal delete
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      expect(content).toHaveStyle({ transform: 'translateX(-72px)' });
-
-      // Click content - should close, not trigger edit
-      await user.click(screen.getByText('Mathematics'));
-
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-      expect(onEdit).not.toHaveBeenCalled();
-    });
-
-    it('resets swipe state when delete is triggered', async () => {
-      const user = userEvent.setup();
-      const onDelete = vi.fn();
-
-      render(<SwipeableSessionItem {...defaultProps} onDelete={onDelete} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Reveal delete
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      // Click delete button
-      await user.click(screen.getByLabelText('Excluir sessão'));
-
-      expect(onDelete).toHaveBeenCalledWith('session-1');
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-  });
-
   describe('accessibility', () => {
-    it('has role="button" on clickable content when canModify', () => {
+    it('has role="button" on clickable content', () => {
       render(<SwipeableSessionItem {...defaultProps} />);
 
       const content = screen.getByText('Mathematics').closest('[role="button"]');
@@ -259,90 +105,21 @@ describe('SwipeableSessionItem', () => {
       const content = screen.getByText('Mathematics').closest('[role="button"]');
       expect(content).toHaveAttribute('tabIndex', '0');
     });
-
-    it('delete button has proper aria-label', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      expect(screen.getByLabelText('Excluir sessão')).toBeInTheDocument();
-    });
   });
 
-  describe('touch utilities', () => {
-    it('has touch-no-select class to prevent text selection', () => {
+  describe('styling', () => {
+    it('has cursor-pointer class when canModify is true', () => {
       render(<SwipeableSessionItem {...defaultProps} />);
 
       const content = screen.getByTestId('session-content');
-      expect(content).toHaveClass('touch-no-select');
+      expect(content).toHaveClass('cursor-pointer');
     });
 
-    it('has touch-action-pan-y class to allow vertical scroll', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-      expect(content).toHaveClass('touch-action-pan-y');
-    });
-
-    it('has touch-action-manipulation on content area', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const contentInner = screen.getByText('Mathematics').closest('.touch-action-manipulation');
-      expect(contentInner).toBeInTheDocument();
-    });
-  });
-
-  describe('vertical scroll non-interference', () => {
-    it('allows vertical scrolling when movement is primarily vertical', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Start touch
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-
-      // Move vertically (user is scrolling - deltaY > deltaX)
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 210, 200));
-
-      // End touch
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 210, 200));
-
-      // Should not have moved (vertical scroll was detected and swipe was cancelled)
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
-    });
-
-    it('captures horizontal swipe when movement is primarily horizontal', () => {
-      render(<SwipeableSessionItem {...defaultProps} />);
-
-      const content = screen.getByTestId('session-content');
-
-      // Start touch
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-
-      // Move horizontally (user is swiping - deltaX > deltaY)
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 110));
-
-      // End touch
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 110));
-
-      // Should have moved (horizontal swipe was captured)
-      expect(content).toHaveStyle({ transform: 'translateX(-72px)' });
-    });
-
-    it('does not interfere with scroll when canModify is false', () => {
+    it('does not have cursor-pointer class when canModify is false', () => {
       render(<SwipeableSessionItem {...defaultProps} canModify={false} />);
 
       const content = screen.getByTestId('session-content');
-
-      // Start touch
-      fireEvent.touchStart(content, createTouchEvent('touchstart', 200, 100));
-
-      // Move horizontally
-      fireEvent.touchMove(content, createTouchEvent('touchmove', 100, 100));
-
-      // End touch
-      fireEvent.touchEnd(content, createTouchEvent('touchend', 100, 100));
-
-      // Should not have moved when canModify is false
-      expect(content).toHaveStyle({ transform: 'translateX(0px)' });
+      expect(content).not.toHaveClass('cursor-pointer');
     });
   });
 });

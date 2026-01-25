@@ -9,6 +9,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,6 +49,7 @@ export function SessionModal({
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const isEditing = editingSession !== null;
@@ -90,10 +92,12 @@ export function SessionModal({
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return;
     setIsSubmitting(true);
     try {
-      await onDeleteSession(id);
+      await onDeleteSession(deleteConfirmId);
+      setDeleteConfirmId(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -230,7 +234,7 @@ export function SessionModal({
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(materia.id);
+                        setDeleteConfirmId(materia.id);
                       }}
                       disabled={isSubmitting}
                       className="text-danger hover:text-danger hover:bg-danger/10"
@@ -251,6 +255,17 @@ export function SessionModal({
           </p>
         )}
       </ResponsiveDialogContent>
+
+      <ConfirmDialog
+        open={!!deleteConfirmId}
+        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+        title="Excluir sessão?"
+        description="Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+        isLoading={isSubmitting}
+      />
     </ResponsiveDialog>
   );
 }
