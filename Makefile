@@ -37,7 +37,7 @@ prisma-generate:
 # Deploy - Production
 deploy-front:
 	cd frontend && PUBLIC_API_BASE_URL="" PUBLIC_FRONTEND_URL="https://horasliquidas.com.br" npm run build
-	netlify deploy --prod --dir=frontend/dist
+	netlify deploy --prod --dir=frontend/dist --filter=frontend-new
 
 deploy-back:
 	cd backend && fly deploy
