@@ -71,6 +71,7 @@ export function CalendarPage() {
   const [mobileTab, setMobileTab] = useState<MobileTab>('calendar');
   const [timerActive, setTimerActive] = useState(false);
   const [isModalHighlighted, setIsModalHighlighted] = useState(false);
+  const [isTimerFullscreen, setIsTimerFullscreen] = useState(false);
 
   // Swipe handlers for tab navigation
   const handleSwipeLeft = useCallback(() => {
@@ -302,6 +303,8 @@ export function CalendarPage() {
           <StudyTimer
             subjects={getUniqueSubjects()}
             onRunningChange={setTimerActive}
+            fullscreen={isTimerFullscreen}
+            onFullscreenChange={setIsTimerFullscreen}
           />
         );
       default:
@@ -355,7 +358,11 @@ export function CalendarPage() {
             <div className="space-y-4">
               <CycleSuggestionCard />
               <WeeklyProgress />
-              <StudyTimer subjects={getUniqueSubjects()} />
+              <StudyTimer
+                subjects={getUniqueSubjects()}
+                fullscreen={isTimerFullscreen}
+                onFullscreenChange={setIsTimerFullscreen}
+              />
             </div>
           </div>
         )}
@@ -389,6 +396,20 @@ export function CalendarPage() {
 
       {/* Weekly Goal Achievement Confetti */}
       <Confetti {...confettiProps} />
+
+      {/* Fullscreen Timer Overlay */}
+      {isTimerFullscreen && (
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4 md:p-8 pb-24 md:pb-8">
+          <div className="w-full max-w-md">
+            <StudyTimer
+              subjects={getUniqueSubjects()}
+              onRunningChange={setTimerActive}
+              fullscreen={true}
+              onFullscreenChange={setIsTimerFullscreen}
+            />
+          </div>
+        </div>
+      )}
     </div>
     </SkeletonTransition>
   );

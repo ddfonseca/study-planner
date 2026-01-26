@@ -9,7 +9,7 @@ import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { useHaptic } from '@/hooks/useHaptic';
-import { Play, Square, Clock, Timer, Infinity as InfinityIcon } from 'lucide-react';
+import { Play, Square, Clock, Timer, Infinity as InfinityIcon, Maximize2, Minimize2 } from 'lucide-react';
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 import { cn } from '@/lib/utils';
 
@@ -35,9 +35,11 @@ interface TimerState {
 interface StudyTimerProps {
   subjects: string[];
   onRunningChange?: (isRunning: boolean) => void;
+  fullscreen?: boolean;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
-export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
+export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFullscreenChange }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
@@ -49,6 +51,19 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   const [targetSeconds, setTargetSeconds] = useState(25 * 60);
   const [subject, setSubject] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(fullscreen);
+
+  // Sync fullscreen state with prop
+  useEffect(() => {
+    setIsFullscreen(fullscreen);
+  }, [fullscreen]);
+
+  // Toggle fullscreen handler
+  const toggleFullscreen = () => {
+    const newValue = !isFullscreen;
+    setIsFullscreen(newValue);
+    onFullscreenChange?.(newValue);
+  };
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initializedRef = useRef(false);
   const isRunningRef = useRef(isRunning);
@@ -380,27 +395,46 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
   return (
     <Card data-tour="study-timer">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          {mode === 'stopwatch' ? (
-            <Clock className="h-4 w-4" />
-          ) : (
-            <Timer className="h-4 w-4" />
-          )}
-          Estudar Agora
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className={cn(
+            "font-medium flex items-center gap-2",
+            isFullscreen ? "text-base" : "text-sm"
+          )}>
+            {mode === 'stopwatch' ? (
+              <Clock className={isFullscreen ? "h-5 w-5" : "h-4 w-4"} />
+            ) : (
+              <Timer className={isFullscreen ? "h-5 w-5" : "h-4 w-4"} />
+            )}
+            Estudar Agora
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className="h-8 w-8 p-0"
+            title={isFullscreen ? "Minimizar" : "Expandir"}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={cn("space-y-4", isFullscreen && "space-y-6")}>
         {/* Mode selection - only show when not running */}
         {!isRunning && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className={cn("grid grid-cols-3", isFullscreen ? "gap-3 max-w-md mx-auto" : "gap-2")}>
             {TIMER_PRESETS.map((preset) => (
               <button
                 key={preset.mode}
                 onClick={() => selectMode(preset.mode)}
                 disabled={!canModify}
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all',
+                  'flex flex-col items-center justify-center rounded-lg border-2 transition-all',
                   'hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20',
+                  isFullscreen ? 'p-3' : 'p-2',
                   mode === preset.mode
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-muted bg-muted/30 text-muted-foreground',
@@ -408,25 +442,29 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
                 )}
               >
                 {preset.mode === 'stopwatch' ? (
-                  <InfinityIcon className="h-4 w-4 mb-1" />
+                  <InfinityIcon className={cn("mb-1", isFullscreen ? "h-5 w-5" : "h-4 w-4")} />
                 ) : (
-                  <span className="text-sm mb-1">🍅</span>
+                  <span className={cn("mb-1", isFullscreen ? "text-base" : "text-sm")}>🍅</span>
                 )}
-                <span className="text-sm font-medium">{preset.label}</span>
-                <span className="text-[10px] opacity-70">{preset.sublabel}</span>
+                <span className={cn("font-medium", isFullscreen ? "text-base" : "text-sm")}>{preset.label}</span>
+                <span className={cn("opacity-70", isFullscreen ? "text-xs" : "text-[10px]")}>{preset.sublabel}</span>
               </button>
             ))}
           </div>
         )}
 
         {/* Timer display */}
-        <div className="text-center space-y-2">
+        <div className={cn("text-center", isFullscreen ? "space-y-4" : "space-y-2")}>
           {isRunning && subject && (
-            <p className="text-sm text-muted-foreground font-medium">{subject}</p>
+            <p className={cn(
+              "text-muted-foreground font-medium",
+              isFullscreen ? "text-lg" : "text-sm"
+            )}>{subject}</p>
           )}
           <span
             className={cn(
-              'text-4xl font-mono font-bold tabular-nums',
+              'font-mono font-bold tabular-nums',
+              isFullscreen ? 'text-6xl md:text-7xl' : 'text-4xl',
               isRunning ? 'text-primary' : 'text-muted-foreground'
             )}
           >
@@ -435,14 +473,20 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
 
           {/* Progress bar for Pomodoro modes */}
           {isRunning && mode !== 'stopwatch' && (
-            <div className="space-y-1">
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className={cn("space-y-1", isFullscreen && "max-w-sm mx-auto")}>
+              <div className={cn(
+                "bg-muted rounded-full overflow-hidden",
+                isFullscreen ? "h-3" : "h-2"
+              )}>
                 <div
                   className="h-full bg-primary transition-all duration-1000 ease-linear"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">{progress}% concluído</p>
+              <p className={cn(
+                "text-muted-foreground",
+                isFullscreen ? "text-sm" : "text-xs"
+              )}>{progress}% concluído</p>
             </div>
           )}
         </div>
@@ -452,42 +496,49 @@ export function StudyTimer({ subjects, onRunningChange }: StudyTimerProps) {
 
         {/* Subject input - only show when not running */}
         {!isRunning && (
-          <SubjectPicker
-            value={subject}
-            onValueChange={setSubject}
-            subjects={subjects}
-            recentSubjects={recentSubjects}
-            onSubjectUsed={addRecentSubject}
-            placeholder="Selecione a matéria..."
-            searchPlaceholder="Buscar..."
-            emptyMessage="Nenhuma matéria"
-            disabled={isRunning || !canModify}
-            open={isPickerOpen}
-            onOpenChange={setIsPickerOpen}
-          />
+          <div className={cn(isFullscreen && "max-w-md mx-auto")}>
+            <SubjectPicker
+              value={subject}
+              onValueChange={setSubject}
+              subjects={subjects}
+              recentSubjects={recentSubjects}
+              onSubjectUsed={addRecentSubject}
+              placeholder="Selecione a matéria..."
+              searchPlaceholder="Buscar..."
+              emptyMessage="Nenhuma matéria"
+              disabled={isRunning || !canModify}
+              open={isPickerOpen}
+              onOpenChange={setIsPickerOpen}
+            />
+          </div>
         )}
 
         {/* Start/Stop button */}
-        {!canModify ? (
-          <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
-            Selecione um workspace para usar o timer.
-          </p>
-        ) : !isRunning ? (
-          <Button onClick={handleStart} className="w-full" size="lg">
-            <Play className="h-4 w-4 mr-2" />
-            {mode === 'stopwatch' ? 'Iniciar' : 'Iniciar Pomodoro'}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleStop}
-            variant="destructive"
-            className="w-full"
-            size="lg"
-          >
-            <Square className="h-4 w-4 mr-2" />
-            Parar e Salvar
-          </Button>
-        )}
+        <div className={cn(isFullscreen && "max-w-md mx-auto")}>
+          {!canModify ? (
+            <p className={cn(
+              "text-amber-600 dark:text-amber-400 text-center",
+              isFullscreen ? "text-sm" : "text-xs"
+            )}>
+              Selecione um workspace para usar o timer.
+            </p>
+          ) : !isRunning ? (
+            <Button onClick={handleStart} className="w-full" size="lg">
+              <Play className={cn("mr-2", isFullscreen ? "h-5 w-5" : "h-4 w-4")} />
+              {mode === 'stopwatch' ? 'Iniciar' : 'Iniciar Pomodoro'}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleStop}
+              variant="destructive"
+              className="w-full"
+              size="lg"
+            >
+              <Square className={cn("mr-2", isFullscreen ? "h-5 w-5" : "h-4 w-4")} />
+              Parar e Salvar
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
