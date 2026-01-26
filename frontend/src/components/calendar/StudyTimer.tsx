@@ -75,7 +75,6 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
   const openPickerRef = useRef<() => void>(() => {});
 
   // Load saved state from localStorage on mount
-  /* eslint-disable react-hooks/set-state-in-effect -- Initialization from localStorage on mount is intentional */
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -106,7 +105,6 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
       }
     }
   }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Save state to localStorage
   useEffect(() => {

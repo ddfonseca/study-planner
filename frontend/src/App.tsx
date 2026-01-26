@@ -16,6 +16,7 @@ import { DashboardPage } from '@/views/DashboardPage';
 import { SubjectAnalyticsPage } from '@/views/SubjectAnalyticsPage';
 import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
+import { AllocationPage } from '@/views/AllocationPage';
 import { TermsPage } from '@/views/TermsPage';
 import { PrivacyPage } from '@/views/PrivacyPage';
 
@@ -50,6 +51,7 @@ function App() {
           <Route path="analytics" element={<SubjectAnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="scratchpad" element={<ScratchpadPage />} />
+          <Route path="allocation" element={<AllocationPage />} />
         </Route>
 
         {/* Landing page */}

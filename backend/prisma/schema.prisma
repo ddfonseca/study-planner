@@ -114,6 +114,7 @@ model Workspace {
   studySessions StudySession[]
   weeklyGoals   WeeklyGoal[]
   studyCycles   StudyCycle[]
+  examProfiles  ExamProfile[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -374,4 +375,75 @@ model ScratchpadNote {
 
   @@index([userId])
   @@map("scratchpad_notes")
+}
+
+// =====================================================
+// STUDY ALLOCATION SYSTEM
+// =====================================================
+
+// ExamProfile - User's exam/contest profile for study allocation
+model ExamProfile {
+  id          String    @id @default(cuid())
+  workspaceId String    @map("workspace_id")
+  name        String    @db.VarChar(100)
+  examDate    DateTime? @map("exam_date") @db.Date
+  weeklyHours Float     @default(30) @map("weekly_hours")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subjects  SubjectProfile[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("exam_profiles")
+}
+
+// SubjectProfile - Subject with metadata for allocation calculation
+model SubjectProfile {
+  id            String   @id @default(cuid())
+  examProfileId String   @map("exam_profile_id")
+  subject       String   @db.VarChar(100)
+  weight        Float    @default(1.0)
+  currentLevel  Int      @default(5) @map("current_level")
+  goalLevel     Int      @default(8) @map("goal_level")
+  position      Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  examProfile ExamProfile @relation(fields: [examProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([examProfileId, subject])
+  @@index([examProfileId])
+  @@map("subject_profiles")
+}
+
+// ExamTemplate - Pre-populated templates for common exams
+model ExamTemplate {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  category  String   @db.VarChar(50)
+  isPublic  Boolean  @default(true) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  items ExamTemplateItem[]
+
+  @@unique([name, category])
+  @@map("exam_templates")
+}
+
+// ExamTemplateItem - Individual subject entry in a template
+model ExamTemplateItem {
+  id          String @id @default(cuid())
+  templateId  String @map("template_id")
+  subject     String @db.VarChar(100)
+  weight      Float  @default(1.0)
+  medianLevel Int    @map("median_level")
+  position    Int
+
+  template ExamTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@map("exam_template_items")
 }

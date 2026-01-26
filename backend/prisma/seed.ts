@@ -3,6 +3,7 @@
  * Run: npx ts-node prisma/seed.ts
  */
 import { PrismaClient } from '@prisma/client';
+import { seedExamTemplates } from './seed/exam-templates';
 
 const prisma = new PrismaClient();
 
@@ -150,8 +151,9 @@ async function main() {
   try {
     await seedPlans();
     await migrateExistingSubscribers();
+    await seedExamTemplates();
   } catch (error) {
-    console.error('Error seeding plans:', error);
+    console.error('Error seeding database:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

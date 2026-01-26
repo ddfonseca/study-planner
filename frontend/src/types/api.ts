@@ -213,3 +213,100 @@ export interface UpdateStudyCycleDto {
   currentItemIndex?: number;
   items?: CreateCycleItemDto[];
 }
+
+// =====================================================
+// STUDY ALLOCATION
+// =====================================================
+
+// Exam Profile - user's exam/contest profile
+export interface ExamProfile {
+  id: string;
+  workspaceId: string;
+  name: string;
+  examDate: string | null;
+  weeklyHours: number;
+  isActive: boolean;
+  subjects: SubjectProfile[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Subject Profile - subject with metadata
+export interface SubjectProfile {
+  id: string;
+  examProfileId: string;
+  subject: string;
+  weight: number;
+  currentLevel: number;
+  goalLevel: number;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Exam Template - pre-populated templates
+export interface ExamTemplate {
+  id: string;
+  name: string;
+  category: string;
+  isPublic: boolean;
+  items: ExamTemplateItem[];
+  createdAt: string;
+}
+
+// Exam Template Item
+export interface ExamTemplateItem {
+  id: string;
+  templateId: string;
+  subject: string;
+  weight: number;
+  medianLevel: number;
+  position: number;
+}
+
+// Allocation result
+export interface AllocationResult {
+  subject: string;
+  totalHours: number;
+  hoursPerWeek: number;
+  gap: number;
+  percentage: number;
+}
+
+// Allocation response with metadata
+export interface AllocationResponse {
+  results: AllocationResult[];
+  metadata: {
+    weeksUntilExam: number;
+    totalAvailableHours: number;
+    weeklyHours: number;
+    examDate: string;
+  };
+}
+
+// Create exam profile DTO
+export interface CreateExamProfileDto {
+  workspaceId: string;
+  name: string;
+  examDate: string;
+  weeklyHours: number;
+  subjects: CreateSubjectProfileDto[];
+}
+
+// Create subject profile DTO
+export interface CreateSubjectProfileDto {
+  subject: string;
+  weight: number;
+  currentLevel: number;
+  goalLevel: number;
+  position: number;
+}
+
+// Update exam profile DTO
+export interface UpdateExamProfileDto {
+  name?: string;
+  examDate?: string | null;
+  weeklyHours?: number;
+  isActive?: boolean;
+  subjects?: CreateSubjectProfileDto[];
+}

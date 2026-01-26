@@ -8,7 +8,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, Users, BookOpen } from 'lucide-react';
+import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, Users, BookOpen, Calculator } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
@@ -68,6 +68,7 @@ export function AppLayout() {
     { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null, tourId: null },
     { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: null, tourId: null },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
+    { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: null, tourId: null },
     { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null, tourId: null },
   ];
 
