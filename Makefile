@@ -1,9 +1,16 @@
 .PHONY: up down logs build test lint migrate prisma-generate \
-	deploy-front deploy-back deploy-all
+	deploy-front deploy-back deploy-all postgres postgres-down
 
 # Docker
 up:
 	docker-compose up -d
+
+# Postgres only (for local dev)
+postgres:
+	docker compose -f docker-compose.postgres.yml up -d
+
+postgres-down:
+	docker compose -f docker-compose.postgres.yml down
 
 build:
 	docker-compose build

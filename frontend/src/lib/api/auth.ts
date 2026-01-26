@@ -44,10 +44,10 @@ function translateError(message: string | undefined): string {
 
 export const authApi = {
   /**
-   * Check if email/password auth is available
+   * Check if email/password auth is available (only in dev)
    */
   isEmailAuthEnabled(): boolean {
-    return true;
+    return import.meta.env.DEV;
   },
 
   /**

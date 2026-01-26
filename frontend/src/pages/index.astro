@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { ThemeToggle } from '@/components/landing/ThemeToggle';
-import { FAQItem } from '@/components/landing/FAQItem';
+import ThemeToggle from '@/components/landing/ThemeToggle.astro';
 import '@/index.css';
 
 // Gradient colors for calendar preview
@@ -21,25 +20,6 @@ const calendarDays = [
   { day: 20, label: 'Sex', intensity: 1, session: 'Mat', time: '30m' },
   { day: 21, label: 'Sáb', intensity: 0, session: '', time: '' },
   { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
-];
-
-const faqs = [
-  {
-    question: 'O Horas Líquidas é gratuito?',
-    answer: 'Sim, oferecemos um plano gratuito com recursos essenciais para organizar seus estudos. Para funcionalidades avançadas como matérias ilimitadas e estatísticas detalhadas, temos o plano Pro.',
-  },
-  {
-    question: 'Meus dados ficam salvos na nuvem?',
-    answer: 'Sim, seus dados são sincronizados automaticamente na nuvem. Você pode acessar suas sessões de estudo de qualquer dispositivo.',
-  },
-  {
-    question: 'Posso usar no celular?',
-    answer: 'Sim, a interface é totalmente responsiva e funciona perfeitamente em smartphones, tablets e computadores.',
-  },
-  {
-    question: 'Como defino minhas metas semanais?',
-    answer: 'Nas configurações do aplicativo, você pode definir quantas horas deseja estudar por semana. O calendário mostrará seu progresso em relação a essa meta.',
-  },
 ];
 
 const plans = [
@@ -108,7 +88,7 @@ const currentYear = new Date().getFullYear();
           <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 h-8 flex items-center">
             Blog
           </a>
-          <ThemeToggle client:load />
+          <ThemeToggle />
           <a href="/login">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs sm:text-sm">
               Entrar
@@ -230,6 +210,38 @@ const currentYear = new Date().getFullYear();
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Feature - Alocação Inteligente (NEW) -->
+          <div class="rounded-xl border border-blue-500/50 bg-card text-card-foreground relative overflow-hidden group hover:border-blue-500 transition-all md:col-span-2 md:mx-auto md:max-w-xl">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+            <span class="absolute top-3 right-3 inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold bg-blue-500 text-white border-transparent">
+              Novo
+            </span>
+            <div class="p-6">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-2">Alocação Inteligente de Horas</h3>
+                  <p class="text-muted-foreground text-sm leading-relaxed mb-3">
+                    Calcule automaticamente quantas horas dedicar a cada disciplina baseado no peso, seu nível atual e sua meta. Chega de planejamentos genéricos que ignoram suas necessidades.
+                  </p>
+                  <a href="/blog/modelo-alocacao-estudo-por-disciplina" class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors">
+                    Entenda o modelo
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                      <path d="M5 12h14"/>
+                      <path d="m12 5 7 7-7 7"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Feature 1 - Calendário Heatmap -->
           <div class="rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group hover:border-accent/50 transition-all">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500"></div>
@@ -317,6 +329,7 @@ const currentYear = new Date().getFullYear();
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -335,22 +348,6 @@ const currentYear = new Date().getFullYear();
             Começar grátis agora
           </button>
         </a>
-      </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="py-12 sm:py-16 md:py-24">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6">
-        <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-8 sm:mb-12">
-          Perguntas frequentes
-        </h2>
-        <div class="rounded-xl border border-border bg-card text-card-foreground">
-          <div class="p-6">
-            {faqs.map((faq) => (
-              <FAQItem client:load question={faq.question} answer={faq.answer} />
-            ))}
-          </div>
-        </div>
       </div>
     </section>
 

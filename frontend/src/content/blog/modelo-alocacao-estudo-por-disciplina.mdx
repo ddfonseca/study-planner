@@ -97,14 +97,77 @@ Para cada matéria, estime: "Se a prova fosse hoje, quantos pontos eu faria?"
 
 A diferença entre sua meta e seu nível atual é o **gap** que você precisa fechar.
 
-| Matéria | Questões | Peso | Pts Total | Se a prova fosse hoje | Mediana aprovados | Desvio |
-|---------|----------|------|-----------|----------------------|-------------------|--------|
-| Português | 10 | 2 | 20 | 16 | 18 | **-2** |
-| Constitucional | 15 | 2 | 30 | 24 | 28 | **-4** |
-| Administrativo | 10 | 2 | 20 | 18 | 18 | 0 |
-| Tributário | 10 | 3 | 30 | 15 | 24 | **-9** |
-| Penal | 10 | 2 | 20 | 14 | 16 | **-2** |
-| Informática | 5 | 1 | 5 | 4 | 4 | 0 |
+<div className="my-8 overflow-x-auto">
+  <table className="w-full text-sm border border-border rounded-lg overflow-hidden bg-muted/30">
+    <thead>
+      <tr className="bg-muted/50 text-foreground">
+        <th className="px-4 py-3 text-left font-semibold">Matéria</th>
+        <th className="px-3 py-3 text-center font-semibold">Questões</th>
+        <th className="px-3 py-3 text-center font-semibold">Peso</th>
+        <th className="px-3 py-3 text-center font-semibold">Pts Total</th>
+        <th className="px-3 py-3 text-center font-semibold">Hoje</th>
+        <th className="px-3 py-3 text-center font-semibold">Meta</th>
+        <th className="px-3 py-3 text-center font-semibold">Desvio</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-border/50">
+        <td className="px-4 py-3 font-medium">Português</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">10</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">2</td>
+        <td className="px-3 py-3 text-center">20</td>
+        <td className="px-3 py-3 text-center">16</td>
+        <td className="px-3 py-3 text-center">18</td>
+        <td className="px-3 py-3 text-center font-semibold text-amber-500">-2</td>
+      </tr>
+      <tr className="border-b border-border/50 bg-muted/20">
+        <td className="px-4 py-3 font-medium">Constitucional</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">15</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">2</td>
+        <td className="px-3 py-3 text-center">30</td>
+        <td className="px-3 py-3 text-center">24</td>
+        <td className="px-3 py-3 text-center">28</td>
+        <td className="px-3 py-3 text-center font-semibold text-orange-500">-4</td>
+      </tr>
+      <tr className="border-b border-border/50">
+        <td className="px-4 py-3 font-medium">Administrativo</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">10</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">2</td>
+        <td className="px-3 py-3 text-center">20</td>
+        <td className="px-3 py-3 text-center">18</td>
+        <td className="px-3 py-3 text-center">18</td>
+        <td className="px-3 py-3 text-center font-semibold text-green-500">0</td>
+      </tr>
+      <tr className="border-b border-border/50 bg-muted/20">
+        <td className="px-4 py-3 font-medium">Tributário</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">10</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">3</td>
+        <td className="px-3 py-3 text-center">30</td>
+        <td className="px-3 py-3 text-center">15</td>
+        <td className="px-3 py-3 text-center">24</td>
+        <td className="px-3 py-3 text-center font-bold text-red-500">-9</td>
+      </tr>
+      <tr className="border-b border-border/50">
+        <td className="px-4 py-3 font-medium">Penal</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">10</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">2</td>
+        <td className="px-3 py-3 text-center">20</td>
+        <td className="px-3 py-3 text-center">14</td>
+        <td className="px-3 py-3 text-center">16</td>
+        <td className="px-3 py-3 text-center font-semibold text-amber-500">-2</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-3 font-medium">Informática</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">5</td>
+        <td className="px-3 py-3 text-center text-muted-foreground">1</td>
+        <td className="px-3 py-3 text-center">5</td>
+        <td className="px-3 py-3 text-center">4</td>
+        <td className="px-3 py-3 text-center">4</td>
+        <td className="px-3 py-3 text-center font-semibold text-green-500">0</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ### Passo 4: Priorize pelos desvios
 

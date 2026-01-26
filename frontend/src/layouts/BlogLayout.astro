@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import ThemeToggle from '@/components/landing/ThemeToggle.astro';
 import '@/index.css';
 
 interface Props {
@@ -37,10 +38,11 @@ const formattedUpdatedDate = updatedDate?.toLocaleDateString('pt-BR', {
           </svg>
           <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
         </a>
-        <nav class="flex items-center gap-4">
+        <nav class="flex items-center gap-2 sm:gap-4">
           <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Blog
           </a>
+          <ThemeToggle />
           <a href="/login">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md px-3 text-xs sm:text-sm">
               Entrar
