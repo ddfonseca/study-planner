@@ -6,7 +6,7 @@ import type { ApiError } from '@/types/api';
 
 // In production: empty string (uses Netlify proxy at same domain)
 // In development: undefined, so fallback to localhost
-const envApiUrl = import.meta.env.VITE_API_BASE_URL;
+const envApiUrl = import.meta.env.PUBLIC_API_BASE_URL;
 const API_BASE_URL = envApiUrl !== undefined ? envApiUrl : 'http://localhost:3000';
 
 class ApiClient {
