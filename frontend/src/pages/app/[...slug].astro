@@ -1,0 +1,23 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SpaApp } from '@/components/SpaApp';
+import '@/index.css';
+
+// Generate all known app routes at build time
+export function getStaticPaths() {
+  return [
+    { params: { slug: 'calendar' } },
+    { params: { slug: 'statistics' } },
+    { params: { slug: 'goals' } },
+    { params: { slug: 'scratchpad' } },
+    { params: { slug: 'cycles' } },
+    { params: { slug: 'settings' } },
+    { params: { slug: 'allocation' } },
+  ];
+}
+---
+
+<BaseLayout title="Horas Líquidas">
+  <div id="root"></div>
+  <SpaApp client:only="react" />
+</BaseLayout>

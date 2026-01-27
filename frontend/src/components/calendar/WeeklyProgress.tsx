@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
-import { formatTime } from '@/lib/utils/time';
+import { formatTime, formatPomodoros, hoursToPomodoros } from '@/lib/utils/time';
 import { getDayNames } from '@/lib/utils/date';
 import { AnimatedProgress } from '@/components/ui/animated-progress';
 import { AnimatedNumber } from '@/components/ui/animated-number';
@@ -14,7 +14,7 @@ import { AnimatedBar } from '@/components/ui/animated-bar';
 
 export function WeeklyProgress() {
   const { sessions } = useSessionStore();
-  const { targetHours, weekStartDay } = useConfigStore();
+  const { targetHours, weekStartDay, timeDisplayMode } = useConfigStore();
 
   // Get current week data (fixed days, respecting weekStartDay)
   const weekData = useMemo(() => {
@@ -87,10 +87,14 @@ export function WeeklyProgress() {
           </AnimatedProgress>
           <div className="flex-1">
             <p className="text-lg font-semibold">
-              {formatTime(weeklyStats.totalMinutes)}
+              {timeDisplayMode === 'pomodoros'
+                ? formatPomodoros(weeklyStats.totalMinutes)
+                : formatTime(weeklyStats.totalMinutes)}
             </p>
             <p className="text-xs text-muted-foreground">
-              de {targetHours}h meta
+              {timeDisplayMode === 'pomodoros'
+                ? `de ${hoursToPomodoros(targetHours)} 🍅 meta`
+                : `de ${targetHours}h meta`}
             </p>
           </div>
         </div>

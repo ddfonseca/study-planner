@@ -8,7 +8,8 @@ import { WeeklyGoalEditor } from './WeeklyGoalEditor';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { formatDateKey } from '@/lib/utils/date';
-import { formatTime } from '@/lib/utils/time';
+import { formatTime, formatPomodoros, hoursToPomodoros } from '@/lib/utils/time';
+import { useConfigStore } from '@/store/configStore';
 import { useSessions } from '@/hooks/useSessions';
 import { useWeeklyGoals } from '@/hooks/useWeeklyGoals';
 import type { DayData } from '@/types/session';
@@ -28,6 +29,7 @@ export function CalendarGrid({
 }: CalendarGridProps) {
   const { sessions, getCellIntensity, getWeekTotals, hasSessionsInMonth } = useSessions();
   const { getCachedGoalForWeek, prefetchGoals, calculateWeekStart } = useWeeklyGoals();
+  const { timeDisplayMode } = useConfigStore();
 
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
   const [selectedWeekTotal, setSelectedWeekTotal] = useState<number>(0);
@@ -125,7 +127,11 @@ export function CalendarGrid({
                       className={`w-full h-[80px] sm:h-[100px] flex flex-col items-center justify-center rounded-md border transition-colors hover:opacity-80 cursor-pointer px-1 sm:px-2 ${statusStyles}`}
                     >
                       <span className="text-sm font-medium">
-                        {weekTotal > 0 ? formatTime(weekTotal) : '-'}
+                        {weekTotal > 0
+                          ? timeDisplayMode === 'pomodoros'
+                            ? formatPomodoros(weekTotal)
+                            : formatTime(weekTotal)
+                          : '-'}
                       </span>
                       {getCachedGoalForWeek(new Date(calculateWeekStart(week[0]))) && (
                         <>
@@ -138,7 +144,9 @@ export function CalendarGrid({
                             />
                           </div>
                           <span className="text-[10px] opacity-70 mt-1">
-                            {getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.targetHours}h
+                            {timeDisplayMode === 'pomodoros'
+                              ? `${hoursToPomodoros(getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.targetHours || 0)} 🍅`
+                              : `${getCachedGoalForWeek(new Date(calculateWeekStart(week[0])))?.targetHours}h`}
                           </span>
                         </>
                       )}

@@ -19,14 +19,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Settings, User, Clock, Calendar, Save, Loader2, Palette, Layers, Crown } from 'lucide-react';
-import type { HeatmapStyle } from '@/store/configStore';
+import type { HeatmapStyle, TimeDisplayMode } from '@/store/configStore';
 import { useToast } from '@/hooks/use-toast';
 import { WorkspaceManager } from '@/components/workspace';
 import { PricingModal } from '@/components/subscription/PricingModal';
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const { targetHours, weekStartDay, heatmapStyle, updateConfig, setHeatmapStyle, isLoading } = useConfigStore();
+  const { targetHours, weekStartDay, heatmapStyle, timeDisplayMode, updateConfig, setHeatmapStyle, setTimeDisplayMode, isLoading } = useConfigStore();
   const { workspaces } = useWorkspaceStore();
   const { currentPlan, subscription, isFree, fetchCurrentSubscription } = useSubscriptionStore();
   const { toast } = useToast();
@@ -43,6 +43,10 @@ export function SettingsPage() {
 
   const handleHeatmapStyleChange = (value: string) => {
     setHeatmapStyle(value as HeatmapStyle);
+  };
+
+  const handleTimeDisplayModeChange = (value: string) => {
+    setTimeDisplayMode(value as TimeDisplayMode);
   };
 
   const handleSave = async () => {
@@ -290,6 +294,28 @@ export function SettingsPage() {
               </Select>
               <p className="text-[10px] sm:text-xs text-muted-foreground">
                 Como a intensidade de estudo é exibida nas células
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timeDisplayMode" className="flex items-center gap-2 text-sm">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Exibição de Tempo
+              </Label>
+              <Select
+                value={timeDisplayMode}
+                onValueChange={handleTimeDisplayModeChange}
+              >
+                <SelectTrigger id="timeDisplayMode" className="w-full">
+                  <SelectValue placeholder="Selecione o formato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hours">🕐 Horas</SelectItem>
+                  <SelectItem value="pomodoros">🍅 Pomodoros</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                1 pomodoro = 25 minutos
               </p>
             </div>
           </div>

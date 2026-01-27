@@ -3,6 +3,36 @@
  */
 
 /**
+ * Pomodoro duration in minutes
+ */
+export const POMODORO_MINUTES = 25;
+
+/**
+ * Convert minutes to pomodoros (floor)
+ * Example: 150 -> 6
+ */
+export function minutesToPomodoros(minutes: number): number {
+  return Math.floor(minutes / POMODORO_MINUTES);
+}
+
+/**
+ * Format minutes as pomodoros with emoji
+ * Example: 200 -> "8 🍅"
+ */
+export function formatPomodoros(minutes: number): string {
+  const pomodoros = minutesToPomodoros(minutes);
+  return `${pomodoros} 🍅`;
+}
+
+/**
+ * Convert hours to pomodoros
+ * Example: 10 -> 24
+ */
+export function hoursToPomodoros(hours: number): number {
+  return Math.floor((hours * 60) / POMODORO_MINUTES);
+}
+
+/**
  * Format minutes to hours and minutes string
  * Example: 150 -> "2h 30m"
  */

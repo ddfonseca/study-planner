@@ -7,11 +7,13 @@ import type { UpdateConfigDto } from '@/types/api';
 import { configApi } from '@/lib/api/config';
 
 export type HeatmapStyle = 'gradient' | 'dots';
+export type TimeDisplayMode = 'hours' | 'pomodoros';
 
 interface ConfigState {
   targetHours: number;
   weekStartDay: number; // 0=Dom, 1=Seg
   heatmapStyle: HeatmapStyle;
+  timeDisplayMode: TimeDisplayMode;
   isLoading: boolean;
   error: string | null;
 }
@@ -22,6 +24,7 @@ interface ConfigActions {
   setTargetHours: (hours: number) => void;
   setWeekStartDay: (day: number) => void;
   setHeatmapStyle: (style: HeatmapStyle) => void;
+  setTimeDisplayMode: (mode: TimeDisplayMode) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -32,6 +35,7 @@ type ConfigStore = ConfigState & ConfigActions;
 const DEFAULT_TARGET_HOURS = 30;
 const DEFAULT_WEEK_START_DAY = 1; // Segunda-feira
 const DEFAULT_HEATMAP_STYLE: HeatmapStyle = 'gradient';
+const DEFAULT_TIME_DISPLAY_MODE: TimeDisplayMode = 'hours';
 
 export const useConfigStore = create<ConfigStore>()(
   persist(
@@ -40,6 +44,7 @@ export const useConfigStore = create<ConfigStore>()(
       targetHours: DEFAULT_TARGET_HOURS,
       weekStartDay: DEFAULT_WEEK_START_DAY,
       heatmapStyle: DEFAULT_HEATMAP_STYLE,
+      timeDisplayMode: DEFAULT_TIME_DISPLAY_MODE,
       isLoading: false,
       error: null,
 
@@ -102,6 +107,10 @@ export const useConfigStore = create<ConfigStore>()(
         set({ heatmapStyle: style });
       },
 
+      setTimeDisplayMode: (mode) => {
+        set({ timeDisplayMode: mode });
+      },
+
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
@@ -116,6 +125,7 @@ export const useConfigStore = create<ConfigStore>()(
         targetHours: state.targetHours,
         weekStartDay: state.weekStartDay,
         heatmapStyle: state.heatmapStyle,
+        timeDisplayMode: state.timeDisplayMode,
       }),
     }
   )
