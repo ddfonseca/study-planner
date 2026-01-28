@@ -30,6 +30,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/throttler": "^6.5.0",
+    "@nestjs/websockets": "^11.1.12",
     "@prisma/client": "^5.22.0",
     "@thallesp/nestjs-better-auth": "^2.2.0",
     "better-auth": "^1.4.7",
@@ -46,7 +47,6 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "dotenv-cli": "^8.0.0",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
@@ -57,6 +57,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

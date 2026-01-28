@@ -6,10 +6,10 @@ import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-do
 import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Settings, LogOut, Clock, Moon, Sun, FileText, Users, BookOpen, Calculator } from 'lucide-react';
+import { Calendar, BarChart3, Settings, Clock, FileText, Calculator } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
 import { OfflineBanner } from '@/components/ui/offline-banner';
 import { ShortcutsHelpFAB, ShortcutsModal } from '@/components/keyboard';
@@ -80,26 +80,23 @@ export function AppLayout() {
       {/* Header */}
       <header className="bg-container border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center h-16 gap-4">
             {/* Logo */}
-            <Link to="/app/calendar" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link to="/app/calendar" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
               <Clock className="h-6 w-6 text-primary" />
               <span className="text-lg font-semibold text-foreground hidden sm:inline">
                 Horas Líquidas
               </span>
             </Link>
 
-            {/* Workspace Selector */}
-            <WorkspaceSelector />
-
-            {/* Navigation */}
+            {/* Navigation - Desktop */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map(({ to, icon: Icon, label, badgeKey, tourId }) => (
                 <NavLink
                   key={to}
                   to={to}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors
+                    `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
                     ${
                       isActive
                         ? 'bg-primary text-primary-foreground'
@@ -119,72 +116,19 @@ export function AppLayout() {
               ))}
             </nav>
 
-            {/* User Menu */}
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Right side: Workspace + User Menu */}
             <div className="flex items-center gap-2">
-              {/* Blog Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Blog"
-                title="Blog - Dicas de estudo e produtividade"
-              >
-                <a href="/blog">
-                  <BookOpen className="h-5 w-5" aria-hidden="true" />
-                </a>
-              </Button>
-
-              {/* Community Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Entrar na comunidade"
-                title="Entrar na comunidade - Peça ajuda, sugira features, troque ideias"
-              >
-                <a href="https://t.me/+g27TaGZfnYIzZTUx" target="_blank" rel="noopener noreferrer">
-                  <Users className="h-5 w-5" aria-hidden="true" />
-                </a>
-              </Button>
-
-              {/* Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="text-muted-foreground hover:text-foreground"
-                aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
-              >
-                {isDark ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
-              </Button>
-
-              {user && (
-                <div className="hidden sm:flex items-center gap-2">
-                  {user.image && (
-                    <img
-                      src={user.image}
-                      alt={user.name || 'User'}
-                      className="h-8 w-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-sm text-muted-foreground">
-                    {user.name || user.email}
-                  </span>
-                </div>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                disabled={isLoading}
-                className="text-muted-foreground hover:text-destructive"
-                aria-label="Sair da conta"
-              >
-                <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
-                Sair
-              </Button>
+              <WorkspaceSelector />
+              <UserMenu
+                user={user}
+                isDark={isDark}
+                onToggleTheme={toggleTheme}
+                onLogout={handleLogout}
+                isLoading={isLoading}
+              />
             </div>
           </div>
         </div>
