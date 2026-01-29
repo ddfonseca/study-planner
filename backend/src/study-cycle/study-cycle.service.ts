@@ -306,8 +306,9 @@ export class StudyCycleService {
 
   /**
    * Avança para o próximo item do ciclo ativo
+   * @param forceComplete - Se true, adiciona compensação para considerar a matéria como completa
    */
-  async advanceToNext(userId: string, workspaceId: string) {
+  async advanceToNext(userId: string, workspaceId: string, forceComplete?: boolean) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
     const cycle = await this.prisma.studyCycle.findFirst({
@@ -334,12 +335,30 @@ export class StudyCycleService {
     const nextIndex = (currentIndex + 1) % cycle.items.length;
     const nextItem = cycle.items[nextIndex];
 
-    // Get accumulated minutes for current subject
+    // Get accumulated minutes for current subject (considering lastResetAt)
     const sessionsAgg = await this.prisma.studySession.aggregate({
-      where: { workspaceId, subject: currentItem.subject },
+      where: {
+        workspaceId,
+        subject: currentItem.subject,
+        ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
+      },
       _sum: { minutes: true },
     });
-    const minutesSpent = sessionsAgg._sum.minutes || 0;
+    const sessionMinutes = sessionsAgg._sum.minutes || 0;
+    const totalAccumulated = sessionMinutes + (currentItem.compensationMinutes || 0);
+
+    // If forceComplete and not yet complete, add compensation
+    if (forceComplete) {
+      const remainingMinutes = Math.max(0, currentItem.targetMinutes - totalAccumulated);
+      if (remainingMinutes > 0) {
+        await this.prisma.studyCycleItem.update({
+          where: { id: currentItem.id },
+          data: {
+            compensationMinutes: (currentItem.compensationMinutes || 0) + remainingMinutes,
+          },
+        });
+      }
+    }
 
     // Record advance in history
     await this.prisma.studyCycleAdvance.create({
@@ -349,7 +368,7 @@ export class StudyCycleService {
         toSubject: nextItem.subject,
         fromPosition: currentIndex,
         toPosition: nextIndex,
-        minutesSpent,
+        minutesSpent: totalAccumulated,
       },
     });
 
@@ -357,10 +376,13 @@ export class StudyCycleService {
     if (nextIndex === 0) {
       const totalTarget = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
 
-      // Get total accumulated for all subjects
+      // Get total accumulated for all subjects (including compensation)
       const allSessionsAgg = await this.prisma.studySession.groupBy({
         by: ['subject'],
-        where: { workspaceId },
+        where: {
+          workspaceId,
+          ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
+        },
         _sum: { minutes: true },
       });
       const subjectMinutes = allSessionsAgg.reduce(
@@ -371,7 +393,7 @@ export class StudyCycleService {
         {} as Record<string, number>,
       );
       const totalSpent = cycle.items.reduce(
-        (sum, item) => sum + (subjectMinutes[item.subject] || 0),
+        (sum, item) => sum + (subjectMinutes[item.subject] || 0) + (item.compensationMinutes || 0),
         0,
       );
 
@@ -435,10 +457,10 @@ export class StudyCycleService {
       {} as Record<string, number>,
     );
 
-    // Enriquecer items com progresso calculado
+    // Enriquecer items com progresso calculado (sessões + compensação)
     const itemsWithProgress = cycle.items.map((item) => ({
       ...item,
-      accumulatedMinutes: subjectMinutes[item.subject] || 0,
+      accumulatedMinutes: (subjectMinutes[item.subject] || 0) + (item.compensationMinutes || 0),
     }));
 
     const currentItem = itemsWithProgress[cycle.currentItemIndex];
@@ -520,15 +542,15 @@ export class StudyCycleService {
       {} as Record<string, number>,
     );
 
-    // Calcular estatísticas
+    // Calcular estatísticas (sessões + compensação)
     const totalTargetMinutes = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
     const totalAccumulatedMinutes = cycle.items.reduce(
-      (sum, item) => sum + (subjectMinutes[item.subject] || 0),
+      (sum, item) => sum + (subjectMinutes[item.subject] || 0) + (item.compensationMinutes || 0),
       0,
     );
 
     const completedItemsCount = cycle.items.filter(
-      (item) => (subjectMinutes[item.subject] || 0) >= item.targetMinutes,
+      (item) => (subjectMinutes[item.subject] || 0) + (item.compensationMinutes || 0) >= item.targetMinutes,
     ).length;
 
     const totalItemsCount = cycle.items.length;
@@ -632,6 +654,12 @@ export class StudyCycleService {
     if (!cycle) {
       throw new NotFoundException('Study cycle not found');
     }
+
+    // Reset compensation minutes for all items
+    await this.prisma.studyCycleItem.updateMany({
+      where: { cycleId: cycle.id },
+      data: { compensationMinutes: 0 },
+    });
 
     return this.prisma.studyCycle.update({
       where: { id: cycle.id },

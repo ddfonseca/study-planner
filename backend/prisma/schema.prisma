@@ -209,11 +209,12 @@ model StudyCycle {
 
 // Study Cycle Item - individual subject entry in a cycle
 model StudyCycleItem {
-  id            String   @id @default(cuid())
-  cycleId       String   @map("cycle_id")
-  subject       String   @db.VarChar(100)
-  targetMinutes Int      @map("target_minutes")
-  position      Int
+  id                  String @id @default(cuid())
+  cycleId             String @map("cycle_id")
+  subject             String @db.VarChar(100)
+  targetMinutes       Int    @map("target_minutes")
+  position            Int
+  compensationMinutes Int    @default(0) @map("compensation_minutes") // Minutes added when skipping incomplete
 
   cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 

@@ -76,9 +76,13 @@ export const studyCycleApi = {
 
   /**
    * Advance to next item in cycle
+   * @param forceComplete - If true, marks current subject as complete (adds compensation)
    */
-  async advance(workspaceId: string): Promise<StudyCycle> {
-    return apiClient.post<StudyCycle>(`/api/workspaces/${workspaceId}/cycle/advance`);
+  async advance(workspaceId: string, forceComplete?: boolean): Promise<StudyCycle> {
+    return apiClient.post<StudyCycle, { forceComplete?: boolean }>(
+      `/api/workspaces/${workspaceId}/cycle/advance`,
+      forceComplete ? { forceComplete } : undefined
+    );
   },
 
   /**

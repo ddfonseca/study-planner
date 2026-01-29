@@ -16,7 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock, Layers } from 'lucide-react';
+import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock, Layers, SkipForward } from 'lucide-react';
 import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
@@ -134,10 +134,10 @@ export function CycleSuggestionCard() {
 
   const progress = calculateCycleProgress(data.currentAccumulatedMinutes, data.currentTargetMinutes);
 
-  const handleAdvance = async () => {
+  const handleAdvance = async (forceComplete?: boolean) => {
     if (!currentWorkspaceId) return;
     try {
-      await advanceToNext(currentWorkspaceId);
+      await advanceToNext(currentWorkspaceId, forceComplete);
     } catch (error) {
       console.error('Failed to advance cycle:', error);
     }
@@ -298,12 +298,25 @@ export function CycleSuggestionCard() {
               </Button>
             </div>
           ) : (
-            <div className="text-xs text-muted-foreground">
-              <span>Faltam </span>
-              <span className="font-medium text-foreground">
-                {formatDuration(data.remainingMinutes)}
-              </span>
-              <span> para completar</span>
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground">
+                <span>Faltam </span>
+                <span className="font-medium text-foreground">
+                  {formatDuration(data.remainingMinutes)}
+                </span>
+                <span> para completar</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full h-7 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => handleAdvance(true)}
+                disabled={isLoading}
+                title="Considerar matéria como completa e avançar"
+              >
+                <SkipForward className="h-3 w-3 mr-1.5" />
+                Avançar mesmo assim
+              </Button>
             </div>
           )}
 

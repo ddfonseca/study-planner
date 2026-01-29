@@ -129,14 +129,16 @@ export class StudyCycleController {
   /**
    * POST /api/workspaces/:workspaceId/cycle/advance
    * Avança para o próximo item do ciclo
+   * @param forceComplete - Se true, considera a matéria atual como completa (adiciona compensação)
    */
   @Post('advance')
   async advanceToNext(
     @Session() session: UserSession,
     @Param('workspaceId') workspaceId: string,
+    @Body() body?: { forceComplete?: boolean },
   ) {
     const userId = session.user.id;
-    return this.studyCycleService.advanceToNext(userId, workspaceId);
+    return this.studyCycleService.advanceToNext(userId, workspaceId, body?.forceComplete);
   }
 
   /**

@@ -53,8 +53,9 @@ interface StudyCycleActions {
 
   /**
    * Advance to next item in cycle
+   * @param forceComplete - If true, marks current subject as complete
    */
-  advanceToNext: (workspaceId: string) => Promise<void>;
+  advanceToNext: (workspaceId: string, forceComplete?: boolean) => Promise<void>;
 
   /**
    * Delete cycle
@@ -176,10 +177,10 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
     }
   },
 
-  advanceToNext: async (workspaceId: string) => {
+  advanceToNext: async (workspaceId: string, forceComplete?: boolean) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.advance(workspaceId);
+      const cycle = await studyCycleApi.advance(workspaceId, forceComplete);
       set({ cycle, isLoading: false });
       // Refresh suggestion after advancing
       await get().fetchSuggestion(workspaceId);

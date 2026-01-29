@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Loader2, Trash2, ExternalLink } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useAllocationStore } from '@/store/allocationStore';
 import {
@@ -113,7 +113,14 @@ export function AllocationPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Alocação de Estudo</h1>
           <p className="text-muted-foreground mt-1">
-            Calcule a distribuição ideal de horas por disciplina
+            Calcule a distribuição ideal de horas por disciplina.{' '}
+            <a
+              href="/blog/modelo-alocacao-estudo-por-disciplina"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              Entenda o modelo
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </p>
         </div>
         <Button onClick={() => { setEditingProfile(null); setProfileModalOpen(true); }}>
