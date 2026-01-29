@@ -73,10 +73,10 @@ export function AppLayout() {
 
   const navItems = [
     { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null, tourId: null },
-    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: 'scratchpad' as const, tourId: null },
+    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: 'scratchpad' as const, tourId: 'nav-scratchpad' },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
-    { to: '/app/subjects', icon: BookOpen, label: 'Tópicos', badgeKey: 'subjects' as const, tourId: null },
-    { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: 'allocation' as const, tourId: null },
+    { to: '/app/subjects', icon: BookOpen, label: 'Tópicos', badgeKey: 'subjects' as const, tourId: 'nav-subjects' },
+    { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: 'allocation' as const, tourId: 'nav-allocation' },
     { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null, tourId: null },
   ];
 

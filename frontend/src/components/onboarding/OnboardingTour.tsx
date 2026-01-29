@@ -13,7 +13,7 @@ const desktopSteps: Step[] = [
   {
     target: '[data-tour="calendar-grid"]',
     content: 'Clique em qualquer dia para registrar suas sessões de estudo.',
-    title: '📅 Calendário',
+    title: 'Calendário',
     placement: 'bottom',
     disableBeacon: true,
     spotlightClicks: true,
@@ -22,21 +22,42 @@ const desktopSteps: Step[] = [
     target: '[data-tour="study-timer"]',
     content:
       'Use o cronômetro para medir seu tempo de estudo em tempo real. Ele continua rodando mesmo se você fechar a aba!',
-    title: '⏱️ Timer',
+    title: 'Timer',
     placement: 'left',
   },
   {
     target: '[data-tour="cycle-card"]',
     content:
       'Organize suas matérias em ciclos para estudar de forma equilibrada. O sistema sugere qual matéria estudar em seguida.',
-    title: '🔄 Ciclos de Estudo',
+    title: 'Ciclos de Estudo',
     placement: 'left',
+  },
+  {
+    target: '[data-tour="nav-scratchpad"]',
+    content:
+      'Anote ideias, resumos e lembretes rápidos enquanto estuda. Suas notas ficam salvas automaticamente.',
+    title: 'Notas Rápidas',
+    placement: 'bottom',
   },
   {
     target: '[data-tour="nav-dashboard"]',
     content:
       'Acompanhe seu progresso com gráficos e estatísticas detalhadas do seu tempo de estudo.',
-    title: '📊 Dashboard',
+    title: 'Dashboard',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="nav-subjects"]',
+    content:
+      'Gerencie seus tópicos de estudo: renomeie, mescle duplicados, arquive ou adicione cores.',
+    title: 'Tópicos',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="nav-allocation"]',
+    content:
+      'Calcule quanto tempo dedicar a cada matéria com base no peso e seu nível atual. Ideal para concursos!',
+    title: 'Alocação de Estudos',
     placement: 'bottom',
   },
 ];
