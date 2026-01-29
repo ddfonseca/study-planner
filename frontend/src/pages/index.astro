@@ -3,6 +3,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import ThemeToggle from '@/components/landing/ThemeToggle.astro';
 import '@/index.css';
 
+const currentYear = new Date().getFullYear();
+
 // Gradient colors for calendar preview
 const previewGradientColors: Record<number, string> = {
   0: 'bg-card',
@@ -22,44 +24,6 @@ const calendarDays = [
   { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
 ];
 
-const plans = [
-  {
-    name: 'Gratuito',
-    price: 'R$ 0',
-    period: 'para sempre',
-    description: 'Perfeito para começar a organizar seus estudos.',
-    features: [
-      'Calendário visual com heatmap',
-      '1 ciclo de estudo',
-      '2 workspaces',
-      'Até 20 sessões por dia',
-      '30 dias de histórico',
-      'Metas semanais',
-      'Modo escuro',
-    ],
-    cta: 'Começar grátis',
-    highlighted: false,
-  },
-  {
-    name: 'Pro Vitalício',
-    price: 'R$ 19,90',
-    period: 'pagamento único',
-    description: 'Acesso vitalício a todos os recursos premium.',
-    features: [
-      'Tudo do plano Gratuito',
-      '10 ciclos de estudo',
-      '10 workspaces',
-      'Sessões ilimitadas',
-      '1 ano de histórico',
-      'Exportar dados',
-      'Compartilhar com 5 pessoas',
-      'Acesso para sempre',
-    ],
-    cta: 'Comprar acesso vitalício',
-    highlighted: true,
-  },
-];
-
 const getTextClass = (intensity: number, isToday: boolean) => {
   if (intensity === 4) return 'text-white';
   if (isToday) return 'text-primary';
@@ -68,13 +32,12 @@ const getTextClass = (intensity: number, isToday: boolean) => {
 };
 
 const needsLightText = (intensity: number) => intensity === 4;
-
-const currentYear = new Date().getFullYear();
 ---
 
 <BaseLayout title="Horas Líquidas - Controle seu tempo de estudo">
   <div class="min-h-screen bg-background">
-    <!-- Header -->
+
+    <!-- Navigation -->
     <header class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -85,6 +48,9 @@ const currentYear = new Date().getFullYear();
           <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
         </div>
         <div class="flex items-center gap-1 sm:gap-2">
+          <a href="#features" class="hidden sm:flex text-sm text-muted-foreground hover:text-foreground transition-colors px-2 h-8 items-center">
+            Funcionalidades
+          </a>
           <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 h-8 flex items-center">
             Blog
           </a>
@@ -101,13 +67,13 @@ const currentYear = new Date().getFullYear();
     <!-- Hero Section -->
     <section class="py-10 sm:py-16 md:py-24">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
+        <h1 class="animate-on-scroll text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
           Controle quanto tempo você <span class="text-primary">realmente</span> estuda
         </h1>
-        <p class="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
+        <p class="animate-on-scroll text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
           Não quanto tempo passa na cadeira. Registre sessões de foco, visualize padrões em um calendário heatmap e atinja suas metas semanais.
         </p>
-        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+        <div class="animate-on-scroll flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
           <a href="/login" class="w-full sm:w-auto">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 w-full sm:w-auto text-sm sm:text-base">
               Começar a medir meu foco
@@ -125,10 +91,10 @@ const currentYear = new Date().getFullYear();
     <!-- Calendar Preview Section -->
     <section class="py-8 sm:py-12 md:py-16 bg-muted/30">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
-        <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6 sm:mb-8">
+        <h2 class="animate-on-scroll text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6 sm:mb-8">
           Visualize seu progresso
         </h2>
-        <div class="w-full max-w-4xl mx-auto px-4">
+        <div class="animate-on-scroll w-full max-w-4xl mx-auto px-4">
           <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
             {calendarDays.map((d) => {
               const isHighIntensity = d.intensity >= 3;
@@ -202,37 +168,38 @@ const currentYear = new Date().getFullYear();
     <!-- Features Section -->
     <section id="features" class="py-12 sm:py-16 md:py-24">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
-        <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
+        <h2 class="animate-on-scroll text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
           Tudo que você precisa para estudar melhor
         </h2>
-        <p class="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
+        <p class="animate-on-scroll text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
           Não é sobre estudar mais. É sobre estudar com clareza.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <!-- Feature - Alocação Inteligente (NEW) -->
-          <div class="rounded-xl border border-blue-500/50 bg-card text-card-foreground relative overflow-hidden group hover:border-blue-500 transition-all md:col-span-2 md:mx-auto md:max-w-xl">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-            <span class="absolute top-3 right-3 inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold bg-blue-500 text-white border-transparent">
-              Novo
-            </span>
-            <div class="p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+
+          <!-- Feature 1 - Alocação Inteligente (Highlighted) -->
+          <div class="animate-on-scroll">
+            <div class="group relative bg-card rounded-xl p-6 border-2 border-blue-500/50 hover:border-blue-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+              <span class="absolute top-3 right-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-500 text-white">
+                Novo
+              </span>
               <div class="flex items-start gap-4">
                 <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
                     <rect x="3" y="3" width="18" height="18" rx="2"/>
                     <path d="M3 9h18"/>
                     <path d="M9 21V9"/>
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">Alocação Inteligente de Horas</h3>
+                  <h3 class="font-semibold text-lg mb-2">Alocação Inteligente</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed mb-3">
-                    Calcule automaticamente quantas horas dedicar a cada disciplina baseado no peso, seu nível atual e sua meta. Chega de planejamentos genéricos que ignoram suas necessidades.
+                    Calcule quantas horas dedicar a cada disciplina baseado no peso e seu nível atual.
                   </p>
                   <a href="/blog/modelo-alocacao-estudo-por-disciplina" class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors">
                     Entenda o modelo
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M5 12h14"/>
                       <path d="m12 5 7 7-7 7"/>
                     </svg>
@@ -242,45 +209,23 @@ const currentYear = new Date().getFullYear();
             </div>
           </div>
 
-          <!-- Feature 1 - Calendário Heatmap -->
-          <div class="rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group hover:border-accent/50 transition-all">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500"></div>
-            <div class="p-6">
-              <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-[#c17a5c]/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-[#c17a5c]">
-                    <path d="M8 2v4"></path>
-                    <path d="M16 2v4"></path>
-                    <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                    <path d="M3 10h18"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-lg mb-2">Calendário Heatmap</h3>
-                  <p class="text-muted-foreground text-sm leading-relaxed">
-                    Visualize seu esforço dia a dia com cores de intensidade. Identifique padrões e entenda seus hábitos de estudo.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Feature 2 - Foco Real -->
-          <div class="rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group hover:border-accent/50 transition-all">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
-            <div class="p-6">
+          <!-- Feature 2 - Ciclos de Estudo -->
+          <div class="animate-on-scroll">
+            <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
               <div class="flex items-start gap-4">
                 <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-purple-500">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <circle cx="12" cy="12" r="6"></circle>
-                    <circle cx="12" cy="12" r="2"></circle>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                    <path d="M16 16h5v5"/>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="font-semibold text-lg mb-2">Foco Real</h3>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-2">Ciclos de Estudo</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Meça tempo de concentração, não tempo sentado. Num mundo de distrações, saber seu foco real é um superpoder.
+                    Organize disciplinas em ciclos de revisão. Saiba exatamente quando retomar cada matéria.
                   </p>
                 </div>
               </div>
@@ -288,42 +233,42 @@ const currentYear = new Date().getFullYear();
           </div>
 
           <!-- Feature 3 - Metas Semanais -->
-          <div class="rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group hover:border-accent/50 transition-all">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
-            <div class="p-6">
+          <div class="animate-on-scroll">
+            <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-green-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
               <div class="flex items-start gap-4">
                 <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-green-500">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <circle cx="12" cy="12" r="6"></circle>
-                    <circle cx="12" cy="12" r="2"></circle>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
                   </svg>
                 </div>
-                <div>
+                <div class="flex-1">
                   <h3 class="font-semibold text-lg mb-2">Metas Semanais</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Defina objetivos e acompanhe seu progresso em tempo real. Consistência de 1h por dia vale mais que 7h no domingo.
+                    Defina objetivos e acompanhe em tempo real. Consistência diária vale mais que maratonas.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Feature 4 - Histórico e Padrões -->
-          <div class="rounded-xl border border-border bg-card text-card-foreground relative overflow-hidden group hover:border-accent/50 transition-all">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
-            <div class="p-6">
+          <!-- Feature 4 - Timer Pomodoro -->
+          <div class="animate-on-scroll">
+            <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-amber-500"></div>
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-orange-500">
-                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                    <polyline points="16 7 22 7 22 13"></polyline>
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="font-semibold text-lg mb-2">Histórico e Padrões</h3>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-2">Timer Pomodoro</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Acompanhe sua evolução semana a semana. Compare com você mesmo e supere seu eu de ontem.
+                    Foco em blocos com pausas programadas. Técnica comprovada para maximizar concentração.
                   </p>
                 </div>
               </div>
@@ -337,91 +282,17 @@ const currentYear = new Date().getFullYear();
     <!-- CTA Section -->
     <section class="py-10 sm:py-12 md:py-16 bg-muted/30">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">
+        <h3 class="animate-on-scroll text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">
           Pronto para estudar com mais clareza?
         </h3>
-        <p class="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
+        <p class="animate-on-scroll text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
           Comece gratuitamente e veja a diferença de medir seu foco real.
         </p>
-        <a href="/login">
+        <a href="/login" class="animate-on-scroll inline-block">
           <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 text-sm sm:text-base">
             Começar grátis agora
           </button>
         </a>
-      </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-12 sm:py-16 md:py-24">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6">
-        <h2 class="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
-          Escolha seu plano
-        </h2>
-        <p class="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12">
-          Comece grátis ou desbloqueie tudo com um único pagamento.
-        </p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {plans.map((plan) => (
-            <div class:list={[
-              'rounded-xl border bg-card text-card-foreground relative',
-              plan.highlighted ? 'border-primary shadow-lg shadow-primary/10 ring-2 ring-primary' : 'border-border'
-            ]}>
-              {plan.highlighted && (
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-white border-transparent">
-                    Recomendado
-                  </span>
-                </div>
-              )}
-              <div class="p-6 pt-8">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class:list={[
-                    'p-2 rounded-lg',
-                    plan.highlighted ? 'bg-primary/10' : 'bg-muted'
-                  ]}>
-                    {plan.highlighted ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary">
-                        <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path>
-                        <path d="M5 21h14"></path>
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-muted-foreground">
-                        <path d="M12 7v14"></path>
-                        <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>
-                      </svg>
-                    )}
-                  </div>
-                  <h3 class="text-xl font-semibold">{plan.name}</h3>
-                </div>
-                <p class="text-muted-foreground text-sm mb-4">
-                  {plan.description}
-                </p>
-                <div class="mb-6">
-                  <span class="text-3xl font-bold">{plan.price}</span>
-                  <span class="text-muted-foreground text-sm ml-1">{plan.period}</span>
-                </div>
-                <ul class="space-y-2 mb-6">
-                  {plan.features.map((feature) => (
-                    <li class="flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:list={['h-4 w-4 flex-shrink-0', plan.highlighted ? 'text-primary' : 'text-green-500']}>
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
-                      <span class="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a href="/login" class="block">
-                  <button class:list={[
-                    'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-10 rounded-md px-6 w-full',
-                    plan.highlighted ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-                  ]}>
-                    {plan.cta}
-                  </button>
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
 
@@ -448,10 +319,37 @@ const currentYear = new Date().getFullYear();
             </a>
           </div>
           <div class="text-xs sm:text-sm text-muted-foreground">
-            © {currentYear} Horas Líquidas
+            &copy; {currentYear} Horas Líquidas
           </div>
         </div>
       </div>
     </footer>
   </div>
+
+  <style>
+    /* Scroll animations */
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+
+  <script>
+    // Intersection Observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+  </script>
 </BaseLayout>
