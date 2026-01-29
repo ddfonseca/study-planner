@@ -67,6 +67,18 @@ export const useFeatureBadgesStore = create<FeatureBadgesStore>()(
     {
       name: 'feature-badges-storage',
       partialize: (state) => ({ seenFeatures: state.seenFeatures }),
+      // Merge persisted state with initial state to ensure new feature keys
+      // are always present (showing "Novo" badge for new features)
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<FeatureBadgesState> | undefined;
+        return {
+          ...currentState,
+          seenFeatures: {
+            ...initialSeenFeatures,
+            ...(persisted?.seenFeatures || {}),
+          },
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
