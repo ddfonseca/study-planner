@@ -22,6 +22,8 @@ import {
   X,
   Eye,
   EyeOff,
+  Tag,
+  Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Subject } from '@/types/api';
@@ -44,6 +46,7 @@ interface EditingSubject {
   id: string;
   name: string;
   color: string | null;
+  category: string | null;
 }
 
 export function SubjectsPage() {
@@ -70,6 +73,10 @@ export function SubjectsPage() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergeTarget, setMergeTarget] = useState<string | null>(null);
   const [confirmArchive, setConfirmArchive] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  // Get unique categories from subjects
+  const categories = [...new Set(subjects.map(s => s.category).filter((c): c is string => !!c))].sort();
 
   // Fetch subjects when workspace changes
   useEffect(() => {
@@ -78,10 +85,13 @@ export function SubjectsPage() {
     }
   }, [currentWorkspace, showArchived, fetchSubjects]);
 
-  // Filter subjects based on archived state
+  // Filter subjects based on archived state and category
   const activeSubjects = subjects.filter(s => !s.archivedAt);
   const archivedSubjects = subjects.filter(s => s.archivedAt);
-  const displayedSubjects = showArchived ? subjects : activeSubjects;
+  const filteredByArchive = showArchived ? subjects : activeSubjects;
+  const displayedSubjects = categoryFilter
+    ? filteredByArchive.filter(s => s.category === categoryFilter)
+    : filteredByArchive;
 
   // Handle create new subject
   const handleCreate = useCallback(async () => {
@@ -100,6 +110,7 @@ export function SubjectsPage() {
       id: subject.id,
       name: subject.name,
       color: subject.color,
+      category: subject.category,
     });
   };
 
@@ -110,6 +121,7 @@ export function SubjectsPage() {
       await updateSubject(editingSubject.id, {
         name: editingSubject.name,
         color: editingSubject.color ?? undefined,
+        category: editingSubject.category?.trim() || undefined,
       });
       setEditingSubject(null);
     } catch {
@@ -190,31 +202,58 @@ export function SubjectsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold">Tópicos</h1>
           <p className="text-muted-foreground">
             Gerencie os tópicos do workspace {currentWorkspace.name}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowArchived(!showArchived)}
-        >
-          {showArchived ? (
-            <>
-              <EyeOff className="h-4 w-4 mr-2" />
-              Ocultar arquivadas
-            </>
-          ) : (
-            <>
-              <Eye className="h-4 w-4 mr-2" />
-              Mostrar arquivadas ({archivedSubjects.length})
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? (
+              <>
+                <EyeOff className="h-4 w-4 mr-2" />
+                Ocultar arquivadas
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Mostrar arquivadas ({archivedSubjects.length})
+              </>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* Category filter */}
+      {categories.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Button
+            variant={categoryFilter === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCategoryFilter(null)}
+          >
+            Todos
+          </Button>
+          {categories.map((cat) => (
+            <Button
+              key={cat}
+              variant={categoryFilter === cat ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCategoryFilter(cat)}
+            >
+              <Tag className="h-3 w-3 mr-1" />
+              {cat}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Error message */}
       {error && (
@@ -365,22 +404,49 @@ export function SubjectsPage() {
                   />
                 )}
 
-                {/* Name */}
+                {/* Name and Category */}
                 {isEditing ? (
-                  <Input
-                    value={editingSubject?.name || ''}
-                    onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
-                    className="flex-1 h-8"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSaveEdit();
-                      if (e.key === 'Escape') setEditingSubject(null);
-                    }}
-                  />
+                  <div className="flex-1 flex gap-2">
+                    <Input
+                      value={editingSubject?.name || ''}
+                      onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
+                      className="flex-1 h-8"
+                      placeholder="Nome"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveEdit();
+                        if (e.key === 'Escape') setEditingSubject(null);
+                      }}
+                    />
+                    <Input
+                      value={editingSubject?.category || ''}
+                      onChange={(e) => setEditingSubject({ ...editingSubject!, category: e.target.value || null })}
+                      className="w-32 h-8"
+                      placeholder="Categoria"
+                      list="category-suggestions"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveEdit();
+                        if (e.key === 'Escape') setEditingSubject(null);
+                      }}
+                    />
+                    <datalist id="category-suggestions">
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat} />
+                      ))}
+                    </datalist>
+                  </div>
                 ) : (
-                  <span className={cn("flex-1 font-medium", isArchived && "line-through")}>
-                    {subject.name}
-                  </span>
+                  <div className="flex-1 flex items-center gap-2">
+                    <span className={cn("font-medium", isArchived && "line-through")}>
+                      {subject.name}
+                    </span>
+                    {subject.category && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        <Tag className="h-2.5 w-2.5 mr-1" />
+                        {subject.category}
+                      </Badge>
+                    )}
+                  </div>
                 )}
 
                 {/* Archived badge */}

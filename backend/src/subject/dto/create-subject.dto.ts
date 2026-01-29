@@ -27,6 +27,11 @@ export class CreateSubjectDto {
   icon?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  category?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   position?: number;

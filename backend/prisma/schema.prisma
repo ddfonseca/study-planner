@@ -129,6 +129,7 @@ model Subject {
   name        String    @db.VarChar(100)
   color       String?   @db.VarChar(7)
   icon        String?   @db.VarChar(50)
+  category    String?   @db.VarChar(50)
   position    Int       @default(0)
   archivedAt  DateTime? @map("archived_at")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -141,6 +142,7 @@ model Subject {
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
+  @@index([category])
   @@map("subjects")
 }
 

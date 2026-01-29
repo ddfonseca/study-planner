@@ -30,6 +30,7 @@ export interface Subject {
   name: string;
   color: string | null;
   icon: string | null;
+  category: string | null;
   position: number;
   archivedAt: string | null;
   createdAt: string;
@@ -41,6 +42,7 @@ export interface CreateSubjectDto {
   name: string;
   color?: string;
   icon?: string;
+  category?: string;
   position?: number;
 }
 
@@ -49,6 +51,7 @@ export interface UpdateSubjectDto {
   name?: string;
   color?: string;
   icon?: string;
+  category?: string;
   position?: number;
 }
 
