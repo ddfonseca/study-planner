@@ -55,6 +55,9 @@ export function AppLayout() {
     if (location.pathname === '/app/dashboard' && isFeatureNew('dashboard')) {
       markFeatureSeen('dashboard');
     }
+    if (location.pathname === '/app/subjects' && isFeatureNew('subjects')) {
+      markFeatureSeen('subjects');
+    }
   }, [location.pathname, isFeatureNew, markFeatureSeen]);
 
   const toggleTheme = () => setIsDark(!isDark);
