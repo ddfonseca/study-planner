@@ -48,16 +48,6 @@ export class WorkspaceController {
   }
 
   /**
-   * GET /api/workspaces/:id/subjects
-   * Lista matérias distintas do workspace
-   */
-  @Get(':id/subjects')
-  async getSubjects(@Session() session: UserSession, @Param('id') id: string) {
-    const userId = session.user.id;
-    return this.workspaceService.getDistinctSubjects(userId, id);
-  }
-
-  /**
    * GET /api/workspaces/:id/stats
    * Retorna estatísticas do workspace
    */

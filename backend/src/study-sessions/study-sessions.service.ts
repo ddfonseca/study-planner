@@ -12,26 +12,36 @@ export class StudySessionsService {
 
   /**
    * Busca todas as matérias distintas de um usuário ou workspace
+   * @deprecated Use SubjectService.findAll instead
    * @param workspaceId - ID do workspace ou "all" para todos os workspaces do usuário
    */
   async getDistinctSubjects(
     userId: string,
     workspaceId?: string,
   ): Promise<string[]> {
-    const where: any = { userId };
+    const where: any = {};
 
     if (workspaceId && workspaceId !== 'all') {
       where.workspaceId = workspaceId;
+    } else {
+      // Get all workspaces for user
+      const workspaces = await this.prisma.workspace.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+      where.workspaceId = { in: workspaces.map((w) => w.id) };
     }
 
-    const subjects = await this.prisma.studySession.findMany({
-      where,
-      select: { subject: true },
-      distinct: ['subject'],
-      orderBy: { subject: 'asc' },
+    const subjects = await this.prisma.subject.findMany({
+      where: {
+        ...where,
+        archivedAt: null,
+      },
+      select: { name: true },
+      orderBy: { name: 'asc' },
     });
 
-    return subjects.map((s) => s.subject);
+    return subjects.map((s) => s.name);
   }
 
   /**
@@ -66,6 +76,9 @@ export class StudySessionsService {
 
     return this.prisma.studySession.findMany({
       where,
+      include: {
+        subject: true,
+      },
       orderBy: {
         date: 'asc',
       },
@@ -85,13 +98,25 @@ export class StudySessionsService {
       throw new ForbiddenException('Invalid workspace');
     }
 
+    // Verificar se o subject existe e pertence ao workspace
+    const subject = await this.prisma.subject.findFirst({
+      where: { id: createDto.subjectId, workspaceId: createDto.workspaceId },
+    });
+
+    if (!subject) {
+      throw new ForbiddenException('Invalid subject');
+    }
+
     return this.prisma.studySession.create({
       data: {
         userId,
         workspaceId: createDto.workspaceId,
+        subjectId: createDto.subjectId,
         date: new Date(createDto.date),
-        subject: createDto.subject,
         minutes: createDto.minutes,
+      },
+      include: {
+        subject: true,
       },
     });
   }
@@ -120,6 +145,9 @@ export class StudySessionsService {
     return this.prisma.studySession.update({
       where: { id: sessionId },
       data: updateDto,
+      include: {
+        subject: true,
+      },
     });
   }
 

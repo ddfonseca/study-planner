@@ -69,14 +69,14 @@ export function useSessions() {
 
   // Add a new study session
   const handleAddSession = useCallback(
-    async (date: string, subject: string, minutes: number) => {
+    async (date: string, subjectId: string, minutes: number) => {
       if (!currentWorkspaceId) {
         throw new Error('Selecione um workspace para adicionar sessão');
       }
       const sessionData: CreateSessionDto = {
         workspaceId: currentWorkspaceId,
         date,
-        subject,
+        subjectId,
         minutes,
       };
       const result = await addSession(sessionData);
@@ -89,9 +89,9 @@ export function useSessions() {
 
   // Update a study session
   const handleUpdateSession = useCallback(
-    async (id: string, subject: string, minutes: number) => {
+    async (id: string, subjectId: string, minutes: number) => {
       const sessionData: UpdateSessionDto = {
-        subject,
+        subjectId,
         minutes,
       };
       const result = await updateSession(id, sessionData);

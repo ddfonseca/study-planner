@@ -56,6 +56,7 @@ export class ExamProfileService {
       where: { workspaceId },
       include: {
         subjects: {
+          include: { subject: true },
           orderBy: { position: 'asc' },
         },
       },
@@ -98,7 +99,7 @@ export class ExamProfileService {
         weeklyHours: dto.weeklyHours,
         subjects: {
           create: dto.subjects.map((subject, index) => ({
-            subject: subject.subject,
+            subjectId: subject.subjectId,
             weight: subject.weight,
             currentLevel: subject.currentLevel,
             goalLevel: subject.goalLevel,
@@ -108,6 +109,7 @@ export class ExamProfileService {
       },
       include: {
         subjects: {
+          include: { subject: true },
           orderBy: { position: 'asc' },
         },
       },
@@ -124,6 +126,7 @@ export class ExamProfileService {
       where: { id: profileId },
       include: {
         subjects: {
+          include: { subject: true },
           orderBy: { position: 'asc' },
         },
       },
@@ -147,7 +150,7 @@ export class ExamProfileService {
       await this.prisma.subjectProfile.createMany({
         data: dto.subjects.map((subject, index) => ({
           examProfileId: profileId,
-          subject: subject.subject,
+          subjectId: subject.subjectId,
           weight: subject.weight,
           currentLevel: subject.currentLevel,
           goalLevel: subject.goalLevel,
@@ -167,6 +170,7 @@ export class ExamProfileService {
       },
       include: {
         subjects: {
+          include: { subject: true },
           orderBy: { position: 'asc' },
         },
       },
@@ -195,6 +199,7 @@ export class ExamProfileService {
       where: { id: profileId },
       include: {
         subjects: {
+          include: { subject: true },
           orderBy: { position: 'asc' },
         },
       },
@@ -234,7 +239,7 @@ export class ExamProfileService {
       const gap = Math.max(0, s.goalLevel - s.currentLevel);
       const rawScore = gap * s.weight * (1 + Math.log10(1 + gap));
       return {
-        subject: s.subject,
+        subject: s.subject.name,
         gap,
         rawScore,
         weight: s.weight,

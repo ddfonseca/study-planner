@@ -17,6 +17,7 @@ import { MercadoPagoModule } from './mercadopago/mercadopago.module';
 import { ScratchpadNotesModule } from './scratchpad-notes/scratchpad-notes.module';
 import { ExamTemplateModule } from './exam-template/exam-template.module';
 import { ExamProfileModule } from './exam-profile/exam-profile.module';
+import { SubjectModule } from './subject/subject.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ExamProfileModule } from './exam-profile/exam-profile.module';
     ScratchpadNotesModule,
     ExamTemplateModule,
     ExamProfileModule,
+    SubjectModule,
   ],
   providers: [
     {

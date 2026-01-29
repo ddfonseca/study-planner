@@ -13,6 +13,7 @@ import { Play, Square, Clock, Timer, Infinity as InfinityIcon, Maximize2, Minimi
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 import { cn } from '@/lib/utils';
 import { formatDateKey } from '@/lib/utils/date';
+import type { Subject } from '@/types/api';
 
 const STORAGE_KEY = 'studyTimer';
 
@@ -29,18 +30,19 @@ interface TimerState {
   isRunning: boolean;
   seconds: number;
   targetSeconds: number;
-  subject: string;
+  subjectId: string;
   startTime: number | null;
 }
 
 interface StudyTimerProps {
-  subjects: string[];
+  subjects: Subject[];
   onRunningChange?: (isRunning: boolean) => void;
   fullscreen?: boolean;
   onFullscreenChange?: (fullscreen: boolean) => void;
+  onCreateSubject?: (name: string) => Promise<Subject>;
 }
 
-export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFullscreenChange }: StudyTimerProps) {
+export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFullscreenChange, onCreateSubject }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
@@ -50,9 +52,12 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(25 * 60);
   const [targetSeconds, setTargetSeconds] = useState(25 * 60);
-  const [subject, setSubject] = useState('');
+  const [subjectId, setSubjectId] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(fullscreen);
+
+  // Get subject name for display purposes
+  const subjectName = subjects.find(s => s.id === subjectId)?.name || '';
 
   // Sync fullscreen state with prop
   useEffect(() => {
@@ -68,7 +73,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initializedRef = useRef(false);
   const isRunningRef = useRef(isRunning);
-  const subjectRef = useRef(subject);
+  const subjectIdRef = useRef(subjectId);
   const modeRef = useRef(mode);
   const handleStartRef = useRef<() => void>(() => {});
   const handleStopRef = useRef<() => void>(() => {});
@@ -95,11 +100,11 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
           } else {
             setSeconds(elapsed);
           }
-          setSubject(state.subject);
+          setSubjectId(state.subjectId);
           setIsRunning(true);
         } else {
           setSeconds(state.seconds);
-          setSubject(state.subject);
+          setSubjectId(state.subjectId);
         }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
@@ -117,11 +122,11 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
       isRunning,
       seconds,
       targetSeconds,
-      subject,
+      subjectId,
       startTime: isRunning ? Date.now() - elapsedForCountdown * 1000 : null,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [mode, isRunning, seconds, targetSeconds, subject]);
+  }, [mode, isRunning, seconds, targetSeconds, subjectId]);
 
   // Keep mode ref in sync
   useEffect(() => {
@@ -134,10 +139,10 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
     isRunningRef.current = isRunning;
   }, [isRunning, onRunningChange]);
 
-  // Keep subject ref in sync
+  // Keep subjectId ref in sync
   useEffect(() => {
-    subjectRef.current = subject;
-  }, [subject]);
+    subjectIdRef.current = subjectId;
+  }, [subjectId]);
 
   // Timer interval
   useEffect(() => {
@@ -210,14 +215,14 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
         ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
         : `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       const modeIcon = mode === 'stopwatch' ? '⏱️' : '🍅';
-      document.title = `${modeIcon} ${timeStr} - ${subject}`;
+      document.title = `${modeIcon} ${timeStr} - ${subjectName}`;
     } else {
       document.title = 'Horas Líquidas';
     }
     return () => {
       document.title = 'Horas Líquidas';
     };
-  }, [isRunning, seconds, subject, mode]);
+  }, [isRunning, seconds, subjectName, mode]);
 
   // Handle Pomodoro completion (when countdown reaches 0)
   useEffect(() => {
@@ -250,7 +255,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
   };
 
   const handleStart = () => {
-    if (!subject.trim()) {
+    if (!subjectId) {
       triggerPattern('error');
       toast({
         title: 'Atenção',
@@ -290,19 +295,20 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
     // Try to show browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('🍅 Pomodoro completo!', {
-        body: `${minutes} minutos de ${subject} finalizados. Hora da pausa!`,
+        body: `${minutes} minutos de ${subjectIdRef.current ? subjects.find(s => s.id === subjectIdRef.current)?.name : ''} finalizados. Hora da pausa!`,
         icon: '/favicon.png',
       });
     }
 
     // Save session
-    if (minutes > 0) {
+    if (minutes > 0 && subjectIdRef.current) {
       try {
         const today = formatDateKey(new Date());
-        await handleAddSession(today, subject.trim(), minutes);
+        const currentSubjectName = subjects.find(s => s.id === subjectIdRef.current)?.name || '';
+        await handleAddSession(today, subjectIdRef.current, minutes);
         toast({
           title: '🍅 Pomodoro completo!',
-          description: `${minutes} minutos de ${subject} registrados. Hora da pausa!`,
+          description: `${minutes} minutos de ${currentSubjectName} registrados. Hora da pausa!`,
         });
       } catch (err) {
         triggerPattern('error');
@@ -317,9 +323,9 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
     // Reset to initial state for selected mode
     const preset = TIMER_PRESETS.find(p => p.mode === mode);
     setSeconds(preset?.seconds || 0);
-    setSubject('');
+    setSubjectId('');
     localStorage.removeItem(STORAGE_KEY);
-  }, [mode, targetSeconds, subject, handleAddSession, toast, triggerPattern]);
+  }, [mode, targetSeconds, subjects, handleAddSession, toast, triggerPattern]);
 
   const handleStop = async () => {
     setIsRunning(false);
@@ -330,14 +336,14 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
       ? Math.floor(seconds / 60)
       : Math.floor((targetSeconds - seconds) / 60);
 
-    if (studiedMinutes > 0) {
+    if (studiedMinutes > 0 && subjectId) {
       try {
         const today = formatDateKey(new Date());
-        await handleAddSession(today, subject.trim(), studiedMinutes);
+        await handleAddSession(today, subjectId, studiedMinutes);
         triggerPattern('success');
         toast({
           title: 'Sessão salva!',
-          description: `${studiedMinutes} minutos de ${subject} registrados`,
+          description: `${studiedMinutes} minutos de ${subjectName} registrados`,
         });
       } catch (err) {
         triggerPattern('error');
@@ -372,18 +378,18 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
 
   // Listen for keyboard shortcut to toggle timer (smart behavior)
   // - If timer running: stop and save
-  // - If no subject selected: open the subject picker
-  // - If subject selected: start the timer
+  // - If no subjectId selected: open the subject picker
+  // - If subjectId selected: start the timer
   useEffect(() => {
     const handleToggleTimer = () => {
       if (isRunningRef.current) {
         // Timer is running - stop it
         handleStopRef.current();
-      } else if (!subjectRef.current.trim()) {
-        // No subject - open the picker
+      } else if (!subjectIdRef.current) {
+        // No subjectId - open the picker
         openPickerRef.current();
       } else {
-        // Has subject - start the timer
+        // Has subjectId - start the timer
         handleStartRef.current();
       }
     };
@@ -460,11 +466,11 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
 
         {/* Timer display */}
         <div className={cn("text-center", isFullscreen ? "space-y-4" : "space-y-2")}>
-          {isRunning && subject && (
+          {isRunning && subjectName && (
             <p className={cn(
               "text-muted-foreground font-medium",
               isFullscreen ? "text-lg" : "text-sm"
-            )}>{subject}</p>
+            )}>{subjectName}</p>
           )}
           <span
             className={cn(
@@ -503,11 +509,12 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
         {!isRunning && (
           <div className={cn(isFullscreen && "max-w-md mx-auto")}>
             <SubjectPicker
-              value={subject}
-              onValueChange={setSubject}
+              value={subjectId}
+              onValueChange={setSubjectId}
               subjects={subjects}
               recentSubjects={recentSubjects}
               onSubjectUsed={addRecentSubject}
+              onCreateSubject={onCreateSubject}
               placeholder="Selecione a matéria..."
               searchPlaceholder="Buscar..."
               emptyMessage="Nenhuma matéria"

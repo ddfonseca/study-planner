@@ -13,3 +13,4 @@ export {
 export { useFeatureBadgesStore, type FeatureKey } from './featureBadgesStore';
 export { useAchievementsStore, type AchievementType } from './achievementsStore';
 export { useAllocationStore } from './allocationStore';
+export { useSubjectStore } from './subjectStore';

@@ -5,6 +5,7 @@
 // Individual study session in UI format
 export interface StudySession {
   id: string;
+  subjectId: string; // subject ID
   materia: string; // subject name in Portuguese
   minutos: number; // minutes in Portuguese
 }

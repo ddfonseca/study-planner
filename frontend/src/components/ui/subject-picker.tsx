@@ -19,22 +19,59 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { Badge } from "@/components/ui/badge"
+import type { Subject } from "@/types/api"
 
-interface SubjectPickerProps {
-  value: string
+// Internal representation for unified handling
+interface SubjectItem {
+  id: string
+  name: string
+  color?: string | null
+  icon?: string | null
+}
+
+// Props when using Subject[] (new mode)
+interface SubjectPickerPropsWithSubjects {
+  value: string // Subject ID or name (depending on mode)
   onValueChange: (value: string) => void
-  subjects: string[]
-  recentSubjects?: string[]
-  onSubjectUsed?: (subject: string) => void
+  subjects: Subject[]
+  recentSubjects?: string[] // Recent subject IDs
+  onSubjectUsed?: (subjectId: string) => void
+  /** Called when user wants to create a new subject. Returns the created Subject. */
+  onCreateSubject?: (name: string) => Promise<Subject>
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
   disabled?: boolean
   className?: string
-  /** Controlled open state */
   open?: boolean
-  /** Callback when open state changes */
   onOpenChange?: (open: boolean) => void
+  /** When true, value/onChange use subject names instead of IDs (for legacy compat) */
+  useNameAsValue?: boolean
+}
+
+// Props when using string[] (legacy mode)
+interface SubjectPickerPropsLegacy {
+  value: string
+  onValueChange: (value: string) => void
+  subjects: string[]
+  recentSubjects?: string[]
+  onSubjectUsed?: (subject: string) => void
+  onCreateSubject?: never
+  placeholder?: string
+  searchPlaceholder?: string
+  emptyMessage?: string
+  disabled?: boolean
+  className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  useNameAsValue?: never
+}
+
+export type SubjectPickerProps = SubjectPickerPropsWithSubjects | SubjectPickerPropsLegacy
+
+// Type guard to check if subjects is Subject[]
+function isSubjectArray(subjects: Subject[] | string[]): subjects is Subject[] {
+  return subjects.length === 0 || typeof subjects[0] === 'object'
 }
 
 // Normalize string for search (remove accents, lowercase)
@@ -42,14 +79,14 @@ const normalizeString = (str: string) =>
   str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 
 // Group subjects by first letter
-function groupByFirstLetter(subjects: string[]): Map<string, string[]> {
-  const groups = new Map<string, string[]>()
+function groupByFirstLetter(subjects: SubjectItem[]): Map<string, SubjectItem[]> {
+  const groups = new Map<string, SubjectItem[]>()
   const sorted = [...subjects].sort((a, b) =>
-    a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
   )
 
   sorted.forEach((subject) => {
-    const letter = subject[0].toUpperCase()
+    const letter = subject.name[0].toUpperCase()
     if (!groups.has(letter)) groups.set(letter, [])
     groups.get(letter)!.push(subject)
   })
@@ -59,15 +96,16 @@ function groupByFirstLetter(subjects: string[]): Map<string, string[]> {
 
 // Shared content component for both Popover and Drawer
 interface SubjectPickerContentProps {
-  subjects: string[]
-  recentSubjects: string[]
-  value: string
+  subjects: SubjectItem[]
+  recentSubjects: SubjectItem[]
+  selectedId: string
   inputValue: string
   onInputChange: (value: string) => void
-  onSelect: (value: string) => void
+  onSelect: (subject: SubjectItem) => void
   onCreateNew: () => void
   showCreateOption: boolean
-  matchingOptions: string[]
+  isCreating: boolean
+  matchingOptions: SubjectItem[]
   emptyMessage: string
   searchPlaceholder: string
   isMobile: boolean
@@ -76,12 +114,13 @@ interface SubjectPickerContentProps {
 function SubjectPickerContent({
   subjects,
   recentSubjects,
-  value,
+  selectedId,
   inputValue,
   onInputChange,
   onSelect,
   onCreateNew,
   showCreateOption,
+  isCreating,
   matchingOptions,
   emptyMessage,
   searchPlaceholder,
@@ -95,18 +134,18 @@ function SubjectPickerContent({
 
   // Filter recents that exist in subjects and match search
   const filteredRecents = React.useMemo(() => {
-    if (!inputValue) return recentSubjects.filter((r) => subjects.includes(r))
+    const subjectIds = new Set(subjects.map(s => s.id))
+    if (!inputValue) return recentSubjects.filter((r) => subjectIds.has(r.id))
     return recentSubjects.filter(
       (r) =>
-        subjects.includes(r) &&
-        normalizeString(r).includes(normalizeString(inputValue))
+        subjectIds.has(r.id) &&
+        normalizeString(r.name).includes(normalizeString(inputValue))
     )
   }, [recentSubjects, subjects, inputValue])
 
   // Focus input on mount for mobile
   React.useEffect(() => {
     if (isMobile) {
-      // Small delay to ensure drawer animation is complete
       const timer = setTimeout(() => {
         inputRef.current?.focus()
       }, 100)
@@ -156,9 +195,10 @@ function SubjectPickerContent({
             <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Matérias recentes">
               {filteredRecents.map((subject) => (
                 <Badge
-                  key={subject}
-                  variant={value === subject ? "default" : "secondary"}
+                  key={subject.id}
+                  variant={selectedId === subject.id ? "default" : "secondary"}
                   className="cursor-pointer hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  style={subject.color ? { borderColor: subject.color } : undefined}
                   onClick={() => onSelect(subject)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -168,10 +208,10 @@ function SubjectPickerContent({
                   }}
                   role="option"
                   tabIndex={0}
-                  aria-selected={value === subject}
+                  aria-selected={selectedId === subject.id}
                 >
-                  {subject}
-                  {value === subject && (
+                  {subject.name}
+                  {selectedId === subject.id && (
                     <Check className="ml-1 h-3 w-3" />
                   )}
                 </Badge>
@@ -190,7 +230,7 @@ function SubjectPickerContent({
                 </p>
                 {items.map((subject) => (
                   <button
-                    key={subject}
+                    key={subject.id}
                     onClick={() => onSelect(subject)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -199,16 +239,22 @@ function SubjectPickerContent({
                       }
                     }}
                     role="option"
-                    aria-selected={value === subject}
+                    aria-selected={selectedId === subject.id}
                     className={cn(
                       "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors",
                       "hover:bg-accent hover:text-accent-foreground",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      value === subject && "bg-accent"
+                      selectedId === subject.id && "bg-accent"
                     )}
                   >
-                    <span className="flex-1 text-left">{subject}</span>
-                    {value === subject && (
+                    {subject.color && (
+                      <span
+                        className="w-2 h-2 rounded-full mr-2 shrink-0"
+                        style={{ backgroundColor: subject.color }}
+                      />
+                    )}
+                    <span className="flex-1 text-left">{subject.name}</span>
+                    {selectedId === subject.id && (
                       <Check className="h-4 w-4 text-primary" />
                     )}
                   </button>
@@ -231,17 +277,21 @@ function SubjectPickerContent({
         )}>
           <button
             onClick={onCreateNew}
+            disabled={isCreating}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
                 onCreateNew()
               }
             }}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={cn(
+              "flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              isCreating && "opacity-50 cursor-not-allowed"
+            )}
             aria-label={`Criar nova matéria: ${inputValue.trim()}`}
           >
             <Plus className="h-4 w-4" />
-            Criar "{inputValue.trim()}"
+            {isCreating ? "Criando..." : `Criar "${inputValue.trim()}"`}
           </button>
         </div>
       )}
@@ -249,23 +299,84 @@ function SubjectPickerContent({
   )
 }
 
-export function SubjectPicker({
-  value,
-  onValueChange,
-  subjects,
-  recentSubjects = [],
-  onSubjectUsed,
-  placeholder = "Selecione...",
-  searchPlaceholder = "Buscar matéria...",
-  emptyMessage = "Nenhuma matéria encontrada.",
-  disabled = false,
-  className,
-  open: controlledOpen,
-  onOpenChange,
-}: SubjectPickerProps) {
+export function SubjectPicker(props: SubjectPickerProps) {
+  const {
+    value,
+    onValueChange,
+    subjects,
+    recentSubjects = [],
+    onSubjectUsed,
+    placeholder = "Selecione...",
+    searchPlaceholder = "Buscar matéria...",
+    emptyMessage = "Nenhuma matéria encontrada.",
+    disabled = false,
+    className,
+    open: controlledOpen,
+    onOpenChange,
+  } = props
+
+  const onCreateSubject = 'onCreateSubject' in props ? props.onCreateSubject : undefined
+  const useNameAsValue = 'useNameAsValue' in props ? props.useNameAsValue : undefined
+
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
+  const [isCreating, setIsCreating] = React.useState(false)
   const isMobile = useIsMobile()
+
+  // Detect mode based on subjects type
+  const isObjectMode = isSubjectArray(subjects)
+
+  // Convert subjects to internal format
+  const subjectItems: SubjectItem[] = React.useMemo(() => {
+    if (isObjectMode) {
+      return (subjects as Subject[]).map(s => ({
+        id: s.id,
+        name: s.name,
+        color: s.color,
+        icon: s.icon,
+      }))
+    }
+    // Legacy string mode: use name as id
+    return (subjects as string[]).map(s => ({
+      id: s,
+      name: s,
+    }))
+  }, [subjects, isObjectMode])
+
+  // Convert recent subjects to internal format
+  const recentItems: SubjectItem[] = React.useMemo(() => {
+    if (isObjectMode) {
+      // recentSubjects contains IDs, find full objects
+      return recentSubjects
+        .map(id => subjectItems.find(s => s.id === id))
+        .filter((s): s is SubjectItem => s !== undefined)
+    }
+    // Legacy: recentSubjects contains names
+    return (recentSubjects as string[]).map(s => ({
+      id: s,
+      name: s,
+    }))
+  }, [recentSubjects, subjectItems, isObjectMode])
+
+  // Get selected ID (in object mode with useNameAsValue, find by name)
+  const selectedId = React.useMemo(() => {
+    if (!value) return ""
+    if (!isObjectMode) return value
+    if (useNameAsValue) {
+      const found = subjectItems.find(s => s.name === value)
+      return found?.id ?? ""
+    }
+    return value
+  }, [value, isObjectMode, useNameAsValue, subjectItems])
+
+  // Get display value
+  const displayValue = React.useMemo(() => {
+    if (!value) return ""
+    if (!isObjectMode) return value
+    if (useNameAsValue) return value
+    const found = subjectItems.find(s => s.id === value)
+    return found?.name ?? ""
+  }, [value, isObjectMode, useNameAsValue, subjectItems])
 
   // Support controlled and uncontrolled modes
   const isControlled = controlledOpen !== undefined
@@ -279,27 +390,47 @@ export function SubjectPicker({
 
   const matchingOptions = React.useMemo(
     () =>
-      subjects.filter((option) =>
-        normalizeString(option).includes(normalizeString(inputValue))
+      subjectItems.filter((option) =>
+        normalizeString(option.name).includes(normalizeString(inputValue))
       ),
-    [subjects, inputValue]
+    [subjectItems, inputValue]
   )
 
-  const exactMatch = subjects.some(
-    (option) => normalizeString(option) === normalizeString(inputValue)
+  const exactMatch = subjectItems.some(
+    (option) => normalizeString(option.name) === normalizeString(inputValue)
   )
 
   const showCreateOption = Boolean(inputValue.trim()) && !exactMatch
 
-  const handleSelect = (selectedValue: string) => {
-    onValueChange(selectedValue)
-    onSubjectUsed?.(selectedValue)
+  const handleSelect = (subject: SubjectItem) => {
+    // Return ID for object mode (unless useNameAsValue), name for legacy
+    const returnValue = isObjectMode && !useNameAsValue ? subject.id : subject.name
+    onValueChange(returnValue)
+    onSubjectUsed?.(isObjectMode ? subject.id : subject.name)
     setInputValue("")
     setOpen(false)
   }
 
-  const handleCreateNew = () => {
-    if (inputValue.trim()) {
+  const handleCreateNew = async () => {
+    if (!inputValue.trim()) return
+
+    if (onCreateSubject) {
+      // Object mode with API creation
+      setIsCreating(true)
+      try {
+        const newSubject = await onCreateSubject(inputValue.trim())
+        const returnValue = useNameAsValue ? newSubject.name : newSubject.id
+        onValueChange(returnValue)
+        onSubjectUsed?.(newSubject.id)
+        setInputValue("")
+        setOpen(false)
+      } catch (error) {
+        console.error('Failed to create subject:', error)
+      } finally {
+        setIsCreating(false)
+      }
+    } else {
+      // Legacy mode: just return the name
       onValueChange(inputValue.trim())
       onSubjectUsed?.(inputValue.trim())
       setInputValue("")
@@ -315,11 +446,11 @@ export function SubjectPicker({
       disabled={disabled}
       className={cn(
         "w-full justify-between font-normal",
-        !value && "text-muted-foreground",
+        !displayValue && "text-muted-foreground",
         className
       )}
     >
-      <span className="truncate">{value || placeholder}</span>
+      <span className="truncate">{displayValue || placeholder}</span>
       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
     </Button>
   )
@@ -346,14 +477,15 @@ export function SubjectPicker({
             </div>
           </DrawerHeader>
           <SubjectPickerContent
-            subjects={subjects}
-            recentSubjects={recentSubjects}
-            value={value}
+            subjects={subjectItems}
+            recentSubjects={recentItems}
+            selectedId={selectedId}
             inputValue={inputValue}
             onInputChange={setInputValue}
             onSelect={handleSelect}
             onCreateNew={handleCreateNew}
             showCreateOption={showCreateOption}
+            isCreating={isCreating}
             matchingOptions={matchingOptions}
             emptyMessage={emptyMessage}
             searchPlaceholder={searchPlaceholder}
@@ -373,14 +505,15 @@ export function SubjectPicker({
         align="start"
       >
         <SubjectPickerContent
-          subjects={subjects}
-          recentSubjects={recentSubjects}
-          value={value}
+          subjects={subjectItems}
+          recentSubjects={recentItems}
+          selectedId={selectedId}
           inputValue={inputValue}
           onInputChange={setInputValue}
           onSelect={handleSelect}
           onCreateNew={handleCreateNew}
           showCreateOption={showCreateOption}
+          isCreating={isCreating}
           matchingOptions={matchingOptions}
           emptyMessage={emptyMessage}
           searchPlaceholder={searchPlaceholder}

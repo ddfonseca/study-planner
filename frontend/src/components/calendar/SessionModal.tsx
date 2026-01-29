@@ -19,16 +19,18 @@ import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
 import type { DayData, StudySession } from '@/types/session';
+import type { Subject } from '@/types/api';
 
 interface SessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   date: Date | null;
   dayData: DayData;
-  subjects: string[];
-  onAddSession: (subject: string, minutes: number) => Promise<void>;
-  onUpdateSession: (id: string, subject: string, minutes: number) => Promise<void>;
+  subjects: Subject[];
+  onAddSession: (subjectId: string, minutes: number) => Promise<void>;
+  onUpdateSession: (id: string, subjectId: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
+  onCreateSubject?: (name: string) => Promise<Subject>;
   canModify?: boolean;
   highlighted?: boolean;
 }
@@ -42,10 +44,11 @@ export function SessionModal({
   onAddSession,
   onUpdateSession,
   onDeleteSession,
+  onCreateSubject,
   canModify = true,
   highlighted = false,
 }: SessionModalProps) {
-  const [subject, setSubject] = useState('');
+  const [subjectId, setSubjectId] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
@@ -54,15 +57,22 @@ export function SessionModal({
 
   const isEditing = editingSession !== null;
 
+  // Find subject by name for editing (session.materia is the name)
+  const findSubjectIdByName = (name: string): string => {
+    const subject = subjects.find(s => s.name === name);
+    return subject?.id || '';
+  };
+
   const handleStartEdit = (session: StudySession) => {
     setEditingSession(session);
-    setSubject(session.materia);
+    // Session stores subject name, convert to ID
+    setSubjectId(session.subjectId || findSubjectIdByName(session.materia));
     setMinutes(session.minutos.toString());
   };
 
   const handleCancelEdit = () => {
     setEditingSession(null);
-    setSubject('');
+    setSubjectId('');
     setMinutes('');
   };
 
@@ -74,17 +84,17 @@ export function SessionModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subject.trim() || !minutes) return;
+    if (!subjectId || !minutes) return;
 
     setIsSubmitting(true);
     try {
       if (isEditing && editingSession) {
-        await onUpdateSession(editingSession.id, subject.trim(), parseInt(minutes, 10));
+        await onUpdateSession(editingSession.id, subjectId, parseInt(minutes, 10));
         setEditingSession(null);
       } else {
-        await onAddSession(subject.trim(), parseInt(minutes, 10));
+        await onAddSession(subjectId, parseInt(minutes, 10));
       }
-      setSubject('');
+      setSubjectId('');
       setMinutes('');
       onClose();
     } finally {
@@ -130,11 +140,12 @@ export function SessionModal({
               <div className="space-y-2">
                 <Label htmlFor="subject">Matéria</Label>
                 <SubjectPicker
-                  value={subject}
-                  onValueChange={setSubject}
+                  value={subjectId}
+                  onValueChange={setSubjectId}
                   subjects={subjects}
                   recentSubjects={recentSubjects}
                   onSubjectUsed={addRecentSubject}
+                  onCreateSubject={onCreateSubject}
                   placeholder="Selecione ou digite..."
                   searchPlaceholder="Buscar matéria..."
                   emptyMessage="Nenhuma matéria encontrada"
@@ -170,7 +181,7 @@ export function SessionModal({
               )}
               <Button
                 type="submit"
-                disabled={!subject.trim() || !minutes || isSubmitting}
+                disabled={!subjectId || !minutes || isSubmitting}
                 className="flex-1"
               >
                 {isSubmitting ? (

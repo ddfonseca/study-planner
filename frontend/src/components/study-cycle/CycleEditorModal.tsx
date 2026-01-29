@@ -28,7 +28,7 @@ import {
 import { useStudyCycleStore, formatDuration } from '@/store/studyCycleStore';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { useSessions } from '@/hooks/useSessions';
+import { useSubjectStore } from '@/store/subjectStore';
 import type { CreateCycleItemDto } from '@/types/api';
 
 interface CycleEditorModalProps {
@@ -48,13 +48,13 @@ function generateId(): string {
 export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEditorModalProps) {
   const { currentWorkspaceId } = useWorkspaceStore();
   const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } = useStudyCycleStore();
-  const { getUniqueSubjects } = useSessions();
-  const subjects = getUniqueSubjects();
+  const { getActiveSubjects, findOrCreateSubject } = useSubjectStore();
+  const subjects = getActiveSubjects();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const [items, setItems] = useState<CycleItemForm[]>([]);
   const [cycleName, setCycleName] = useState('');
-  const [newSubject, setNewSubject] = useState('');
+  const [newSubjectId, setNewSubjectId] = useState('');
   const [newMinutes, setNewMinutes] = useState('');
   const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,7 +71,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       setItems(
         cycle.items.map((item) => ({
           id: item.id,
-          subject: item.subject,
+          subjectId: item.subjectId,
           targetMinutes: item.targetMinutes,
         }))
       );
@@ -84,17 +84,17 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   }, [open, isEditing, cycle, cycles.length]);
 
   const handleAddItem = () => {
-    if (!newSubject.trim() || !newMinutes) return;
+    if (!newSubjectId || !newMinutes) return;
 
     setItems((prev) => [
       ...prev,
       {
         id: generateId(),
-        subject: newSubject.trim(),
+        subjectId: newSubjectId,
         targetMinutes: parseInt(newMinutes, 10),
       },
     ]);
-    setNewSubject('');
+    setNewSubjectId('');
     setNewMinutes('');
   };
 
@@ -129,13 +129,13 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       if (isEditing) {
         const data = {
           name: cycleName.trim() || undefined,
-          items: items.map(({ subject, targetMinutes }) => ({ subject, targetMinutes })),
+          items: items.map(({ subjectId, targetMinutes }) => ({ subjectId, targetMinutes })),
         };
         await updateCycle(currentWorkspaceId, data);
       } else {
         const data = {
           name: cycleName.trim(),
-          items: items.map(({ subject, targetMinutes }) => ({ subject, targetMinutes })),
+          items: items.map(({ subjectId, targetMinutes }) => ({ subjectId, targetMinutes })),
           activateOnCreate,
         };
         await createCycle(currentWorkspaceId, data);
@@ -192,7 +192,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             </Label>
             <Input
               id="cycleName"
-              placeholder="Ex: Concurso TRT"
+              placeholder="Ex: Auditor-Fiscal"
               value={cycleName}
               onChange={(e) => setCycleName(e.target.value)}
               maxLength={50}
@@ -216,18 +216,19 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
 
           {/* Add item form */}
           <div className="space-y-2">
-            <Label>Adicionar matéria</Label>
+            <Label>Adicionar tópico</Label>
             <div className="flex gap-2">
               <div className="flex-1">
                 <SubjectPicker
-                  value={newSubject}
-                  onValueChange={setNewSubject}
+                  value={newSubjectId}
+                  onValueChange={setNewSubjectId}
                   subjects={subjects}
                   recentSubjects={recentSubjects}
                   onSubjectUsed={addRecentSubject}
-                  placeholder="Matéria"
+                  onCreateSubject={currentWorkspaceId ? (name) => findOrCreateSubject(currentWorkspaceId, name) : undefined}
+                  placeholder="Tópico"
                   searchPlaceholder="Buscar..."
-                  emptyMessage="Nenhuma encontrada"
+                  emptyMessage="Nenhum encontrado"
                 />
               </div>
               <Input
@@ -243,7 +244,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                 type="button"
                 size="icon"
                 onClick={handleAddItem}
-                disabled={!newSubject.trim() || !newMinutes}
+                disabled={!newSubjectId || !newMinutes}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -269,7 +270,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                       {index + 1}.
                     </span>
                     <span className="flex-1 text-sm font-medium truncate">
-                      {item.subject}
+                      {subjects.find(s => s.id === item.subjectId)?.name || item.subjectId}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {formatDuration(item.targetMinutes)}

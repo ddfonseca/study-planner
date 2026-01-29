@@ -190,14 +190,13 @@ export class WorkspaceService {
     // Verificar acesso ao workspace
     await this.findById(userId, workspaceId);
 
-    const subjects = await this.prisma.studySession.findMany({
-      where: { workspaceId },
-      select: { subject: true },
-      distinct: ['subject'],
-      orderBy: { subject: 'asc' },
+    const subjects = await this.prisma.subject.findMany({
+      where: { workspaceId, archivedAt: null },
+      select: { name: true },
+      orderBy: { name: 'asc' },
     });
 
-    return subjects.map((s) => s.subject);
+    return subjects.map((s) => s.name);
   }
 
   /**

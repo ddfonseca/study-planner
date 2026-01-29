@@ -23,13 +23,54 @@ export interface Workspace {
   updatedAt: string;
 }
 
+// Subject entity - normalized subject per workspace
+export interface Subject {
+  id: string;
+  workspaceId: string;
+  name: string;
+  color: string | null;
+  icon: string | null;
+  position: number;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Create subject DTO
+export interface CreateSubjectDto {
+  name: string;
+  color?: string;
+  icon?: string;
+  position?: number;
+}
+
+// Update subject DTO
+export interface UpdateSubjectDto {
+  name?: string;
+  color?: string;
+  icon?: string;
+  position?: number;
+}
+
+// Merge subjects DTO
+export interface MergeSubjectsDto {
+  sourceIds: string[];
+  targetId: string;
+}
+
+// Reorder subjects DTO
+export interface ReorderSubjectsDto {
+  subjectIds: string[];
+}
+
 // Session entity from backend
 export interface Session {
   id: string;
   userId: string;
   workspaceId: string;
+  subjectId: string;
+  subject: Subject; // Populated relation
   date: string; // ISO date string
-  subject: string;
   minutes: number;
   createdAt: string;
   updatedAt: string;
@@ -79,14 +120,14 @@ export interface ApiError {
 export interface CreateSessionDto {
   workspaceId: string;
   date: string;
-  subject: string;
+  subjectId: string;
   minutes: number;
 }
 
 // Update session DTO
 export interface UpdateSessionDto {
   date?: string;
-  subject?: string;
+  subjectId?: string;
   minutes?: number;
 }
 
@@ -118,7 +159,8 @@ export interface UpdateWorkspaceDto {
 export interface StudyCycleItem {
   id: string;
   cycleId: string;
-  subject: string;
+  subjectId: string;
+  subject: Subject; // Populated relation
   targetMinutes: number;
   position: number;
 }
@@ -195,7 +237,7 @@ export interface CycleHistory {
 
 // Create cycle item DTO
 export interface CreateCycleItemDto {
-  subject: string;
+  subjectId: string;
   targetMinutes: number;
 }
 

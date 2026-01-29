@@ -289,7 +289,7 @@ export function CycleSuggestionCard() {
               <Button
                 size="sm"
                 className="w-full"
-                onClick={handleAdvance}
+                onClick={() => handleAdvance()}
                 disabled={isLoading}
                 title={`Avançar para ${data.nextSubject}`}
               >

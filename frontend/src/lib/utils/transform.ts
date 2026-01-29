@@ -23,7 +23,8 @@ export function transformSessionsToAppFormat(sessions: Session[]): SessionsMap {
 
     data[dateKey].materias.push({
       id: session.id,
-      materia: session.subject,
+      subjectId: session.subjectId,
+      materia: session.subject.name,
       minutos: session.minutes,
     });
 
@@ -39,7 +40,8 @@ export function transformSessionsToAppFormat(sessions: Session[]): SessionsMap {
 export function transformSessionToUI(session: Session): StudySession {
   return {
     id: session.id,
-    materia: session.subject,
+    subjectId: session.subjectId,
+    materia: session.subject.name,
     minutos: session.minutes,
   };
 }

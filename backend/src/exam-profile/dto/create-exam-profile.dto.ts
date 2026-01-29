@@ -15,8 +15,7 @@ import { Type } from 'class-transformer';
 
 export class CreateSubjectProfileDto {
   @IsString()
-  @MaxLength(100)
-  subject: string;
+  subjectId: string;
 
   @IsNumber()
   @Min(0.1)

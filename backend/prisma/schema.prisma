@@ -115,10 +115,33 @@ model Workspace {
   weeklyGoals   WeeklyGoal[]
   studyCycles   StudyCycle[]
   examProfiles  ExamProfile[]
+  subjects      Subject[]
 
   @@unique([userId, name])
   @@index([userId])
   @@map("workspaces")
+}
+
+// Subject - normalized subjects per workspace
+model Subject {
+  id          String    @id @default(cuid())
+  workspaceId String    @map("workspace_id")
+  name        String    @db.VarChar(100)
+  color       String?   @db.VarChar(7)
+  icon        String?   @db.VarChar(50)
+  position    Int       @default(0)
+  archivedAt  DateTime? @map("archived_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  studySessions   StudySession[]
+  studyCycleItems StudyCycleItem[]
+  subjectProfiles SubjectProfile[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("subjects")
 }
 
 // Weekly goal - stores goals for specific weeks per workspace
@@ -146,18 +169,20 @@ model StudySession {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
   workspaceId String   @map("workspace_id")
+  subjectId   String   @map("subject_id")
   date        DateTime @db.Date
-  subject     String
   minutes     Int
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
   @@index([userId])
   @@index([workspaceId])
+  @@index([subjectId])
   @@map("study_sessions")
 }
 
@@ -211,15 +236,17 @@ model StudyCycle {
 model StudyCycleItem {
   id                  String @id @default(cuid())
   cycleId             String @map("cycle_id")
-  subject             String @db.VarChar(100)
+  subjectId           String @map("subject_id")
   targetMinutes       Int    @map("target_minutes")
   position            Int
   compensationMinutes Int    @default(0) @map("compensation_minutes") // Minutes added when skipping incomplete
 
-  cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  cycle   StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  subject Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([cycleId, position])
   @@index([cycleId])
+  @@index([subjectId])
   @@map("study_cycle_items")
 }
 
@@ -405,7 +432,7 @@ model ExamProfile {
 model SubjectProfile {
   id            String   @id @default(cuid())
   examProfileId String   @map("exam_profile_id")
-  subject       String   @db.VarChar(100)
+  subjectId     String   @map("subject_id")
   weight        Float    @default(1.0)
   currentLevel  Int      @default(5) @map("current_level")
   goalLevel     Int      @default(8) @map("goal_level")
@@ -414,9 +441,11 @@ model SubjectProfile {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   examProfile ExamProfile @relation(fields: [examProfileId], references: [id], onDelete: Cascade)
+  subject     Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
-  @@unique([examProfileId, subject])
+  @@unique([examProfileId, subjectId])
   @@index([examProfileId])
+  @@index([subjectId])
   @@map("subject_profiles")
 }
 

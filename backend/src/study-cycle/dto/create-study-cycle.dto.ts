@@ -14,8 +14,7 @@ import { Type } from 'class-transformer';
 
 export class CreateCycleItemDto {
   @IsString()
-  @MaxLength(100)
-  subject: string;
+  subjectId: string;
 
   @IsInt()
   @Min(1)

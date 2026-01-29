@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
+import { useSubjectStore } from '@/store/subjectStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
@@ -39,16 +41,27 @@ export function CalendarPage() {
   const { isLoading: sessionsLoading } = useSessionStore();
   const { fetchConfig, isLoading: configLoading } = useConfigStore();
   const { shouldOpenSessionModal, setShouldOpenSessionModal } = useOnboardingStore();
+  const { currentWorkspaceId } = useWorkspaceStore();
+  const { fetchSubjects, findOrCreateSubject, getActiveSubjects } = useSubjectStore();
   const {
     handleAddSession,
     handleUpdateSession,
     handleSoftDeleteSession,
     getSessionsForDate,
-    getUniqueSubjects,
     fetchSessions,
     canModify,
   } = useSessions();
   const { toast } = useToast();
+
+  // Fetch subjects when workspace changes
+  useEffect(() => {
+    if (currentWorkspaceId) {
+      fetchSubjects(currentWorkspaceId);
+    }
+  }, [currentWorkspaceId, fetchSubjects]);
+
+  // Get active (non-archived) subjects
+  const activeSubjects = getActiveSubjects();
 
   const {
     currentMonth,
@@ -156,12 +169,23 @@ export function CalendarPage() {
   }, []);
 
   // Handle add session
+  // Create a new subject on-the-fly
+  const handleCreateSubject = useCallback(
+    async (name: string) => {
+      if (!currentWorkspaceId) {
+        throw new Error('Selecione um workspace');
+      }
+      return findOrCreateSubject(currentWorkspaceId, name);
+    },
+    [currentWorkspaceId, findOrCreateSubject]
+  );
+
   const handleAddSessionSubmit = useCallback(
-    async (subject: string, minutes: number) => {
+    async (subjectId: string, minutes: number) => {
       if (!selectedDate) return;
 
       try {
-        await handleAddSession(formatDateKey(selectedDate), subject, minutes);
+        await handleAddSession(formatDateKey(selectedDate), subjectId, minutes);
         toast({
           title: 'Sucesso',
           description: 'Sessão adicionada com sucesso!',
@@ -179,9 +203,9 @@ export function CalendarPage() {
 
   // Handle update session
   const handleUpdateSessionSubmit = useCallback(
-    async (id: string, subject: string, minutes: number) => {
+    async (id: string, subjectId: string, minutes: number) => {
       try {
-        await handleUpdateSession(id, subject, minutes);
+        await handleUpdateSession(id, subjectId, minutes);
         toast({
           title: 'Sucesso',
           description: 'Sessão atualizada!',
@@ -303,7 +327,8 @@ export function CalendarPage() {
         if (isTimerFullscreen) return null;
         return (
           <StudyTimer
-            subjects={getUniqueSubjects()}
+            subjects={activeSubjects}
+          onCreateSubject={handleCreateSubject}
             onRunningChange={setTimerActive}
             fullscreen={isTimerFullscreen}
             onFullscreenChange={setIsTimerFullscreen}
@@ -363,7 +388,8 @@ export function CalendarPage() {
               {/* Don't render here if fullscreen - single instance rendered in overlay */}
               {!isTimerFullscreen && (
                 <StudyTimer
-                  subjects={getUniqueSubjects()}
+                  subjects={activeSubjects}
+          onCreateSubject={handleCreateSubject}
                   onRunningChange={setTimerActive}
                   fullscreen={isTimerFullscreen}
                   onFullscreenChange={setIsTimerFullscreen}
@@ -382,10 +408,11 @@ export function CalendarPage() {
           }}
           date={selectedDate}
           dayData={selectedDayData}
-          subjects={getUniqueSubjects()}
+          subjects={activeSubjects}
           onAddSession={handleAddSessionSubmit}
           onUpdateSession={handleUpdateSessionSubmit}
           onDeleteSession={handleDeleteSessionSubmit}
+          onCreateSubject={handleCreateSubject}
           canModify={canModify}
           highlighted={isModalHighlighted}
         />
@@ -408,7 +435,8 @@ export function CalendarPage() {
         <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4 md:p-8 pb-24 md:pb-8">
           <div className="w-full max-w-md">
             <StudyTimer
-              subjects={getUniqueSubjects()}
+              subjects={activeSubjects}
+          onCreateSubject={handleCreateSubject}
               onRunningChange={setTimerActive}
               fullscreen={true}
               onFullscreenChange={setIsTimerFullscreen}

@@ -4,7 +4,6 @@ import {
   IsInt,
   Min,
   Max,
-  MaxLength,
   IsDateString,
 } from 'class-validator';
 
@@ -19,8 +18,7 @@ export class CreateStudySessionDto {
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  subject: string;
+  subjectId: string;
 
   @IsInt()
   @Min(1)
