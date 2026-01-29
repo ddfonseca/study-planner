@@ -23,7 +23,7 @@ interface FeatureItemProps {
 function FeatureItem({ icon, title, description }: FeatureItemProps) {
   return (
     <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-accent-foreground">
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
         {icon}
       </div>
       <div>
