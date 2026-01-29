@@ -12,6 +12,7 @@ import { useHaptic } from '@/hooks/useHaptic';
 import { Play, Square, Clock, Timer, Infinity as InfinityIcon, Maximize2, Minimize2 } from 'lucide-react';
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 import { cn } from '@/lib/utils';
+import { formatDateKey } from '@/lib/utils/date';
 
 const STORAGE_KEY = 'studyTimer';
 
@@ -297,7 +298,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
     // Save session
     if (minutes > 0) {
       try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatDateKey(new Date());
         await handleAddSession(today, subject.trim(), minutes);
         toast({
           title: '🍅 Pomodoro completo!',
@@ -331,7 +332,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
 
     if (studiedMinutes > 0) {
       try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatDateKey(new Date());
         await handleAddSession(today, subject.trim(), studiedMinutes);
         triggerPattern('success');
         toast({

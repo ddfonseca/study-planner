@@ -177,21 +177,26 @@ export const useWeeklyGoalStore = create<WeeklyGoalStore>()((set, get) => ({
 
 /**
  * Calculate the week start date (Monday by default)
+ * Uses local timezone to ensure consistency with session dates
  */
 export function calculateWeekStart(date: Date, weekStartDay: number = 1): string {
-  const d = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  );
+  // Create a new date at midnight local time
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  const currentDay = d.getUTCDay(); // 0=Sun, 1=Mon, ...
+  const currentDay = d.getDay(); // 0=Sun, 1=Mon, ... (local)
   let diff = currentDay - weekStartDay;
 
   if (diff < 0) {
     diff += 7;
   }
 
-  d.setUTCDate(d.getUTCDate() - diff);
-  return d.toISOString().split('T')[0];
+  d.setDate(d.getDate() - diff);
+
+  // Format as YYYY-MM-DD using local timezone
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**

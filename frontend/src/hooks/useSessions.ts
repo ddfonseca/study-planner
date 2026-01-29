@@ -7,6 +7,7 @@ import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useStudyCycleStore } from '@/store/studyCycleStore';
 import type { CreateSessionDto, UpdateSessionDto, Session } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
+import { formatDateKey } from '@/lib/utils/date';
 
 export interface UndoDeleteResult {
   session: Session;
@@ -151,7 +152,7 @@ export function useSessions() {
     (weekDates: Date[]) => {
       let total = 0;
       weekDates.forEach((date) => {
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = formatDateKey(date);
         const dayData = sessions[dateKey];
         if (dayData) {
           total += dayData.totalMinutos;
@@ -180,7 +181,7 @@ export function useSessions() {
     (weeks: Date[][]): boolean => {
       for (const week of weeks) {
         for (const date of week) {
-          const dateKey = date.toISOString().split('T')[0];
+          const dateKey = formatDateKey(date);
           const dayData = sessions[dateKey];
           if (dayData && dayData.totalMinutos > 0) {
             return true;

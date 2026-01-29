@@ -7,7 +7,7 @@ import { TrendingUp } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
 import { formatTime, formatPomodoros, hoursToPomodoros } from '@/lib/utils/time';
-import { getDayNames } from '@/lib/utils/date';
+import { getDayNames, formatDateKey } from '@/lib/utils/date';
 import { AnimatedProgress } from '@/components/ui/animated-progress';
 import { AnimatedNumber } from '@/components/ui/animated-number';
 import { AnimatedBar } from '@/components/ui/animated-bar';
@@ -19,7 +19,7 @@ export function WeeklyProgress() {
   // Get current week data (fixed days, respecting weekStartDay)
   const weekData = useMemo(() => {
     const today = new Date();
-    const todayKey = today.toISOString().split('T')[0];
+    const todayKey = formatDateKey(today);
     const currentDayOfWeek = today.getDay(); // 0=Dom, 1=Seg...
 
     // Calculate start of current week
@@ -38,7 +38,7 @@ export function WeeklyProgress() {
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart);
       date.setDate(weekStart.getDate() + i);
-      const dateKey = date.toISOString().split('T')[0];
+      const dateKey = formatDateKey(date);
       const dayData = sessions[dateKey];
 
       days.push({

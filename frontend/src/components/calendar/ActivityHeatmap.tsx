@@ -3,7 +3,7 @@
  */
 import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
-import { getCalendarDays, getDayNames } from '@/lib/utils/date';
+import { getCalendarDays, getDayNames, formatDateKey } from '@/lib/utils/date';
 import { cn } from '@/lib/utils';
 
 interface ActivityHeatmapProps {
@@ -43,7 +43,7 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
   };
 
   const getMinutesForDay = (date: Date): number => {
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = formatDateKey(date);
     return sessions[dateKey]?.totalMinutos || 0;
   };
 
