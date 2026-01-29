@@ -3,23 +3,24 @@
 
 # Docker
 up:
-	docker-compose up -d
+	docker compose up -d
 
 # Postgres only (for local dev)
 postgres:
+	@docker network create study-planner-network 2>/dev/null || true
 	docker compose -f docker-compose.postgres.yml up -d
 
 postgres-down:
 	docker compose -f docker-compose.postgres.yml down
 
 build:
-	docker-compose build
-	docker-compose up -d
+	docker compose build
+	docker compose up -d
 down:
-	docker-compose down
+	docker compose down
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 # Testes (ambiente isolado via Docker)
 test:
@@ -31,15 +32,15 @@ test:
 
 # Lint via Docker
 lint:
-	docker-compose exec -T frontend npm run lint
-	docker-compose exec -T backend npm run lint
+	docker compose exec -T frontend npm run lint
+	docker compose exec -T backend npm run lint
 
 # Prisma
 migrate:
 	cd backend && npx prisma migrate dev
 
 prisma-generate:
-	docker-compose exec -T backend npx prisma generate
+	docker compose exec -T backend npx prisma generate
 
 # Deploy - Production
 deploy-front:

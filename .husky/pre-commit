@@ -1,23 +1,68 @@
 #!/bin/sh
 
-echo "Running lint and build checks via Docker..."
+echo "Running lint and build checks..."
 
-# Start containers if not running
-if ! docker ps --filter "name=study-planner-backend" --format "{{.Status}}" | grep -q "Up"; then
+# Check if backend is running locally (port 3000 in use but not by Docker)
+BACKEND_CONTAINER=$(docker ps --filter "name=study-planner-backend" --format "{{.Status}}" | grep -q "Up" && echo "yes" || echo "no")
+PORT_3000_IN_USE=$(lsof -i :3000 -t 2>/dev/null | head -1)
+
+# Determine if running locally or via Docker
+if [ "$BACKEND_CONTAINER" = "yes" ]; then
+  # Running via Docker containers
+  echo "Using Docker containers..."
+
+  # Frontend
+  echo "Checking frontend..."
+  docker compose exec -T frontend npm run lint || exit 1
+  docker compose exec -T frontend npm run build || exit 1
+
+  # Backend
+  echo "Checking backend..."
+  docker compose exec -T backend npm run lint || exit 1
+  docker compose exec -T backend npm run build || exit 1
+
+elif [ -n "$PORT_3000_IN_USE" ]; then
+  # Running locally (port 3000 in use but not by Docker)
+  echo "Detected local dev environment, running checks directly..."
+
+  # Frontend
+  echo "Checking frontend..."
+  cd frontend && npm run lint || exit 1
+  npm run build || exit 1
+  cd ..
+
+  # Backend
+  echo "Checking backend..."
+  cd backend && npm run lint || exit 1
+  npm run build || exit 1
+  cd ..
+
+else
+  # Nothing running, start Docker containers
   echo "Starting Docker containers..."
-  docker-compose up -d --quiet-pull
+
+  # Check if postgres is already running
+  POSTGRES_RUNNING=$(docker ps --filter "name=study-planner-postgres" --format "{{.Status}}" | grep -q "Up" && echo "yes" || echo "no")
+
+  if [ "$POSTGRES_RUNNING" = "yes" ]; then
+    echo "Postgres already running, starting only backend and frontend..."
+    docker compose up -d --quiet-pull --no-deps backend frontend
+  else
+    docker compose up -d --quiet-pull
+  fi
+
   echo "Waiting for containers to be ready..."
   sleep 5
+
+  # Frontend
+  echo "Checking frontend..."
+  docker compose exec -T frontend npm run lint || exit 1
+  docker compose exec -T frontend npm run build || exit 1
+
+  # Backend
+  echo "Checking backend..."
+  docker compose exec -T backend npm run lint || exit 1
+  docker compose exec -T backend npm run build || exit 1
 fi
-
-# Frontend
-echo "Checking frontend..."
-docker-compose exec -T frontend npm run lint || exit 1
-docker-compose exec -T frontend npm run build || exit 1
-
-# Backend
-echo "Checking backend..."
-docker-compose exec -T backend npm run lint || exit 1
-docker-compose exec -T backend npm run build || exit 1
 
 echo "All checks passed!"

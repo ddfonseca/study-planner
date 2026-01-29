@@ -299,6 +299,8 @@ export function CalendarPage() {
       case 'progress':
         return <WeeklyProgress />;
       case 'timer':
+        // Don't render here if fullscreen - single instance rendered in overlay
+        if (isTimerFullscreen) return null;
         return (
           <StudyTimer
             subjects={getUniqueSubjects()}
@@ -358,11 +360,15 @@ export function CalendarPage() {
             <div className="space-y-4">
               <CycleSuggestionCard />
               <WeeklyProgress />
-              <StudyTimer
-                subjects={getUniqueSubjects()}
-                fullscreen={isTimerFullscreen}
-                onFullscreenChange={setIsTimerFullscreen}
-              />
+              {/* Don't render here if fullscreen - single instance rendered in overlay */}
+              {!isTimerFullscreen && (
+                <StudyTimer
+                  subjects={getUniqueSubjects()}
+                  onRunningChange={setTimerActive}
+                  fullscreen={isTimerFullscreen}
+                  onFullscreenChange={setIsTimerFullscreen}
+                />
+              )}
             </div>
           </div>
         )}

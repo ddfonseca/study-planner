@@ -19,7 +19,7 @@ const STORAGE_KEY = 'studyTimer';
 type TimerMode = 'pomodoro-25' | 'pomodoro-50' | 'stopwatch';
 
 const TIMER_PRESETS: { mode: TimerMode; label: string; sublabel: string; seconds: number }[] = [
-  { mode: 'pomodoro-25', label: '25s', sublabel: 'Teste', seconds: 25 * 60 },
+  { mode: 'pomodoro-25', label: '25 min', sublabel: 'Pomodoro', seconds: 25 * 60 },
   { mode: 'pomodoro-50', label: '50 min', sublabel: 'Deep Work', seconds: 50 * 60 },
   { mode: 'stopwatch', label: 'Livre', sublabel: 'Cronômetro', seconds: 0 },
 ];
