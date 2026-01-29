@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type FeatureKey = 'timer' | 'cycles' | 'dashboard' | 'allocation' | 'subjects';
+export type FeatureKey = 'timer' | 'cycles' | 'dashboard' | 'allocation' | 'subjects' | 'scratchpad';
 
 interface FeatureBadgesState {
   seenFeatures: Record<FeatureKey, boolean>;
@@ -27,6 +27,7 @@ const initialSeenFeatures: Record<FeatureKey, boolean> = {
   dashboard: false,
   allocation: false,
   subjects: false,
+  scratchpad: false,
 };
 
 export const useFeatureBadgesStore = create<FeatureBadgesStore>()(
