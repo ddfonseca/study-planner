@@ -14,7 +14,7 @@ export function useDashboard() {
   // Whether viewing consolidated data
   const isConsolidatedView = currentWorkspaceId === null;
   const currentWorkspace = getCurrentWorkspace();
-  const [daysBack, setDaysBack] = useState(30);
+  const [daysBack, setDaysBack] = useState(7);
 
   // Calculate date range based on days back
   const dateRange = useMemo(() => {
