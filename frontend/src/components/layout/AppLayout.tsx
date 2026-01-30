@@ -103,8 +103,9 @@ export function AppLayout() {
                 <NavLink
                   key={to}
                   to={to}
+                  title={label}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
+                    `flex items-center gap-2 px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-colors relative
                     ${
                       isActive
                         ? 'bg-primary text-primary-foreground'
@@ -114,11 +115,14 @@ export function AppLayout() {
                   {...(tourId && { 'data-tour': tourId })}
                 >
                   <Icon className="h-4 w-4" />
-                  {label}
+                  <span className="hidden lg:inline">{label}</span>
                   {badgeKey && isFeatureNew(badgeKey) && (
-                    <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] bg-primary/90">
+                    <Badge variant="default" className="hidden lg:inline-flex ml-1 px-1.5 py-0 text-[10px] bg-primary/90">
                       Novo
                     </Badge>
+                  )}
+                  {badgeKey && isFeatureNew(badgeKey) && (
+                    <span className="lg:hidden absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full" />
                   )}
                 </NavLink>
               ))}
