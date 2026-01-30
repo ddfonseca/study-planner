@@ -1,7 +1,22 @@
 /**
  * Cycle Editor Modal - Create/edit study cycle
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -16,12 +31,11 @@ import { Label } from '@/components/ui/label';
 import { SubjectPicker } from '@/components/ui/subject-picker';
 import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SortableCycleItem } from './SortableCycleItem';
 import {
   RefreshCw,
   Plus,
   Trash2,
-  ArrowUp,
-  ArrowDown,
   Loader2,
   Save,
 } from 'lucide-react';
@@ -60,6 +74,33 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for reordering
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    setItems((prev) => {
+      const oldIndex = prev.findIndex((item) => item.id === active.id);
+      const newIndex = prev.findIndex((item) => item.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  }, []);
 
   // Determine if editing or creating
   const isEditing = mode === 'edit' && !!cycle;
@@ -100,24 +141,6 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
 
   const handleRemoveItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    setItems((prev) => {
-      const newItems = [...prev];
-      [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
-      return newItems;
-    });
-  };
-
-  const handleMoveDown = (index: number) => {
-    if (index === items.length - 1) return;
-    setItems((prev) => {
-      const newItems = [...prev];
-      [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
-      return newItems;
-    });
   };
 
   const handleSave = async () => {
@@ -260,52 +283,29 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                   Total: {formatDuration(totalMinutes)}
                 </span>
               </div>
-              <div className="space-y-1 max-h-48 overflow-y-auto">
-                {items.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-2 p-2 bg-muted rounded-lg"
-                  >
-                    <span className="text-xs text-muted-foreground w-5">
-                      {index + 1}.
-                    </span>
-                    <span className="flex-1 text-sm font-medium truncate">
-                      {subjects.find(s => s.id === item.subjectId)?.name || item.subjectId}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDuration(item.targetMinutes)}
-                    </span>
-                    <div className="flex gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => handleMoveUp(index)}
-                        disabled={index === 0}
-                      >
-                        <ArrowUp className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => handleMoveDown(index)}
-                        disabled={index === items.length - 1}
-                      >
-                        <ArrowDown className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-destructive hover:text-destructive"
-                        onClick={() => handleRemoveItem(item.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={items.map((item) => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {items.map((item, index) => (
+                      <SortableCycleItem
+                        key={item.id}
+                        id={item.id}
+                        index={index}
+                        subjectName={subjects.find(s => s.id === item.subjectId)?.name || item.subjectId}
+                        duration={formatDuration(item.targetMinutes)}
+                        onRemove={() => handleRemoveItem(item.id)}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
