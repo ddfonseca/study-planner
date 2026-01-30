@@ -3,6 +3,21 @@
  * Manage, edit, archive, and merge study subjects
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useCategoryStore } from '@/store/categoryStore';
@@ -11,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { MultiCategorySelect } from '@/components/ui/multi-category-select';
+import { SortableSubjectItem } from '@/components/subjects/SortableSubjectItem';
 import {
   BookOpen,
   Plus,
@@ -19,7 +35,6 @@ import {
   ArchiveRestore,
   Merge,
   Loader2,
-  GripVertical,
   Check,
   X,
   Eye,
@@ -67,8 +82,21 @@ export function SubjectsPage() {
     archiveSubject,
     unarchiveSubject,
     mergeSubjects,
+    reorderSubjects,
     setError,
   } = useSubjectStore();
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const {
     categories,
@@ -230,6 +258,36 @@ export function SubjectsPage() {
     setIsMerging(false);
     setMergeTarget(null);
   };
+
+  // Handle drag end for reordering
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (!over || active.id === over.id || !currentWorkspace) {
+        return;
+      }
+
+      // Only reorder non-archived subjects
+      const activeSubjects = subjects.filter((s) => !s.archivedAt);
+      const oldIndex = activeSubjects.findIndex((s) => s.id === active.id);
+      const newIndex = activeSubjects.findIndex((s) => s.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
+
+      const reordered = arrayMove(activeSubjects, oldIndex, newIndex);
+      const newSubjectIds = reordered.map((s) => s.id);
+
+      try {
+        await reorderSubjects(currentWorkspace.id, newSubjectIds);
+      } catch {
+        // Error is handled in store
+      }
+    },
+    [subjects, currentWorkspace, reorderSubjects]
+  );
 
   if (!currentWorkspace) {
     return (
@@ -420,174 +478,187 @@ export function SubjectsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {displayedSubjects.map((subject) => {
-            const isEditing = editingSubject?.id === subject.id;
-            const isSelected = selectedForMerge.has(subject.id);
-            const isArchived = !!subject.archivedAt;
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={displayedSubjects.map((s) => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {displayedSubjects.map((subject) => {
+                const isEditing = editingSubject?.id === subject.id;
+                const isSelected = selectedForMerge.has(subject.id);
+                const isArchived = !!subject.archivedAt;
 
-            return (
-              <div
-                key={subject.id}
-                className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border transition-colors",
-                  isSelected && "border-primary bg-primary/5",
-                  isArchived && "opacity-60",
-                  isMerging && isSelected && "cursor-pointer hover:bg-primary/10"
-                )}
-                onClick={() => {
-                  if (isMerging && isSelected) {
-                    setMergeTarget(subject.id);
-                    handleMerge();
-                  }
-                }}
-              >
-                {/* Drag handle (visual only for now) */}
-                <GripVertical className="h-5 w-5 text-muted-foreground/50 cursor-grab" />
-
-                {/* Merge checkbox */}
-                {!isArchived && (
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => toggleMergeSelection(subject.id)}
-                    className="h-4 w-4 rounded border-gray-300"
-                    disabled={isMerging}
-                  />
-                )}
-
-                {/* Color indicator */}
-                {isEditing ? (
-                  <div className="flex gap-1">
-                    {COLOR_OPTIONS.map((color, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setEditingSubject({ ...editingSubject!, color })}
-                        className={cn(
-                          "w-5 h-5 rounded-full border-2 transition-transform hover:scale-110",
-                          editingSubject?.color === color && "ring-2 ring-offset-2 ring-primary"
-                        )}
-                        style={{ backgroundColor: color || 'transparent' }}
-                      >
-                        {color === null && <X className="h-3 w-3 mx-auto text-muted-foreground" />}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <span
-                    className="w-4 h-4 rounded-full shrink-0"
-                    style={{ backgroundColor: subject.color || '#6b7280' }}
-                  />
-                )}
-
-                {/* Name and Category */}
-                {isEditing ? (
-                  <div className="flex-1 flex gap-2 items-center">
-                    <Input
-                      value={editingSubject?.name || ''}
-                      onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
-                      className="flex-1 h-8"
-                      placeholder="Nome"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveEdit();
-                        if (e.key === 'Escape') setEditingSubject(null);
+                return (
+                  <SortableSubjectItem
+                    key={subject.id}
+                    subject={subject}
+                    disabled={isArchived || isEditing || isMerging}
+                  >
+                    <div
+                      className={cn(
+                        "flex-1 flex items-center gap-3",
+                        isSelected && "border-primary bg-primary/5",
+                        isArchived && "opacity-60",
+                        isMerging && isSelected && "cursor-pointer"
+                      )}
+                      onClick={() => {
+                        if (isMerging && isSelected) {
+                          setMergeTarget(subject.id);
+                          handleMerge();
+                        }
                       }}
-                    />
-                    <div className="w-48">
-                      <MultiCategorySelect
-                        value={editingSubject?.categoryIds || []}
-                        onValueChange={(categoryIds) => setEditingSubject({ ...editingSubject!, categoryIds })}
-                        categories={categories}
-                        onCreateCategory={handleCreateCategory}
-                        placeholder="Categorias"
-                        className="h-8"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center gap-2 flex-wrap">
-                    <span className={cn("font-medium", isArchived && "line-through")}>
-                      {subject.name}
-                    </span>
-                    {subject.categories?.map((sc) => (
-                      <Badge key={sc.id} variant="outline" className="text-xs font-normal">
-                        <Tag className="h-2.5 w-2.5 mr-1" />
-                        {sc.category.name}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Archived badge */}
-                {isArchived && (
-                  <Badge variant="secondary" className="text-xs">
-                    Arquivada
-                  </Badge>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  {isEditing ? (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={handleSaveEdit}
-                        disabled={isSaving}
-                      >
-                        <Check className="h-4 w-4 text-green-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => setEditingSubject(null)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
+                    >
+                      {/* Merge checkbox */}
                       {!isArchived && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleStartEdit(subject)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleMergeSelection(subject.id)}
+                          className="h-4 w-4 rounded border-gray-300"
+                          disabled={isMerging}
+                        />
                       )}
-                      {isArchived ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleUnarchive(subject.id)}
-                          title="Desarquivar"
-                        >
-                          <ArchiveRestore className="h-4 w-4" />
-                        </Button>
+
+                      {/* Color indicator */}
+                      {isEditing ? (
+                        <div className="flex gap-1">
+                          {COLOR_OPTIONS.map((color, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setEditingSubject({ ...editingSubject!, color })}
+                              className={cn(
+                                "w-5 h-5 rounded-full border-2 transition-transform hover:scale-110",
+                                editingSubject?.color === color && "ring-2 ring-offset-2 ring-primary"
+                              )}
+                              style={{ backgroundColor: color || 'transparent' }}
+                            >
+                              {color === null && <X className="h-3 w-3 mx-auto text-muted-foreground" />}
+                            </button>
+                          ))}
+                        </div>
                       ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setConfirmArchive(subject.id)}
-                          title="Arquivar"
-                        >
-                          <Archive className="h-4 w-4" />
-                        </Button>
+                        <span
+                          className="w-4 h-4 rounded-full shrink-0"
+                          style={{ backgroundColor: subject.color || '#6b7280' }}
+                        />
                       )}
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+
+                      {/* Name and Category */}
+                      {isEditing ? (
+                        <div className="flex-1 flex gap-2 items-center">
+                          <Input
+                            value={editingSubject?.name || ''}
+                            onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
+                            className="flex-1 h-8"
+                            placeholder="Nome"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveEdit();
+                              if (e.key === 'Escape') setEditingSubject(null);
+                            }}
+                          />
+                          <div className="w-48">
+                            <MultiCategorySelect
+                              value={editingSubject?.categoryIds || []}
+                              onValueChange={(categoryIds) => setEditingSubject({ ...editingSubject!, categoryIds })}
+                              categories={categories}
+                              onCreateCategory={handleCreateCategory}
+                              placeholder="Categorias"
+                              className="h-8"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex-1 flex items-center gap-2 flex-wrap">
+                          <span className={cn("font-medium", isArchived && "line-through")}>
+                            {subject.name}
+                          </span>
+                          {subject.categories?.map((sc) => (
+                            <Badge key={sc.id} variant="outline" className="text-xs font-normal">
+                              <Tag className="h-2.5 w-2.5 mr-1" />
+                              {sc.category.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Archived badge */}
+                      {isArchived && (
+                        <Badge variant="secondary" className="text-xs">
+                          Arquivada
+                        </Badge>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        {isEditing ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={handleSaveEdit}
+                              disabled={isSaving}
+                            >
+                              <Check className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setEditingSubject(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            {!isArchived && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleStartEdit(subject)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {isArchived ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleUnarchive(subject.id)}
+                                title="Desarquivar"
+                              >
+                                <ArchiveRestore className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setConfirmArchive(subject.id)}
+                                title="Arquivar"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </SortableSubjectItem>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Archive confirmation dialog */}
