@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, BookOpen, Users, LogOut, User } from 'lucide-react';
+import { Moon, Sun, BookOpen, Users, LogOut, User, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface UserMenuProps {
   user: { name?: string | null; email: string; image?: string | null } | null;
@@ -50,6 +51,12 @@ export function UserMenu({ user, isDark, onToggleTheme, onLogout, isLoading }: U
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/app/settings">
+            <Settings className="mr-2 h-4 w-4" />
+            Configurações
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onToggleTheme} className="cursor-pointer">
           {isDark ? (
             <Sun className="mr-2 h-4 w-4" />

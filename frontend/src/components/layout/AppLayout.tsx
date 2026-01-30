@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Settings, Clock, FileText, Calculator, BookOpen } from 'lucide-react';
+import { Calendar, BarChart3, Clock, FileText, Calculator, BookOpen } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
@@ -77,7 +77,6 @@ export function AppLayout() {
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
     { to: '/app/subjects', icon: BookOpen, label: 'Tópicos', badgeKey: 'subjects' as const, tourId: 'nav-subjects' },
     { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: 'allocation' as const, tourId: 'nav-allocation' },
-    { to: '/app/settings', icon: Settings, label: 'Configurações', badgeKey: null, tourId: null },
   ];
 
   return (
