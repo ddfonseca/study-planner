@@ -46,6 +46,7 @@ export interface CycleHistory {
 
 export interface CycleSuggestion {
   hasCycle: boolean;
+  isEmpty: boolean;
   suggestion: {
     currentSubject: string;
     currentTargetMinutes: number;
@@ -443,8 +444,12 @@ export class StudyCycleService {
       },
     });
 
-    if (!cycle || !cycle.isActive || cycle.items.length === 0) {
-      return { hasCycle: false, suggestion: null };
+    if (!cycle || !cycle.isActive) {
+      return { hasCycle: false, isEmpty: false, suggestion: null };
+    }
+
+    if (cycle.items.length === 0) {
+      return { hasCycle: true, isEmpty: true, suggestion: null };
     }
 
     // Buscar minutos acumulados por matéria das sessões (filtrado por lastResetAt)
@@ -497,6 +502,7 @@ export class StudyCycleService {
 
     return {
       hasCycle: true,
+      isEmpty: false,
       suggestion: {
         currentSubject: currentItem.subject.name,
         currentTargetMinutes: currentItem.targetMinutes,

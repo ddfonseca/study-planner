@@ -129,6 +129,38 @@ export function CycleSuggestionCard() {
     );
   }
 
+  // Cycle exists but is empty (all subjects were deleted)
+  if (suggestion?.isEmpty) {
+    return (
+      <>
+        <Card className="border-dashed border-warning">
+          <CardContent className="p-0">
+            <EmptyState
+              icon={Layers}
+              title="Ciclo sem tópicos"
+              description="Os tópicos deste ciclo foram removidos. Adicione novos tópicos para continuar."
+              size="sm"
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditorMode('edit');
+                    setEditorOpen(true);
+                  }}
+                >
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
+                  Editar Ciclo
+                </Button>
+              }
+            />
+          </CardContent>
+        </Card>
+        <CycleEditorModal open={editorOpen} onOpenChange={setEditorOpen} mode={editorMode} />
+      </>
+    );
+  }
+
   const { suggestion: data } = suggestion;
   if (!data) return null;
 

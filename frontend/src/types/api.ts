@@ -232,6 +232,7 @@ export interface CycleItemProgress {
 // Cycle Suggestion response
 export interface CycleSuggestion {
   hasCycle: boolean;
+  isEmpty: boolean;
   suggestion: {
     currentSubject: string;
     currentTargetMinutes: number;
