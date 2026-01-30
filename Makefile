@@ -42,9 +42,8 @@ migrate:
 prisma-generate:
 	docker compose exec -T backend npx prisma generate
 
-# Deploy - Production
+# Deploy - Production (build is done by Netlify via netlify.toml)
 deploy-front:
-	cd frontend && PUBLIC_API_BASE_URL="" PUBLIC_FRONTEND_URL="https://horasliquidas.com.br" npm run build
 	netlify deploy --prod --dir=frontend/dist --filter=frontend-new
 
 deploy-back:
