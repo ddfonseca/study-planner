@@ -116,6 +116,7 @@ model Workspace {
   studyCycles   StudyCycle[]
   examProfiles  ExamProfile[]
   subjects      Subject[]
+  categories    Category[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -129,21 +130,56 @@ model Subject {
   name        String    @db.VarChar(100)
   color       String?   @db.VarChar(7)
   icon        String?   @db.VarChar(50)
-  category    String?   @db.VarChar(50)
+  category    String?   @db.VarChar(50) // @deprecated - use categories relation
   position    Int       @default(0)
   archivedAt  DateTime? @map("archived_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  studySessions   StudySession[]
-  studyCycleItems StudyCycleItem[]
-  subjectProfiles SubjectProfile[]
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  studySessions    StudySession[]
+  studyCycleItems  StudyCycleItem[]
+  subjectProfiles  SubjectProfile[]
+  categories       SubjectCategory[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
   @@index([category])
   @@map("subjects")
+}
+
+// Category - categorization for subjects (many-to-many)
+model Category {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  name        String   @db.VarChar(50)
+  color       String?  @db.VarChar(7)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subjects  SubjectCategory[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("categories")
+}
+
+// SubjectCategory - junction table for Subject-Category many-to-many
+model SubjectCategory {
+  id         String   @id @default(cuid())
+  subjectId  String   @map("subject_id")
+  categoryId String   @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  subject  Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, categoryId])
+  @@index([subjectId])
+  @@index([categoryId])
+  @@map("subject_categories")
 }
 
 // Weekly goal - stores goals for specific weeks per workspace

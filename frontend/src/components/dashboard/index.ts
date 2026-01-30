@@ -1,6 +1,7 @@
 /**
  * Dashboard components exports
  */
+export { CategoryFilter } from './CategoryFilter';
 export { DateRangeFilter } from './DateRangeFilter';
 export { StatsCards } from './StatsCards';
 export { StatsCardsSkeleton } from './StatsCardsSkeleton';

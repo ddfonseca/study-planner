@@ -18,6 +18,7 @@ import { ScratchpadNotesModule } from './scratchpad-notes/scratchpad-notes.modul
 import { ExamTemplateModule } from './exam-template/exam-template.module';
 import { ExamProfileModule } from './exam-profile/exam-profile.module';
 import { SubjectModule } from './subject/subject.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { SubjectModule } from './subject/subject.module';
     ExamTemplateModule,
     ExamProfileModule,
     SubjectModule,
+    CategoryModule,
   ],
   providers: [
     {

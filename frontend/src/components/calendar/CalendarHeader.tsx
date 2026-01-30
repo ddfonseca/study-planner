@@ -19,22 +19,22 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
-          size="icon"
+          size="icon-sm"
           onClick={onPreviousMonth}
           aria-label="Mês anterior"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft />
         </Button>
         <Button
           variant="outline"
-          size="icon"
+          size="icon-sm"
           onClick={onNextMonth}
           aria-label="Próximo mês"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight />
         </Button>
         <h2 className="text-xl font-semibold text-foreground capitalize ml-2">
           {monthYearDisplay}

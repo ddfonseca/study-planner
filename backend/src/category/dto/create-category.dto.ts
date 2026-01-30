@@ -6,13 +6,12 @@ import {
   Matches,
   IsInt,
   Min,
-  IsArray,
 } from 'class-validator';
 
-export class CreateSubjectDto {
+export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(50)
   name: string;
 
   @IsOptional()
@@ -21,21 +20,6 @@ export class CreateSubjectDto {
     message: 'color must be a valid hex color (e.g., #FFFFFF)',
   })
   color?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  icon?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  category?: string; // @deprecated - use categoryIds
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  categoryIds?: string[];
 
   @IsOptional()
   @IsInt()

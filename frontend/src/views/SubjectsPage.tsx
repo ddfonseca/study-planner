@@ -2,13 +2,15 @@
  * Subjects Management Page
  * Manage, edit, archive, and merge study subjects
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useCategoryStore } from '@/store/categoryStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { MultiCategorySelect } from '@/components/ui/multi-category-select';
 import {
   BookOpen,
   Plus,
@@ -24,6 +26,8 @@ import {
   EyeOff,
   Tag,
   Filter,
+  Settings2,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Subject } from '@/types/api';
@@ -46,7 +50,7 @@ interface EditingSubject {
   id: string;
   name: string;
   color: string | null;
-  category: string | null;
+  categoryIds: string[];
 }
 
 export function SubjectsPage() {
@@ -66,6 +70,14 @@ export function SubjectsPage() {
     setError,
   } = useSubjectStore();
 
+  const {
+    categories,
+    fetchCategories,
+    createCategory,
+    deleteCategory,
+    isSaving: isSavingCategory,
+  } = useCategoryStore();
+
   const [showArchived, setShowArchived] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [editingSubject, setEditingSubject] = useState<EditingSubject | null>(null);
@@ -73,25 +85,57 @@ export function SubjectsPage() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergeTarget, setMergeTarget] = useState<string | null>(null);
   const [confirmArchive, setConfirmArchive] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [managingCategories, setManagingCategories] = useState(false);
+  const [confirmDeleteCategory, setConfirmDeleteCategory] = useState<string | null>(null);
 
-  // Get unique categories from subjects
-  const categories = [...new Set(subjects.map(s => s.category).filter((c): c is string => !!c))].sort();
-
-  // Fetch subjects when workspace changes
+  // Fetch subjects and categories when workspace changes
   useEffect(() => {
     if (currentWorkspace) {
       fetchSubjects(currentWorkspace.id, showArchived);
+      fetchCategories(currentWorkspace.id);
     }
-  }, [currentWorkspace, showArchived, fetchSubjects]);
+  }, [currentWorkspace, showArchived, fetchSubjects, fetchCategories]);
 
-  // Filter subjects based on archived state and category
+  // Filter subjects based on archived state and categories
   const activeSubjects = subjects.filter(s => !s.archivedAt);
   const archivedSubjects = subjects.filter(s => s.archivedAt);
   const filteredByArchive = showArchived ? subjects : activeSubjects;
-  const displayedSubjects = categoryFilter
-    ? filteredByArchive.filter(s => s.category === categoryFilter)
-    : filteredByArchive;
+  const displayedSubjects = useMemo(() => {
+    if (selectedCategoryIds.length === 0) {
+      return filteredByArchive;
+    }
+    return filteredByArchive.filter(s =>
+      s.categories?.some(sc => selectedCategoryIds.includes(sc.categoryId))
+    );
+  }, [filteredByArchive, selectedCategoryIds]);
+
+  // Handle category filter toggle
+  const handleCategoryToggle = (categoryId: string) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  // Handle create category inline
+  const handleCreateCategory = async (name: string) => {
+    if (!currentWorkspace) throw new Error('No workspace');
+    return createCategory(currentWorkspace.id, { name });
+  };
+
+  // Handle delete category
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteCategory(categoryId);
+      setConfirmDeleteCategory(null);
+      // Remove from filter if selected
+      setSelectedCategoryIds(prev => prev.filter(id => id !== categoryId));
+    } catch {
+      // Error is handled in store
+    }
+  };
 
   // Handle create new subject
   const handleCreate = useCallback(async () => {
@@ -110,7 +154,7 @@ export function SubjectsPage() {
       id: subject.id,
       name: subject.name,
       color: subject.color,
-      category: subject.category,
+      categoryIds: subject.categories?.map(sc => sc.categoryId) || [],
     });
   };
 
@@ -121,7 +165,7 @@ export function SubjectsPage() {
       await updateSubject(editingSubject.id, {
         name: editingSubject.name,
         color: editingSubject.color ?? undefined,
-        category: editingSubject.category?.trim() || undefined,
+        categoryIds: editingSubject.categoryIds,
       });
       setEditingSubject(null);
     } catch {
@@ -234,24 +278,56 @@ export function SubjectsPage() {
       {categories.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <Button
-            variant={categoryFilter === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => setCategoryFilter(null)}
-          >
-            Todos
-          </Button>
-          {categories.map((cat) => (
+          {!managingCategories && (
             <Button
-              key={cat}
-              variant={categoryFilter === cat ? "default" : "outline"}
+              variant={selectedCategoryIds.length === 0 ? "default" : "outline"}
               size="sm"
-              onClick={() => setCategoryFilter(cat)}
+              onClick={() => setSelectedCategoryIds([])}
             >
-              <Tag className="h-3 w-3 mr-1" />
-              {cat}
+              Todos
             </Button>
+          )}
+          {categories.map((cat) => (
+            <div key={cat.id} className="flex items-center">
+              <Button
+                variant={selectedCategoryIds.includes(cat.id) ? "default" : "outline"}
+                size="sm"
+                onClick={() => !managingCategories && handleCategoryToggle(cat.id)}
+                className={cn("gap-1", managingCategories && "rounded-r-none border-r-0")}
+              >
+                <Tag className="h-3 w-3" />
+                {cat.name}
+              </Button>
+              {managingCategories && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-l-none px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setConfirmDeleteCategory(cat.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setManagingCategories(!managingCategories)}
+            className="ml-2"
+          >
+            {managingCategories ? (
+              <>
+                <Check className="h-3 w-3 mr-1" />
+                Concluir
+              </>
+            ) : (
+              <>
+                <Settings2 className="h-3 w-3 mr-1" />
+                Gerenciar
+              </>
+            )}
+          </Button>
         </div>
       )}
 
@@ -406,7 +482,7 @@ export function SubjectsPage() {
 
                 {/* Name and Category */}
                 {isEditing ? (
-                  <div className="flex-1 flex gap-2">
+                  <div className="flex-1 flex gap-2 items-center">
                     <Input
                       value={editingSubject?.name || ''}
                       onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
@@ -418,34 +494,28 @@ export function SubjectsPage() {
                         if (e.key === 'Escape') setEditingSubject(null);
                       }}
                     />
-                    <Input
-                      value={editingSubject?.category || ''}
-                      onChange={(e) => setEditingSubject({ ...editingSubject!, category: e.target.value || null })}
-                      className="w-32 h-8"
-                      placeholder="Categoria"
-                      list="category-suggestions"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveEdit();
-                        if (e.key === 'Escape') setEditingSubject(null);
-                      }}
-                    />
-                    <datalist id="category-suggestions">
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat} />
-                      ))}
-                    </datalist>
+                    <div className="w-48">
+                      <MultiCategorySelect
+                        value={editingSubject?.categoryIds || []}
+                        onValueChange={(categoryIds) => setEditingSubject({ ...editingSubject!, categoryIds })}
+                        categories={categories}
+                        onCreateCategory={handleCreateCategory}
+                        placeholder="Categorias"
+                        className="h-8"
+                      />
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 flex-wrap">
                     <span className={cn("font-medium", isArchived && "line-through")}>
                       {subject.name}
                     </span>
-                    {subject.category && (
-                      <Badge variant="outline" className="text-xs font-normal">
+                    {subject.categories?.map((sc) => (
+                      <Badge key={sc.id} variant="outline" className="text-xs font-normal">
                         <Tag className="h-2.5 w-2.5 mr-1" />
-                        {subject.category}
+                        {sc.category.name}
                       </Badge>
-                    )}
+                    ))}
                   </div>
                 )}
 
@@ -527,8 +597,20 @@ export function SubjectsPage() {
         title="Arquivar tópico?"
         description="O tópico será ocultado da lista, mas todo o histórico será mantido. Você pode desarquivá-lo a qualquer momento."
         confirmText="Arquivar"
-        onConfirm={() => confirmArchive && handleArchive(confirmArchive)}
+        onConfirm={() => { if (confirmArchive) handleArchive(confirmArchive); }}
         isLoading={isSaving}
+      />
+
+      {/* Delete category confirmation dialog */}
+      <ConfirmDialog
+        open={!!confirmDeleteCategory}
+        onOpenChange={(open) => !open && setConfirmDeleteCategory(null)}
+        title="Deletar categoria?"
+        description="A categoria será removida permanentemente. Os tópicos não serão afetados, apenas perderão esta categoria."
+        confirmText="Deletar"
+        variant="destructive"
+        onConfirm={() => { if (confirmDeleteCategory) handleDeleteCategory(confirmDeleteCategory); }}
+        isLoading={isSavingCategory}
       />
     </div>
   );

@@ -33,6 +33,13 @@ export class SubjectService {
         ...(includeArchived ? {} : { archivedAt: null }),
       },
       orderBy: { position: 'asc' },
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+      },
     });
   }
 
@@ -42,7 +49,14 @@ export class SubjectService {
   async findOne(userId: string, subjectId: string) {
     const subject = await this.prisma.subject.findUnique({
       where: { id: subjectId },
-      include: { workspace: true },
+      include: {
+        workspace: true,
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+      },
     });
 
     if (!subject) {
@@ -83,6 +97,7 @@ export class SubjectService {
       position = (maxPosition._max.position ?? -1) + 1;
     }
 
+    // Create subject with optional category connections
     return this.prisma.subject.create({
       data: {
         workspaceId,
@@ -90,6 +105,20 @@ export class SubjectService {
         color: dto.color,
         icon: dto.icon,
         position,
+        ...(dto.categoryIds?.length && {
+          categories: {
+            create: dto.categoryIds.map((categoryId) => ({
+              categoryId,
+            })),
+          },
+        }),
+      },
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
       },
     });
   }
@@ -153,9 +182,54 @@ export class SubjectService {
       }
     }
 
+    // Extract categoryIds from dto to handle separately
+    const { categoryIds, ...updateData } = dto;
+
+    // If categoryIds is provided, update the relationships
+    if (categoryIds !== undefined) {
+      // Use transaction to ensure atomicity
+      return this.prisma.$transaction(async (tx) => {
+        // Delete existing category connections
+        await tx.subjectCategory.deleteMany({
+          where: { subjectId },
+        });
+
+        // Create new category connections
+        if (categoryIds.length > 0) {
+          await tx.subjectCategory.createMany({
+            data: categoryIds.map((categoryId) => ({
+              subjectId,
+              categoryId,
+            })),
+          });
+        }
+
+        // Update the subject itself
+        return tx.subject.update({
+          where: { id: subjectId },
+          data: updateData,
+          include: {
+            categories: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        });
+      });
+    }
+
+    // Simple update without category changes
     return this.prisma.subject.update({
       where: { id: subjectId },
-      data: dto,
+      data: updateData,
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+      },
     });
   }
 

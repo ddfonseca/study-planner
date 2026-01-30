@@ -23,6 +23,29 @@ export interface Workspace {
   updatedAt: string;
 }
 
+// Category entity - categorization for subjects
+export interface Category {
+  id: string;
+  workspaceId: string;
+  name: string;
+  color: string | null;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    subjects: number;
+  };
+}
+
+// SubjectCategory junction
+export interface SubjectCategory {
+  id: string;
+  subjectId: string;
+  categoryId: string;
+  category: Category;
+  createdAt: string;
+}
+
 // Subject entity - normalized subject per workspace
 export interface Subject {
   id: string;
@@ -30,7 +53,8 @@ export interface Subject {
   name: string;
   color: string | null;
   icon: string | null;
-  category: string | null;
+  category: string | null; // @deprecated - use categories
+  categories: SubjectCategory[];
   position: number;
   archivedAt: string | null;
   createdAt: string;
@@ -42,7 +66,8 @@ export interface CreateSubjectDto {
   name: string;
   color?: string;
   icon?: string;
-  category?: string;
+  category?: string; // @deprecated - use categoryIds
+  categoryIds?: string[];
   position?: number;
 }
 
@@ -51,7 +76,22 @@ export interface UpdateSubjectDto {
   name?: string;
   color?: string;
   icon?: string;
-  category?: string;
+  category?: string; // @deprecated - use categoryIds
+  categoryIds?: string[];
+  position?: number;
+}
+
+// Create category DTO
+export interface CreateCategoryDto {
+  name: string;
+  color?: string;
+  position?: number;
+}
+
+// Update category DTO
+export interface UpdateCategoryDto {
+  name?: string;
+  color?: string;
   position?: number;
 }
 
