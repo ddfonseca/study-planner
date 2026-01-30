@@ -25,6 +25,7 @@ interface SubjectActions {
   updateSubject: (subjectId: string, data: UpdateSubjectDto) => Promise<Subject>;
   archiveSubject: (subjectId: string) => Promise<void>;
   unarchiveSubject: (subjectId: string) => Promise<void>;
+  permanentDeleteSubject: (subjectId: string) => Promise<void>;
   mergeSubjects: (data: MergeSubjectsDto) => Promise<Subject>;
   reorderSubjects: (workspaceId: string, subjectIds: string[]) => Promise<void>;
   getSubjectById: (id: string) => Subject | undefined;
@@ -177,6 +178,24 @@ export const useSubjectStore = create<SubjectStore>()((set, get) => ({
       set({
         isSaving: false,
         error: error instanceof Error ? error.message : 'Failed to unarchive subject',
+      });
+      throw error;
+    }
+  },
+
+  permanentDeleteSubject: async (subjectId) => {
+    try {
+      set({ isSaving: true, error: null });
+      await subjectsApi.permanentDelete(subjectId);
+
+      set((state) => ({
+        subjects: state.subjects.filter((s) => s.id !== subjectId),
+        isSaving: false,
+      }));
+    } catch (error) {
+      set({
+        isSaving: false,
+        error: error instanceof Error ? error.message : 'Failed to permanently delete subject',
       });
       throw error;
     }

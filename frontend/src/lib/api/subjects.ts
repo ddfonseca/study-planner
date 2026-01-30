@@ -77,6 +77,15 @@ export const subjectsApi = {
   },
 
   /**
+   * Permanently delete an archived subject
+   */
+  async permanentDelete(subjectId: string): Promise<{ deleted: boolean; subjectId: string }> {
+    return apiClient.delete<{ deleted: boolean; subjectId: string }>(
+      `/api/subjects/${subjectId}/permanent`,
+    );
+  },
+
+  /**
    * Merge multiple subjects into one
    */
   async merge(data: MergeSubjectsDto): Promise<Subject> {

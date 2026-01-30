@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -255,6 +256,28 @@ export class SubjectService {
       where: { id: subjectId },
       data: { archivedAt: null },
     });
+  }
+
+  /**
+   * Deleta permanentemente um subject arquivado
+   * Remove todas as sessões de estudo, itens de ciclo, perfis e categorias associadas
+   */
+  async permanentDelete(userId: string, subjectId: string) {
+    const subject = await this.findOne(userId, subjectId);
+
+    // Apenas permitir deletar subjects arquivados
+    if (!subject.archivedAt) {
+      throw new BadRequestException(
+        'Apenas tópicos arquivados podem ser deletados permanentemente',
+      );
+    }
+
+    // Cascade delete já configurado no Prisma
+    await this.prisma.subject.delete({
+      where: { id: subjectId },
+    });
+
+    return { deleted: true, subjectId };
   }
 
   /**

@@ -136,6 +136,19 @@ export class SubjectController {
   }
 
   /**
+   * DELETE /api/subjects/:id/permanent
+   * Deleta permanentemente um subject arquivado
+   */
+  @Delete('subjects/:id/permanent')
+  async permanentDelete(
+    @Session() session: UserSession,
+    @Param('id') id: string,
+  ) {
+    const userId = session.user.id;
+    return this.subjectService.permanentDelete(userId, id);
+  }
+
+  /**
    * POST /api/subjects/merge
    * Mescla múltiplos subjects em um target
    */

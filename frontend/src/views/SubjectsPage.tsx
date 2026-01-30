@@ -24,6 +24,7 @@ import { useCategoryStore } from '@/store/categoryStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { MultiCategorySelect } from '@/components/ui/multi-category-select';
 import { SortableSubjectItem } from '@/components/subjects/SortableSubjectItem';
@@ -43,6 +44,7 @@ import {
   Filter,
   Settings2,
   Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Subject } from '@/types/api';
@@ -81,6 +83,7 @@ export function SubjectsPage() {
     updateSubject,
     archiveSubject,
     unarchiveSubject,
+    permanentDeleteSubject,
     mergeSubjects,
     reorderSubjects,
     setError,
@@ -116,6 +119,8 @@ export function SubjectsPage() {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [managingCategories, setManagingCategories] = useState(false);
   const [confirmDeleteCategory, setConfirmDeleteCategory] = useState<string | null>(null);
+  const [deletingSubjectId, setDeletingSubjectId] = useState<string | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   // Fetch subjects and categories when workspace changes
   useEffect(() => {
@@ -219,6 +224,31 @@ export function SubjectsPage() {
       // Error is handled in store
     }
   };
+
+  // Handle permanent delete
+  const handlePermanentDelete = async () => {
+    if (!deletingSubjectId) return;
+
+    const subject = subjects.find((s) => s.id === deletingSubjectId);
+    if (!subject || deleteConfirmName !== subject.name) return;
+
+    try {
+      await permanentDeleteSubject(deletingSubjectId);
+      setDeletingSubjectId(null);
+      setDeleteConfirmName('');
+    } catch {
+      // Error is handled in store
+    }
+  };
+
+  // Cancel permanent delete
+  const handleCancelDelete = () => {
+    setDeletingSubjectId(null);
+    setDeleteConfirmName('');
+  };
+
+  // Get deleting subject for display
+  const deletingSubject = subjects.find((s) => s.id === deletingSubjectId);
 
   // Toggle merge selection
   const toggleMergeSelection = (id: string) => {
@@ -629,15 +659,26 @@ export function SubjectsPage() {
                               </Button>
                             )}
                             {isArchived ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => handleUnarchive(subject.id)}
-                                title="Desarquivar"
-                              >
-                                <ArchiveRestore className="h-4 w-4" />
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleUnarchive(subject.id)}
+                                  title="Desarquivar"
+                                >
+                                  <ArchiveRestore className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  onClick={() => setDeletingSubjectId(subject.id)}
+                                  title="Deletar permanentemente"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
                             ) : (
                               <Button
                                 variant="ghost"
@@ -683,6 +724,68 @@ export function SubjectsPage() {
         onConfirm={() => { if (confirmDeleteCategory) handleDeleteCategory(confirmDeleteCategory); }}
         isLoading={isSavingCategory}
       />
+
+      {/* Permanent delete confirmation dialog */}
+      {deletingSubjectId && deletingSubject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={handleCancelDelete}
+          />
+          <div className="relative z-50 w-full max-w-md p-6 bg-background rounded-lg border shadow-lg mx-4">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-lg text-destructive">
+                  Deletar "{deletingSubject.name}" permanentemente?
+                </h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Esta ação é irreversível. Todas as horas de estudo registradas
+                  neste tópico serão perdidas permanentemente.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="confirm-delete-subject" className="text-sm">
+                  Digite "{deletingSubject.name}" para confirmar:
+                </Label>
+                <Input
+                  id="confirm-delete-subject"
+                  value={deleteConfirmName}
+                  onChange={(e) => setDeleteConfirmName(e.target.value)}
+                  placeholder={deletingSubject.name}
+                  disabled={isSaving}
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelDelete}
+                  disabled={isSaving}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handlePermanentDelete}
+                  disabled={isSaving || deleteConfirmName !== deletingSubject.name}
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-2" />
+                  )}
+                  Deletar permanentemente
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
