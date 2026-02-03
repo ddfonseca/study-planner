@@ -9,12 +9,20 @@ import {
   Max,
   MaxLength,
   ArrayMinSize,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateCycleItemDto {
+  @IsOptional()
   @IsString()
-  subjectId: string;
+  @ValidateIf((o) => !o.disciplineId)
+  subjectId?: string;
+
+  @IsOptional()
+  @IsString()
+  @ValidateIf((o) => !o.subjectId)
+  disciplineId?: string;
 
   @IsInt()
   @Min(1)

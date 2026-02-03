@@ -50,11 +50,13 @@ export interface SubjectCategory {
 export interface Subject {
   id: string;
   workspaceId: string;
+  disciplineId: string | null;
   name: string;
   color: string | null;
   icon: string | null;
   category: string | null; // @deprecated - use categories
   categories: SubjectCategory[];
+  discipline?: Discipline | null;
   position: number;
   archivedAt: string | null;
   createdAt: string;
@@ -93,6 +95,40 @@ export interface UpdateCategoryDto {
   name?: string;
   color?: string;
   position?: number;
+}
+
+// Discipline entity - groups related subjects for study cycle organization
+export interface Discipline {
+  id: string;
+  workspaceId: string;
+  name: string;
+  color: string | null;
+  icon: string | null;
+  position: number;
+  subjects: Pick<Subject, 'id' | 'name' | 'color' | 'icon'>[];
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    subjects: number;
+  };
+}
+
+// Create discipline DTO
+export interface CreateDisciplineDto {
+  name: string;
+  color?: string;
+  icon?: string;
+  position?: number;
+  subjectIds?: string[];
+}
+
+// Update discipline DTO
+export interface UpdateDisciplineDto {
+  name?: string;
+  color?: string;
+  icon?: string;
+  position?: number;
+  subjectIds?: string[];
 }
 
 // Merge subjects DTO
@@ -202,8 +238,10 @@ export interface UpdateWorkspaceDto {
 export interface StudyCycleItem {
   id: string;
   cycleId: string;
-  subjectId: string;
-  subject: Subject; // Populated relation
+  subjectId: string | null;
+  disciplineId: string | null;
+  subject: Subject | null; // Populated relation
+  discipline: Discipline | null; // Populated relation
   targetMinutes: number;
   position: number;
 }
@@ -227,6 +265,9 @@ export interface CycleItemProgress {
   accumulatedMinutes: number;
   isComplete: boolean;
   position: number;
+  isDiscipline: boolean;
+  disciplineId?: string;
+  subjectId?: string;
 }
 
 // Cycle Suggestion response
@@ -245,6 +286,9 @@ export interface CycleSuggestion {
     totalItems: number;
     allItemsProgress: CycleItemProgress[];
     isCycleComplete: boolean;
+    currentIsDiscipline: boolean;
+    currentDisciplineId?: string;
+    currentSubjectId?: string;
   } | null;
 }
 
@@ -281,7 +325,8 @@ export interface CycleHistory {
 
 // Create cycle item DTO
 export interface CreateCycleItemDto {
-  subjectId: string;
+  subjectId?: string;
+  disciplineId?: string;
   targetMinutes: number;
 }
 

@@ -282,7 +282,12 @@ export function CycleSuggestionCard() {
           {/* Current subject */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium truncate" title={data.currentSubject}>
+              <span className="text-sm font-medium truncate flex items-center gap-1.5" title={data.currentSubject}>
+                {data.currentIsDiscipline ? (
+                  <Layers className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                ) : (
+                  <BookOpen className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                )}
                 {data.currentSubject}
               </span>
               <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
@@ -409,8 +414,13 @@ export function CycleSuggestionCard() {
                         className={`p-2 rounded-md ${isCurrent ? 'bg-primary/10' : 'bg-muted/50'}`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-xs truncate ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
-                            {item.isComplete && <Check className="h-3 w-3 inline mr-1 text-accent" />}
+                          <span className={`text-xs truncate flex items-center gap-1 ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
+                            {item.isComplete && <Check className="h-3 w-3 text-accent shrink-0" />}
+                            {item.isDiscipline ? (
+                              <Layers className="h-3 w-3 text-primary/70 shrink-0" />
+                            ) : (
+                              <BookOpen className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                            )}
                             {item.subject}
                           </span>
                           <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">

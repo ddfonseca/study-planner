@@ -31,6 +31,14 @@ import { Label } from '@/components/ui/label';
 import { SubjectPicker } from '@/components/ui/subject-picker';
 import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { SortableCycleItem } from './SortableCycleItem';
 import {
   RefreshCw,
@@ -38,11 +46,14 @@ import {
   Trash2,
   Loader2,
   Save,
+  BookOpen,
+  Layers,
 } from 'lucide-react';
 import { useStudyCycleStore, formatDuration } from '@/store/studyCycleStore';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useSubjectStore } from '@/store/subjectStore';
+import { useDisciplineStore } from '@/store/disciplineStore';
 import type { CreateCycleItemDto } from '@/types/api';
 
 interface CycleEditorModalProps {
@@ -61,19 +72,30 @@ function generateId(): string {
 
 export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEditorModalProps) {
   const { currentWorkspaceId } = useWorkspaceStore();
-  const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } = useStudyCycleStore();
+  const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } =
+    useStudyCycleStore();
   const { getActiveSubjects, findOrCreateSubject } = useSubjectStore();
+  const { disciplines, fetchDisciplines } = useDisciplineStore();
   const subjects = getActiveSubjects();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
   const [items, setItems] = useState<CycleItemForm[]>([]);
   const [cycleName, setCycleName] = useState('');
   const [newSubjectId, setNewSubjectId] = useState('');
+  const [newDisciplineId, setNewDisciplineId] = useState('');
   const [newMinutes, setNewMinutes] = useState('');
   const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [addItemType, setAddItemType] = useState<'subject' | 'discipline'>('subject');
+
+  // Fetch disciplines when modal opens
+  useEffect(() => {
+    if (open && currentWorkspaceId) {
+      fetchDisciplines(currentWorkspaceId);
+    }
+  }, [open, currentWorkspaceId, fetchDisciplines]);
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -112,7 +134,8 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       setItems(
         cycle.items.map((item) => ({
           id: item.id,
-          subjectId: item.subjectId,
+          subjectId: item.subjectId || undefined,
+          disciplineId: item.disciplineId || undefined,
           targetMinutes: item.targetMinutes,
         }))
       );
@@ -125,22 +148,51 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   }, [open, isEditing, cycle, cycles.length]);
 
   const handleAddItem = () => {
-    if (!newSubjectId || !newMinutes) return;
+    if (!newMinutes) return;
 
-    setItems((prev) => [
-      ...prev,
-      {
-        id: generateId(),
-        subjectId: newSubjectId,
-        targetMinutes: parseInt(newMinutes, 10),
-      },
-    ]);
-    setNewSubjectId('');
+    if (addItemType === 'subject' && newSubjectId) {
+      setItems((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          subjectId: newSubjectId,
+          targetMinutes: parseInt(newMinutes, 10),
+        },
+      ]);
+      setNewSubjectId('');
+    } else if (addItemType === 'discipline' && newDisciplineId) {
+      setItems((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          disciplineId: newDisciplineId,
+          targetMinutes: parseInt(newMinutes, 10),
+        },
+      ]);
+      setNewDisciplineId('');
+    }
+
     setNewMinutes('');
   };
 
   const handleRemoveItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const getItemName = (item: CycleItemForm): string => {
+    if (item.disciplineId) {
+      const discipline = disciplines.find((d) => d.id === item.disciplineId);
+      return discipline?.name || item.disciplineId;
+    }
+    if (item.subjectId) {
+      const subject = subjects.find((s) => s.id === item.subjectId);
+      return subject?.name || item.subjectId;
+    }
+    return 'Unknown';
+  };
+
+  const isItemDiscipline = (item: CycleItemForm): boolean => {
+    return !!item.disciplineId;
   };
 
   const handleSave = async () => {
@@ -152,13 +204,21 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       if (isEditing) {
         const data = {
           name: cycleName.trim() || undefined,
-          items: items.map(({ subjectId, targetMinutes }) => ({ subjectId, targetMinutes })),
+          items: items.map(({ subjectId, disciplineId, targetMinutes }) => ({
+            subjectId,
+            disciplineId,
+            targetMinutes,
+          })),
         };
         await updateCycle(currentWorkspaceId, data);
       } else {
         const data = {
           name: cycleName.trim(),
-          items: items.map(({ subjectId, targetMinutes }) => ({ subjectId, targetMinutes })),
+          items: items.map(({ subjectId, disciplineId, targetMinutes }) => ({
+            subjectId,
+            disciplineId,
+            targetMinutes,
+          })),
           activateOnCreate,
         };
         await createCycle(currentWorkspaceId, data);
@@ -193,6 +253,12 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   // Calculate total duration
   const totalMinutes = items.reduce((acc, item) => acc + item.targetMinutes, 0);
 
+  // Check if can add item
+  const canAddItem =
+    !!newMinutes &&
+    ((addItemType === 'subject' && !!newSubjectId) ||
+      (addItemType === 'discipline' && !!newDisciplineId));
+
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="sm:max-w-lg">
@@ -202,8 +268,8 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             {cycle ? 'Editar Ciclo' : 'Criar Ciclo de Estudos'}
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Configure as matérias e o tempo de estudo para cada uma.
-            O ciclo irá sugerir o que estudar baseado na ordem definida.
+            Configure as matérias/disciplinas e o tempo de estudo para cada uma. O ciclo irá
+            sugerir o que estudar baseado na ordem definida.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -239,20 +305,74 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
 
           {/* Add item form */}
           <div className="space-y-2">
-            <Label>Adicionar tópico</Label>
+            <Label>Adicionar ao ciclo</Label>
+
+            {/* Type selector tabs */}
+            <Tabs
+              value={addItemType}
+              onValueChange={(v) => setAddItemType(v as 'subject' | 'discipline')}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="subject" className="flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Tópico
+                </TabsTrigger>
+                <TabsTrigger value="discipline" className="flex items-center gap-1.5">
+                  <Layers className="h-3.5 w-3.5" />
+                  Disciplina
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <div className="flex gap-2">
               <div className="flex-1">
-                <SubjectPicker
-                  value={newSubjectId}
-                  onValueChange={setNewSubjectId}
-                  subjects={subjects}
-                  recentSubjects={recentSubjects}
-                  onSubjectUsed={addRecentSubject}
-                  onCreateSubject={currentWorkspaceId ? (name) => findOrCreateSubject(currentWorkspaceId, name) : undefined}
-                  placeholder="Tópico"
-                  searchPlaceholder="Buscar..."
-                  emptyMessage="Nenhum encontrado"
-                />
+                {addItemType === 'subject' ? (
+                  <SubjectPicker
+                    value={newSubjectId}
+                    onValueChange={setNewSubjectId}
+                    subjects={subjects}
+                    recentSubjects={recentSubjects}
+                    onSubjectUsed={addRecentSubject}
+                    onCreateSubject={
+                      currentWorkspaceId
+                        ? (name) => findOrCreateSubject(currentWorkspaceId, name)
+                        : undefined
+                    }
+                    placeholder="Tópico"
+                    searchPlaceholder="Buscar..."
+                    emptyMessage="Nenhum encontrado"
+                  />
+                ) : (
+                  <Select value={newDisciplineId} onValueChange={setNewDisciplineId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma disciplina" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {disciplines.length === 0 ? (
+                        <div className="py-6 text-center text-sm text-muted-foreground">
+                          Nenhuma disciplina encontrada.
+                          <br />
+                          Crie disciplinas para agrupar tópicos.
+                        </div>
+                      ) : (
+                        disciplines.map((discipline) => (
+                          <SelectItem key={discipline.id} value={discipline.id}>
+                            <div className="flex items-center gap-2">
+                              <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>{discipline.name}</span>
+                              {discipline.subjects.length > 0 && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({discipline.subjects.length} tópicos)
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <Input
                 type="number"
@@ -263,12 +383,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                 onChange={(e) => setNewMinutes(e.target.value)}
                 className="w-20"
               />
-              <Button
-                type="button"
-                size="icon"
-                onClick={handleAddItem}
-                disabled={!newSubjectId || !newMinutes}
-              >
+              <Button type="button" size="icon" onClick={handleAddItem} disabled={!canAddItem}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -298,9 +413,10 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                         key={item.id}
                         id={item.id}
                         index={index}
-                        subjectName={subjects.find(s => s.id === item.subjectId)?.name || item.subjectId}
+                        subjectName={getItemName(item)}
                         duration={formatDuration(item.targetMinutes)}
                         onRemove={() => handleRemoveItem(item.id)}
+                        isDiscipline={isItemDiscipline(item)}
                       />
                     ))}
                   </div>
@@ -309,7 +425,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              Adicione matérias para criar o ciclo
+              Adicione matérias ou disciplinas para criar o ciclo
             </p>
           )}
         </div>
@@ -349,7 +465,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           </Button>
           <Button
             onClick={handleSave}
-            disabled={items.length === 0 || isSaving || isLoading || (!isEditing && !cycleName.trim())}
+            disabled={
+              items.length === 0 || isSaving || isLoading || (!isEditing && !cycleName.trim())
+            }
             className="w-full sm:w-auto"
           >
             {isSaving ? (

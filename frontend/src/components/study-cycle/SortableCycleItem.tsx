@@ -4,7 +4,7 @@
  */
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2, BookOpen, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ interface SortableCycleItemProps {
   subjectName: string;
   duration: string;
   onRemove: () => void;
+  isDiscipline?: boolean;
 }
 
 export function SortableCycleItem({
@@ -22,6 +23,7 @@ export function SortableCycleItem({
   subjectName,
   duration,
   onRemove,
+  isDiscipline = false,
 }: SortableCycleItemProps) {
   const {
     attributes,
@@ -59,6 +61,11 @@ export function SortableCycleItem({
       <span className="text-xs text-muted-foreground w-5">
         {index + 1}.
       </span>
+      {isDiscipline ? (
+        <Layers className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+      ) : (
+        <BookOpen className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+      )}
       <span className="flex-1 text-sm font-medium truncate">
         {subjectName}
       </span>

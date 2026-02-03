@@ -17,6 +17,7 @@ import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
 import { AllocationPage } from '@/views/AllocationPage';
 import { SubjectsPage } from '@/views/SubjectsPage';
+import { DisciplinesPage } from '@/views/DisciplinesPage';
 
 // Toast notifications
 import { Toaster } from '@/components/ui/toaster';
@@ -47,6 +48,7 @@ export function SpaApp() {
           <Route path="scratchpad" element={<ScratchpadPage />} />
           <Route path="allocation" element={<AllocationPage />} />
           <Route path="subjects" element={<SubjectsPage />} />
+          <Route path="disciplines" element={<DisciplinesPage />} />
         </Route>
 
         {/* Redirect unknown routes to app */}
