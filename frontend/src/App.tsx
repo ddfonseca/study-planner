@@ -18,6 +18,7 @@ import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
 import { AllocationPage } from '@/views/AllocationPage';
 import { SubjectsPage } from '@/views/SubjectsPage';
+import { DisciplinesPage } from '@/views/DisciplinesPage';
 import { TermsPage } from '@/views/TermsPage';
 import { PrivacyPage } from '@/views/PrivacyPage';
 
@@ -54,6 +55,7 @@ function App() {
           <Route path="scratchpad" element={<ScratchpadPage />} />
           <Route path="allocation" element={<AllocationPage />} />
           <Route path="subjects" element={<SubjectsPage />} />
+          <Route path="disciplines" element={<DisciplinesPage />} />
         </Route>
 
         {/* Landing page */}

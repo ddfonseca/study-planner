@@ -19,6 +19,7 @@ import { ExamTemplateModule } from './exam-template/exam-template.module';
 import { ExamProfileModule } from './exam-profile/exam-profile.module';
 import { SubjectModule } from './subject/subject.module';
 import { CategoryModule } from './category/category.module';
+import { DisciplineModule } from './discipline/discipline.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { CategoryModule } from './category/category.module';
     ExamProfileModule,
     SubjectModule,
     CategoryModule,
+    DisciplineModule,
   ],
   providers: [
     {

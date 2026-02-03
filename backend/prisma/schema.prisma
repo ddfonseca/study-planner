@@ -117,26 +117,49 @@ model Workspace {
   examProfiles  ExamProfile[]
   subjects      Subject[]
   categories    Category[]
+  disciplines   Discipline[]
 
   @@unique([userId, name])
   @@index([userId])
   @@map("workspaces")
 }
 
+// Discipline - groups related subjects for study cycle organization
+model Discipline {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  name        String   @db.VarChar(100)
+  color       String?  @db.VarChar(7)
+  icon        String?  @db.VarChar(50)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subjects        Subject[]
+  studyCycleItems StudyCycleItem[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("disciplines")
+}
+
 // Subject - normalized subjects per workspace
 model Subject {
-  id          String    @id @default(cuid())
-  workspaceId String    @map("workspace_id")
-  name        String    @db.VarChar(100)
-  color       String?   @db.VarChar(7)
-  icon        String?   @db.VarChar(50)
-  category    String?   @db.VarChar(50) // @deprecated - use categories relation
-  position    Int       @default(0)
-  archivedAt  DateTime? @map("archived_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id           String    @id @default(cuid())
+  workspaceId  String    @map("workspace_id")
+  disciplineId String?   @map("discipline_id")
+  name         String    @db.VarChar(100)
+  color        String?   @db.VarChar(7)
+  icon         String?   @db.VarChar(50)
+  category     String?   @db.VarChar(50) // @deprecated - use categories relation
+  position     Int       @default(0)
+  archivedAt   DateTime? @map("archived_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  discipline       Discipline?       @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
   studySessions    StudySession[]
   studyCycleItems  StudyCycleItem[]
   subjectProfiles  SubjectProfile[]
@@ -144,6 +167,7 @@ model Subject {
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
+  @@index([disciplineId])
   @@index([category])
   @@map("subjects")
 }
@@ -270,21 +294,25 @@ model StudyCycle {
   @@map("study_cycles")
 }
 
-// Study Cycle Item - individual subject entry in a cycle
+// Study Cycle Item - individual subject or discipline entry in a cycle
+// Either subjectId OR disciplineId must be set (validated in application layer)
 model StudyCycleItem {
-  id                  String @id @default(cuid())
-  cycleId             String @map("cycle_id")
-  subjectId           String @map("subject_id")
-  targetMinutes       Int    @map("target_minutes")
+  id                  String  @id @default(cuid())
+  cycleId             String  @map("cycle_id")
+  subjectId           String? @map("subject_id")
+  disciplineId        String? @map("discipline_id")
+  targetMinutes       Int     @map("target_minutes")
   position            Int
-  compensationMinutes Int    @default(0) @map("compensation_minutes") // Minutes added when skipping incomplete
+  compensationMinutes Int     @default(0) @map("compensation_minutes") // Minutes added when skipping incomplete
 
-  cycle   StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
-  subject Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  cycle      StudyCycle  @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  subject    Subject?    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  discipline Discipline? @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
 
   @@unique([cycleId, position])
   @@index([cycleId])
   @@index([subjectId])
+  @@index([disciplineId])
   @@map("study_cycle_items")
 }
 

@@ -14,6 +14,9 @@ export interface CycleItemProgress {
   accumulatedMinutes: number;
   isComplete: boolean;
   position: number;
+  isDiscipline: boolean;
+  disciplineId?: string;
+  subjectId?: string;
 }
 
 export interface CycleStatistics {
@@ -59,8 +62,30 @@ export interface CycleSuggestion {
     totalItems: number;
     allItemsProgress: CycleItemProgress[];
     isCycleComplete: boolean;
+    currentIsDiscipline: boolean;
+    currentDisciplineId?: string;
+    currentSubjectId?: string;
   } | null;
 }
+
+// Helper type for cycle items with discipline and subject relations
+type CycleItemWithRelations = {
+  id: string;
+  cycleId: string;
+  subjectId: string | null;
+  disciplineId: string | null;
+  targetMinutes: number;
+  position: number;
+  compensationMinutes: number;
+  subject: { id: string; name: string; color: string | null; icon: string | null } | null;
+  discipline: {
+    id: string;
+    name: string;
+    color: string | null;
+    icon: string | null;
+    subjects: { id: string; name: string }[];
+  } | null;
+};
 
 @Injectable()
 export class StudyCycleService {
@@ -69,6 +94,20 @@ export class StudyCycleService {
     private subscriptionService: SubscriptionService,
   ) {}
 
+  /**
+   * Standard include for cycle items (subject and discipline with their subjects)
+   */
+  private readonly cycleItemInclude = {
+    subject: true,
+    discipline: {
+      include: {
+        subjects: {
+          where: { archivedAt: null },
+          select: { id: true, name: true },
+        },
+      },
+    },
+  };
 
   /**
    * Verifica se o usuário tem acesso ao workspace
@@ -90,6 +129,44 @@ export class StudyCycleService {
   }
 
   /**
+   * Gets the display name for a cycle item (discipline name or subject name)
+   */
+  private getItemDisplayName(item: CycleItemWithRelations): string {
+    if (item.disciplineId && item.discipline) {
+      return item.discipline.name;
+    }
+    return item.subject?.name || 'Unknown';
+  }
+
+  /**
+   * Gets all subject IDs for a cycle item
+   * For a discipline, returns all subject IDs within that discipline
+   * For a subject, returns just that subject's ID
+   */
+  private getItemSubjectIds(item: CycleItemWithRelations): string[] {
+    if (item.disciplineId && item.discipline) {
+      return item.discipline.subjects.map((s) => s.id);
+    }
+    return item.subjectId ? [item.subjectId] : [];
+  }
+
+  /**
+   * Calculates accumulated minutes for a cycle item
+   * For disciplines, aggregates all subjects within the discipline
+   */
+  private calculateItemAccumulatedMinutes(
+    item: CycleItemWithRelations,
+    subjectMinutes: Record<string, number>,
+  ): number {
+    const subjectIds = this.getItemSubjectIds(item);
+    const sessionMinutes = subjectIds.reduce(
+      (sum, id) => sum + (subjectMinutes[id] || 0),
+      0,
+    );
+    return sessionMinutes + (item.compensationMinutes || 0);
+  }
+
+  /**
    * Busca o ciclo ativo de um workspace (com itens ordenados)
    */
   async getCycle(userId: string, workspaceId: string) {
@@ -99,7 +176,7 @@ export class StudyCycleService {
       where: { workspaceId, isActive: true },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -117,7 +194,7 @@ export class StudyCycleService {
       orderBy: [{ isActive: 'desc' }, { displayOrder: 'asc' }, { name: 'asc' }],
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -151,7 +228,7 @@ export class StudyCycleService {
       data: { isActive: true },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -182,6 +259,20 @@ export class StudyCycleService {
 
     if (existing) {
       throw new BadRequestException('A cycle with this name already exists');
+    }
+
+    // Validate items - each must have either subjectId or disciplineId
+    for (const item of dto.items) {
+      if (!item.subjectId && !item.disciplineId) {
+        throw new BadRequestException(
+          'Each cycle item must have either a subjectId or disciplineId',
+        );
+      }
+      if (item.subjectId && item.disciplineId) {
+        throw new BadRequestException(
+          'Each cycle item must have either a subjectId or disciplineId, not both',
+        );
+      }
     }
 
     // Get current max displayOrder
@@ -215,7 +306,8 @@ export class StudyCycleService {
         currentItemIndex: 0,
         items: {
           create: dto.items.map((item, index) => ({
-            subjectId: item.subjectId,
+            subjectId: item.subjectId || null,
+            disciplineId: item.disciplineId || null,
             targetMinutes: item.targetMinutes,
             position: index,
           })),
@@ -223,7 +315,7 @@ export class StudyCycleService {
       },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -246,6 +338,20 @@ export class StudyCycleService {
 
     // Se items foram enviados, recriar todos
     if (dto.items) {
+      // Validate items
+      for (const item of dto.items) {
+        if (!item.subjectId && !item.disciplineId) {
+          throw new BadRequestException(
+            'Each cycle item must have either a subjectId or disciplineId',
+          );
+        }
+        if (item.subjectId && item.disciplineId) {
+          throw new BadRequestException(
+            'Each cycle item must have either a subjectId or disciplineId, not both',
+          );
+        }
+      }
+
       // Deletar items existentes
       await this.prisma.studyCycleItem.deleteMany({
         where: { cycleId: cycle.id },
@@ -255,7 +361,8 @@ export class StudyCycleService {
       await this.prisma.studyCycleItem.createMany({
         data: dto.items.map((item, index) => ({
           cycleId: cycle.id,
-          subjectId: item.subjectId,
+          subjectId: item.subjectId || null,
+          disciplineId: item.disciplineId || null,
           targetMinutes: item.targetMinutes,
           position: index,
         })),
@@ -274,7 +381,7 @@ export class StudyCycleService {
         },
         include: {
           items: {
-            include: { subject: true },
+            include: this.cycleItemInclude,
             orderBy: { position: 'asc' },
           },
         },
@@ -287,11 +394,12 @@ export class StudyCycleService {
       data: {
         name: dto.name !== undefined ? dto.name : undefined,
         isActive: dto.isActive !== undefined ? dto.isActive : undefined,
-        currentItemIndex: dto.currentItemIndex !== undefined ? dto.currentItemIndex : undefined,
+        currentItemIndex:
+          dto.currentItemIndex !== undefined ? dto.currentItemIndex : undefined,
       },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -315,14 +423,18 @@ export class StudyCycleService {
    * Avança para o próximo item do ciclo ativo
    * @param forceComplete - Se true, adiciona compensação para considerar a matéria como completa
    */
-  async advanceToNext(userId: string, workspaceId: string, forceComplete?: boolean) {
+  async advanceToNext(
+    userId: string,
+    workspaceId: string,
+    forceComplete?: boolean,
+  ) {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
     const cycle = await this.prisma.studyCycle.findFirst({
       where: { workspaceId, isActive: true },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -337,43 +449,62 @@ export class StudyCycleService {
     }
 
     const currentIndex = cycle.currentItemIndex;
-    const currentItem = cycle.items[currentIndex];
+    const currentItem = cycle.items[currentIndex] as CycleItemWithRelations;
 
     // Circular: volta ao início quando chega no final
     const nextIndex = (currentIndex + 1) % cycle.items.length;
-    const nextItem = cycle.items[nextIndex];
+    const nextItem = cycle.items[nextIndex] as CycleItemWithRelations;
 
-    // Get accumulated minutes for current subject (considering lastResetAt)
-    const sessionsAgg = await this.prisma.studySession.aggregate({
+    // Get subject IDs for current item (may be multiple if discipline)
+    const currentSubjectIds = this.getItemSubjectIds(currentItem);
+
+    // Get accumulated minutes for current item (considering lastResetAt)
+    const sessionsAgg = await this.prisma.studySession.groupBy({
+      by: ['subjectId'],
       where: {
         workspaceId,
-        subjectId: currentItem.subjectId,
+        subjectId: { in: currentSubjectIds },
         ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
       },
       _sum: { minutes: true },
     });
-    const sessionMinutes = sessionsAgg._sum.minutes || 0;
-    const totalAccumulated = sessionMinutes + (currentItem.compensationMinutes || 0);
+
+    const subjectMinutes = sessionsAgg.reduce(
+      (acc, s) => {
+        acc[s.subjectId] = s._sum.minutes || 0;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const totalAccumulated = this.calculateItemAccumulatedMinutes(
+      currentItem,
+      subjectMinutes,
+    );
 
     // If forceComplete and not yet complete, add compensation
     if (forceComplete) {
-      const remainingMinutes = Math.max(0, currentItem.targetMinutes - totalAccumulated);
+      const remainingMinutes = Math.max(
+        0,
+        currentItem.targetMinutes - totalAccumulated,
+      );
       if (remainingMinutes > 0) {
         await this.prisma.studyCycleItem.update({
           where: { id: currentItem.id },
           data: {
-            compensationMinutes: (currentItem.compensationMinutes || 0) + remainingMinutes,
+            compensationMinutes:
+              (currentItem.compensationMinutes || 0) + remainingMinutes,
           },
         });
       }
     }
 
-    // Record advance in history (use subject names for display)
+    // Record advance in history (use display names)
     await this.prisma.studyCycleAdvance.create({
       data: {
         cycleId: cycle.id,
-        fromSubject: currentItem.subject.name,
-        toSubject: nextItem.subject.name,
+        fromSubject: this.getItemDisplayName(currentItem),
+        toSubject: this.getItemDisplayName(nextItem),
         fromPosition: currentIndex,
         toPosition: nextIndex,
         minutesSpent: totalAccumulated,
@@ -382,26 +513,42 @@ export class StudyCycleService {
 
     // If completing the cycle (returning to position 0), record completion
     if (nextIndex === 0) {
-      const totalTarget = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
+      const totalTarget = cycle.items.reduce(
+        (sum, item) => sum + item.targetMinutes,
+        0,
+      );
+
+      // Get all subject IDs in the cycle
+      const allSubjectIds = cycle.items.flatMap((item) =>
+        this.getItemSubjectIds(item as CycleItemWithRelations),
+      );
 
       // Get total accumulated for all subjects (including compensation)
       const allSessionsAgg = await this.prisma.studySession.groupBy({
         by: ['subjectId'],
         where: {
           workspaceId,
+          subjectId: { in: allSubjectIds },
           ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
         },
         _sum: { minutes: true },
       });
-      const subjectMinutes = allSessionsAgg.reduce(
+
+      const allSubjectMinutes = allSessionsAgg.reduce(
         (acc, s) => {
           acc[s.subjectId] = s._sum.minutes || 0;
           return acc;
         },
         {} as Record<string, number>,
       );
+
       const totalSpent = cycle.items.reduce(
-        (sum, item) => sum + (subjectMinutes[item.subjectId] || 0) + (item.compensationMinutes || 0),
+        (sum, item) =>
+          sum +
+          this.calculateItemAccumulatedMinutes(
+            item as CycleItemWithRelations,
+            allSubjectMinutes,
+          ),
         0,
       );
 
@@ -421,7 +568,7 @@ export class StudyCycleService {
       data: { currentItemIndex: nextIndex },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -431,14 +578,17 @@ export class StudyCycleService {
   /**
    * Retorna a sugestão de estudo atual baseada no ciclo ativo
    */
-  async getSuggestion(userId: string, workspaceId: string): Promise<CycleSuggestion> {
+  async getSuggestion(
+    userId: string,
+    workspaceId: string,
+  ): Promise<CycleSuggestion> {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
     const cycle = await this.prisma.studyCycle.findFirst({
       where: { workspaceId, isActive: true },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -452,12 +602,17 @@ export class StudyCycleService {
       return { hasCycle: true, isEmpty: true, suggestion: null };
     }
 
+    // Get all subject IDs in the cycle
+    const allSubjectIds = cycle.items.flatMap((item) =>
+      this.getItemSubjectIds(item as CycleItemWithRelations),
+    );
+
     // Buscar minutos acumulados por matéria das sessões (filtrado por lastResetAt)
-    // Usa createdAt (timestamp completo) para filtrar corretamente
     const sessionsAgg = await this.prisma.studySession.groupBy({
       by: ['subjectId'],
       where: {
         workspaceId,
+        subjectId: { in: allSubjectIds },
         ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
       },
       _sum: { minutes: true },
@@ -472,10 +627,16 @@ export class StudyCycleService {
     );
 
     // Enriquecer items com progresso calculado (sessões + compensação)
-    const itemsWithProgress = cycle.items.map((item) => ({
-      ...item,
-      accumulatedMinutes: (subjectMinutes[item.subjectId] || 0) + (item.compensationMinutes || 0),
-    }));
+    const itemsWithProgress = cycle.items.map((item) => {
+      const typedItem = item as CycleItemWithRelations;
+      return {
+        ...typedItem,
+        accumulatedMinutes: this.calculateItemAccumulatedMinutes(
+          typedItem,
+          subjectMinutes,
+        ),
+      };
+    });
 
     const currentItem = itemsWithProgress[cycle.currentItemIndex];
     const remainingMinutes = Math.max(
@@ -488,14 +649,19 @@ export class StudyCycleService {
     const nextIndex = (cycle.currentItemIndex + 1) % itemsWithProgress.length;
     const nextItem = itemsWithProgress[nextIndex];
 
-    // Build progress for all items (use subject name for display)
-    const allItemsProgress: CycleItemProgress[] = itemsWithProgress.map((item) => ({
-      subject: item.subject.name,
-      targetMinutes: item.targetMinutes,
-      accumulatedMinutes: item.accumulatedMinutes,
-      isComplete: item.accumulatedMinutes >= item.targetMinutes,
-      position: item.position,
-    }));
+    // Build progress for all items
+    const allItemsProgress: CycleItemProgress[] = itemsWithProgress.map(
+      (item) => ({
+        subject: this.getItemDisplayName(item),
+        targetMinutes: item.targetMinutes,
+        accumulatedMinutes: item.accumulatedMinutes,
+        isComplete: item.accumulatedMinutes >= item.targetMinutes,
+        position: item.position,
+        isDiscipline: !!item.disciplineId,
+        disciplineId: item.disciplineId || undefined,
+        subjectId: item.subjectId || undefined,
+      }),
+    );
 
     // Check if entire cycle is complete
     const isCycleComplete = allItemsProgress.every((item) => item.isComplete);
@@ -504,17 +670,20 @@ export class StudyCycleService {
       hasCycle: true,
       isEmpty: false,
       suggestion: {
-        currentSubject: currentItem.subject.name,
+        currentSubject: this.getItemDisplayName(currentItem),
         currentTargetMinutes: currentItem.targetMinutes,
         currentAccumulatedMinutes: currentItem.accumulatedMinutes,
         remainingMinutes,
         isCurrentComplete: isComplete,
-        nextSubject: nextItem.subject.name,
+        nextSubject: this.getItemDisplayName(nextItem),
         nextTargetMinutes: nextItem.targetMinutes,
         currentPosition: cycle.currentItemIndex,
         totalItems: itemsWithProgress.length,
         allItemsProgress,
         isCycleComplete,
+        currentIsDiscipline: !!currentItem.disciplineId,
+        currentDisciplineId: currentItem.disciplineId || undefined,
+        currentSubjectId: currentItem.subjectId || undefined,
       },
     };
   }
@@ -522,13 +691,17 @@ export class StudyCycleService {
   /**
    * Retorna estatísticas do ciclo ativo
    */
-  async getStatistics(userId: string, workspaceId: string): Promise<CycleStatistics | null> {
+  async getStatistics(
+    userId: string,
+    workspaceId: string,
+  ): Promise<CycleStatistics | null> {
     await this.verifyWorkspaceAccess(userId, workspaceId);
 
     const cycle = await this.prisma.studyCycle.findFirst({
       where: { workspaceId, isActive: true },
       include: {
         items: {
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
@@ -538,12 +711,17 @@ export class StudyCycleService {
       return null;
     }
 
+    // Get all subject IDs in the cycle
+    const allSubjectIds = cycle.items.flatMap((item) =>
+      this.getItemSubjectIds(item as CycleItemWithRelations),
+    );
+
     // Buscar minutos acumulados por matéria das sessões (filtrado por lastResetAt)
-    // Usa createdAt (timestamp completo) para filtrar corretamente
     const sessionsAgg = await this.prisma.studySession.groupBy({
       by: ['subjectId'],
       where: {
         workspaceId,
+        subjectId: { in: allSubjectIds },
         ...(cycle.lastResetAt && { createdAt: { gte: cycle.lastResetAt } }),
       },
       _sum: { minutes: true },
@@ -558,23 +736,40 @@ export class StudyCycleService {
     );
 
     // Calcular estatísticas (sessões + compensação)
-    const totalTargetMinutes = cycle.items.reduce((sum, item) => sum + item.targetMinutes, 0);
+    const totalTargetMinutes = cycle.items.reduce(
+      (sum, item) => sum + item.targetMinutes,
+      0,
+    );
     const totalAccumulatedMinutes = cycle.items.reduce(
-      (sum, item) => sum + (subjectMinutes[item.subjectId] || 0) + (item.compensationMinutes || 0),
+      (sum, item) =>
+        sum +
+        this.calculateItemAccumulatedMinutes(
+          item as CycleItemWithRelations,
+          subjectMinutes,
+        ),
       0,
     );
 
     const completedItemsCount = cycle.items.filter(
-      (item) => (subjectMinutes[item.subjectId] || 0) + (item.compensationMinutes || 0) >= item.targetMinutes,
+      (item) =>
+        this.calculateItemAccumulatedMinutes(
+          item as CycleItemWithRelations,
+          subjectMinutes,
+        ) >= item.targetMinutes,
     ).length;
 
     const totalItemsCount = cycle.items.length;
     const overallPercentage =
       totalTargetMinutes > 0
-        ? Math.min(100, Math.round((totalAccumulatedMinutes / totalTargetMinutes) * 100))
+        ? Math.min(
+            100,
+            Math.round((totalAccumulatedMinutes / totalTargetMinutes) * 100),
+          )
         : 0;
     const averagePerItem =
-      totalItemsCount > 0 ? Math.round(totalAccumulatedMinutes / totalItemsCount) : 0;
+      totalItemsCount > 0
+        ? Math.round(totalAccumulatedMinutes / totalItemsCount)
+        : 0;
 
     return {
       totalTargetMinutes,
@@ -684,7 +879,7 @@ export class StudyCycleService {
       },
       include: {
         items: {
-          include: { subject: true },
+          include: this.cycleItemInclude,
           orderBy: { position: 'asc' },
         },
       },
