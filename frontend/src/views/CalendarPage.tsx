@@ -237,9 +237,10 @@ export function CalendarPage() {
 
       const { session, undo } = result;
 
+      const subjectName = session.subject?.name ?? 'Sessão';
       const { dismiss } = toast({
         title: 'Sessão removida',
-        description: `"${session.subject}" foi removida`,
+        description: `"${subjectName}" foi removida`,
         duration: 5000,
         action: (
           <ToastAction
@@ -250,7 +251,7 @@ export function CalendarPage() {
                 dismiss();
                 toast({
                   title: 'Sessão restaurada',
-                  description: `"${session.subject}" foi restaurada`,
+                  description: `"${subjectName}" foi restaurada`,
                 });
               }
             }}

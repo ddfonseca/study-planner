@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { MultiCategorySelect } from '@/components/ui/multi-category-select';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { SortableSubjectItem } from '@/components/subjects/SortableSubjectItem';
 import {
   BookOpen,
@@ -556,21 +557,11 @@ export function SubjectsPage() {
 
                       {/* Color indicator */}
                       {isEditing ? (
-                        <div className="flex gap-1">
-                          {COLOR_OPTIONS.map((color, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setEditingSubject({ ...editingSubject!, color })}
-                              className={cn(
-                                "w-5 h-5 rounded-full border-2 transition-transform hover:scale-110",
-                                editingSubject?.color === color && "ring-2 ring-offset-2 ring-primary"
-                              )}
-                              style={{ backgroundColor: color || 'transparent' }}
-                            >
-                              {color === null && <X className="h-3 w-3 mx-auto text-muted-foreground" />}
-                            </button>
-                          ))}
-                        </div>
+                        <ColorPicker
+                          value={editingSubject?.color ?? null}
+                          onValueChange={(color) => setEditingSubject({ ...editingSubject!, color })}
+                          colors={COLOR_OPTIONS}
+                        />
                       ) : (
                         <span
                           className="w-4 h-4 rounded-full shrink-0"
@@ -580,11 +571,11 @@ export function SubjectsPage() {
 
                       {/* Name and Category */}
                       {isEditing ? (
-                        <div className="flex-1 flex gap-2 items-center">
+                        <div className="flex-1 flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
                           <Input
                             value={editingSubject?.name || ''}
                             onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
-                            className="flex-1 h-8"
+                            className="flex-1 h-8 min-w-0"
                             placeholder="Nome"
                             autoFocus
                             onKeyDown={(e) => {
@@ -592,7 +583,7 @@ export function SubjectsPage() {
                               if (e.key === 'Escape') setEditingSubject(null);
                             }}
                           />
-                          <div className="w-48">
+                          <div className="w-full sm:w-48 shrink-0">
                             <MultiCategorySelect
                               value={editingSubject?.categoryIds || []}
                               onValueChange={(categoryIds) => setEditingSubject({ ...editingSubject!, categoryIds })}
