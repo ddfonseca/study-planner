@@ -123,7 +123,13 @@ export class WorkspaceService {
         throw new BadRequestException('No default workspace found');
       }
 
-      // Mover sessões para workspace default
+      // First, move subjects to the default workspace
+      await this.prisma.subject.updateMany({
+        where: { workspaceId },
+        data: { workspaceId: defaultWorkspace.id },
+      });
+
+      // Then, move sessions to the default workspace
       await this.prisma.studySession.updateMany({
         where: { workspaceId },
         data: { workspaceId: defaultWorkspace.id },

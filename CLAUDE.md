@@ -48,3 +48,27 @@ When creating a new NestJS module:
 - Files are mounted as volumes, changes should hot-reload
 - If hot-reload doesn't work: `docker compose restart frontend`
 - To apply migrations: `docker compose exec backend npx prisma migrate deploy`
+
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make up` | Start all Docker containers |
+| `make down` | Stop all Docker containers |
+| `make build` | Build and start containers |
+| `make logs` | Follow container logs |
+| `make test` | Run tests in isolated Docker environment |
+| `make lint` | Run linter on frontend and backend |
+| `make migrate` | Run Prisma migrations (local) |
+| `make prisma-generate` | Generate Prisma client |
+| `make postgres` | Start only Postgres (for local dev) |
+| `make postgres-down` | Stop Postgres |
+| `make deploy-front` | Deploy frontend to Netlify |
+| `make deploy-back` | Deploy backend to Fly.io |
+| `make deploy-all` | Deploy both frontend and backend |
+
+## IMPORTANT: Always Run Tests
+
+**After completing any code change, ALWAYS run `make test` to verify everything works.**
+
+This runs tests in an isolated Docker environment with a fresh database.

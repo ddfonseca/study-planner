@@ -581,7 +581,9 @@ describe('StudyCycleService', () => {
 
       const suggestion = await service.getSuggestion(user.id, workspace.id);
 
-      expect(suggestion.hasCycle).toBe(false);
+      expect(suggestion.hasCycle).toBe(true); // Service returns true with isEmpty flag
+      expect(suggestion.isEmpty).toBe(true);
+      expect(suggestion.suggestion).toBeNull();
     });
 
     it('should return current subject suggestion', async () => {
@@ -641,8 +643,8 @@ describe('StudyCycleService', () => {
       // Add study sessions for Math
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 30 },
-          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 45 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 30 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 45 },
         ],
       });
 
@@ -679,7 +681,6 @@ describe('StudyCycleService', () => {
           workspaceId: workspace.id,
           subjectId: subjects[0].id,
           date: new Date(),
-          subject: 'Math',
           minutes: 60,
         },
       });
@@ -849,8 +850,8 @@ describe('StudyCycleService', () => {
       // Add sessions
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[1].id, date: new Date(), subject: 'Physics', minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[1].id, date: new Date(), minutes: 60 },
         ],
       });
 

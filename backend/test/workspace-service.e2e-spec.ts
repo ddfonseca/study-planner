@@ -11,7 +11,7 @@ import {
 import { WorkspaceService } from '../src/workspace/workspace.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { SubscriptionService } from '../src/subscription/subscription.service';
-import { createTestUser, createTestWorkspace, createTestUserWithWorkspace } from './helpers/database.helper';
+import { createTestUser, createTestWorkspace, createTestUserWithWorkspace, createTestSubject } from './helpers/database.helper';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -279,6 +279,7 @@ describe('WorkspaceService', () => {
     it('should move sessions to default workspace when moveToDefault=true', async () => {
       const { user, workspace: defaultWorkspace } = await createTestUserWithWorkspace();
       const workToDelete = await createTestWorkspace(user.id, { name: 'Work' });
+      const math = await createTestSubject(workToDelete.id, { name: 'Math' });
 
       // Create session in workspace to be deleted
       const prisma = jestPrisma.client;
@@ -286,8 +287,8 @@ describe('WorkspaceService', () => {
         data: {
           userId: user.id,
           workspaceId: workToDelete.id,
+          subjectId: math.id,
           date: new Date('2024-12-16'),
-          subject: 'Math',
           minutes: 60,
         },
       });
@@ -305,14 +306,15 @@ describe('WorkspaceService', () => {
     it('should delete sessions when moveToDefault=false (cascade)', async () => {
       const { user } = await createTestUserWithWorkspace();
       const workToDelete = await createTestWorkspace(user.id, { name: 'Work' });
+      const math = await createTestSubject(workToDelete.id, { name: 'Math' });
 
       const prisma = jestPrisma.client;
       await prisma.studySession.create({
         data: {
           userId: user.id,
           workspaceId: workToDelete.id,
+          subjectId: math.id,
           date: new Date('2024-12-16'),
-          subject: 'Math',
           minutes: 60,
         },
       });
@@ -394,12 +396,14 @@ describe('WorkspaceService', () => {
     it('should return distinct subjects from workspace', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const math = await createTestSubject(workspace.id, { name: 'Math' });
+      const physics = await createTestSubject(workspace.id, { name: 'Physics' });
 
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Physics', minutes: 45 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 30 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: math.id, date: new Date(), minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: physics.id, date: new Date(), minutes: 45 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: math.id, date: new Date(), minutes: 30 },
         ],
       });
 
@@ -431,11 +435,13 @@ describe('WorkspaceService', () => {
     it('should return workspace stats', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const math = await createTestSubject(workspace.id, { name: 'Math' });
+      const physics = await createTestSubject(workspace.id, { name: 'Physics' });
 
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Physics', minutes: 45 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: math.id, date: new Date(), minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: physics.id, date: new Date(), minutes: 45 },
         ],
       });
 

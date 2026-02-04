@@ -483,7 +483,6 @@ describe('SubjectService', () => {
           userId: user.id,
           workspaceId: workspace.id,
           subjectId: source.id,
-          subject: 'Source',
           date: new Date(),
           minutes: 60,
         },
