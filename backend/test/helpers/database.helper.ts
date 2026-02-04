@@ -127,6 +127,40 @@ export async function createTestPlanLimits(
 /**
  * Create a subscription for a user
  */
+/**
+ * Create a test subject
+ */
+export async function createTestSubject(
+  workspaceId: string,
+  data?: { name?: string; color?: string; position?: number },
+): Promise<{ id: string; workspaceId: string; name: string }> {
+  const prisma = jestPrisma.client;
+  const subject = await prisma.subject.create({
+    data: {
+      workspaceId,
+      name: data?.name || `Subject-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      color: data?.color,
+      position: data?.position ?? 0,
+    },
+  });
+  return subject;
+}
+
+/**
+ * Create multiple test subjects at once
+ */
+export async function createTestSubjects(
+  workspaceId: string,
+  names: string[],
+): Promise<{ id: string; workspaceId: string; name: string }[]> {
+  const subjects: { id: string; workspaceId: string; name: string }[] = [];
+  for (let i = 0; i < names.length; i++) {
+    const subject = await createTestSubject(workspaceId, { name: names[i], position: i });
+    subjects.push(subject);
+  }
+  return subjects;
+}
+
 export async function createTestSubscription(
   userId: string,
   planId: string,

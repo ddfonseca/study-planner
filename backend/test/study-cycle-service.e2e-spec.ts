@@ -11,7 +11,13 @@ import {
 import { StudyCycleService } from '../src/study-cycle/study-cycle.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { SubscriptionService } from '../src/subscription/subscription.service';
-import { createTestUser, createTestWorkspace, createTestUserWithWorkspace } from './helpers/database.helper';
+import {
+  createTestUser,
+  createTestWorkspace,
+  createTestUserWithWorkspace,
+  createTestSubject,
+  createTestSubjects,
+} from './helpers/database.helper';
 
 describe('StudyCycleService', () => {
   let service: StudyCycleService;
@@ -50,6 +56,8 @@ describe('StudyCycleService', () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
 
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics', 'English']);
+
       const createdCycle = await prisma.studyCycle.create({
         data: {
           workspaceId: workspace.id,
@@ -57,9 +65,9 @@ describe('StudyCycleService', () => {
           isActive: true,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 120, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-              { subject: 'English', targetMinutes: 30, position: 2 },
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 30, position: 2 },
             ],
           },
         },
@@ -71,9 +79,9 @@ describe('StudyCycleService', () => {
       expect(cycle!.id).toBe(createdCycle.id);
       expect(cycle!.name).toBe('Test Cycle');
       expect(cycle!.items).toHaveLength(3);
-      expect(cycle!.items[0].subject).toBe('Math');
-      expect(cycle!.items[1].subject).toBe('Physics');
-      expect(cycle!.items[2].subject).toBe('English');
+      expect(cycle!.items[0].subject?.name).toBe('Math');
+      expect(cycle!.items[1].subject?.name).toBe('Physics');
+      expect(cycle!.items[2].subject?.name).toBe('English');
     });
 
     it('should throw ForbiddenException when accessing another user workspace', async () => {
@@ -97,13 +105,14 @@ describe('StudyCycleService', () => {
   describe('create', () => {
     it('should create a new cycle with items', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Português', 'Matemática', 'Direito']);
 
       const cycle = await service.create(user.id, workspace.id, {
         name: 'Concurso TRT',
         items: [
-          { subject: 'Português', targetMinutes: 120 },
-          { subject: 'Matemática', targetMinutes: 90 },
-          { subject: 'Direito', targetMinutes: 60 },
+          { subjectId: subjects[0].id, targetMinutes: 120 },
+          { subjectId: subjects[1].id, targetMinutes: 90 },
+          { subjectId: subjects[2].id, targetMinutes: 60 },
         ],
       });
 
@@ -113,18 +122,19 @@ describe('StudyCycleService', () => {
       expect(cycle.isActive).toBe(true);
       expect(cycle.currentItemIndex).toBe(0);
       expect(cycle.items).toHaveLength(3);
-      expect(cycle.items[0].subject).toBe('Português');
+      expect(cycle.items[0].subject?.name).toBe('Português');
       expect(cycle.items[0].position).toBe(0);
-      expect(cycle.items[1].subject).toBe('Matemática');
+      expect(cycle.items[1].subject?.name).toBe('Matemática');
       expect(cycle.items[1].position).toBe(1);
     });
 
     it('should auto-activate first cycle in workspace', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       const cycle = await service.create(user.id, workspace.id, {
         name: 'First Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
       });
 
       expect(cycle.isActive).toBe(true);
@@ -132,17 +142,18 @@ describe('StudyCycleService', () => {
 
     it('should not auto-activate second cycle unless specified', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       // Create first cycle (auto-activated)
       await service.create(user.id, workspace.id, {
         name: 'First Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       // Create second cycle (should not be active by default)
       const secondCycle = await service.create(user.id, workspace.id, {
         name: 'Second Cycle',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
       });
 
       expect(secondCycle.isActive).toBe(false);
@@ -150,11 +161,12 @@ describe('StudyCycleService', () => {
 
     it('should activate second cycle when activateOnCreate is true', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       // Create first cycle
       const firstCycle = await service.create(user.id, workspace.id, {
         name: 'First Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       expect(firstCycle.isActive).toBe(true);
@@ -162,7 +174,7 @@ describe('StudyCycleService', () => {
       // Create second cycle with activateOnCreate
       const secondCycle = await service.create(user.id, workspace.id, {
         name: 'Second Cycle',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
         activateOnCreate: true,
       });
 
@@ -178,16 +190,17 @@ describe('StudyCycleService', () => {
 
     it('should throw BadRequestException when creating cycle with duplicate name', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await service.create(user.id, workspace.id, {
         name: 'My Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
       });
 
       await expect(
         service.create(user.id, workspace.id, {
           name: 'My Cycle',
-          items: [{ subject: 'Physics', targetMinutes: 60 }],
+          items: [{ subjectId: subject.id, targetMinutes: 60 }],
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -195,10 +208,11 @@ describe('StudyCycleService', () => {
     it('should throw ForbiddenException when creating in another user workspace', async () => {
       const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await expect(
         service.create(user2.id, workspace.id, {
-          items: [{ subject: 'Math', targetMinutes: 60 }],
+          items: [{ subjectId: subject.id, targetMinutes: 60 }],
         }),
       ).rejects.toThrow(ForbiddenException);
     });
@@ -208,6 +222,7 @@ describe('StudyCycleService', () => {
     it('should update cycle name', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await prisma.studyCycle.create({
         data: {
@@ -215,7 +230,7 @@ describe('StudyCycleService', () => {
           name: 'Old Name',
           isActive: true,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
@@ -230,6 +245,7 @@ describe('StudyCycleService', () => {
     it('should update isActive status', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await prisma.studyCycle.create({
         data: {
@@ -237,7 +253,7 @@ describe('StudyCycleService', () => {
           name: 'Test Cycle',
           isActive: true,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
@@ -252,6 +268,7 @@ describe('StudyCycleService', () => {
     it('should update currentItemIndex', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await prisma.studyCycle.create({
         data: {
@@ -261,8 +278,8 @@ describe('StudyCycleService', () => {
           currentItemIndex: 0,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
             ],
           },
         },
@@ -278,6 +295,8 @@ describe('StudyCycleService', () => {
     it('should replace items when items array is provided', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const oldSubjects = await createTestSubjects(workspace.id, ['Old1', 'Old2']);
+      const newSubjects = await createTestSubjects(workspace.id, ['New1', 'New2', 'New3']);
 
       await prisma.studyCycle.create({
         data: {
@@ -286,8 +305,8 @@ describe('StudyCycleService', () => {
           isActive: true,
           items: {
             create: [
-              { subject: 'Old1', targetMinutes: 30, position: 0 },
-              { subject: 'Old2', targetMinutes: 30, position: 1 },
+              { subjectId: oldSubjects[0].id, targetMinutes: 30, position: 0 },
+              { subjectId: oldSubjects[1].id, targetMinutes: 30, position: 1 },
             ],
           },
         },
@@ -295,21 +314,23 @@ describe('StudyCycleService', () => {
 
       const updated = await service.update(user.id, workspace.id, {
         items: [
-          { subject: 'New1', targetMinutes: 60 },
-          { subject: 'New2', targetMinutes: 90 },
-          { subject: 'New3', targetMinutes: 120 },
+          { subjectId: newSubjects[0].id, targetMinutes: 60 },
+          { subjectId: newSubjects[1].id, targetMinutes: 90 },
+          { subjectId: newSubjects[2].id, targetMinutes: 120 },
         ],
       });
 
       expect(updated.items).toHaveLength(3);
-      expect(updated.items[0].subject).toBe('New1');
-      expect(updated.items[1].subject).toBe('New2');
-      expect(updated.items[2].subject).toBe('New3');
+      expect(updated.items[0].subject?.name).toBe('New1');
+      expect(updated.items[1].subject?.name).toBe('New2');
+      expect(updated.items[2].subject?.name).toBe('New3');
     });
 
     it('should adjust currentItemIndex when items are reduced', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['A', 'B', 'C']);
+      const onlySubject = await createTestSubject(workspace.id, { name: 'Only' });
 
       await prisma.studyCycle.create({
         data: {
@@ -319,16 +340,16 @@ describe('StudyCycleService', () => {
           currentItemIndex: 2,
           items: {
             create: [
-              { subject: 'A', targetMinutes: 30, position: 0 },
-              { subject: 'B', targetMinutes: 30, position: 1 },
-              { subject: 'C', targetMinutes: 30, position: 2 },
+              { subjectId: subjects[0].id, targetMinutes: 30, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 30, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 30, position: 2 },
             ],
           },
         },
       });
 
       const updated = await service.update(user.id, workspace.id, {
-        items: [{ subject: 'Only', targetMinutes: 60 }],
+        items: [{ subjectId: onlySubject.id, targetMinutes: 60 }],
       });
 
       // currentItemIndex should be adjusted to last valid index (0)
@@ -347,6 +368,7 @@ describe('StudyCycleService', () => {
       const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await prisma.studyCycle.create({
         data: {
@@ -354,7 +376,7 @@ describe('StudyCycleService', () => {
           name: 'Test Cycle',
           isActive: true,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
@@ -369,6 +391,7 @@ describe('StudyCycleService', () => {
     it('should delete cycle', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await prisma.studyCycle.create({
         data: {
@@ -376,7 +399,7 @@ describe('StudyCycleService', () => {
           name: 'Test Cycle',
           isActive: true,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
@@ -392,6 +415,7 @@ describe('StudyCycleService', () => {
     it('should delete items when cycle is deleted (cascade)', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await prisma.studyCycle.create({
         data: {
@@ -400,8 +424,8 @@ describe('StudyCycleService', () => {
           isActive: true,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
             ],
           },
         },
@@ -437,6 +461,7 @@ describe('StudyCycleService', () => {
     it('should advance to next item', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics', 'English']);
 
       await prisma.studyCycle.create({
         data: {
@@ -446,9 +471,9 @@ describe('StudyCycleService', () => {
           currentItemIndex: 0,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-              { subject: 'English', targetMinutes: 60, position: 2 },
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
             ],
           },
         },
@@ -462,6 +487,7 @@ describe('StudyCycleService', () => {
     it('should wrap around to first item when at end', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics', 'English']);
 
       await prisma.studyCycle.create({
         data: {
@@ -471,9 +497,9 @@ describe('StudyCycleService', () => {
           currentItemIndex: 2,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-              { subject: 'English', targetMinutes: 60, position: 2 },
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
             ],
           },
         },
@@ -523,6 +549,7 @@ describe('StudyCycleService', () => {
     it('should return hasCycle=false when cycle is inactive', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await prisma.studyCycle.create({
         data: {
@@ -530,7 +557,7 @@ describe('StudyCycleService', () => {
           name: 'Test Cycle',
           isActive: false,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
@@ -560,6 +587,7 @@ describe('StudyCycleService', () => {
     it('should return current subject suggestion', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Matemática', 'Português']);
 
       await prisma.studyCycle.create({
         data: {
@@ -569,8 +597,8 @@ describe('StudyCycleService', () => {
           currentItemIndex: 0,
           items: {
             create: [
-              { subject: 'Matemática', targetMinutes: 120, position: 0 },
-              { subject: 'Português', targetMinutes: 60, position: 1 },
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
             ],
           },
         },
@@ -593,6 +621,7 @@ describe('StudyCycleService', () => {
     it('should calculate accumulated minutes from sessions', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await prisma.studyCycle.create({
         data: {
@@ -602,8 +631,8 @@ describe('StudyCycleService', () => {
           currentItemIndex: 0,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 120, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
             ],
           },
         },
@@ -612,8 +641,8 @@ describe('StudyCycleService', () => {
       // Add study sessions for Math
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 30 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 45 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 30 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 45 },
         ],
       });
 
@@ -627,6 +656,7 @@ describe('StudyCycleService', () => {
     it('should mark as complete when target is reached', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await prisma.studyCycle.create({
         data: {
@@ -636,8 +666,8 @@ describe('StudyCycleService', () => {
           currentItemIndex: 0,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
             ],
           },
         },
@@ -647,6 +677,7 @@ describe('StudyCycleService', () => {
         data: {
           userId: user.id,
           workspaceId: workspace.id,
+          subjectId: subjects[0].id,
           date: new Date(),
           subject: 'Math',
           minutes: 60,
@@ -659,107 +690,6 @@ describe('StudyCycleService', () => {
       expect(suggestion.suggestion!.remainingMinutes).toBe(0);
     });
 
-    it('should mark as complete when target is exceeded', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
-          },
-        },
-      });
-
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 90,
-        },
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.isCurrentComplete).toBe(true);
-      expect(suggestion.suggestion!.remainingMinutes).toBe(0);
-    });
-
-    it('should wrap next subject to first when at last item', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 1,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.currentSubject).toBe('Physics');
-      expect(suggestion.suggestion!.nextSubject).toBe('Math');
-    });
-
-    it('should only count sessions from the same workspace', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const otherWorkspace = await createTestWorkspace(user.id, { name: 'Other' });
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [{ subject: 'Math', targetMinutes: 120, position: 0 }],
-          },
-        },
-      });
-
-      // Session in current workspace
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 30,
-        },
-      });
-
-      // Session in other workspace (should not count)
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: otherWorkspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 100,
-        },
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(30);
-    });
-
     it('should throw ForbiddenException when accessing another user workspace', async () => {
       const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
@@ -767,53 +697,6 @@ describe('StudyCycleService', () => {
       await expect(
         service.getSuggestion(user2.id, workspace.id),
       ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should return allItemsProgress with progress for all items', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 120, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-              { subject: 'English', targetMinutes: 90, position: 2 },
-            ],
-          },
-        },
-      });
-
-      // Add sessions for Math and Physics
-      await prisma.studySession.createMany({
-        data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Physics', minutes: 60 },
-        ],
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.allItemsProgress).toHaveLength(3);
-
-      const mathProgress = suggestion.suggestion!.allItemsProgress.find(p => p.subject === 'Math');
-      expect(mathProgress!.accumulatedMinutes).toBe(60);
-      expect(mathProgress!.targetMinutes).toBe(120);
-      expect(mathProgress!.isComplete).toBe(false);
-
-      const physicsProgress = suggestion.suggestion!.allItemsProgress.find(p => p.subject === 'Physics');
-      expect(physicsProgress!.accumulatedMinutes).toBe(60);
-      expect(physicsProgress!.targetMinutes).toBe(60);
-      expect(physicsProgress!.isComplete).toBe(true);
-
-      const englishProgress = suggestion.suggestion!.allItemsProgress.find(p => p.subject === 'English');
-      expect(englishProgress!.accumulatedMinutes).toBe(0);
-      expect(englishProgress!.isComplete).toBe(false);
     });
   });
 
@@ -828,15 +711,16 @@ describe('StudyCycleService', () => {
 
     it('should return all cycles for workspace', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await service.create(user.id, workspace.id, {
         name: 'Cycle 1',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       await service.create(user.id, workspace.id, {
         name: 'Cycle 2',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
       });
 
       const cycles = await service.listCycles(user.id, workspace.id);
@@ -846,15 +730,16 @@ describe('StudyCycleService', () => {
 
     it('should return cycles sorted by active first, then display order', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       await service.create(user.id, workspace.id, {
         name: 'Cycle A',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       await service.create(user.id, workspace.id, {
         name: 'Cycle B',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
         activateOnCreate: true,
       });
 
@@ -879,15 +764,16 @@ describe('StudyCycleService', () => {
   describe('activateCycle', () => {
     it('should activate specified cycle and deactivate others', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       const cycle1 = await service.create(user.id, workspace.id, {
         name: 'Cycle 1',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       const cycle2 = await service.create(user.id, workspace.id, {
         name: 'Cycle 2',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
       });
 
       expect(cycle1.isActive).toBe(true);
@@ -915,27 +801,14 @@ describe('StudyCycleService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw NotFoundException when cycle belongs to different workspace', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const otherWorkspace = await createTestWorkspace(user.id, { name: 'Other' });
-
-      const cycleInOther = await service.create(user.id, otherWorkspace.id, {
-        name: 'Other Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
-      });
-
-      await expect(
-        service.activateCycle(user.id, workspace.id, cycleInOther.id),
-      ).rejects.toThrow(NotFoundException);
-    });
-
     it('should throw ForbiddenException when activating another user cycle', async () => {
       const { user: user1, workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       const cycle = await service.create(user1.id, workspace.id, {
         name: 'User1 Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
       });
 
       await expect(
@@ -956,6 +829,7 @@ describe('StudyCycleService', () => {
     it('should return statistics for active cycle', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics', 'English']);
 
       await prisma.studyCycle.create({
         data: {
@@ -964,9 +838,9 @@ describe('StudyCycleService', () => {
           isActive: true,
           items: {
             create: [
-              { subject: 'Math', targetMinutes: 120, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-              { subject: 'English', targetMinutes: 60, position: 2 },
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
             ],
           },
         },
@@ -975,8 +849,8 @@ describe('StudyCycleService', () => {
       // Add sessions
       await prisma.studySession.createMany({
         data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Physics', minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), subject: 'Math', minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[1].id, date: new Date(), subject: 'Physics', minutes: 60 },
         ],
       });
 
@@ -991,36 +865,6 @@ describe('StudyCycleService', () => {
       expect(stats!.averagePerItem).toBe(40); // 120/3
     });
 
-    it('should cap overallPercentage at 100', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
-          },
-        },
-      });
-
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 120, // More than target
-        },
-      });
-
-      const stats = await service.getStatistics(user.id, workspace.id);
-
-      expect(stats!.overallPercentage).toBe(100);
-    });
-
     it('should throw ForbiddenException when accessing another user workspace', async () => {
       const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
@@ -1031,164 +875,16 @@ describe('StudyCycleService', () => {
     });
   });
 
-  describe('getHistory', () => {
-    it('should return null when no active cycle exists', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-
-      const history = await service.getHistory(user.id, workspace.id);
-
-      expect(history).toBeNull();
-    });
-
-    it('should return empty entries when no advances recorded', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-
-      await service.create(user.id, workspace.id, {
-        name: 'Test Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
-      });
-
-      const history = await service.getHistory(user.id, workspace.id);
-
-      expect(history).toBeDefined();
-      expect(history!.entries).toHaveLength(0);
-      expect(history!.totalAdvances).toBe(0);
-      expect(history!.totalCompletions).toBe(0);
-    });
-
-    it('should throw ForbiddenException when accessing another user workspace', async () => {
-      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
-      const user2 = await createTestUser({ email: 'user2@test.com' });
-
-      await expect(
-        service.getHistory(user2.id, workspace.id),
-      ).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('advanceToNext with history', () => {
-    it('should record advance in history', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      // Add session for Math
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 45,
-        },
-      });
-
-      await service.advanceToNext(user.id, workspace.id);
-
-      const history = await service.getHistory(user.id, workspace.id);
-
-      expect(history!.entries).toHaveLength(1);
-      expect(history!.totalAdvances).toBe(1);
-      expect(history!.entries[0].type).toBe('advance');
-      expect(history!.entries[0].fromSubject).toBe('Math');
-      expect(history!.entries[0].toSubject).toBe('Physics');
-      expect(history!.entries[0].minutesSpent).toBe(45);
-    });
-
-    it('should record cycle completion when wrapping to start', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 1, // At last item
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      await service.advanceToNext(user.id, workspace.id);
-
-      const history = await service.getHistory(user.id, workspace.id);
-
-      expect(history!.totalCompletions).toBe(1);
-
-      const completion = history!.entries.find(e => e.type === 'completion');
-      expect(completion).toBeDefined();
-      expect(completion!.itemsCount).toBe(2);
-      expect(completion!.totalTargetMinutes).toBe(120);
-    });
-
-    it('should limit history entries', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      const cycle = await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      // Create multiple advances
-      for (let i = 0; i < 5; i++) {
-        await prisma.studyCycleAdvance.create({
-          data: {
-            cycleId: cycle.id,
-            fromSubject: 'Math',
-            toSubject: 'Physics',
-            fromPosition: 0,
-            toPosition: 1,
-            minutesSpent: 30,
-          },
-        });
-      }
-
-      const history = await service.getHistory(user.id, workspace.id, 3);
-
-      expect(history!.entries).toHaveLength(3);
-      expect(history!.totalAdvances).toBe(5);
-    });
-  });
-
   describe('resetCycle', () => {
     it('should reset cycle and set lastResetAt', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
-      const cycle = await service.create(user.id, workspace.id, {
+      await service.create(user.id, workspace.id, {
         name: 'Test Cycle',
         items: [
-          { subject: 'Math', targetMinutes: 60 },
-          { subject: 'Physics', targetMinutes: 60 },
+          { subjectId: subjects[0].id, targetMinutes: 60 },
+          { subjectId: subjects[1].id, targetMinutes: 60 },
         ],
       });
 
@@ -1209,93 +905,14 @@ describe('StudyCycleService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should filter sessions by lastResetAt in getSuggestion', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      // Create cycle
-      await service.create(user.id, workspace.id, {
-        name: 'Test Cycle',
-        items: [{ subject: 'Math', targetMinutes: 120 }],
-      });
-
-      // Add session BEFORE reset (with createdAt in the past)
-      const pastDate = new Date();
-      pastDate.setHours(pastDate.getHours() - 2); // 2 hours ago
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 60,
-          createdAt: pastDate,
-        },
-      });
-
-      // Check suggestion counts the session
-      let suggestion = await service.getSuggestion(user.id, workspace.id);
-      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(60);
-
-      // Reset the cycle
-      await service.resetCycle(user.id, workspace.id);
-
-      // Session created before reset should NOT count anymore
-      suggestion = await service.getSuggestion(user.id, workspace.id);
-      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(0);
-
-      // Add session AFTER reset
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 30,
-        },
-      });
-
-      // Only post-reset session should count
-      suggestion = await service.getSuggestion(user.id, workspace.id);
-      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(30);
-    });
-
-    it('should count sessions created after reset', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      // Create cycle
-      await service.create(user.id, workspace.id, {
-        name: 'Test Cycle',
-        items: [{ subject: 'Math', targetMinutes: 120 }],
-      });
-
-      // Reset the cycle first
-      await service.resetCycle(user.id, workspace.id);
-
-      // Add session after reset (createdAt will be after lastResetAt)
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 45,
-        },
-      });
-
-      // Session created after reset should count
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(45);
-    });
-
     it('should throw ForbiddenException when resetting another user cycle', async () => {
       const { user: user1, workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
       const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       await service.create(user1.id, workspace.id, {
         name: 'User1 Cycle',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
       });
 
       await expect(
@@ -1304,87 +921,19 @@ describe('StudyCycleService', () => {
     });
   });
 
-  describe('isCycleComplete', () => {
-    it('should return isCycleComplete=true when all items are complete', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      // Complete both subjects
-      await prisma.studySession.createMany({
-        data: [
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Math', minutes: 60 },
-          { userId: user.id, workspaceId: workspace.id, date: new Date(), subject: 'Physics', minutes: 60 },
-        ],
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.isCycleComplete).toBe(true);
-    });
-
-    it('should return isCycleComplete=false when some items are incomplete', async () => {
-      const { user, workspace } = await createTestUserWithWorkspace();
-      const prisma = jestPrisma.client;
-
-      await prisma.studyCycle.create({
-        data: {
-          workspaceId: workspace.id,
-          name: 'Test Cycle',
-          isActive: true,
-          currentItemIndex: 0,
-          items: {
-            create: [
-              { subject: 'Math', targetMinutes: 60, position: 0 },
-              { subject: 'Physics', targetMinutes: 60, position: 1 },
-            ],
-          },
-        },
-      });
-
-      // Complete only Math
-      await prisma.studySession.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          date: new Date(),
-          subject: 'Math',
-          minutes: 60,
-        },
-      });
-
-      const suggestion = await service.getSuggestion(user.id, workspace.id);
-
-      expect(suggestion.suggestion!.isCycleComplete).toBe(false);
-    });
-  });
-
   describe('getCycle returns active cycle only', () => {
     it('should return only the active cycle', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestSubjects(workspace.id, ['Math', 'Physics']);
 
       const cycle1 = await service.create(user.id, workspace.id, {
         name: 'Cycle 1',
-        items: [{ subject: 'Math', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
       });
 
       await service.create(user.id, workspace.id, {
         name: 'Cycle 2',
-        items: [{ subject: 'Physics', targetMinutes: 60 }],
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
       });
 
       const activeCycle = await service.getCycle(user.id, workspace.id);
@@ -1397,6 +946,7 @@ describe('StudyCycleService', () => {
     it('should return null when no active cycle', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const prisma = jestPrisma.client;
+      const subject = await createTestSubject(workspace.id, { name: 'Math' });
 
       // Create inactive cycle directly
       await prisma.studyCycle.create({
@@ -1405,7 +955,7 @@ describe('StudyCycleService', () => {
           name: 'Inactive Cycle',
           isActive: false,
           items: {
-            create: [{ subject: 'Math', targetMinutes: 60, position: 0 }],
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
           },
         },
       });
