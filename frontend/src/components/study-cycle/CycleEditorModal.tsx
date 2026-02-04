@@ -29,16 +29,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SubjectPicker } from '@/components/ui/subject-picker';
+import { DisciplinePicker } from '@/components/ui/discipline-picker';
 import { useRecentSubjects } from '@/hooks/useRecentSubjects';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { SortableCycleItem } from './SortableCycleItem';
 import {
   RefreshCw,
@@ -75,7 +69,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } =
     useStudyCycleStore();
   const { getActiveSubjects, findOrCreateSubject } = useSubjectStore();
-  const { disciplines, fetchDisciplines } = useDisciplineStore();
+  const { disciplines, fetchDisciplines, findOrCreateDiscipline } = useDisciplineStore();
   const subjects = getActiveSubjects();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
 
@@ -344,34 +338,19 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                     emptyMessage="Nenhum encontrado"
                   />
                 ) : (
-                  <Select value={newDisciplineId} onValueChange={setNewDisciplineId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma disciplina" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {disciplines.length === 0 ? (
-                        <div className="py-6 text-center text-sm text-muted-foreground">
-                          Nenhuma disciplina encontrada.
-                          <br />
-                          Crie disciplinas para agrupar tópicos.
-                        </div>
-                      ) : (
-                        disciplines.map((discipline) => (
-                          <SelectItem key={discipline.id} value={discipline.id}>
-                            <div className="flex items-center gap-2">
-                              <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span>{discipline.name}</span>
-                              {discipline.subjects.length > 0 && (
-                                <span className="text-xs text-muted-foreground">
-                                  ({discipline.subjects.length} tópicos)
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <DisciplinePicker
+                    value={newDisciplineId}
+                    onValueChange={setNewDisciplineId}
+                    disciplines={disciplines}
+                    onCreateDiscipline={
+                      currentWorkspaceId
+                        ? (name) => findOrCreateDiscipline(currentWorkspaceId, name)
+                        : undefined
+                    }
+                    placeholder="Selecione uma disciplina"
+                    searchPlaceholder="Buscar disciplina..."
+                    emptyMessage="Nenhuma disciplina encontrada"
+                  />
                 )}
               </div>
               <Input

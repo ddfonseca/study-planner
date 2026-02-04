@@ -23,6 +23,7 @@ interface DisciplineActions {
   deleteDiscipline: (disciplineId: string) => Promise<void>;
   getDisciplineById: (id: string) => Discipline | undefined;
   getDisciplineByName: (name: string) => Discipline | undefined;
+  findOrCreateDiscipline: (workspaceId: string, name: string) => Promise<Discipline>;
   clearDisciplines: () => void;
   setError: (error: string | null) => void;
 }
@@ -185,6 +186,12 @@ export const useDisciplineStore = create<DisciplineStore>()((set, get) => ({
     return get().disciplines.find(
       (d) => d.name && d.name.toLowerCase() === name.toLowerCase()
     );
+  },
+
+  findOrCreateDiscipline: async (workspaceId, name) => {
+    const existing = get().getDisciplineByName(name);
+    if (existing) return existing;
+    return get().createDiscipline(workspaceId, { name });
   },
 
   clearDisciplines: () => {
