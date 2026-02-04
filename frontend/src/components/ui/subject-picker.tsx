@@ -19,7 +19,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { Badge } from "@/components/ui/badge"
-import type { Subject } from "@/types/api"
+import { DisciplinePicker } from "@/components/ui/discipline-picker"
+import type { Subject, Discipline } from "@/types/api"
 
 // Internal representation for unified handling
 interface SubjectItem {
@@ -37,7 +38,9 @@ interface SubjectPickerPropsWithSubjects {
   recentSubjects?: string[] // Recent subject IDs
   onSubjectUsed?: (subjectId: string) => void
   /** Called when user wants to create a new subject. Returns the created Subject. */
-  onCreateSubject?: (name: string) => Promise<Subject>
+  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>
+  /** Optional list of disciplines. If provided, shows discipline picker when creating new subject. */
+  disciplines?: Discipline[]
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
@@ -109,6 +112,14 @@ interface SubjectPickerContentProps {
   emptyMessage: string
   searchPlaceholder: string
   isMobile: boolean
+  // Props for create form
+  showCreateForm: boolean
+  pendingName: string
+  disciplines?: Discipline[]
+  selectedDisciplineId: string
+  onDisciplineChange: (id: string) => void
+  onConfirmCreate: () => void
+  onCancelCreate: () => void
 }
 
 function SubjectPickerContent({
@@ -125,6 +136,13 @@ function SubjectPickerContent({
   emptyMessage,
   searchPlaceholder,
   isMobile,
+  showCreateForm,
+  pendingName,
+  disciplines,
+  selectedDisciplineId,
+  onDisciplineChange,
+  onConfirmCreate,
+  onCancelCreate,
 }: SubjectPickerContentProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const grouped = React.useMemo(
@@ -152,6 +170,55 @@ function SubjectPickerContent({
       return () => clearTimeout(timer)
     }
   }, [isMobile])
+
+  // Render create form when showing
+  if (showCreateForm && disciplines) {
+    return (
+      <div className={cn("flex flex-col p-4 space-y-4", isMobile ? "h-full" : "")}>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Nome do tópico</label>
+          <div className="px-3 py-2 bg-muted rounded-md text-sm">
+            {pendingName}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Disciplina <span className="text-muted-foreground font-normal">(opcional)</span>
+          </label>
+          <DisciplinePicker
+            value={selectedDisciplineId}
+            onValueChange={onDisciplineChange}
+            disciplines={disciplines}
+            placeholder="Selecione uma disciplina"
+            searchPlaceholder="Buscar disciplina..."
+            emptyMessage="Nenhuma disciplina"
+          />
+        </div>
+
+        <div className={cn(
+          "flex gap-2 pt-2",
+          isMobile && "fixed bottom-0 left-0 right-0 p-4 bg-background border-t"
+        )}>
+          <Button
+            variant="outline"
+            onClick={onCancelCreate}
+            disabled={isCreating}
+            className="flex-1"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={onConfirmCreate}
+            disabled={isCreating}
+            className="flex-1"
+          >
+            {isCreating ? "Criando..." : "Criar Tópico"}
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn("flex flex-col", isMobile ? "h-full" : "")}>
@@ -317,10 +384,14 @@ export function SubjectPicker(props: SubjectPickerProps) {
 
   const onCreateSubject = 'onCreateSubject' in props ? props.onCreateSubject : undefined
   const useNameAsValue = 'useNameAsValue' in props ? props.useNameAsValue : undefined
+  const disciplines = 'disciplines' in props ? props.disciplines : undefined
 
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
   const [isCreating, setIsCreating] = React.useState(false)
+  const [showCreateForm, setShowCreateForm] = React.useState(false)
+  const [pendingName, setPendingName] = React.useState("")
+  const [selectedDisciplineId, setSelectedDisciplineId] = React.useState("")
   const isMobile = useIsMobile()
 
   // Detect mode based on subjects type
@@ -415,10 +486,17 @@ export function SubjectPicker(props: SubjectPickerProps) {
     if (!inputValue.trim()) return
 
     if (onCreateSubject) {
-      // Object mode with API creation
+      // If disciplines are available, show the create form first
+      if (disciplines && disciplines.length > 0) {
+        setPendingName(inputValue.trim())
+        setShowCreateForm(true)
+        return
+      }
+
+      // Object mode with API creation (no discipline selection)
       setIsCreating(true)
       try {
-        const newSubject = await onCreateSubject(inputValue.trim())
+        const newSubject = await onCreateSubject({ name: inputValue.trim() })
         const returnValue = useNameAsValue ? newSubject.name : newSubject.id
         onValueChange(returnValue)
         onSubjectUsed?.(newSubject.id)
@@ -436,6 +514,36 @@ export function SubjectPicker(props: SubjectPickerProps) {
       setInputValue("")
       setOpen(false)
     }
+  }
+
+  const handleConfirmCreate = async () => {
+    if (!pendingName || !onCreateSubject) return
+
+    setIsCreating(true)
+    try {
+      const newSubject = await onCreateSubject({
+        name: pendingName,
+        disciplineId: selectedDisciplineId || undefined,
+      })
+      const returnValue = useNameAsValue ? newSubject.name : newSubject.id
+      onValueChange(returnValue)
+      onSubjectUsed?.(newSubject.id)
+      setInputValue("")
+      setPendingName("")
+      setSelectedDisciplineId("")
+      setShowCreateForm(false)
+      setOpen(false)
+    } catch (error) {
+      console.error('Failed to create subject:', error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const handleCancelCreate = () => {
+    setShowCreateForm(false)
+    setPendingName("")
+    setSelectedDisciplineId("")
   }
 
   const triggerButton = (
@@ -490,6 +598,13 @@ export function SubjectPicker(props: SubjectPickerProps) {
             emptyMessage={emptyMessage}
             searchPlaceholder={searchPlaceholder}
             isMobile={true}
+            showCreateForm={showCreateForm}
+            pendingName={pendingName}
+            disciplines={disciplines}
+            selectedDisciplineId={selectedDisciplineId}
+            onDisciplineChange={setSelectedDisciplineId}
+            onConfirmCreate={handleConfirmCreate}
+            onCancelCreate={handleCancelCreate}
           />
         </DrawerContent>
       </Drawer>
@@ -518,6 +633,13 @@ export function SubjectPicker(props: SubjectPickerProps) {
           emptyMessage={emptyMessage}
           searchPlaceholder={searchPlaceholder}
           isMobile={false}
+          showCreateForm={showCreateForm}
+          pendingName={pendingName}
+          disciplines={disciplines}
+          selectedDisciplineId={selectedDisciplineId}
+          onDisciplineChange={setSelectedDisciplineId}
+          onConfirmCreate={handleConfirmCreate}
+          onCancelCreate={handleCancelCreate}
         />
       </PopoverContent>
     </Popover>

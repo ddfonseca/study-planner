@@ -106,6 +106,7 @@ export class SubjectService {
         color: dto.color,
         icon: dto.icon,
         position,
+        disciplineId: dto.disciplineId,
         ...(dto.categoryIds?.length && {
           categories: {
             create: dto.categoryIds.map((categoryId) => ({

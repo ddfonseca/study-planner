@@ -71,6 +71,7 @@ export interface CreateSubjectDto {
   category?: string; // @deprecated - use categoryIds
   categoryIds?: string[];
   position?: number;
+  disciplineId?: string;
 }
 
 // Update subject DTO

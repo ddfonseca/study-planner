@@ -13,7 +13,7 @@ import { Play, Square, Clock, Timer, Infinity as InfinityIcon, Maximize2, Minimi
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 import { cn } from '@/lib/utils';
 import { formatDateKey } from '@/lib/utils/date';
-import type { Subject } from '@/types/api';
+import type { Subject, Discipline } from '@/types/api';
 
 const STORAGE_KEY = 'studyTimer';
 
@@ -36,13 +36,14 @@ interface TimerState {
 
 interface StudyTimerProps {
   subjects: Subject[];
+  disciplines?: Discipline[];
   onRunningChange?: (isRunning: boolean) => void;
   fullscreen?: boolean;
   onFullscreenChange?: (fullscreen: boolean) => void;
-  onCreateSubject?: (name: string) => Promise<Subject>;
+  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>;
 }
 
-export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFullscreenChange, onCreateSubject }: StudyTimerProps) {
+export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen = false, onFullscreenChange, onCreateSubject }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
   const { recentSubjects, addRecentSubject } = useRecentSubjects();
@@ -364,7 +365,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
     // Reset to initial state for selected mode
     const preset = TIMER_PRESETS.find(p => p.mode === mode);
     setSeconds(preset?.seconds || 0);
-    setSubject('');
+    setSubjectId('');
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -512,6 +513,7 @@ export function StudyTimer({ subjects, onRunningChange, fullscreen = false, onFu
               value={subjectId}
               onValueChange={setSubjectId}
               subjects={subjects}
+              disciplines={disciplines}
               recentSubjects={recentSubjects}
               onSubjectUsed={addRecentSubject}
               onCreateSubject={onCreateSubject}

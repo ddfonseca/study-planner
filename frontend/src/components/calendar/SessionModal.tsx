@@ -19,7 +19,7 @@ import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
 import type { DayData, StudySession } from '@/types/session';
-import type { Subject } from '@/types/api';
+import type { Subject, Discipline } from '@/types/api';
 
 interface SessionModalProps {
   isOpen: boolean;
@@ -27,10 +27,11 @@ interface SessionModalProps {
   date: Date | null;
   dayData: DayData;
   subjects: Subject[];
+  disciplines?: Discipline[];
   onAddSession: (subjectId: string, minutes: number) => Promise<void>;
   onUpdateSession: (id: string, subjectId: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
-  onCreateSubject?: (name: string) => Promise<Subject>;
+  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>;
   canModify?: boolean;
   highlighted?: boolean;
 }
@@ -41,6 +42,7 @@ export function SessionModal({
   date,
   dayData,
   subjects,
+  disciplines,
   onAddSession,
   onUpdateSession,
   onDeleteSession,
@@ -143,6 +145,7 @@ export function SessionModal({
                   value={subjectId}
                   onValueChange={setSubjectId}
                   subjects={subjects}
+                  disciplines={disciplines}
                   recentSubjects={recentSubjects}
                   onSubjectUsed={addRecentSubject}
                   onCreateSubject={onCreateSubject}

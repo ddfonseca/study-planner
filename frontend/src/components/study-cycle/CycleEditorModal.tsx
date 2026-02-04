@@ -328,9 +328,10 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                     subjects={subjects}
                     recentSubjects={recentSubjects}
                     onSubjectUsed={addRecentSubject}
+                    disciplines={disciplines}
                     onCreateSubject={
                       currentWorkspaceId
-                        ? (name) => findOrCreateSubject(currentWorkspaceId, name)
+                        ? (data) => findOrCreateSubject(currentWorkspaceId, data.name, data.disciplineId)
                         : undefined
                     }
                     placeholder="Tópico"

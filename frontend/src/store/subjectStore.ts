@@ -21,7 +21,7 @@ interface SubjectState {
 interface SubjectActions {
   fetchSubjects: (workspaceId: string, includeArchived?: boolean) => Promise<void>;
   createSubject: (workspaceId: string, data: CreateSubjectDto) => Promise<Subject>;
-  findOrCreateSubject: (workspaceId: string, name: string) => Promise<Subject>;
+  findOrCreateSubject: (workspaceId: string, name: string, disciplineId?: string) => Promise<Subject>;
   updateSubject: (subjectId: string, data: UpdateSubjectDto) => Promise<Subject>;
   archiveSubject: (subjectId: string) => Promise<void>;
   unarchiveSubject: (subjectId: string) => Promise<void>;
@@ -82,7 +82,7 @@ export const useSubjectStore = create<SubjectStore>()((set, get) => ({
     }
   },
 
-  findOrCreateSubject: async (workspaceId, name) => {
+  findOrCreateSubject: async (workspaceId, name, disciplineId) => {
     // First check if already exists in local state
     const existing = get().subjects.find(
       (s) => s.name && s.name.toLowerCase() === name.toLowerCase() && !s.archivedAt
@@ -91,7 +91,12 @@ export const useSubjectStore = create<SubjectStore>()((set, get) => ({
 
     try {
       set({ isSaving: true, error: null });
-      const subject = await subjectsApi.findOrCreate(workspaceId, name);
+
+      // If disciplineId is provided, use create instead of findOrCreate
+      // to set the discipline relationship
+      const subject = disciplineId
+        ? await subjectsApi.create(workspaceId, { name, disciplineId })
+        : await subjectsApi.findOrCreate(workspaceId, name);
 
       // Update local state
       set((state) => {

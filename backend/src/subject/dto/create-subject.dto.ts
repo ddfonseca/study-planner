@@ -41,4 +41,8 @@ export class CreateSubjectDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @IsOptional()
+  @IsString()
+  disciplineId?: string;
 }

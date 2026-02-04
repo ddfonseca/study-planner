@@ -6,6 +6,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { useConfigStore } from '@/store/configStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { useSubjectStore } from '@/store/subjectStore';
+import { useDisciplineStore } from '@/store/disciplineStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
@@ -43,6 +44,7 @@ export function CalendarPage() {
   const { shouldOpenSessionModal, setShouldOpenSessionModal } = useOnboardingStore();
   const { currentWorkspaceId } = useWorkspaceStore();
   const { fetchSubjects, findOrCreateSubject, getActiveSubjects } = useSubjectStore();
+  const { disciplines, fetchDisciplines } = useDisciplineStore();
   const {
     handleAddSession,
     handleUpdateSession,
@@ -53,12 +55,13 @@ export function CalendarPage() {
   } = useSessions();
   const { toast } = useToast();
 
-  // Fetch subjects when workspace changes
+  // Fetch subjects and disciplines when workspace changes
   useEffect(() => {
     if (currentWorkspaceId) {
       fetchSubjects(currentWorkspaceId);
+      fetchDisciplines(currentWorkspaceId);
     }
-  }, [currentWorkspaceId, fetchSubjects]);
+  }, [currentWorkspaceId, fetchSubjects, fetchDisciplines]);
 
   // Get active (non-archived) subjects
   const activeSubjects = getActiveSubjects();
@@ -171,11 +174,11 @@ export function CalendarPage() {
   // Handle add session
   // Create a new subject on-the-fly
   const handleCreateSubject = useCallback(
-    async (name: string) => {
+    async (data: { name: string; disciplineId?: string }) => {
       if (!currentWorkspaceId) {
         throw new Error('Selecione um workspace');
       }
-      return findOrCreateSubject(currentWorkspaceId, name);
+      return findOrCreateSubject(currentWorkspaceId, data.name, data.disciplineId);
     },
     [currentWorkspaceId, findOrCreateSubject]
   );
@@ -329,7 +332,8 @@ export function CalendarPage() {
         return (
           <StudyTimer
             subjects={activeSubjects}
-          onCreateSubject={handleCreateSubject}
+            disciplines={disciplines}
+            onCreateSubject={handleCreateSubject}
             onRunningChange={setTimerActive}
             fullscreen={isTimerFullscreen}
             onFullscreenChange={setIsTimerFullscreen}
@@ -390,7 +394,8 @@ export function CalendarPage() {
               {!isTimerFullscreen && (
                 <StudyTimer
                   subjects={activeSubjects}
-          onCreateSubject={handleCreateSubject}
+                  disciplines={disciplines}
+                  onCreateSubject={handleCreateSubject}
                   onRunningChange={setTimerActive}
                   fullscreen={isTimerFullscreen}
                   onFullscreenChange={setIsTimerFullscreen}
@@ -410,6 +415,7 @@ export function CalendarPage() {
           date={selectedDate}
           dayData={selectedDayData}
           subjects={activeSubjects}
+          disciplines={disciplines}
           onAddSession={handleAddSessionSubmit}
           onUpdateSession={handleUpdateSessionSubmit}
           onDeleteSession={handleDeleteSessionSubmit}
@@ -437,7 +443,8 @@ export function CalendarPage() {
           <div className="w-full max-w-md">
             <StudyTimer
               subjects={activeSubjects}
-          onCreateSubject={handleCreateSubject}
+              disciplines={disciplines}
+              onCreateSubject={handleCreateSubject}
               onRunningChange={setTimerActive}
               fullscreen={true}
               onFullscreenChange={setIsTimerFullscreen}
