@@ -67,8 +67,8 @@ When creating a new NestJS module:
 | `make deploy-back` | Deploy backend to Fly.io |
 | `make deploy-all` | Deploy both frontend and backend |
 
-## IMPORTANT: Always Run Tests
+## When to Run Tests
 
-**After completing any code change, ALWAYS run `make test` to verify everything works.**
+**Run `make test` after modifying files in `backend/`.**
 
 This runs tests in an isolated Docker environment with a fresh database.
