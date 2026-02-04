@@ -71,7 +71,7 @@ interface EditingSubject {
   categoryIds: string[];
 }
 
-export function SubjectsPage() {
+export function SubjectsContent() {
   const { workspaces, currentWorkspaceId } = useWorkspaceStore();
   const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) || null;
   const {
@@ -779,6 +779,10 @@ export function SubjectsPage() {
       )}
     </div>
   );
+}
+
+export function SubjectsPage() {
+  return <SubjectsContent />;
 }
 
 export default SubjectsPage;

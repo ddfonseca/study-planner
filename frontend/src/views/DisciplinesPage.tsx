@@ -22,6 +22,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ColorPicker } from '@/components/ui/color-picker';
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,7 +49,7 @@ interface EditingDiscipline {
   color: string | null;
 }
 
-export function DisciplinesPage() {
+export function DisciplinesContent() {
   const { workspaces, currentWorkspaceId } = useWorkspaceStore();
   const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) || null;
   const {
@@ -65,7 +66,7 @@ export function DisciplinesPage() {
     setError,
   } = useDisciplineStore();
 
-  const { subjects, fetchSubjects, getActiveSubjects } = useSubjectStore();
+  const { fetchSubjects, getActiveSubjects } = useSubjectStore();
   const activeSubjects = getActiveSubjects();
 
   const [newDisciplineName, setNewDisciplineName] = useState('');
@@ -272,26 +273,11 @@ export function DisciplinesPage() {
 
                     {/* Color indicator */}
                     {isEditing ? (
-                      <div className="flex gap-1">
-                        {COLOR_OPTIONS.map((color, i) => (
-                          <button
-                            key={i}
-                            onClick={() =>
-                              setEditingDiscipline({ ...editingDiscipline!, color })
-                            }
-                            className={cn(
-                              'w-5 h-5 rounded-full border-2 transition-transform hover:scale-110',
-                              editingDiscipline?.color === color &&
-                                'ring-2 ring-offset-2 ring-primary'
-                            )}
-                            style={{ backgroundColor: color || 'transparent' }}
-                          >
-                            {color === null && (
-                              <X className="h-3 w-3 mx-auto text-muted-foreground" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                      <ColorPicker
+                        value={editingDiscipline?.color ?? null}
+                        onValueChange={(color) => setEditingDiscipline({ ...editingDiscipline!, color })}
+                        colors={COLOR_OPTIONS}
+                      />
                     ) : (
                       <span
                         className="w-4 h-4 rounded-full shrink-0"
@@ -466,6 +452,10 @@ export function DisciplinesPage() {
       />
     </div>
   );
+}
+
+export function DisciplinesPage() {
+  return <DisciplinesContent />;
 }
 
 export default DisciplinesPage;

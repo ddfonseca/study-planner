@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Clock, FileText, Calculator, BookOpen, Layers } from 'lucide-react';
+import { Calendar, BarChart3, Clock, FileText, Calculator, Layers } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
@@ -52,12 +52,11 @@ export function AppLayout() {
 
   // Mark features as seen when user visits them
   useEffect(() => {
-    const pathToFeature: Record<string, 'dashboard' | 'subjects' | 'allocation' | 'scratchpad' | 'disciplines'> = {
+    const pathToFeature: Record<string, 'dashboard' | 'allocation' | 'scratchpad' | 'content'> = {
       '/app/dashboard': 'dashboard',
-      '/app/subjects': 'subjects',
       '/app/allocation': 'allocation',
       '/app/scratchpad': 'scratchpad',
-      '/app/disciplines': 'disciplines',
+      '/app/content': 'content',
     };
     const feature = pathToFeature[location.pathname];
     if (feature && isFeatureNew(feature)) {
@@ -76,8 +75,7 @@ export function AppLayout() {
     { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null, tourId: null },
     { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: 'scratchpad' as const, tourId: 'nav-scratchpad' },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
-    { to: '/app/subjects', icon: BookOpen, label: 'Tópicos', badgeKey: 'subjects' as const, tourId: 'nav-subjects' },
-    { to: '/app/disciplines', icon: Layers, label: 'Disciplinas', badgeKey: 'disciplines' as const, tourId: 'nav-disciplines' },
+    { to: '/app/content', icon: Layers, label: 'Conteúdo', badgeKey: 'content' as const, tourId: 'nav-content' },
     { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: 'allocation' as const, tourId: 'nav-allocation' },
   ];
 

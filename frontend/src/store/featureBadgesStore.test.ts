@@ -2,15 +2,22 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useFeatureBadgesStore } from './featureBadgesStore';
 
 describe('featureBadgesStore', () => {
+  // Helper to create full seenFeatures state
+  const createSeenFeatures = (overrides: Partial<Record<string, boolean>> = {}) => ({
+    timer: false,
+    cycles: false,
+    dashboard: false,
+    allocation: false,
+    scratchpad: false,
+    content: false,
+    ...overrides,
+  });
+
   beforeEach(() => {
     // Reset store to initial state before each test
     // Set _hasHydrated to true to simulate completed hydration
     useFeatureBadgesStore.setState({
-      seenFeatures: {
-        timer: false,
-        cycles: false,
-        dashboard: false,
-      },
+      seenFeatures: createSeenFeatures(),
       _hasHydrated: true,
     });
   });
@@ -86,11 +93,11 @@ describe('featureBadgesStore', () => {
 
     it('returns false for seen features', () => {
       useFeatureBadgesStore.setState({
-        seenFeatures: {
+        seenFeatures: createSeenFeatures({
           timer: true,
           cycles: false,
           dashboard: true,
-        },
+        }),
       });
 
       const { isFeatureNew } = useFeatureBadgesStore.getState();
@@ -105,11 +112,11 @@ describe('featureBadgesStore', () => {
     it('resets all features to not seen', () => {
       // First mark all as seen
       useFeatureBadgesStore.setState({
-        seenFeatures: {
+        seenFeatures: createSeenFeatures({
           timer: true,
           cycles: true,
           dashboard: true,
-        },
+        }),
       });
 
       const { resetBadges } = useFeatureBadgesStore.getState();
@@ -125,11 +132,11 @@ describe('featureBadgesStore', () => {
     it('makes all features new again after reset', () => {
       // First mark all as seen
       useFeatureBadgesStore.setState({
-        seenFeatures: {
+        seenFeatures: createSeenFeatures({
           timer: true,
           cycles: true,
           dashboard: true,
-        },
+        }),
       });
 
       const { resetBadges } = useFeatureBadgesStore.getState();
@@ -150,11 +157,7 @@ describe('featureBadgesStore', () => {
     beforeEach(() => {
       localStorage.clear();
       useFeatureBadgesStore.setState({
-        seenFeatures: {
-          timer: false,
-          cycles: false,
-          dashboard: false,
-        },
+        seenFeatures: createSeenFeatures(),
         _hasHydrated: true,
       });
     });
@@ -202,8 +205,9 @@ describe('featureBadgesStore', () => {
       expect(persistOptions.name).toBe(STORAGE_KEY);
 
       // partialize should only include seenFeatures
+      const mockSeenFeatures = createSeenFeatures({ timer: true, cycles: false, dashboard: true });
       const mockState = {
-        seenFeatures: { timer: true, cycles: false, dashboard: true },
+        seenFeatures: mockSeenFeatures,
         _hasHydrated: true,
         markFeatureSeen: () => {},
         isFeatureNew: () => false,
@@ -211,9 +215,10 @@ describe('featureBadgesStore', () => {
         setHasHydrated: () => {},
       };
 
-      const partialized = persistOptions.partialize?.(mockState);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const partialized = persistOptions.partialize?.(mockState as any);
       expect(partialized).toEqual({
-        seenFeatures: { timer: true, cycles: false, dashboard: true },
+        seenFeatures: mockSeenFeatures,
       });
       expect(partialized).not.toHaveProperty('_hasHydrated');
     });
@@ -238,11 +243,7 @@ describe('featureBadgesStore', () => {
     beforeEach(() => {
       // Reset to non-hydrated state for hydration tests
       useFeatureBadgesStore.setState({
-        seenFeatures: {
-          timer: false,
-          cycles: false,
-          dashboard: false,
-        },
+        seenFeatures: createSeenFeatures(),
         _hasHydrated: false,
       });
     });
@@ -315,11 +316,7 @@ describe('featureBadgesStore', () => {
 
       // Simulate hydration completing with dashboard still unseen
       useFeatureBadgesStore.setState({
-        seenFeatures: {
-          timer: false,
-          cycles: false,
-          dashboard: false,
-        },
+        seenFeatures: createSeenFeatures(),
         _hasHydrated: true,
       });
 
