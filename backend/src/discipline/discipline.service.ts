@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDisciplineDto, UpdateDisciplineDto } from './dto';
@@ -214,6 +215,10 @@ export class DisciplineService {
     disciplineId: string,
     subjectIds: string[],
   ) {
+    if (!subjectIds || !Array.isArray(subjectIds) || subjectIds.length === 0) {
+      throw new BadRequestException('subjectIds é obrigatório e deve conter pelo menos um ID');
+    }
+
     await this.findOne(userId, disciplineId);
 
     await this.prisma.subject.updateMany({

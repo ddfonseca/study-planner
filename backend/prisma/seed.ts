@@ -154,7 +154,7 @@ async function main() {
     await seedExamTemplates();
   } catch (error) {
     console.error('Error seeding database:', error);
-    process.exit(1);
+    throw error;
   } finally {
     await prisma.$disconnect();
   }

@@ -177,13 +177,3 @@ export async function seedExamTemplates() {
   console.log('\n✅ Exam templates seeding complete!');
 }
 
-// If running directly
-if (require.main === module) {
-  seedExamTemplates()
-    .then(() => process.exit(0))
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    })
-    .finally(() => prisma.$disconnect());
-}
