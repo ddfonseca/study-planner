@@ -436,7 +436,7 @@ export function ScratchpadPage() {
                 <div className="flex-1 min-h-0">
                   <CodeMirrorEditor
                     docId={currentNote.id}
-                    initialDoc={localContent}
+                    initialDoc={currentNote.content}
                     onChange={handleEditorChange}
                     vimMode={vimMode}
                     placeholder="Escreva seus pensamentos, objetivos, reflexoes..."
