@@ -17,14 +17,23 @@ vi.mock('date-fns/locale', () => ({
   ptBR: {},
 }))
 
-// Mock ReactMarkdown
-vi.mock('react-markdown', () => ({
-  default: ({ children }: { children: string }) => <div>{children}</div>,
-}))
-
-// Mock remarkGfm
-vi.mock('remark-gfm', () => ({
-  default: () => {},
+// Mock CodeMirrorEditor since CodeMirror doesn't work well in jsdom
+vi.mock('@/components/ui/codemirror-editor', () => ({
+  CodeMirrorEditor: ({ onChange, docId }: {
+    onChange: (content: string) => void;
+    placeholder?: string;
+    docId: string;
+  }) => {
+    return (
+      <div data-testid="codemirror-editor" data-doc-id={docId}>
+        <textarea
+          data-testid="codemirror-textarea"
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+    )
+  },
 }))
 
 // Mock useAutoSave - to control save status for SyncIndicator tests
@@ -104,9 +113,7 @@ vi.mock('@/lib/api/scratchpadNotes', () => ({
 describe('ScratchpadPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Clear localStorage before each test
     localStorage.clear()
-    // Reset mock status to idle
     mockAutoSaveStatus = 'idle'
   })
 
@@ -114,7 +121,6 @@ describe('ScratchpadPage', () => {
     it('shows delete button on note list items on hover', () => {
       render(<ScratchpadPage />)
 
-      // The delete buttons have opacity-0 by default but should exist
       const deleteButtons = document.querySelectorAll('button')
       const trashButtons = Array.from(deleteButtons).filter(btn =>
         btn.querySelector('svg.lucide-trash-2') || btn.innerHTML.includes('Trash2')
@@ -126,7 +132,6 @@ describe('ScratchpadPage', () => {
       const user = userEvent.setup()
       render(<ScratchpadPage />)
 
-      // Find the delete button for the first note in the desktop sidebar
       const noteItems = screen.getAllByText('First Note')
       const noteItem = noteItems[0].closest('div')
       const deleteButton = noteItem?.querySelector('button')
@@ -145,7 +150,6 @@ describe('ScratchpadPage', () => {
       const user = userEvent.setup()
       render(<ScratchpadPage />)
 
-      // Find and click delete button
       const noteItems = screen.getAllByText('First Note')
       const noteItem = noteItems[0].closest('div')
       const deleteButton = noteItem?.querySelector('button')
@@ -156,7 +160,6 @@ describe('ScratchpadPage', () => {
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument()
-        // There should be an Excluir button in the dialog
         const excluirButtons = screen.getAllByRole('button', { name: /excluir/i })
         expect(excluirButtons.length).toBeGreaterThan(0)
       })
@@ -166,7 +169,6 @@ describe('ScratchpadPage', () => {
       const user = userEvent.setup()
       render(<ScratchpadPage />)
 
-      // Find and click delete button
       const noteItems = screen.getAllByText('First Note')
       const noteItem = noteItems[0].closest('div')
       const deleteButton = noteItem?.querySelector('button')
@@ -175,12 +177,10 @@ describe('ScratchpadPage', () => {
         await user.click(deleteButton)
       }
 
-      // Wait for dialog to open
       await waitFor(() => {
         expect(screen.getByText('Excluir nota')).toBeInTheDocument()
       })
 
-      // Find and click confirm button
       const excluirButtons = screen.getAllByRole('button', { name: /excluir/i })
       const confirmButton = excluirButtons.find(btn => btn.classList.contains('bg-destructive'))
       expect(confirmButton).toBeInTheDocument()
@@ -189,9 +189,6 @@ describe('ScratchpadPage', () => {
         await user.click(confirmButton)
       }
 
-      // The dialog should close after confirmation (or show loading)
-      // Since the mock deleteNote is inside the factory, we can't easily check if it was called
-      // But we can verify the UI behavior - the dialog should close
       await waitFor(() => {
         expect(screen.queryByText(/tem certeza que deseja excluir esta nota/i)).not.toBeInTheDocument()
       })
@@ -201,7 +198,6 @@ describe('ScratchpadPage', () => {
       const user = userEvent.setup()
       render(<ScratchpadPage />)
 
-      // Find and click delete button
       const noteItems = screen.getAllByText('First Note')
       const noteItem = noteItems[0].closest('div')
       const deleteButton = noteItem?.querySelector('button')
@@ -210,12 +206,10 @@ describe('ScratchpadPage', () => {
         await user.click(deleteButton)
       }
 
-      // Wait for dialog to open
       await waitFor(() => {
         expect(screen.getByText('Excluir nota')).toBeInTheDocument()
       })
 
-      // Click cancel
       await user.click(screen.getByRole('button', { name: /cancelar/i }))
 
       await waitFor(() => {
@@ -227,7 +221,6 @@ describe('ScratchpadPage', () => {
       const user = userEvent.setup()
       render(<ScratchpadPage />)
 
-      // Find and click delete button
       const noteItems = screen.getAllByText('First Note')
       const noteItem = noteItems[0].closest('div')
       const deleteButton = noteItem?.querySelector('button')
@@ -248,7 +241,6 @@ describe('ScratchpadPage', () => {
     it('renders SyncIndicator when a note is selected', () => {
       render(<ScratchpadPage />)
 
-      // SyncIndicator should be present with role="status"
       const syncIndicator = screen.getByRole('status')
       expect(syncIndicator).toBeInTheDocument()
     })
@@ -305,15 +297,44 @@ describe('ScratchpadPage', () => {
       mockAutoSaveStatus = 'idle'
       render(<ScratchpadPage />)
 
-      // Click to switch to source view
-      const codeButton = screen.getByRole('button', { name: /codigo/i })
-      await user.click(codeButton)
-
-      // Find the textarea and type in it
-      const textarea = screen.getByRole('textbox')
+      // Type in the mocked CodeMirror textarea
+      const textarea = screen.getByTestId('codemirror-textarea')
       await user.type(textarea, 'New content')
 
       expect(mockSave).toHaveBeenCalled()
+    })
+  })
+
+  describe('CodeMirror editor', () => {
+    it('renders CodeMirrorEditor component', () => {
+      render(<ScratchpadPage />)
+
+      expect(screen.getByTestId('codemirror-editor')).toBeInTheDocument()
+    })
+
+    it('passes correct docId to editor', () => {
+      render(<ScratchpadPage />)
+
+      const editor = screen.getByTestId('codemirror-editor')
+      expect(editor.getAttribute('data-doc-id')).toBe('note-1')
+    })
+  })
+
+  describe('Vim mode toggle', () => {
+    it('renders Vim toggle button', () => {
+      render(<ScratchpadPage />)
+
+      expect(screen.getByTitle(/vim/i)).toBeInTheDocument()
+    })
+
+    it('persists vim preference to localStorage', async () => {
+      const user = userEvent.setup()
+      render(<ScratchpadPage />)
+
+      const vimButton = screen.getByTitle(/ativar vim/i)
+      await user.click(vimButton)
+
+      expect(localStorage.getItem('scratchpad-vim-mode')).toBe('true')
     })
   })
 })

@@ -6,12 +6,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useScratchpadStore } from '@/store/scratchpadStore';
 import type { ScratchpadNote } from '@/store/scratchpadStore';
 import { scratchpadNotesApi } from '@/lib/api/scratchpadNotes';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { CodeMirrorEditor } from '@/components/ui/codemirror-editor';
 import {
   FileText,
-  Eye,
-  Code,
+  Terminal,
   Plus,
   Trash2,
   ChevronDown,
@@ -24,8 +23,6 @@ import { SyncIndicator, type SyncState } from '@/components/ui/sync-indicator';
 import { useAutoSave, type AutoSaveStatus } from '@/hooks/useAutoSave';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 
 // Old localStorage key from previous implementation
@@ -74,7 +71,9 @@ export function ScratchpadPage() {
   } = useScratchpadStore();
 
   const currentNote = getCurrentNote();
-  const [showSource, setShowSource] = useState(false);
+  const [vimMode, setVimMode] = useState(
+    () => localStorage.getItem('scratchpad-vim-mode') === 'true'
+  );
   const [localContent, setLocalContent] = useState(currentNote?.content || '');
   const [localTitle, setLocalTitle] = useState(currentNote?.title || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -112,7 +111,7 @@ export function ScratchpadPage() {
         )
       );
     },
-    debounceMs: 1000,
+    debounceMs: 2000,
     maxRetries: 3,
     retryDelayMs: 1000,
   });
@@ -208,15 +207,23 @@ export function ScratchpadPage() {
     [triggerSave]
   );
 
-  // Handle content change
-  const handleContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newContent = e.target.value;
+  // Handle editor content change
+  const handleEditorChange = useCallback(
+    (newContent: string) => {
       setLocalContent(newContent);
       saveContent(newContent);
     },
     [saveContent]
   );
+
+  // Toggle vim mode with persistence
+  const toggleVimMode = useCallback(() => {
+    setVimMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('scratchpad-vim-mode', String(next));
+      return next;
+    });
+  }, []);
 
   // Handle title save
   const handleTitleSave = useCallback(() => {
@@ -371,13 +378,14 @@ export function ScratchpadPage() {
           </Button>
           {currentNote && (
             <Button
-              variant="ghost"
+              variant={vimMode ? "default" : "ghost"}
               size="sm"
-              onClick={() => setShowSource(!showSource)}
+              onClick={toggleVimMode}
               className="gap-1 sm:gap-2 h-8 px-2 sm:px-3"
+              title={vimMode ? "Vim ativo" : "Ativar Vim"}
             >
-              {showSource ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
-              <span className="hidden sm:inline">{showSource ? 'Preview' : 'Codigo'}</span>
+              <Terminal className="h-4 w-4" />
+              <span className="hidden sm:inline">Vim</span>
             </Button>
           )}
         </div>
@@ -424,41 +432,16 @@ export function ScratchpadPage() {
                   )}
                 </div>
 
-                {/* Content editor/preview */}
+                {/* Content editor */}
                 <div className="flex-1 min-h-0">
-                  {showSource ? (
-                    <Textarea
-                      value={localContent}
-                      onChange={handleContentChange}
-                      placeholder="Escreva seus pensamentos, objetivos, reflexoes...
-
-Suporta markdown basico:
-# Titulo
-## Subtitulo
-**negrito**
-*italico*
-- lista"
-                      className="h-full min-h-[40vh] sm:min-h-[50vh] font-mono text-sm sm:text-base resize-none"
-                      autoFocus
-                    />
-                  ) : (
-                    <div
-                      className="h-full min-h-[40vh] sm:min-h-[50vh] p-3 sm:p-4 rounded-[var(--radius)] border border-input bg-transparent cursor-text overflow-y-auto"
-                      onClick={() => setShowSource(true)}
-                    >
-                      {localContent ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {localContent}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Clique para comecar a escrever...
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <CodeMirrorEditor
+                    docId={currentNote.id}
+                    initialDoc={localContent}
+                    onChange={handleEditorChange}
+                    vimMode={vimMode}
+                    placeholder="Escreva seus pensamentos, objetivos, reflexoes..."
+                    className="h-full min-h-[40vh] sm:min-h-[50vh]"
+                  />
                 </div>
 
                 {/* Footer - Desktop only */}

@@ -74,6 +74,7 @@ export default {
       },
       fontFamily: {
         sans: ['Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+        mono: ['"Fira Code"', 'monospace'],
       },
       transitionDuration: {
         DEFAULT: '150ms',
