@@ -102,9 +102,10 @@ export function ScratchpadPage() {
   } = useAutoSave<{ id: string; content: string }>({
     onSave: async (data) => {
       await scratchpadNotesApi.update(data.id, { content: data.content });
-      // Update local store with optimistic update
+      // Update local store - use getState() to avoid stale closure
+      const currentNotes = useScratchpadStore.getState().notes;
       useScratchpadStore.getState().setNotes(
-        notes.map((note) =>
+        currentNotes.map((note) =>
           note.id === data.id
             ? { ...note, content: data.content, updatedAt: new Date().toISOString() }
             : note
@@ -176,18 +177,19 @@ export function ScratchpadPage() {
     initialize();
   }, [fetchNotes, migrateLocalStorageData]);
 
-  // Sync local content with current note
-  // Only sync when specific properties change (id, content, title)
+  // Sync local content with current note only when switching notes
+  // localContent is the source of truth while editing - don't sync on content changes
+  // to avoid auto-save responses overwriting newer local edits
   useEffect(() => {
-    if (currentNote) {
-      setLocalContent(currentNote.content);
-      setLocalTitle(currentNote.title);
+    const note = useScratchpadStore.getState().getCurrentNote();
+    if (note) {
+      setLocalContent(note.content);
+      setLocalTitle(note.title);
     } else {
       setLocalContent('');
       setLocalTitle('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentNote?.id, currentNote?.content, currentNote?.title]);
+  }, [currentNote?.id]);
 
   // Focus title input when editing
   useEffect(() => {
