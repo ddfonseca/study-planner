@@ -5,6 +5,8 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { markdownDecorations } from '@/lib/codemirror/markdown-decorations';
+import { paragraphBlocks } from '@/lib/codemirror/paragraph-blocks';
+import { taskCheckboxes } from '@/lib/codemirror/task-checkboxes';
 import { cn } from '@/lib/utils';
 
 interface CodeMirrorEditorProps {
@@ -106,6 +108,47 @@ const editorTheme = EditorView.theme({
     fontWeight: '700',
   },
 
+  // Task checkbox styles
+  '.cm-task-checkbox': {
+    appearance: 'none',
+    width: '14px',
+    height: '14px',
+    border: '2px solid var(--muted-foreground)',
+    borderRadius: '3px',
+    verticalAlign: 'middle',
+    marginRight: '6px',
+    cursor: 'pointer',
+    position: 'relative',
+    top: '-1px',
+    transition: 'all 0.15s ease',
+  },
+  '.cm-task-checkbox:checked': {
+    backgroundColor: 'var(--accent)',
+    borderColor: 'var(--accent)',
+  },
+  '.cm-task-checkbox:hover': {
+    borderColor: 'var(--accent)',
+  },
+  '.cm-task-done': {
+    color: 'color-mix(in srgb, var(--muted-foreground) 70%, transparent)',
+  },
+  '.cm-task-done-text': {
+    textDecoration: 'line-through',
+  },
+
+  // Paragraph block styles (TaskTXT)
+  '.cm-paragraph-title': {
+    fontWeight: '600',
+    fontSize: '1.05em',
+    color: 'var(--foreground)',
+    marginTop: '8px',
+  },
+  '.cm-paragraph-body': {
+    paddingLeft: '16px',
+    color: 'color-mix(in srgb, var(--foreground) 75%, transparent)',
+    fontSize: '0.95em',
+  },
+
   // Vim panel styling
   '.cm-vim-panel': {
     backgroundColor: 'var(--muted)',
@@ -154,6 +197,8 @@ export function CodeMirrorEditor({
         editorTheme,
         markdown({ codeLanguages: languages }),
         markdownDecorations,
+        paragraphBlocks,
+        taskCheckboxes,
         history(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
