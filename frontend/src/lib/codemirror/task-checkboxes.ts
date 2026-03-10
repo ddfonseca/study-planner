@@ -5,8 +5,8 @@ import {
   type DecorationSet,
   type EditorView,
   type ViewUpdate,
-} from '@codemirror/view';
-import type { Range } from '@codemirror/state';
+} from "@codemirror/view";
+import type { Range } from "@codemirror/state";
 
 // Matches [ ] or [x]/[X] at the start of a line, optionally preceded by - or *
 const taskPattern = /^(\s*(?:[-*]\s+)?)\[([ xX])\]/;
@@ -16,22 +16,19 @@ const timestampPattern = / ✓ \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/;
 
 function formatTimestamp(): string {
   const now = new Date();
-  const dd = String(now.getDate()).padStart(2, '0');
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
   const yyyy = now.getFullYear();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
   return ` ✓ ${dd}/${mm}/${yyyy} às ${hh}:${min}`;
 }
-
-const taskDoneLine = Decoration.line({ class: 'cm-task-done' });
-const taskDoneText = Decoration.mark({ class: 'cm-task-done-text' });
 
 class CheckboxWidget extends WidgetType {
   constructor(
     private checked: boolean,
     private pos: number,
-    private bracketLen: number
+    private bracketLen: number,
   ) {
     super();
   }
@@ -41,34 +38,50 @@ class CheckboxWidget extends WidgetType {
   }
 
   toDOM(view: EditorView) {
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.checked = this.checked;
-    input.className = 'cm-task-checkbox';
-    input.setAttribute('aria-label', this.checked ? 'Completar tarefa' : 'Marcar tarefa');
-
-    input.addEventListener('mousedown', (e) => {
-      e.preventDefault();
+    const runToggle = () => {
       const line = view.state.doc.lineAt(this.pos);
       const changes: { from: number; to: number; insert: string }[] = [];
 
       if (this.checked) {
         // Unchecking: [x] → [ ] and remove timestamp
-        changes.push({ from: this.pos, to: this.pos + this.bracketLen, insert: '[ ]' });
+        changes.push({ from: this.pos, to: this.pos + this.bracketLen, insert: "[ ]" });
         const tsMatch = timestampPattern.exec(line.text);
         if (tsMatch) {
           const tsStart = line.from + tsMatch.index;
-          changes.push({ from: tsStart, to: line.to, insert: '' });
+          changes.push({ from: tsStart, to: line.to, insert: "" });
         }
       } else {
         // Checking: [ ] → [x] and append timestamp
-        changes.push({ from: this.pos, to: this.pos + this.bracketLen, insert: '[x]' });
+        changes.push({ from: this.pos, to: this.pos + this.bracketLen, insert: "[x]" });
         changes.push({ from: line.to, to: line.to, insert: formatTimestamp() });
       }
 
       view.dispatch({ changes });
-    });
+    };
 
+    if (this.checked) {
+      // Checked: show ✅ [x] (emoji + [x]), clickable to uncheck
+      const span = document.createElement("span");
+      span.className = "cm-task-checked";
+      span.setAttribute("aria-label", "Desmarcar tarefa");
+      span.textContent = "✅ [x] ";
+      span.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        runToggle();
+      });
+      return span;
+    }
+
+    // Unchecked: show checkbox for [ ]
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = false;
+    input.className = "cm-task-checkbox";
+    input.setAttribute("aria-label", "Marcar tarefa");
+    input.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      runToggle();
+    });
     return input;
   }
 
@@ -93,39 +106,14 @@ function buildDecorations(view: EditorView): DecorationSet {
       const prefixLen = match[1].length;
       const bracketStart = line.from + prefixLen;
       const bracketEnd = bracketStart + 3; // [x] or [ ]
-      const checked = match[2] !== ' ';
+      const checked = match[2] !== " ";
 
       const widget = new CheckboxWidget(checked, bracketStart, 3);
       decorations.push(
         Decoration.replace({
           widget,
-        }).range(bracketStart, bracketEnd)
+        }).range(bracketStart, bracketEnd),
       );
-
-      // When checked, apply strikethrough only on the text (not prefix/checkbox)
-      if (checked) {
-        // Line deco for color dimming; mark deco for strikethrough after [x]
-        decorations.push(taskDoneLine.range(line.from));
-        const textStart = bracketEnd;
-        // Skip optional space after [x]
-        const textFrom = line.text[bracketEnd - line.from] === ' ' ? textStart + 1 : textStart;
-        // Stop strikethrough before the timestamp if present
-        const tsMatch = timestampPattern.exec(line.text);
-        const textEnd = tsMatch ? line.from + tsMatch.index : line.to;
-        if (textFrom < textEnd) {
-          decorations.push(taskDoneText.range(textFrom, textEnd));
-        }
-        // Walk subsequent body lines until blank line or next task
-        for (let j = i + 1; j <= doc.lines; j++) {
-          const bodyLine = doc.line(j);
-          if (bodyLine.text.trim().length === 0) break;
-          if (taskPattern.test(bodyLine.text)) break;
-          decorations.push(taskDoneLine.range(bodyLine.from));
-          if (bodyLine.from < bodyLine.to) {
-            decorations.push(taskDoneText.range(bodyLine.from, bodyLine.to));
-          }
-        }
-      }
     }
   }
 
@@ -152,5 +140,5 @@ export const taskCheckboxes = ViewPlugin.fromClass(
   },
   {
     decorations: (v) => v.decorations,
-  }
+  },
 );
