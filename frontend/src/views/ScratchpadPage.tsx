@@ -281,15 +281,15 @@ export function ScratchpadPage() {
   const NoteListItem = ({ note }: { note: ScratchpadNote }) => (
     <div
       className={cn(
-        'group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors',
+        'group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors',
         note.id === currentNoteId
           ? 'bg-primary/10 text-primary'
           : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
       )}
       onClick={() => handleSelectNote(note.id)}
     >
-      <StickyNote className="h-4 w-4 flex-shrink-0" />
-      <span className="flex-1 truncate text-sm">{note.title}</span>
+      <StickyNote className="h-3.5 w-3.5 flex-shrink-0" />
+      <span className="flex-1 truncate text-xs">{note.title}</span>
       <Button
         variant="ghost"
         size="sm"

@@ -33,12 +33,12 @@ const editorTheme = EditorView.theme({
   '.cm-scroller': {
     overflow: 'auto',
     fontFamily: '"Fira Code", monospace',
-    fontSize: '14px',
-    lineHeight: '1.7',
+    fontSize: '13px',
+    lineHeight: '1.5',
   },
   '.cm-content': {
     caretColor: 'var(--accent)',
-    padding: '12px 16px',
+    padding: '8px 12px',
   },
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: 'var(--accent)',
@@ -139,14 +139,11 @@ const editorTheme = EditorView.theme({
   // Paragraph block styles (TaskTXT)
   '.cm-paragraph-title': {
     fontWeight: '600',
-    fontSize: '1.05em',
     color: 'var(--foreground)',
-    marginTop: '8px',
   },
   '.cm-paragraph-body': {
     paddingLeft: '16px',
     color: 'color-mix(in srgb, var(--foreground) 75%, transparent)',
-    fontSize: '0.95em',
   },
 
   // Vim panel styling
@@ -215,11 +212,12 @@ export function CodeMirrorEditor({
 
       // Load vim if needed
       let vimExt: Extension[] = [];
+      let VimApi: Awaited<ReturnType<typeof import('@replit/codemirror-vim')>>['Vim'] | null = null;
       if (vimMode) {
         try {
           const { vim, Vim } = await import('@replit/codemirror-vim');
-          Vim.map('jk', '<Esc>', 'insert');
           vimExt = [vim()];
+          VimApi = Vim;
         } catch {
           // vim extension failed to load, continue without it
         }
@@ -236,6 +234,11 @@ export function CodeMirrorEditor({
         state,
         parent: containerRef.current!,
       });
+
+      // Configure vim mappings after editor is created
+      if (VimApi) {
+        VimApi.map('jk', '<Esc>', 'insert');
+      }
 
       viewRef.current = view;
     };
@@ -258,8 +261,9 @@ export function CodeMirrorEditor({
       let vimExt: Extension[] = [];
       if (vimMode) {
         try {
-          const { vim } = await import('@replit/codemirror-vim');
+          const { vim, Vim } = await import('@replit/codemirror-vim');
           vimExt = [vim()];
+          Vim.map('jk', '<Esc>', 'insert');
         } catch {
           // vim extension failed to load
         }
