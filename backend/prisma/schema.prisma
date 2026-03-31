@@ -21,7 +21,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  studySessions   StudySession[]
+  workSessions    WorkSession[]
   userConfig      UserConfig?
   weeklyGoals     WeeklyGoal[]
   workspaces      Workspace[]
@@ -111,20 +111,20 @@ model Workspace {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studySessions StudySession[]
+  workSessions  WorkSession[]
   weeklyGoals   WeeklyGoal[]
-  studyCycles   StudyCycle[]
-  subjects      Subject[]
+  focusCycles   FocusCycle[]
+  tasks         Task[]
   categories    Category[]
-  disciplines   Discipline[]
+  projects      Project[]
 
   @@unique([userId, name])
   @@index([userId])
   @@map("workspaces")
 }
 
-// Discipline - groups related subjects for study cycle organization
-model Discipline {
+// Project - groups related tasks for focus cycle organization
+model Project {
   id          String   @id @default(cuid())
   workspaceId String   @map("workspace_id")
   name        String   @db.VarChar(100)
@@ -135,16 +135,16 @@ model Discipline {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  subjects        Subject[]
-  studyCycleItems StudyCycleItem[]
+  tasks           Task[]
+  focusCycleItems FocusCycleItem[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
   @@map("disciplines")
 }
 
-// Subject - normalized subjects per workspace
-model Subject {
+// Task - normalized tasks per workspace
+model Task {
   id           String    @id @default(cuid())
   workspaceId  String    @map("workspace_id")
   disciplineId String?   @map("discipline_id")
@@ -158,10 +158,10 @@ model Subject {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  discipline       Discipline?       @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
-  studySessions    StudySession[]
-  studyCycleItems  StudyCycleItem[]
-  categories       SubjectCategory[]
+  project          Project?          @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  workSessions     WorkSession[]
+  focusCycleItems  FocusCycleItem[]
+  categories       TaskCategory[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
@@ -181,21 +181,21 @@ model Category {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  subjects  SubjectCategory[]
+  tasks     TaskCategory[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
   @@map("categories")
 }
 
-// SubjectCategory - junction table for Subject-Category many-to-many
-model SubjectCategory {
+// TaskCategory - junction table for Task-Category many-to-many
+model TaskCategory {
   id         String   @id @default(cuid())
   subjectId  String   @map("subject_id")
   categoryId String   @map("category_id")
   createdAt  DateTime @default(now()) @map("created_at")
 
-  subject  Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  task     Task     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([subjectId, categoryId])
@@ -224,8 +224,8 @@ model WeeklyGoal {
   @@map("weekly_goals")
 }
 
-// Study session (replaces localStorage materias array)
-model StudySession {
+// Work session (replaces localStorage materias array)
+model WorkSession {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
   workspaceId String   @map("workspace_id")
@@ -237,7 +237,7 @@ model StudySession {
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  task      Task      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
   @@index([userId])
@@ -269,8 +269,8 @@ enum Permission {
   WRITE
 }
 
-// Study Cycle - rotational study schedule per workspace (multiple cycles allowed)
-model StudyCycle {
+// Focus Cycle - rotational schedule per workspace (multiple cycles allowed)
+model FocusCycle {
   id               String    @id @default(cuid())
   workspaceId      String    @map("workspace_id")
   name             String    @db.VarChar(50)
@@ -282,9 +282,9 @@ model StudyCycle {
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
   workspace   Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  items       StudyCycleItem[]
-  advances    StudyCycleAdvance[]
-  completions StudyCycleCompletion[]
+  items       FocusCycleItem[]
+  advances    FocusCycleAdvance[]
+  completions FocusCycleCompletion[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
@@ -292,9 +292,9 @@ model StudyCycle {
   @@map("study_cycles")
 }
 
-// Study Cycle Item - individual subject or discipline entry in a cycle
+// Focus Cycle Item - individual task or project entry in a cycle
 // Either subjectId OR disciplineId must be set (validated in application layer)
-model StudyCycleItem {
+model FocusCycleItem {
   id                  String  @id @default(cuid())
   cycleId             String  @map("cycle_id")
   subjectId           String? @map("subject_id")
@@ -303,9 +303,9 @@ model StudyCycleItem {
   position            Int
   compensationMinutes Int     @default(0) @map("compensation_minutes") // Minutes added when skipping incomplete
 
-  cycle      StudyCycle  @relation(fields: [cycleId], references: [id], onDelete: Cascade)
-  subject    Subject?    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  discipline Discipline? @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  cycle   FocusCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  task    Task?      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  project Project?   @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
 
   @@unique([cycleId, position])
   @@index([cycleId])
@@ -314,8 +314,8 @@ model StudyCycleItem {
   @@map("study_cycle_items")
 }
 
-// Study Cycle Advance - tracks each time user advances to next subject
-model StudyCycleAdvance {
+// Focus Cycle Advance - tracks each time user advances to next task
+model FocusCycleAdvance {
   id           String   @id @default(cuid())
   cycleId      String   @map("cycle_id")
   fromSubject  String   @map("from_subject") @db.VarChar(100)
@@ -325,15 +325,15 @@ model StudyCycleAdvance {
   minutesSpent Int      @map("minutes_spent")
   advancedAt   DateTime @default(now()) @map("advanced_at")
 
-  cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  cycle FocusCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 
   @@index([cycleId])
   @@index([advancedAt])
   @@map("study_cycle_advances")
 }
 
-// Study Cycle Completion - tracks when entire cycle is completed
-model StudyCycleCompletion {
+// Focus Cycle Completion - tracks when entire cycle is completed
+model FocusCycleCompletion {
   id                 String   @id @default(cuid())
   cycleId            String   @map("cycle_id")
   cycleName          String?  @map("cycle_name") @db.VarChar(50)
@@ -342,7 +342,7 @@ model StudyCycleCompletion {
   itemsCount         Int      @map("items_count")
   completedAt        DateTime @default(now()) @map("completed_at")
 
-  cycle StudyCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  cycle FocusCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 
   @@index([cycleId])
   @@index([completedAt])
