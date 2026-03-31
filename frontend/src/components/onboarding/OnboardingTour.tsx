@@ -53,13 +53,6 @@ const desktopSteps: Step[] = [
     title: 'Tópicos',
     placement: 'bottom',
   },
-  {
-    target: '[data-tour="nav-allocation"]',
-    content:
-      'Calcule quanto tempo dedicar a cada matéria com base no peso e seu nível atual. Ideal para concursos!',
-    title: 'Alocação de Estudos',
-    placement: 'bottom',
-  },
 ];
 
 // Mobile shows fewer steps since timer/cycle are in separate tabs

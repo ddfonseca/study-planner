@@ -7,7 +7,6 @@ describe('featureBadgesStore', () => {
     timer: false,
     cycles: false,
     dashboard: false,
-    allocation: false,
     scratchpad: false,
     content: false,
     ...overrides,

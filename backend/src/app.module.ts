@@ -15,8 +15,6 @@ import { StudyCycleModule } from './study-cycle/study-cycle.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { MercadoPagoModule } from './mercadopago/mercadopago.module';
 import { ScratchpadNotesModule } from './scratchpad-notes/scratchpad-notes.module';
-import { ExamTemplateModule } from './exam-template/exam-template.module';
-import { ExamProfileModule } from './exam-profile/exam-profile.module';
 import { SubjectModule } from './subject/subject.module';
 import { CategoryModule } from './category/category.module';
 import { DisciplineModule } from './discipline/discipline.module';
@@ -69,8 +67,6 @@ import { DisciplineModule } from './discipline/discipline.module';
     SubscriptionModule,
     MercadoPagoModule,
     ScratchpadNotesModule,
-    ExamTemplateModule,
-    ExamProfileModule,
     SubjectModule,
     CategoryModule,
     DisciplineModule,

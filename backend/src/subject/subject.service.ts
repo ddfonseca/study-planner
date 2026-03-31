@@ -319,11 +319,6 @@ export class SubjectService {
         data: { subjectId: dto.targetId },
       });
 
-      await tx.subjectProfile.updateMany({
-        where: { subjectId: { in: dto.sourceIds } },
-        data: { subjectId: dto.targetId },
-      });
-
       // Delete source subjects
       await tx.subject.deleteMany({
         where: { id: { in: dto.sourceIds } },

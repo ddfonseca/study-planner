@@ -10,5 +10,4 @@ export { workspacesApi } from './workspaces';
 export { studyCycleApi } from './studyCycle';
 export { subscriptionApi } from './subscription';
 export { scratchpadNotesApi } from './scratchpadNotes';
-export { allocationApi } from './allocation';
 export { subjectsApi } from './subjects';

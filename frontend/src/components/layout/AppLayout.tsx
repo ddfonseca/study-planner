@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useFeatureBadgesStore } from '@/store/featureBadgesStore';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, BarChart3, Clock, FileText, Calculator, Layers } from 'lucide-react';
+import { Calendar, BarChart3, Clock, FileText, Layers } from 'lucide-react';
 import { WorkspaceSelector } from '@/components/workspace';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { WelcomeOverlay, OnboardingTour } from '@/components/onboarding';
@@ -52,9 +52,8 @@ export function AppLayout() {
 
   // Mark features as seen when user visits them
   useEffect(() => {
-    const pathToFeature: Record<string, 'dashboard' | 'allocation' | 'scratchpad' | 'content'> = {
+    const pathToFeature: Record<string, 'dashboard' | 'scratchpad' | 'content'> = {
       '/app/dashboard': 'dashboard',
-      '/app/allocation': 'allocation',
       '/app/scratchpad': 'scratchpad',
       '/app/content': 'content',
     };
@@ -76,7 +75,6 @@ export function AppLayout() {
     { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: 'scratchpad' as const, tourId: 'nav-scratchpad' },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
     { to: '/app/content', icon: Layers, label: 'Conteúdo', badgeKey: 'content' as const, tourId: 'nav-content' },
-    { to: '/app/allocation', icon: Calculator, label: 'Alocação', badgeKey: 'allocation' as const, tourId: 'nav-allocation' },
   ];
 
   return (

@@ -15,7 +15,6 @@ import { DashboardPage } from '@/views/DashboardPage';
 import { SubjectAnalyticsPage } from '@/views/SubjectAnalyticsPage';
 import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
-import { AllocationPage } from '@/views/AllocationPage';
 import { SubjectsAndDisciplinesPage } from '@/views/SubjectsAndDisciplinesPage';
 
 // Toast notifications
@@ -45,7 +44,6 @@ export function SpaApp() {
           <Route path="analytics" element={<SubjectAnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="scratchpad" element={<ScratchpadPage />} />
-          <Route path="allocation" element={<AllocationPage />} />
           <Route path="content" element={<SubjectsAndDisciplinesPage />} />
           {/* Redirect old routes to the unified page */}
           <Route path="subjects" element={<Navigate to="/app/content" replace />} />
