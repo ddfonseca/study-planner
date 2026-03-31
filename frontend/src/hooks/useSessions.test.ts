@@ -24,8 +24,8 @@ vi.mock('@/store/workspaceStore', () => ({
   })),
 }))
 
-vi.mock('@/store/studyCycleStore', () => ({
-  useStudyCycleStore: vi.fn(() => ({
+vi.mock('@/store/focusCycleStore', () => ({
+  useFocusCycleStore: vi.fn(() => ({
     cycle: null,
     fetchSuggestion: vi.fn(),
   })),

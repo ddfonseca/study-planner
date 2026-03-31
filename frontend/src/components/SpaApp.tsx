@@ -12,10 +12,10 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { LoginPage } from '@/views/LoginPage';
 import { CalendarPage } from '@/views/CalendarPage';
 import { DashboardPage } from '@/views/DashboardPage';
-import { SubjectAnalyticsPage } from '@/views/SubjectAnalyticsPage';
+import { TaskAnalyticsPage } from '@/views/TaskAnalyticsPage';
 import { SettingsPage } from '@/views/SettingsPage';
 import { ScratchpadPage } from '@/views/ScratchpadPage';
-import { SubjectsAndDisciplinesPage } from '@/views/SubjectsAndDisciplinesPage';
+import { TasksAndProjectsPage } from '@/views/TasksAndProjectsPage';
 
 // Toast notifications
 import { Toaster } from '@/components/ui/toaster';
@@ -41,10 +41,10 @@ export function SpaApp() {
           <Route index element={<Navigate to="calendar" replace />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="analytics" element={<SubjectAnalyticsPage />} />
+          <Route path="analytics" element={<TaskAnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="scratchpad" element={<ScratchpadPage />} />
-          <Route path="content" element={<SubjectsAndDisciplinesPage />} />
+          <Route path="content" element={<TasksAndProjectsPage />} />
           {/* Redirect old routes to the unified page */}
           <Route path="subjects" element={<Navigate to="/app/content" replace />} />
           <Route path="disciplines" element={<Navigate to="/app/content" replace />} />

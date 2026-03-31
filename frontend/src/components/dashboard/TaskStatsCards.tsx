@@ -4,13 +4,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, Hash, Target, Percent } from 'lucide-react';
 import { formatTime } from '@/lib/utils/time';
-import type { SubjectStats } from '@/types/session';
+import type { TaskStats } from '@/types/session';
 
-interface SubjectStatsCardsProps {
-  stats: SubjectStats | null;
+interface TaskStatsCardsProps {
+  stats: TaskStats | null;
 }
 
-export function SubjectStatsCards({ stats }: SubjectStatsCardsProps) {
+export function TaskStatsCards({ stats }: TaskStatsCardsProps) {
   const cards = [
     {
       title: 'Total de Horas',
@@ -65,4 +65,4 @@ export function SubjectStatsCards({ stats }: SubjectStatsCardsProps) {
   );
 }
 
-export default SubjectStatsCards;
+export default TaskStatsCards;

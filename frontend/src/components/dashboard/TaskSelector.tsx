@@ -19,7 +19,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 
-interface SubjectSelectorProps {
+interface TaskSelectorProps {
   subjects: string[];
   selectedSubject: string | null;
   onSelectSubject: (subject: string) => void;
@@ -162,11 +162,11 @@ function SelectorContent({
   );
 }
 
-export function SubjectSelector({
+export function TaskSelector({
   subjects,
   selectedSubject,
   onSelectSubject,
-}: SubjectSelectorProps) {
+}: TaskSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
   const isMobile = useIsMobile();
@@ -270,4 +270,4 @@ export function SubjectSelector({
   );
 }
 
-export default SubjectSelector;
+export default TaskSelector;

@@ -16,11 +16,11 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface SubjectChartProps {
+interface TaskChartProps {
   data: ChartData<'doughnut'>;
 }
 
-export function SubjectChart({ data }: SubjectChartProps) {
+export function TaskChart({ data }: TaskChartProps) {
   const hasData = data.labels && data.labels.length > 0;
   const isMobile = useIsMobile();
 
@@ -70,4 +70,4 @@ export function SubjectChart({ data }: SubjectChartProps) {
   );
 }
 
-export default SubjectChart;
+export default TaskChart;

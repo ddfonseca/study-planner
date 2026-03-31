@@ -17,7 +17,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { RefreshCw, ChevronRight, ChevronDown, Settings, BookOpen, Check, Plus, ChevronsUpDown, Trophy, Lock, Layers, SkipForward } from 'lucide-react';
-import { useStudyCycleStore, formatDuration, calculateCycleProgress } from '@/store/studyCycleStore';
+import { useFocusCycleStore, formatDuration, calculateCycleProgress } from '@/store/focusCycleStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CycleEditorModal } from './CycleEditorModal';
 import { useCanUseFeature, FEATURES } from '@/hooks/useSubscriptionLimits';
@@ -40,7 +40,7 @@ export function CycleSuggestionCard() {
     advanceToNext,
     activateCycle,
     resetCycle,
-  } = useStudyCycleStore();
+  } = useFocusCycleStore();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('edit');
   const [showAllItems, setShowAllItems] = useState(false);
@@ -283,7 +283,7 @@ export function CycleSuggestionCard() {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium truncate flex items-center gap-1.5" title={data.currentSubject}>
-                {data.currentIsDiscipline ? (
+                {data.currentIsProject ? (
                   <Layers className="h-3.5 w-3.5 text-primary/70 shrink-0" />
                 ) : (
                   <BookOpen className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
@@ -416,7 +416,7 @@ export function CycleSuggestionCard() {
                         <div className="flex items-center justify-between mb-1">
                           <span className={`text-xs truncate flex items-center gap-1 ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
                             {item.isComplete && <Check className="h-3 w-3 text-accent shrink-0" />}
-                            {item.isDiscipline ? (
+                            {item.isProject ? (
                               <Layers className="h-3 w-3 text-primary/70 shrink-0" />
                             ) : (
                               <BookOpen className="h-3 w-3 text-muted-foreground/50 shrink-0" />

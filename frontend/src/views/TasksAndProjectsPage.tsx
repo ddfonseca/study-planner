@@ -1,5 +1,5 @@
 /**
- * Unified Subjects and Disciplines Management Page
+ * Unified Tasks and Projects Management Page
  * Combines both pages into a single view with sidebar navigation
  */
 import { useState } from 'react';
@@ -8,18 +8,18 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Import content components from the original pages
-import { DisciplinesContent } from './DisciplinesPage';
-import { SubjectsContent } from './SubjectsPage';
+import { ProjectsContent } from './ProjectsPage';
+import { TasksContent } from './TasksPage';
 
-type ActiveSection = 'disciplines' | 'subjects';
+type ActiveSection = 'projects' | 'tasks';
 
 const sections = [
-  { id: 'disciplines' as const, label: 'Disciplinas', icon: Layers },
-  { id: 'subjects' as const, label: 'Tópicos', icon: BookOpen },
+  { id: 'projects' as const, label: 'Disciplinas', icon: Layers },
+  { id: 'tasks' as const, label: 'Tópicos', icon: BookOpen },
 ];
 
-export function SubjectsAndDisciplinesPage() {
-  const [activeSection, setActiveSection] = useState<ActiveSection>('disciplines');
+export function TasksAndProjectsPage() {
+  const [activeSection, setActiveSection] = useState<ActiveSection>('projects');
   const isMobile = useIsMobile();
 
   // Mobile: tabs at the top
@@ -43,7 +43,7 @@ export function SubjectsAndDisciplinesPage() {
             </button>
           ))}
         </div>
-        {activeSection === 'disciplines' ? <DisciplinesContent /> : <SubjectsContent />}
+        {activeSection === 'projects' ? <ProjectsContent /> : <TasksContent />}
       </div>
     );
   }
@@ -72,10 +72,10 @@ export function SubjectsAndDisciplinesPage() {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        {activeSection === 'disciplines' ? <DisciplinesContent /> : <SubjectsContent />}
+        {activeSection === 'projects' ? <ProjectsContent /> : <TasksContent />}
       </div>
     </div>
   );
 }
 
-export default SubjectsAndDisciplinesPage;
+export default TasksAndProjectsPage;

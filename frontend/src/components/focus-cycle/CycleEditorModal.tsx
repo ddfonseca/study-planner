@@ -28,9 +28,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SubjectPicker } from '@/components/ui/subject-picker';
-import { DisciplinePicker } from '@/components/ui/discipline-picker';
-import { useRecentSubjects } from '@/hooks/useRecentSubjects';
+import { TaskPicker } from '@/components/ui/task-picker';
+import { ProjectPicker } from '@/components/ui/project-picker';
+import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SortableCycleItem } from './SortableCycleItem';
@@ -43,11 +43,11 @@ import {
   BookOpen,
   Layers,
 } from 'lucide-react';
-import { useStudyCycleStore, formatDuration } from '@/store/studyCycleStore';
+import { useFocusCycleStore, formatDuration } from '@/store/focusCycleStore';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { useSubjectStore } from '@/store/subjectStore';
-import { useDisciplineStore } from '@/store/disciplineStore';
+import { useTaskStore } from '@/store/taskStore';
+import { useProjectStore } from '@/store/projectStore';
 import type { CreateCycleItemDto } from '@/types/api';
 
 interface CycleEditorModalProps {
@@ -67,16 +67,16 @@ function generateId(): string {
 export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEditorModalProps) {
   const { currentWorkspaceId } = useWorkspaceStore();
   const { cycle, cycles, isLoading, createCycle, updateCycle, deleteCycle, refresh } =
-    useStudyCycleStore();
-  const { getActiveSubjects, findOrCreateSubject } = useSubjectStore();
-  const { disciplines, fetchDisciplines, findOrCreateDiscipline } = useDisciplineStore();
-  const subjects = getActiveSubjects();
-  const { recentSubjects, addRecentSubject } = useRecentSubjects();
+    useFocusCycleStore();
+  const { getActiveTasks, findOrCreateTask } = useTaskStore();
+  const { projects, fetchProjects, findOrCreateProject } = useProjectStore();
+  const tasks = getActiveTasks();
+  const { recentTasks, addRecentTask } = useRecentTasks();
 
   const [items, setItems] = useState<CycleItemForm[]>([]);
   const [cycleName, setCycleName] = useState('');
-  const [newSubjectId, setNewSubjectId] = useState('');
-  const [newDisciplineId, setNewDisciplineId] = useState('');
+  const [newTaskId, setNewTaskId] = useState('');
+  const [newProjectId, setNewProjectId] = useState('');
   const [newMinutes, setNewMinutes] = useState('');
   const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -87,9 +87,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   // Fetch disciplines when modal opens
   useEffect(() => {
     if (open && currentWorkspaceId) {
-      fetchDisciplines(currentWorkspaceId);
+      fetchProjects(currentWorkspaceId);
     }
-  }, [open, currentWorkspaceId, fetchDisciplines]);
+  }, [open, currentWorkspaceId, fetchProjects]);
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -128,8 +128,8 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       setItems(
         cycle.items.map((item) => ({
           id: item.id,
-          subjectId: item.subjectId || undefined,
-          disciplineId: item.disciplineId || undefined,
+          taskId: item.taskId || undefined,
+          projectId: item.projectId || undefined,
           targetMinutes: item.targetMinutes,
         }))
       );
@@ -144,26 +144,26 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   const handleAddItem = () => {
     if (!newMinutes) return;
 
-    if (addItemType === 'subject' && newSubjectId) {
+    if (addItemType === 'subject' && newTaskId) {
       setItems((prev) => [
         ...prev,
         {
           id: generateId(),
-          subjectId: newSubjectId,
+          taskId: newTaskId,
           targetMinutes: parseInt(newMinutes, 10),
         },
       ]);
-      setNewSubjectId('');
-    } else if (addItemType === 'discipline' && newDisciplineId) {
+      setNewTaskId('');
+    } else if (addItemType === 'discipline' && newProjectId) {
       setItems((prev) => [
         ...prev,
         {
           id: generateId(),
-          disciplineId: newDisciplineId,
+          projectId: newProjectId,
           targetMinutes: parseInt(newMinutes, 10),
         },
       ]);
-      setNewDisciplineId('');
+      setNewProjectId('');
     }
 
     setNewMinutes('');
@@ -174,19 +174,19 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   };
 
   const getItemName = (item: CycleItemForm): string => {
-    if (item.disciplineId) {
-      const discipline = disciplines.find((d) => d.id === item.disciplineId);
-      return discipline?.name || item.disciplineId;
+    if (item.projectId) {
+      const project = projects.find((d) => d.id === item.projectId);
+      return project?.name || item.projectId;
     }
-    if (item.subjectId) {
-      const subject = subjects.find((s) => s.id === item.subjectId);
-      return subject?.name || item.subjectId;
+    if (item.taskId) {
+      const task = tasks.find((s) => s.id === item.taskId);
+      return task?.name || item.taskId;
     }
     return 'Unknown';
   };
 
   const isItemDiscipline = (item: CycleItemForm): boolean => {
-    return !!item.disciplineId;
+    return !!item.projectId;
   };
 
   const handleSave = async () => {
@@ -198,9 +198,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       if (isEditing) {
         const data = {
           name: cycleName.trim() || undefined,
-          items: items.map(({ subjectId, disciplineId, targetMinutes }) => ({
-            subjectId,
-            disciplineId,
+          items: items.map(({ taskId, projectId, targetMinutes }) => ({
+            taskId,
+            projectId,
             targetMinutes,
           })),
         };
@@ -208,9 +208,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
       } else {
         const data = {
           name: cycleName.trim(),
-          items: items.map(({ subjectId, disciplineId, targetMinutes }) => ({
-            subjectId,
-            disciplineId,
+          items: items.map(({ taskId, projectId, targetMinutes }) => ({
+            taskId,
+            projectId,
             targetMinutes,
           })),
           activateOnCreate,
@@ -250,8 +250,8 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   // Check if can add item
   const canAddItem =
     !!newMinutes &&
-    ((addItemType === 'subject' && !!newSubjectId) ||
-      (addItemType === 'discipline' && !!newDisciplineId));
+    ((addItemType === 'subject' && !!newTaskId) ||
+      (addItemType === 'discipline' && !!newProjectId));
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -322,16 +322,16 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             <div className="flex gap-2">
               <div className="flex-1">
                 {addItemType === 'subject' ? (
-                  <SubjectPicker
-                    value={newSubjectId}
-                    onValueChange={setNewSubjectId}
-                    subjects={subjects}
-                    recentSubjects={recentSubjects}
-                    onSubjectUsed={addRecentSubject}
-                    disciplines={disciplines}
-                    onCreateSubject={
+                  <TaskPicker
+                    value={newTaskId}
+                    onValueChange={setNewTaskId}
+                    subjects={tasks}
+                    recentTasks={recentTasks}
+                    onTaskUsed={addRecentTask}
+                    projects={projects}
+                    onCreateTask={
                       currentWorkspaceId
-                        ? (data) => findOrCreateSubject(currentWorkspaceId, data.name, data.disciplineId)
+                        ? (data) => findOrCreateTask(currentWorkspaceId, data.name, data.projectId)
                         : undefined
                     }
                     placeholder="Tópico"
@@ -339,13 +339,13 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                     emptyMessage="Nenhum encontrado"
                   />
                 ) : (
-                  <DisciplinePicker
-                    value={newDisciplineId}
-                    onValueChange={setNewDisciplineId}
-                    disciplines={disciplines}
-                    onCreateDiscipline={
+                  <ProjectPicker
+                    value={newProjectId}
+                    onValueChange={setNewProjectId}
+                    projects={projects}
+                    onCreateProject={
                       currentWorkspaceId
-                        ? (name) => findOrCreateDiscipline(currentWorkspaceId, name)
+                        ? (name) => findOrCreateProject(currentWorkspaceId, name)
                         : undefined
                     }
                     placeholder="Selecione uma disciplina"

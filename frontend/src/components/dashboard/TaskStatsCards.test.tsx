@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { SubjectStatsCards } from './SubjectStatsCards'
-import type { SubjectStats } from '@/types/session'
+import { TaskStatsCards } from './TaskStatsCards'
+import type { TaskStats } from '@/types/session'
 
-const mockStats: SubjectStats = {
+const mockStats: TaskStats = {
   totalMinutes: 180,
   totalSessions: 5,
   averageSessionMinutes: 36,
   percentageOfTotal: 25,
 }
 
-describe('SubjectStatsCards', () => {
+describe('TaskStatsCards', () => {
   describe('rendering', () => {
     it('renders all four stat cards', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
 
       expect(screen.getByText('Total de Horas')).toBeInTheDocument()
       expect(screen.getByText('Sessoes')).toBeInTheDocument()
@@ -22,22 +22,22 @@ describe('SubjectStatsCards', () => {
     })
 
     it('displays formatted time for total minutes', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       expect(screen.getByText('3h')).toBeInTheDocument()
     })
 
     it('displays total sessions count', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       expect(screen.getByText('5')).toBeInTheDocument()
     })
 
     it('displays percentage of total', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       expect(screen.getByText('25%')).toBeInTheDocument()
     })
 
     it('displays "-" when stats is null', () => {
-      render(<SubjectStatsCards stats={null} />)
+      render(<TaskStatsCards stats={null} />)
       const dashValues = screen.getAllByText('-')
       expect(dashValues.length).toBe(4)
     })
@@ -45,7 +45,7 @@ describe('SubjectStatsCards', () => {
 
   describe('responsive layout', () => {
     it('renders with responsive grid classes', () => {
-      const { container } = render(<SubjectStatsCards stats={mockStats} />)
+      const { container } = render(<TaskStatsCards stats={mockStats} />)
       const grid = container.firstChild as HTMLElement
 
       expect(grid).toHaveClass('grid')
@@ -55,7 +55,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders cards with responsive padding', () => {
-      const { container } = render(<SubjectStatsCards stats={mockStats} />)
+      const { container } = render(<TaskStatsCards stats={mockStats} />)
       const cardContent = container.querySelector('.p-3')
 
       expect(cardContent).toHaveClass('p-3')
@@ -63,7 +63,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders with responsive gap in flex container', () => {
-      const { container } = render(<SubjectStatsCards stats={mockStats} />)
+      const { container } = render(<TaskStatsCards stats={mockStats} />)
       const flexContainer = container.querySelector('.gap-3')
 
       expect(flexContainer).toHaveClass('gap-3')
@@ -71,7 +71,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders icons with responsive sizes', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       const icons = document.querySelectorAll('svg')
 
       icons.forEach((icon) => {
@@ -81,7 +81,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders icon containers with responsive padding', () => {
-      const { container } = render(<SubjectStatsCards stats={mockStats} />)
+      const { container } = render(<TaskStatsCards stats={mockStats} />)
       const iconContainers = container.querySelectorAll('.rounded-lg')
 
       iconContainers.forEach((iconContainer) => {
@@ -91,7 +91,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders values with responsive text size', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       const valueElements = document.querySelectorAll('.font-bold')
 
       valueElements.forEach((element) => {
@@ -101,7 +101,7 @@ describe('SubjectStatsCards', () => {
     })
 
     it('renders values with responsive max-width for truncation', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       const valueElements = document.querySelectorAll('.truncate')
 
       valueElements.forEach((element) => {
@@ -113,14 +113,14 @@ describe('SubjectStatsCards', () => {
 
   describe('accessibility', () => {
     it('renders all icons with proper styling', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
       const icons = document.querySelectorAll('svg')
 
       expect(icons.length).toBe(4)
     })
 
     it('values are visible', () => {
-      render(<SubjectStatsCards stats={mockStats} />)
+      render(<TaskStatsCards stats={mockStats} />)
 
       expect(screen.getByText('3h')).toBeVisible()
       expect(screen.getByText('5')).toBeVisible()

@@ -1,10 +1,10 @@
 /**
  * Disciplines Management Page
- * Manage disciplines that group related subjects for study cycles
+ * Manage projects that group related subjects for study cycles
  */
 import { useState, useEffect } from 'react';
-import { useDisciplineStore } from '@/store/disciplineStore';
-import { useSubjectStore } from '@/store/subjectStore';
+import { useProjectStore } from '@/store/projectStore';
+import { useTaskStore } from '@/store/taskStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
-// Color palette for disciplines
+// Color palette for projects
 const COLOR_OPTIONS = [
   '#ef4444', // red
   '#f97316', // orange
@@ -49,25 +49,25 @@ interface EditingDiscipline {
   color: string | null;
 }
 
-export function DisciplinesContent() {
+export function ProjectsContent() {
   const { workspaces, currentWorkspaceId } = useWorkspaceStore();
   const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) || null;
   const {
-    disciplines,
+    projects,
     isLoading,
     isSaving,
     error,
-    fetchDisciplines,
-    createDiscipline,
-    updateDiscipline,
-    addSubjectsToDiscipline,
-    removeSubjectsFromDiscipline,
-    deleteDiscipline,
+    fetchProjects,
+    createProject,
+    updateProject,
+    addTasksToProject,
+    removeTasksFromProject,
+    deleteProject,
     setError,
-  } = useDisciplineStore();
+  } = useProjectStore();
 
-  const { fetchSubjects, getActiveSubjects } = useSubjectStore();
-  const activeSubjects = getActiveSubjects();
+  const { fetchTasks, getActiveTasks } = useTaskStore();
+  const activeTasks = getActiveTasks();
 
   const [newDisciplineName, setNewDisciplineName] = useState('');
   const [editingDiscipline, setEditingDiscipline] = useState<EditingDiscipline | null>(null);
@@ -75,19 +75,19 @@ export function DisciplinesContent() {
   const [expandedDisciplines, setExpandedDisciplines] = useState<Set<string>>(new Set());
   const [addingSubjectTo, setAddingSubjectTo] = useState<string | null>(null);
 
-  // Fetch disciplines and subjects when workspace changes
+  // Fetch projects and subjects when workspace changes
   useEffect(() => {
     if (currentWorkspace) {
-      fetchDisciplines(currentWorkspace.id);
-      fetchSubjects(currentWorkspace.id);
+      fetchProjects(currentWorkspace.id);
+      fetchTasks(currentWorkspace.id);
     }
-  }, [currentWorkspace, fetchDisciplines, fetchSubjects]);
+  }, [currentWorkspace, fetchProjects, fetchTasks]);
 
   // Handle create new discipline
   const handleCreate = async () => {
     if (!currentWorkspace || !newDisciplineName.trim()) return;
     try {
-      await createDiscipline(currentWorkspace.id, { name: newDisciplineName.trim() });
+      await createProject(currentWorkspace.id, { name: newDisciplineName.trim() });
       setNewDisciplineName('');
     } catch {
       // Error is handled in store
@@ -107,7 +107,7 @@ export function DisciplinesContent() {
   const handleSaveEdit = async () => {
     if (!editingDiscipline) return;
     try {
-      await updateDiscipline(editingDiscipline.id, {
+      await updateProject(editingDiscipline.id, {
         name: editingDiscipline.name,
         color: editingDiscipline.color ?? undefined,
       });
@@ -120,7 +120,7 @@ export function DisciplinesContent() {
   // Handle delete
   const handleDelete = async (id: string) => {
     try {
-      await deleteDiscipline(id);
+      await deleteProject(id);
       setConfirmDelete(null);
     } catch {
       // Error is handled in store
@@ -130,7 +130,7 @@ export function DisciplinesContent() {
   // Handle add subject to discipline
   const handleAddSubject = async (disciplineId: string, subjectId: string) => {
     try {
-      await addSubjectsToDiscipline(disciplineId, [subjectId]);
+      await addTasksToProject(disciplineId, [subjectId]);
       setAddingSubjectTo(null);
     } catch {
       // Error is handled in store
@@ -140,7 +140,7 @@ export function DisciplinesContent() {
   // Handle remove subject from discipline
   const handleRemoveSubject = async (disciplineId: string, subjectId: string) => {
     try {
-      await removeSubjectsFromDiscipline(disciplineId, [subjectId]);
+      await removeTasksFromProject(disciplineId, [subjectId]);
     } catch {
       // Error is handled in store
     }
@@ -162,11 +162,11 @@ export function DisciplinesContent() {
   // Get subjects not in any discipline (or in current discipline)
   const getAvailableSubjects = (currentDisciplineId: string) => {
     const disciplineSubjectIds = new Set(
-      disciplines
+      projects
         .filter((d) => d.id !== currentDisciplineId)
-        .flatMap((d) => d.subjects.map((s) => s.id))
+        .flatMap((d) => d.tasks.map((s) => s.id))
     );
-    return activeSubjects.filter((s) => !disciplineSubjectIds.has(s.id));
+    return activeTasks.filter((s) => !disciplineSubjectIds.has(s.id));
   };
 
   if (!currentWorkspace) {
@@ -226,7 +226,7 @@ export function DisciplinesContent() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : disciplines.length === 0 ? (
+      ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
           <Layers className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">Nenhuma disciplina cadastrada</h3>
@@ -238,12 +238,12 @@ export function DisciplinesContent() {
         </div>
       ) : (
         <div className="space-y-3">
-          {disciplines.map((discipline) => {
+          {projects.map((discipline) => {
             const isEditing = editingDiscipline?.id === discipline.id;
             const isExpanded = expandedDisciplines.has(discipline.id);
             const availableSubjects = getAvailableSubjects(discipline.id);
             const unassignedSubjects = availableSubjects.filter(
-              (s) => !discipline.subjects.some((ds) => ds.id === s.id)
+              (s) => !discipline.tasks.some((ds) => ds.id === s.id)
             );
 
             return (
@@ -306,7 +306,7 @@ export function DisciplinesContent() {
 
                     {/* Subject count */}
                     <Badge variant="secondary" className="text-xs">
-                      {discipline.subjects.length} tópicos
+                      {discipline.tasks.length} tópicos
                     </Badge>
 
                     {/* Actions */}
@@ -357,13 +357,13 @@ export function DisciplinesContent() {
                   {/* Subjects list */}
                   <CollapsibleContent>
                     <div className="p-3 space-y-2">
-                      {discipline.subjects.length === 0 ? (
+                      {discipline.tasks.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-2">
                           Nenhum tópico vinculado a esta disciplina
                         </p>
                       ) : (
                         <div className="space-y-1">
-                          {discipline.subjects.map((subject) => (
+                          {discipline.tasks.map((subject) => (
                             <div
                               key={subject.id}
                               className="flex items-center gap-2 p-2 rounded-md bg-muted/50"
@@ -454,8 +454,8 @@ export function DisciplinesContent() {
   );
 }
 
-export function DisciplinesPage() {
-  return <DisciplinesContent />;
+export function ProjectsPage() {
+  return <ProjectsContent />;
 }
 
-export default DisciplinesPage;
+export default ProjectsPage;

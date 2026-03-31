@@ -1,16 +1,16 @@
 /**
- * Subject Analytics Hook - Manages subject-specific analytics data
+ * Task Analytics Hook - Manages task-specific analytics data
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { filterSessionsByDateRange } from '@/lib/utils/transform';
 import { getDateRangeFromDays } from '@/lib/utils/date';
 import {
-  getUniqueSubjects,
-  calculateSubjectStats,
-  getSubjectTrendData,
-  getSubjectWeeklyAverages,
-} from '@/lib/utils/subjectAnalytics';
+  getUniqueTasks,
+  calculateTaskStats,
+  getTaskTrendData,
+  getTaskWeeklyAverages,
+} from '@/lib/utils/taskAnalytics';
 
 // Modern soft color palette (same as useDashboard)
 const MODERN_PALETTE = [
@@ -28,7 +28,7 @@ const MODERN_PALETTE = [
   { bg: '#fca5a5', border: '#f87171' }, // Red 300/400
 ];
 
-export function useSubjectAnalytics() {
+export function useTaskAnalytics() {
   const { sessions } = useSessionStore();
   const [daysBack, setDaysBack] = useState(30);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function useSubjectAnalytics() {
 
   // Get list of available subjects
   const subjects = useMemo(() => {
-    return getUniqueSubjects(filteredSessions);
+    return getUniqueTasks(filteredSessions);
   }, [filteredSessions]);
 
   // Auto-select first subject if none selected or selection becomes invalid
@@ -59,7 +59,7 @@ export function useSubjectAnalytics() {
   // Calculate stats for selected subject
   const stats = useMemo(() => {
     if (!activeSubject) return null;
-    return calculateSubjectStats(
+    return calculateTaskStats(
       filteredSessions,
       activeSubject,
       dateRange.startDate,
@@ -70,7 +70,7 @@ export function useSubjectAnalytics() {
   // Get trend data for chart
   const trendData = useMemo(() => {
     if (!activeSubject) return [];
-    return getSubjectTrendData(
+    return getTaskTrendData(
       filteredSessions,
       activeSubject,
       dateRange.startDate,
@@ -81,7 +81,7 @@ export function useSubjectAnalytics() {
   // Get weekly averages for chart
   const weeklyAverages = useMemo(() => {
     if (!activeSubject) return [];
-    return getSubjectWeeklyAverages(
+    return getTaskWeeklyAverages(
       filteredSessions,
       activeSubject,
       dateRange.startDate,
@@ -160,4 +160,4 @@ export function useSubjectAnalytics() {
   };
 }
 
-export default useSubjectAnalytics;
+export default useTaskAnalytics;

@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, ChevronRight, Trophy, ChevronDown } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { studyCycleApi } from '@/lib/api';
+import { focusCycleApi } from '@/lib/api';
 import type { CycleHistory, CycleHistoryEntry } from '@/types/api';
-import { formatDuration } from '@/store/studyCycleStore';
+import { formatDuration } from '@/store/focusCycleStore';
 
 function formatRelativeTime(timestamp: string): string {
   const date = new Date(timestamp);
@@ -73,7 +73,7 @@ export function CycleHistoryCard() {
     if (!currentWorkspaceId) return;
     setIsLoading(true);
     try {
-      const data = await studyCycleApi.getHistory(currentWorkspaceId, 10);
+      const data = await focusCycleApi.getHistory(currentWorkspaceId, 10);
       setHistory(data);
     } catch (error) {
       console.error('Failed to fetch history:', error);

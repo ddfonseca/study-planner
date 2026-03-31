@@ -12,4 +12,9 @@ export {
 } from './weeklyGoalStore';
 export { useFeatureBadgesStore, type FeatureKey } from './featureBadgesStore';
 export { useAchievementsStore, type AchievementType } from './achievementsStore';
-export { useSubjectStore } from './subjectStore';
+export { useTaskStore } from './taskStore';
+export { useProjectStore } from './projectStore';
+export { useFocusCycleStore, formatDuration, calculateCycleProgress } from './focusCycleStore';
+export { useWorkspaceStore } from './workspaceStore';
+export { useCategoryStore } from './categoryStore';
+export { useOnboardingStore } from './onboardingStore';

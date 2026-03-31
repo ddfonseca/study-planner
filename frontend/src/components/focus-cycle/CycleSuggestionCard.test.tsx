@@ -31,8 +31,8 @@ vi.mock('@/store/achievementsStore', () => ({
   })),
 }))
 
-vi.mock('@/store/studyCycleStore', () => ({
-  useStudyCycleStore: vi.fn(),
+vi.mock('@/store/focusCycleStore', () => ({
+  useFocusCycleStore: vi.fn(),
   formatDuration: vi.fn((minutes: number) => `${minutes}m`),
   calculateCycleProgress: vi.fn((acc: number, target: number) =>
     target > 0 ? Math.min(100, Math.round((acc / target) * 100)) : 0
@@ -71,12 +71,12 @@ vi.mock('@/components/subscription/UpgradePrompt', () => ({
   UpgradePrompt: vi.fn(() => <div data-testid="upgrade-prompt">Upgrade</div>),
 }))
 
-import { useStudyCycleStore } from '@/store/studyCycleStore'
+import { useFocusCycleStore } from '@/store/focusCycleStore'
 import { useCanUseFeature } from '@/hooks/useSubscriptionLimits'
 import { useConfetti } from '@/hooks/useConfetti'
 import { useAchievementsStore } from '@/store/achievementsStore'
 
-const mockUseStudyCycleStore = vi.mocked(useStudyCycleStore)
+const mockUseStudyCycleStore = vi.mocked(useFocusCycleStore)
 const mockUseCanUseFeature = vi.mocked(useCanUseFeature)
 const mockUseConfetti = vi.mocked(useConfetti)
 const mockUseAchievementsStore = vi.mocked(useAchievementsStore)
@@ -111,7 +111,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 
@@ -131,7 +131,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 
@@ -150,7 +150,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 
@@ -169,7 +169,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 
@@ -195,7 +195,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 
@@ -230,7 +230,7 @@ describe('CycleSuggestionCard', () => {
         advanceToNext: vi.fn(),
         activateCycle: vi.fn(),
         resetCycle: vi.fn(),
-      } as unknown as ReturnType<typeof useStudyCycleStore>)
+      } as unknown as ReturnType<typeof useFocusCycleStore>)
 
       render(<CycleSuggestionCard />)
 

@@ -30,11 +30,11 @@ ChartJS.register(
   Filler
 );
 
-interface SubjectTrendChartProps {
+interface TaskTrendChartProps {
   data: ChartData<'line'>;
 }
 
-export function SubjectTrendChart({ data }: SubjectTrendChartProps) {
+export function TaskTrendChart({ data }: TaskTrendChartProps) {
   const hasData = data.labels && data.labels.length > 0;
   const hasNonZeroData = data.datasets[0]?.data.some((value) => (value as number) > 0);
   const isMobile = useIsMobile();
@@ -120,4 +120,4 @@ export function SubjectTrendChart({ data }: SubjectTrendChartProps) {
   );
 }
 
-export default SubjectTrendChart;
+export default TaskTrendChart;

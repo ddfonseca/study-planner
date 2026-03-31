@@ -18,7 +18,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useSubjectStore } from '@/store/subjectStore';
+import { useTaskStore } from '@/store/taskStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useCategoryStore } from '@/store/categoryStore';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Subject } from '@/types/api';
+import type { Task } from '@/types/api';
 
 // Color palette for subjects
 const COLOR_OPTIONS = [
@@ -71,24 +71,24 @@ interface EditingSubject {
   categoryIds: string[];
 }
 
-export function SubjectsContent() {
+export function TasksContent() {
   const { workspaces, currentWorkspaceId } = useWorkspaceStore();
   const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) || null;
   const {
-    subjects,
+    tasks,
     isLoading,
     isSaving,
     error,
-    fetchSubjects,
-    createSubject,
-    updateSubject,
-    archiveSubject,
-    unarchiveSubject,
-    permanentDeleteSubject,
-    mergeSubjects,
-    reorderSubjects,
+    fetchTasks,
+    createTask,
+    updateTask,
+    archiveTask,
+    unarchiveTask,
+    permanentDeleteTask,
+    mergeTasks,
+    reorderTasks,
     setError,
-  } = useSubjectStore();
+  } = useTaskStore();
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -126,16 +126,16 @@ export function SubjectsContent() {
   // Fetch subjects and categories when workspace changes
   useEffect(() => {
     if (currentWorkspace) {
-      fetchSubjects(currentWorkspace.id, showArchived);
+      fetchTasks(currentWorkspace.id, showArchived);
       fetchCategories(currentWorkspace.id);
     }
-  }, [currentWorkspace, showArchived, fetchSubjects, fetchCategories]);
+  }, [currentWorkspace, showArchived, fetchTasks, fetchCategories]);
 
   // Filter subjects based on archived state and categories
-  const activeSubjects = subjects.filter(s => !s.archivedAt);
-  const archivedSubjects = subjects.filter(s => s.archivedAt);
-  const filteredByArchive = showArchived ? subjects : activeSubjects;
-  const displayedSubjects = useMemo(() => {
+  const activeTasks = tasks.filter(s => !s.archivedAt);
+  const archivedTasks = tasks.filter(s => s.archivedAt);
+  const filteredByArchive = showArchived ? tasks : activeTasks;
+  const displayedTasks = useMemo(() => {
     if (selectedCategoryIds.length === 0) {
       return filteredByArchive;
     }
@@ -175,20 +175,20 @@ export function SubjectsContent() {
   const handleCreate = useCallback(async () => {
     if (!currentWorkspace || !newSubjectName.trim()) return;
     try {
-      await createSubject(currentWorkspace.id, { name: newSubjectName.trim() });
+      await createTask(currentWorkspace.id, { name: newSubjectName.trim() });
       setNewSubjectName('');
     } catch {
       // Error is handled in store
     }
-  }, [currentWorkspace, newSubjectName, createSubject]);
+  }, [currentWorkspace, newSubjectName, createTask]);
 
   // Handle start editing
-  const handleStartEdit = (subject: Subject) => {
+  const handleStartEdit = (task: Task) => {
     setEditingSubject({
-      id: subject.id,
-      name: subject.name,
-      color: subject.color,
-      categoryIds: subject.categories?.map(sc => sc.categoryId) || [],
+      id: task.id,
+      name: task.name,
+      color: task.color,
+      categoryIds: task.categories?.map(sc => sc.categoryId) || [],
     });
   };
 
@@ -196,7 +196,7 @@ export function SubjectsContent() {
   const handleSaveEdit = async () => {
     if (!editingSubject) return;
     try {
-      await updateSubject(editingSubject.id, {
+      await updateTask(editingSubject.id, {
         name: editingSubject.name,
         color: editingSubject.color ?? undefined,
         categoryIds: editingSubject.categoryIds,
@@ -210,7 +210,7 @@ export function SubjectsContent() {
   // Handle archive
   const handleArchive = async (id: string) => {
     try {
-      await archiveSubject(id);
+      await archiveTask(id);
       setConfirmArchive(null);
     } catch {
       // Error is handled in store
@@ -220,7 +220,7 @@ export function SubjectsContent() {
   // Handle unarchive
   const handleUnarchive = async (id: string) => {
     try {
-      await unarchiveSubject(id);
+      await unarchiveTask(id);
     } catch {
       // Error is handled in store
     }
@@ -230,11 +230,11 @@ export function SubjectsContent() {
   const handlePermanentDelete = async () => {
     if (!deletingSubjectId) return;
 
-    const subject = subjects.find((s) => s.id === deletingSubjectId);
-    if (!subject || deleteConfirmName !== subject.name) return;
+    const taskToDelete = tasks.find((s) => s.id === deletingSubjectId);
+    if (!taskToDelete || deleteConfirmName !== taskToDelete.name) return;
 
     try {
-      await permanentDeleteSubject(deletingSubjectId);
+      await permanentDeleteTask(deletingSubjectId);
       setDeletingSubjectId(null);
       setDeleteConfirmName('');
     } catch {
@@ -249,7 +249,7 @@ export function SubjectsContent() {
   };
 
   // Get deleting subject for display
-  const deletingSubject = subjects.find((s) => s.id === deletingSubjectId);
+  const deletingSubject = tasks.find((s) => s.id === deletingSubjectId);
 
   // Toggle merge selection
   const toggleMergeSelection = (id: string) => {
@@ -275,7 +275,7 @@ export function SubjectsContent() {
     if (!mergeTarget || selectedForMerge.size < 2) return;
     const sourceIds = Array.from(selectedForMerge).filter(id => id !== mergeTarget);
     try {
-      await mergeSubjects({ sourceIds, targetId: mergeTarget });
+      await mergeTasks({ sourceIds, targetId: mergeTarget });
       setSelectedForMerge(new Set());
       setMergeTarget(null);
       setIsMerging(false);
@@ -300,24 +300,24 @@ export function SubjectsContent() {
       }
 
       // Only reorder non-archived subjects
-      const activeSubjects = subjects.filter((s) => !s.archivedAt);
-      const oldIndex = activeSubjects.findIndex((s) => s.id === active.id);
-      const newIndex = activeSubjects.findIndex((s) => s.id === over.id);
+      const activeTasks = tasks.filter((s) => !s.archivedAt);
+      const oldIndex = activeTasks.findIndex((s) => s.id === active.id);
+      const newIndex = activeTasks.findIndex((s) => s.id === over.id);
 
       if (oldIndex === -1 || newIndex === -1) {
         return;
       }
 
-      const reordered = arrayMove(activeSubjects, oldIndex, newIndex);
+      const reordered = arrayMove(activeTasks, oldIndex, newIndex);
       const newSubjectIds = reordered.map((s) => s.id);
 
       try {
-        await reorderSubjects(currentWorkspace.id, newSubjectIds);
+        await reorderTasks(currentWorkspace.id, newSubjectIds);
       } catch {
         // Error is handled in store
       }
     },
-    [subjects, currentWorkspace, reorderSubjects]
+    [tasks, currentWorkspace, reorderTasks]
   );
 
   if (!currentWorkspace) {
@@ -356,7 +356,7 @@ export function SubjectsContent() {
             ) : (
               <>
                 <Eye className="h-4 w-4 mr-2" />
-                Mostrar arquivadas ({archivedSubjects.length})
+                Mostrar arquivadas ({archivedTasks.length})
               </>
             )}
           </Button>
@@ -500,7 +500,7 @@ export function SubjectsContent() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : displayedSubjects.length === 0 ? (
+      ) : displayedTasks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">Nenhum tópico cadastrado</h3>
@@ -515,19 +515,19 @@ export function SubjectsContent() {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={displayedSubjects.map((s) => s.id)}
+            items={displayedTasks.map((s) => s.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-2">
-              {displayedSubjects.map((subject) => {
-                const isEditing = editingSubject?.id === subject.id;
-                const isSelected = selectedForMerge.has(subject.id);
-                const isArchived = !!subject.archivedAt;
+              {displayedTasks.map((task) => {
+                const isEditing = editingSubject?.id === task.id;
+                const isSelected = selectedForMerge.has(task.id);
+                const isArchived = !!task.archivedAt;
 
                 return (
                   <SortableSubjectItem
-                    key={subject.id}
-                    subject={subject}
+                    key={task.id}
+                    subject={task}
                     disabled={isArchived || isEditing || isMerging}
                   >
                     <div
@@ -539,7 +539,7 @@ export function SubjectsContent() {
                       )}
                       onClick={() => {
                         if (isMerging && isSelected) {
-                          setMergeTarget(subject.id);
+                          setMergeTarget(task.id);
                           handleMerge();
                         }
                       }}
@@ -549,7 +549,7 @@ export function SubjectsContent() {
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => toggleMergeSelection(subject.id)}
+                          onChange={() => toggleMergeSelection(task.id)}
                           className="h-4 w-4 rounded border-gray-300"
                           disabled={isMerging}
                         />
@@ -565,7 +565,7 @@ export function SubjectsContent() {
                       ) : (
                         <span
                           className="w-4 h-4 rounded-full shrink-0"
-                          style={{ backgroundColor: subject.color || '#6b7280' }}
+                          style={{ backgroundColor: task.color || '#6b7280' }}
                         />
                       )}
 
@@ -597,9 +597,9 @@ export function SubjectsContent() {
                       ) : (
                         <div className="flex-1 flex items-center gap-2 flex-wrap">
                           <span className={cn("font-medium", isArchived && "line-through")}>
-                            {subject.name}
+                            {task.name}
                           </span>
-                          {subject.categories?.map((sc) => (
+                          {task.categories?.map((sc) => (
                             <Badge key={sc.id} variant="outline" className="text-xs font-normal">
                               <Tag className="h-2.5 w-2.5 mr-1" />
                               {sc.category.name}
@@ -644,7 +644,7 @@ export function SubjectsContent() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                onClick={() => handleStartEdit(subject)}
+                                onClick={() => handleStartEdit(task)}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
@@ -655,7 +655,7 @@ export function SubjectsContent() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8"
-                                  onClick={() => handleUnarchive(subject.id)}
+                                  onClick={() => handleUnarchive(task.id)}
                                   title="Desarquivar"
                                 >
                                   <ArchiveRestore className="h-4 w-4" />
@@ -664,7 +664,7 @@ export function SubjectsContent() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 text-destructive hover:text-destructive"
-                                  onClick={() => setDeletingSubjectId(subject.id)}
+                                  onClick={() => setDeletingSubjectId(task.id)}
                                   title="Deletar permanentemente"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -675,7 +675,7 @@ export function SubjectsContent() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                onClick={() => setConfirmArchive(subject.id)}
+                                onClick={() => setConfirmArchive(task.id)}
                                 title="Arquivar"
                               >
                                 <Archive className="h-4 w-4" />
@@ -781,8 +781,8 @@ export function SubjectsContent() {
   );
 }
 
-export function SubjectsPage() {
-  return <SubjectsContent />;
+export function TasksPage() {
+  return <TasksContent />;
 }
 
-export default SubjectsPage;
+export default TasksPage;

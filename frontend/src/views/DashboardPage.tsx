@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useCategoryStore } from '@/store/categoryStore';
-import { useSubjectStore } from '@/store/subjectStore';
+import { useTaskStore } from '@/store/taskStore';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useSessions } from '@/hooks/useSessions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +20,7 @@ import {
   CategoryFilter,
   DateRangeFilter,
   StatsCards,
-  SubjectChart,
+  TaskChart,
   DailyChart,
   AnnualHeatmap,
 } from '@/components/dashboard';
@@ -32,7 +32,7 @@ export function DashboardPage() {
   const { fetchSessions } = useSessions();
   const { currentWorkspaceId } = useWorkspaceStore();
   const { categories, fetchCategories } = useCategoryStore();
-  const { subjects } = useSubjectStore();
+  const { tasks } = useTaskStore();
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   const {
@@ -55,22 +55,22 @@ export function DashboardPage() {
   }, [currentWorkspaceId, fetchCategories]);
 
   // Get subject IDs that belong to selected categories
-  const filteredSubjectIds = useMemo((): string[] | null => {
+  const filteredTaskIds = useMemo((): string[] | null => {
     if (selectedCategoryIds.length === 0) return null;
-    return subjects
+    return tasks
       .filter(s => s.categories?.some(sc => selectedCategoryIds.includes(sc.categoryId)))
       .map(s => s.id);
-  }, [subjects, selectedCategoryIds]);
+  }, [tasks, selectedCategoryIds]);
 
   // Filter raw sessions by category for heatmap
   const filteredRawSessions = useMemo(() => {
-    if (!filteredSubjectIds) return rawSessions;
-    return rawSessions.filter(s => filteredSubjectIds.includes(s.subjectId));
-  }, [rawSessions, filteredSubjectIds]);
+    if (!filteredTaskIds) return rawSessions;
+    return rawSessions.filter(s => filteredTaskIds.includes(s.subjectId));
+  }, [rawSessions, filteredTaskIds]);
 
   // Recalculate stats for filtered sessions
   const filteredStats = useMemo(() => {
-    if (!filteredSubjectIds) return stats;
+    if (!filteredTaskIds) return stats;
     // If filtering, recalculate basic stats
     const totalMinutes = filteredRawSessions.reduce((sum, s) => sum + s.minutes, 0);
     const uniqueSubjects = new Set(filteredRawSessions.map(s => s.subjectId));
@@ -80,23 +80,23 @@ export function DashboardPage() {
       totalSubjects: uniqueSubjects.size,
       totalSessions: filteredRawSessions.length,
     };
-  }, [filteredSubjectIds, filteredRawSessions, stats]);
+  }, [filteredTaskIds, filteredRawSessions, stats]);
 
   // Filter chart data - filter labels/data by subject names
-  const filteredSubjectChartData = useMemo(() => {
-    if (!filteredSubjectIds) return subjectChartData;
+  const filteredTaskChartData = useMemo(() => {
+    if (!filteredTaskIds) return subjectChartData;
 
     // Get names of subjects that are in selected categories
-    const filteredSubjectNames = new Set(
-      subjects
-        .filter(s => filteredSubjectIds.includes(s.id))
+    const filteredTaskNames = new Set(
+      tasks
+        .filter(s => filteredTaskIds.includes(s.id))
         .map(s => s.name)
     );
 
     // Filter the chart data
     const filteredIndices: number[] = [];
     subjectChartData.labels.forEach((label, index) => {
-      if (filteredSubjectNames.has(label)) {
+      if (filteredTaskNames.has(label)) {
         filteredIndices.push(index);
       }
     });
@@ -114,7 +114,7 @@ export function DashboardPage() {
         ),
       })),
     };
-  }, [subjectChartData, filteredSubjectIds, subjects]);
+  }, [subjectChartData, filteredTaskIds, tasks]);
 
   const handleCategoryToggle = (categoryId: string) => {
     setSelectedCategoryIds(prev =>
@@ -197,7 +197,7 @@ export function DashboardPage() {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SubjectChart data={filteredSubjectChartData} />
+            <TaskChart data={filteredTaskChartData} />
             <DailyChart data={dailyChartData} />
           </div>
         </>

@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react'
 import { QuickAddSession } from './QuickAddSession'
 
 // Mock the recent subjects hook
-vi.mock('@/hooks/useRecentSubjects', () => ({
-  useRecentSubjects: vi.fn(() => ({
-    recentSubjects: [],
-    addRecentSubject: vi.fn(),
+vi.mock('@/hooks/useRecentTasks', () => ({
+  useRecentTasks: vi.fn(() => ({
+    recentTasks: [],
+    addRecentTask: vi.fn(),
   })),
 }))
 

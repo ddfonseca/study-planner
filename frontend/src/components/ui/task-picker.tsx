@@ -19,28 +19,28 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { Badge } from "@/components/ui/badge"
-import { DisciplinePicker } from "@/components/ui/discipline-picker"
-import type { Subject, Discipline } from "@/types/api"
+import { ProjectPicker } from "@/components/ui/project-picker"
+import type { Task, Project } from "@/types/api"
 
 // Internal representation for unified handling
-interface SubjectItem {
+interface TaskItem {
   id: string
   name: string
   color?: string | null
   icon?: string | null
 }
 
-// Props when using Subject[] (new mode)
-interface SubjectPickerPropsWithSubjects {
+// Props when using Task[] (new mode)
+interface TaskPickerPropsWithTasks {
   value: string // Subject ID or name (depending on mode)
   onValueChange: (value: string) => void
-  subjects: Subject[]
-  recentSubjects?: string[] // Recent subject IDs
-  onSubjectUsed?: (subjectId: string) => void
+  subjects: Task[]
+  recentTasks?: string[] // Recent subject IDs
+  onTaskUsed?: (subjectId: string) => void
   /** Called when user wants to create a new subject. Returns the created Subject. */
-  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>
-  /** Optional list of disciplines. If provided, shows discipline picker when creating new subject. */
-  disciplines?: Discipline[]
+  onCreateTask?: (data: { name: string; projectId?: string }) => Promise<Task>
+  /** Optional list of projects. If provided, shows discipline picker when creating new subject. */
+  projects?: Project[]
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
@@ -53,13 +53,13 @@ interface SubjectPickerPropsWithSubjects {
 }
 
 // Props when using string[] (legacy mode)
-interface SubjectPickerPropsLegacy {
+interface TaskPickerPropsLegacy {
   value: string
   onValueChange: (value: string) => void
   subjects: string[]
-  recentSubjects?: string[]
-  onSubjectUsed?: (subject: string) => void
-  onCreateSubject?: never
+  recentTasks?: string[]
+  onTaskUsed?: (subject: string) => void
+  onCreateTask?: never
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
@@ -70,11 +70,11 @@ interface SubjectPickerPropsLegacy {
   useNameAsValue?: never
 }
 
-export type SubjectPickerProps = SubjectPickerPropsWithSubjects | SubjectPickerPropsLegacy
+export type TaskPickerProps = TaskPickerPropsWithTasks | TaskPickerPropsLegacy
 
-// Type guard to check if subjects is Subject[]
-function isSubjectArray(subjects: Subject[] | string[]): subjects is Subject[] {
-  return subjects.length === 0 || typeof subjects[0] === 'object'
+// Type guard to check if tasks is Task[]
+function isTaskArray(items: Task[] | string[]): items is Task[] {
+  return items.length === 0 || typeof items[0] === 'object'
 }
 
 // Normalize string for search (remove accents, lowercase)
@@ -82,8 +82,8 @@ const normalizeString = (str: string) =>
   str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 
 // Group subjects by first letter
-function groupByFirstLetter(subjects: SubjectItem[]): Map<string, SubjectItem[]> {
-  const groups = new Map<string, SubjectItem[]>()
+function groupByFirstLetter(subjects: TaskItem[]): Map<string, TaskItem[]> {
+  const groups = new Map<string, TaskItem[]>()
   const sorted = [...subjects].sort((a, b) =>
     a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
   )
@@ -98,33 +98,33 @@ function groupByFirstLetter(subjects: SubjectItem[]): Map<string, SubjectItem[]>
 }
 
 // Shared content component for both Popover and Drawer
-interface SubjectPickerContentProps {
-  subjects: SubjectItem[]
-  recentSubjects: SubjectItem[]
+interface TaskPickerContentProps {
+  subjects: TaskItem[]
+  recentTasks: TaskItem[]
   selectedId: string
   inputValue: string
   onInputChange: (value: string) => void
-  onSelect: (subject: SubjectItem) => void
+  onSelect: (subject: TaskItem) => void
   onCreateNew: () => void
   showCreateOption: boolean
   isCreating: boolean
-  matchingOptions: SubjectItem[]
+  matchingOptions: TaskItem[]
   emptyMessage: string
   searchPlaceholder: string
   isMobile: boolean
   // Props for create form
   showCreateForm: boolean
   pendingName: string
-  disciplines?: Discipline[]
-  selectedDisciplineId: string
+  projects?: Project[]
+  selectedProjectId: string
   onDisciplineChange: (id: string) => void
   onConfirmCreate: () => void
   onCancelCreate: () => void
 }
 
-function SubjectPickerContent({
+function TaskPickerContent({
   subjects,
-  recentSubjects,
+  recentTasks,
   selectedId,
   inputValue,
   onInputChange,
@@ -138,12 +138,12 @@ function SubjectPickerContent({
   isMobile,
   showCreateForm,
   pendingName,
-  disciplines,
-  selectedDisciplineId,
+  projects,
+  selectedProjectId,
   onDisciplineChange,
   onConfirmCreate,
   onCancelCreate,
-}: SubjectPickerContentProps) {
+}: TaskPickerContentProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const grouped = React.useMemo(
     () => groupByFirstLetter(matchingOptions),
@@ -153,13 +153,13 @@ function SubjectPickerContent({
   // Filter recents that exist in subjects and match search
   const filteredRecents = React.useMemo(() => {
     const subjectIds = new Set(subjects.map(s => s.id))
-    if (!inputValue) return recentSubjects.filter((r) => subjectIds.has(r.id))
-    return recentSubjects.filter(
+    if (!inputValue) return recentTasks.filter((r) => subjectIds.has(r.id))
+    return recentTasks.filter(
       (r) =>
         subjectIds.has(r.id) &&
         normalizeString(r.name).includes(normalizeString(inputValue))
     )
-  }, [recentSubjects, subjects, inputValue])
+  }, [recentTasks, subjects, inputValue])
 
   // Focus input on mount for mobile
   React.useEffect(() => {
@@ -172,7 +172,7 @@ function SubjectPickerContent({
   }, [isMobile])
 
   // Render create form when showing
-  if (showCreateForm && disciplines) {
+  if (showCreateForm && projects) {
     return (
       <div className={cn("flex flex-col p-4 space-y-4", isMobile ? "h-full" : "")}>
         <div className="space-y-2">
@@ -186,10 +186,10 @@ function SubjectPickerContent({
           <label className="text-sm font-medium">
             Disciplina <span className="text-muted-foreground font-normal">(opcional)</span>
           </label>
-          <DisciplinePicker
-            value={selectedDisciplineId}
+          <ProjectPicker
+            value={selectedProjectId}
             onValueChange={onDisciplineChange}
-            disciplines={disciplines}
+            projects={projects}
             placeholder="Selecione uma disciplina"
             searchPlaceholder="Buscar disciplina..."
             emptyMessage="Nenhuma disciplina"
@@ -366,13 +366,13 @@ function SubjectPickerContent({
   )
 }
 
-export function SubjectPicker(props: SubjectPickerProps) {
+export function TaskPicker(props: TaskPickerProps) {
   const {
     value,
     onValueChange,
     subjects,
-    recentSubjects = [],
-    onSubjectUsed,
+    recentTasks = [],
+    onTaskUsed,
     placeholder = "Selecione...",
     searchPlaceholder = "Buscar matéria...",
     emptyMessage = "Nenhuma matéria encontrada.",
@@ -382,25 +382,25 @@ export function SubjectPicker(props: SubjectPickerProps) {
     onOpenChange,
   } = props
 
-  const onCreateSubject = 'onCreateSubject' in props ? props.onCreateSubject : undefined
+  const onCreateTask = 'onCreateTask' in props ? props.onCreateTask : undefined
   const useNameAsValue = 'useNameAsValue' in props ? props.useNameAsValue : undefined
-  const disciplines = 'disciplines' in props ? props.disciplines : undefined
+  const projects = 'projects' in props ? props.projects : undefined
 
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
   const [isCreating, setIsCreating] = React.useState(false)
   const [showCreateForm, setShowCreateForm] = React.useState(false)
   const [pendingName, setPendingName] = React.useState("")
-  const [selectedDisciplineId, setSelectedDisciplineId] = React.useState("")
+  const [selectedProjectId, setSelectedProjectId] = React.useState("")
   const isMobile = useIsMobile()
 
   // Detect mode based on subjects type
-  const isObjectMode = isSubjectArray(subjects)
+  const isObjectMode = isTaskArray(subjects)
 
   // Convert subjects to internal format
-  const subjectItems: SubjectItem[] = React.useMemo(() => {
+  const subjectItems: TaskItem[] = React.useMemo(() => {
     if (isObjectMode) {
-      return (subjects as Subject[]).map(s => ({
+      return (subjects as Task[]).map(s => ({
         id: s.id,
         name: s.name,
         color: s.color,
@@ -415,19 +415,19 @@ export function SubjectPicker(props: SubjectPickerProps) {
   }, [subjects, isObjectMode])
 
   // Convert recent subjects to internal format
-  const recentItems: SubjectItem[] = React.useMemo(() => {
+  const recentItems: TaskItem[] = React.useMemo(() => {
     if (isObjectMode) {
-      // recentSubjects contains IDs, find full objects
-      return recentSubjects
+      // recentTasks contains IDs, find full objects
+      return recentTasks
         .map(id => subjectItems.find(s => s.id === id))
-        .filter((s): s is SubjectItem => s !== undefined)
+        .filter((s): s is TaskItem => s !== undefined)
     }
-    // Legacy: recentSubjects contains names
-    return (recentSubjects as string[]).map(s => ({
+    // Legacy: recentTasks contains names
+    return (recentTasks as string[]).map(s => ({
       id: s,
       name: s,
     }))
-  }, [recentSubjects, subjectItems, isObjectMode])
+  }, [recentTasks, subjectItems, isObjectMode])
 
   // Get selected ID (in object mode with useNameAsValue, find by name)
   const selectedId = React.useMemo(() => {
@@ -473,11 +473,11 @@ export function SubjectPicker(props: SubjectPickerProps) {
 
   const showCreateOption = Boolean(inputValue.trim()) && !exactMatch
 
-  const handleSelect = (subject: SubjectItem) => {
+  const handleSelect = (subject: TaskItem) => {
     // Return ID for object mode (unless useNameAsValue), name for legacy
     const returnValue = isObjectMode && !useNameAsValue ? subject.id : subject.name
     onValueChange(returnValue)
-    onSubjectUsed?.(isObjectMode ? subject.id : subject.name)
+    onTaskUsed?.(isObjectMode ? subject.id : subject.name)
     setInputValue("")
     setOpen(false)
   }
@@ -485,9 +485,9 @@ export function SubjectPicker(props: SubjectPickerProps) {
   const handleCreateNew = async () => {
     if (!inputValue.trim()) return
 
-    if (onCreateSubject) {
-      // If disciplines are available, show the create form first
-      if (disciplines && disciplines.length > 0) {
+    if (onCreateTask) {
+      // If projects are available, show the create form first
+      if (projects && projects.length > 0) {
         setPendingName(inputValue.trim())
         setShowCreateForm(true)
         return
@@ -496,10 +496,10 @@ export function SubjectPicker(props: SubjectPickerProps) {
       // Object mode with API creation (no discipline selection)
       setIsCreating(true)
       try {
-        const newSubject = await onCreateSubject({ name: inputValue.trim() })
-        const returnValue = useNameAsValue ? newSubject.name : newSubject.id
+        const newTask = await onCreateTask({ name: inputValue.trim() })
+        const returnValue = useNameAsValue ? newTask.name : newTask.id
         onValueChange(returnValue)
-        onSubjectUsed?.(newSubject.id)
+        onTaskUsed?.(newTask.id)
         setInputValue("")
         setOpen(false)
       } catch (error) {
@@ -510,27 +510,27 @@ export function SubjectPicker(props: SubjectPickerProps) {
     } else {
       // Legacy mode: just return the name
       onValueChange(inputValue.trim())
-      onSubjectUsed?.(inputValue.trim())
+      onTaskUsed?.(inputValue.trim())
       setInputValue("")
       setOpen(false)
     }
   }
 
   const handleConfirmCreate = async () => {
-    if (!pendingName || !onCreateSubject) return
+    if (!pendingName || !onCreateTask) return
 
     setIsCreating(true)
     try {
-      const newSubject = await onCreateSubject({
+      const newTask = await onCreateTask({
         name: pendingName,
-        disciplineId: selectedDisciplineId || undefined,
+        projectId: selectedProjectId || undefined,
       })
-      const returnValue = useNameAsValue ? newSubject.name : newSubject.id
+      const returnValue = useNameAsValue ? newTask.name : newTask.id
       onValueChange(returnValue)
-      onSubjectUsed?.(newSubject.id)
+      onTaskUsed?.(newTask.id)
       setInputValue("")
       setPendingName("")
-      setSelectedDisciplineId("")
+      setSelectedProjectId("")
       setShowCreateForm(false)
       setOpen(false)
     } catch (error) {
@@ -543,7 +543,7 @@ export function SubjectPicker(props: SubjectPickerProps) {
   const handleCancelCreate = () => {
     setShowCreateForm(false)
     setPendingName("")
-    setSelectedDisciplineId("")
+    setSelectedProjectId("")
   }
 
   const triggerButton = (
@@ -584,9 +584,9 @@ export function SubjectPicker(props: SubjectPickerProps) {
               </DrawerClose>
             </div>
           </DrawerHeader>
-          <SubjectPickerContent
+          <TaskPickerContent
             subjects={subjectItems}
-            recentSubjects={recentItems}
+            recentTasks={recentItems}
             selectedId={selectedId}
             inputValue={inputValue}
             onInputChange={setInputValue}
@@ -600,9 +600,9 @@ export function SubjectPicker(props: SubjectPickerProps) {
             isMobile={true}
             showCreateForm={showCreateForm}
             pendingName={pendingName}
-            disciplines={disciplines}
-            selectedDisciplineId={selectedDisciplineId}
-            onDisciplineChange={setSelectedDisciplineId}
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            onDisciplineChange={setSelectedProjectId}
             onConfirmCreate={handleConfirmCreate}
             onCancelCreate={handleCancelCreate}
           />
@@ -619,9 +619,9 @@ export function SubjectPicker(props: SubjectPickerProps) {
         className="w-[--radix-popover-trigger-width] p-0"
         align="start"
       >
-        <SubjectPickerContent
+        <TaskPickerContent
           subjects={subjectItems}
-          recentSubjects={recentItems}
+          recentTasks={recentItems}
           selectedId={selectedId}
           inputValue={inputValue}
           onInputChange={setInputValue}
@@ -635,9 +635,9 @@ export function SubjectPicker(props: SubjectPickerProps) {
           isMobile={false}
           showCreateForm={showCreateForm}
           pendingName={pendingName}
-          disciplines={disciplines}
-          selectedDisciplineId={selectedDisciplineId}
-          onDisciplineChange={setSelectedDisciplineId}
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onDisciplineChange={setSelectedProjectId}
           onConfirmCreate={handleConfirmCreate}
           onCancelCreate={handleCancelCreate}
         />

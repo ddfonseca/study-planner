@@ -40,7 +40,7 @@ vi.mock('@/components/dashboard', () => ({
   StatsCards: vi.fn(({ stats }) => (
     <div data-testid="stats-cards">Stats: {stats.totalMinutes} min</div>
   )),
-  SubjectChart: vi.fn(() => <div data-testid="subject-chart">Subject Chart</div>),
+  TaskChart: vi.fn(() => <div data-testid="subject-chart">Subject Chart</div>),
   DailyChart: vi.fn(() => <div data-testid="daily-chart">Daily Chart</div>),
   AnnualHeatmap: vi.fn(() => <div data-testid="annual-heatmap">Annual Heatmap</div>),
 }))

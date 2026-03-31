@@ -1,26 +1,26 @@
 /**
- * Study Cycle Store using Zustand
- * Manages study cycle state per workspace
+ * Focus Cycle Store using Zustand
+ * Manages focus cycle state per workspace
  */
 import { create } from 'zustand';
 import type {
-  StudyCycle,
+  FocusCycle,
   CycleSuggestion,
-  CreateStudyCycleDto,
-  UpdateStudyCycleDto,
+  CreateFocusCycleDto,
+  UpdateFocusCycleDto,
 } from '@/types/api';
-import { studyCycleApi } from '@/lib/api';
+import { focusCycleApi } from '@/lib/api';
 
-interface StudyCycleState {
-  cycle: StudyCycle | null;
-  cycles: StudyCycle[];
+interface FocusCycleState {
+  cycle: FocusCycle | null;
+  cycles: FocusCycle[];
   suggestion: CycleSuggestion | null;
   isLoading: boolean;
   error: string | null;
   currentWorkspaceId: string | null;
 }
 
-interface StudyCycleActions {
+interface FocusCycleActions {
   /**
    * Fetch active cycle for a workspace
    */
@@ -37,23 +37,23 @@ interface StudyCycleActions {
   activateCycle: (workspaceId: string, cycleId: string) => Promise<void>;
 
   /**
-   * Fetch current study suggestion
+   * Fetch current suggestion
    */
   fetchSuggestion: (workspaceId: string) => Promise<void>;
 
   /**
    * Create a new cycle
    */
-  createCycle: (workspaceId: string, data: CreateStudyCycleDto) => Promise<StudyCycle>;
+  createCycle: (workspaceId: string, data: CreateFocusCycleDto) => Promise<FocusCycle>;
 
   /**
    * Update existing cycle
    */
-  updateCycle: (workspaceId: string, data: UpdateStudyCycleDto) => Promise<StudyCycle>;
+  updateCycle: (workspaceId: string, data: UpdateFocusCycleDto) => Promise<FocusCycle>;
 
   /**
    * Advance to next item in cycle
-   * @param forceComplete - If true, marks current subject as complete
+   * @param forceComplete - If true, marks current task as complete
    */
   advanceToNext: (workspaceId: string, forceComplete?: boolean) => Promise<void>;
 
@@ -78,9 +78,9 @@ interface StudyCycleActions {
   refresh: (workspaceId: string) => Promise<void>;
 }
 
-type StudyCycleStore = StudyCycleState & StudyCycleActions;
+type FocusCycleStore = FocusCycleState & FocusCycleActions;
 
-export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
+export const useFocusCycleStore = create<FocusCycleStore>()((set, get) => ({
   cycle: null,
   cycles: [],
   suggestion: null,
@@ -91,7 +91,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   fetchCycle: async (workspaceId: string) => {
     try {
       set({ isLoading: true, error: null, currentWorkspaceId: workspaceId });
-      const cycle = await studyCycleApi.getCycle(workspaceId);
+      const cycle = await focusCycleApi.getCycle(workspaceId);
       set({ cycle, isLoading: false });
     } catch (error) {
       set({
@@ -104,7 +104,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
 
   fetchCycles: async (workspaceId: string) => {
     try {
-      const cycles = await studyCycleApi.listCycles(workspaceId);
+      const cycles = await focusCycleApi.listCycles(workspaceId);
       set({ cycles });
     } catch (error) {
       set({
@@ -117,7 +117,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   activateCycle: async (workspaceId: string, cycleId: string) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.activateCycle(workspaceId, cycleId);
+      const cycle = await focusCycleApi.activateCycle(workspaceId, cycleId);
       set({ cycle, isLoading: false });
       // Refresh cycles list and suggestion
       await get().fetchCycles(workspaceId);
@@ -133,7 +133,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
 
   fetchSuggestion: async (workspaceId: string) => {
     try {
-      const suggestion = await studyCycleApi.getSuggestion(workspaceId);
+      const suggestion = await focusCycleApi.getSuggestion(workspaceId);
       set({ suggestion });
     } catch (error) {
       set({
@@ -143,10 +143,10 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
     }
   },
 
-  createCycle: async (workspaceId: string, data: CreateStudyCycleDto) => {
+  createCycle: async (workspaceId: string, data: CreateFocusCycleDto) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.create(workspaceId, data);
+      const cycle = await focusCycleApi.create(workspaceId, data);
       set({ cycle, isLoading: false });
       // Refresh suggestion after creating cycle
       await get().fetchSuggestion(workspaceId);
@@ -160,10 +160,10 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
     }
   },
 
-  updateCycle: async (workspaceId: string, data: UpdateStudyCycleDto) => {
+  updateCycle: async (workspaceId: string, data: UpdateFocusCycleDto) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.update(workspaceId, data);
+      const cycle = await focusCycleApi.update(workspaceId, data);
       set({ cycle, isLoading: false });
       // Refresh suggestion after updating
       await get().fetchSuggestion(workspaceId);
@@ -180,7 +180,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   advanceToNext: async (workspaceId: string, forceComplete?: boolean) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.advance(workspaceId, forceComplete);
+      const cycle = await focusCycleApi.advance(workspaceId, forceComplete);
       set({ cycle, isLoading: false });
       // Refresh suggestion after advancing
       await get().fetchSuggestion(workspaceId);
@@ -196,7 +196,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   deleteCycle: async (workspaceId: string) => {
     try {
       set({ isLoading: true, error: null });
-      await studyCycleApi.delete(workspaceId);
+      await focusCycleApi.delete(workspaceId);
       set({ cycle: null, suggestion: null, isLoading: false });
     } catch (error) {
       set({
@@ -210,7 +210,7 @@ export const useStudyCycleStore = create<StudyCycleStore>()((set, get) => ({
   resetCycle: async (workspaceId: string) => {
     try {
       set({ isLoading: true, error: null });
-      const cycle = await studyCycleApi.reset(workspaceId);
+      const cycle = await focusCycleApi.reset(workspaceId);
       set({ cycle, isLoading: false });
       // Refresh suggestion after resetting
       await get().fetchSuggestion(workspaceId);
@@ -265,4 +265,4 @@ export function calculateCycleProgress(accumulated: number, target: number): num
   return Math.min(100, (accumulated / target) * 100);
 }
 
-export default useStudyCycleStore;
+export default useFocusCycleStore;

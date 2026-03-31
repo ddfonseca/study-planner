@@ -4,7 +4,7 @@
 import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { useStudyCycleStore } from '@/store/studyCycleStore';
+import { useFocusCycleStore } from '@/store/focusCycleStore';
 import type { CreateSessionDto, UpdateSessionDto, Session } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
 import { formatDateKey } from '@/lib/utils/date';
@@ -33,7 +33,7 @@ export function useSessions() {
   } = useSessionStore();
 
   const { currentWorkspaceId } = useWorkspaceStore();
-  const { cycle, fetchSuggestion } = useStudyCycleStore();
+  const { cycle, fetchSuggestion } = useFocusCycleStore();
 
   // Effective workspace ID ("all" for consolidated view)
   const effectiveWorkspaceId = currentWorkspaceId || 'all';

@@ -5,10 +5,10 @@ import { SessionModal } from './SessionModal'
 import type { DayData } from '@/types/session'
 
 // Mock the hooks and components
-vi.mock('@/hooks/useRecentSubjects', () => ({
-  useRecentSubjects: vi.fn(() => ({
-    recentSubjects: [],
-    addRecentSubject: vi.fn(),
+vi.mock('@/hooks/useRecentTasks', () => ({
+  useRecentTasks: vi.fn(() => ({
+    recentTasks: [],
+    addRecentTask: vi.fn(),
   })),
 }))
 

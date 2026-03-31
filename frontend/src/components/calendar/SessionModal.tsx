@@ -13,25 +13,25 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SubjectPicker } from '@/components/ui/subject-picker';
-import { useRecentSubjects } from '@/hooks/useRecentSubjects';
+import { TaskPicker } from '@/components/ui/task-picker';
+import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
 import type { DayData, StudySession } from '@/types/session';
-import type { Subject, Discipline } from '@/types/api';
+import type { Task, Project } from '@/types/api';
 
 interface SessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   date: Date | null;
   dayData: DayData;
-  subjects: Subject[];
-  disciplines?: Discipline[];
+  subjects: Task[];
+  disciplines?: Project[];
   onAddSession: (subjectId: string, minutes: number) => Promise<void>;
   onUpdateSession: (id: string, subjectId: string, minutes: number) => Promise<void>;
   onDeleteSession: (id: string) => Promise<void>;
-  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>;
+  onCreateTask?: (data: { name: string; disciplineId?: string }) => Promise<Task>;
   canModify?: boolean;
   highlighted?: boolean;
 }
@@ -46,7 +46,7 @@ export function SessionModal({
   onAddSession,
   onUpdateSession,
   onDeleteSession,
-  onCreateSubject,
+  onCreateTask,
   canModify = true,
   highlighted = false,
 }: SessionModalProps) {
@@ -55,7 +55,7 @@ export function SessionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const { recentSubjects, addRecentSubject } = useRecentSubjects();
+  const { recentTasks, addRecentTask } = useRecentTasks();
 
   const isEditing = editingSession !== null;
 
@@ -141,14 +141,14 @@ export function SessionModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="subject">Matéria</Label>
-                <SubjectPicker
+                <TaskPicker
                   value={subjectId}
                   onValueChange={setSubjectId}
                   subjects={subjects}
-                  disciplines={disciplines}
-                  recentSubjects={recentSubjects}
-                  onSubjectUsed={addRecentSubject}
-                  onCreateSubject={onCreateSubject}
+                  projects={disciplines}
+                  recentTasks={recentTasks}
+                  onTaskUsed={addRecentTask}
+                  onCreateTask={onCreateTask}
                   placeholder="Selecione ou digite..."
                   searchPlaceholder="Buscar matéria..."
                   emptyMessage="Nenhuma matéria encontrada"

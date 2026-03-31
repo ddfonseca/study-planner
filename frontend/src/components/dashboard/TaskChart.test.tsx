@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { SubjectChart } from './SubjectChart'
+import { TaskChart } from './TaskChart'
 import type { ChartData } from 'chart.js'
 
 // Mock chart.js to avoid canvas issues in tests
@@ -30,31 +30,31 @@ const emptyData: ChartData<'doughnut'> = {
   }],
 }
 
-describe('SubjectChart', () => {
+describe('TaskChart', () => {
   beforeEach(() => {
     mockIsMobile.mockReturnValue(false)
   })
 
   describe('rendering', () => {
     it('renders the chart title', () => {
-      render(<SubjectChart data={mockData} />)
+      render(<TaskChart data={mockData} />)
       expect(screen.getByText('Tempo por Matéria')).toBeInTheDocument()
     })
 
     it('renders the doughnut chart when data is available', () => {
-      render(<SubjectChart data={mockData} />)
+      render(<TaskChart data={mockData} />)
       expect(screen.getByTestId('doughnut-chart')).toBeInTheDocument()
     })
 
     it('renders empty state message when no data', () => {
-      render(<SubjectChart data={emptyData} />)
+      render(<TaskChart data={emptyData} />)
       expect(screen.getByText('Nenhum dado disponível')).toBeInTheDocument()
     })
   })
 
   describe('responsive layout', () => {
     it('renders card header with responsive padding', () => {
-      const { container } = render(<SubjectChart data={mockData} />)
+      const { container } = render(<TaskChart data={mockData} />)
       // CardHeader has base classes plus responsive overrides
       const header = container.querySelector('.pb-2.sm\\:pb-6')
 
@@ -62,7 +62,7 @@ describe('SubjectChart', () => {
     })
 
     it('renders card content with responsive padding', () => {
-      const { container } = render(<SubjectChart data={mockData} />)
+      const { container } = render(<TaskChart data={mockData} />)
       // CardContent has responsive padding classes
       const content = container.querySelector('.px-3.sm\\:px-6')
 
@@ -70,7 +70,7 @@ describe('SubjectChart', () => {
     })
 
     it('renders title with responsive font size', () => {
-      render(<SubjectChart data={mockData} />)
+      render(<TaskChart data={mockData} />)
       const title = screen.getByText('Tempo por Matéria')
 
       expect(title).toHaveClass('text-base')
@@ -78,7 +78,7 @@ describe('SubjectChart', () => {
     })
 
     it('renders chart container with responsive height', () => {
-      const { container } = render(<SubjectChart data={mockData} />)
+      const { container } = render(<TaskChart data={mockData} />)
       const chartContainer = container.querySelector('[class*="h-\\[280px\\]"]')
 
       expect(chartContainer).toBeInTheDocument()
@@ -89,7 +89,7 @@ describe('SubjectChart', () => {
   describe('mobile behavior', () => {
     it('uses isMobile hook for responsive chart options', () => {
       mockIsMobile.mockReturnValue(true)
-      render(<SubjectChart data={mockData} />)
+      render(<TaskChart data={mockData} />)
 
       // The hook should be called
       expect(mockIsMobile).toHaveBeenCalled()
@@ -98,7 +98,7 @@ describe('SubjectChart', () => {
 
   describe('empty state responsive', () => {
     it('renders empty state with responsive height', () => {
-      const { container } = render(<SubjectChart data={emptyData} />)
+      const { container } = render(<TaskChart data={emptyData} />)
       const emptyContainer = container.querySelector('[class*="h-\\[280px\\]"][class*="flex"]')
 
       expect(emptyContainer).toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('SubjectChart', () => {
     })
 
     it('renders empty text with responsive font size', () => {
-      render(<SubjectChart data={emptyData} />)
+      render(<TaskChart data={emptyData} />)
       const emptyText = screen.getByText('Nenhum dado disponível')
 
       expect(emptyText).toHaveClass('text-sm')

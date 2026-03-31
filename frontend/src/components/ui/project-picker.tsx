@@ -18,13 +18,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import type { Discipline } from "@/types/api"
+import type { Project } from "@/types/api"
 
-export interface DisciplinePickerProps {
-  value: string // Discipline ID
+export interface ProjectPickerProps {
+  value: string // Project ID
   onValueChange: (value: string) => void
-  disciplines: Discipline[]
-  onCreateDiscipline?: (name: string) => Promise<Discipline>
+  projects: Project[]
+  onCreateProject?: (name: string) => Promise<Project>
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
@@ -38,39 +38,39 @@ export interface DisciplinePickerProps {
 const normalizeString = (str: string) =>
   str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 
-// Group disciplines by first letter
-function groupByFirstLetter(disciplines: Discipline[]): Map<string, Discipline[]> {
-  const groups = new Map<string, Discipline[]>()
-  const sorted = [...disciplines].sort((a, b) =>
+// Group projects by first letter
+function groupByFirstLetter(projects: Project[]): Map<string, Project[]> {
+  const groups = new Map<string, Project[]>()
+  const sorted = [...projects].sort((a, b) =>
     a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
   )
 
-  sorted.forEach((discipline) => {
-    const letter = discipline.name[0].toUpperCase()
+  sorted.forEach((project) => {
+    const letter = project.name[0].toUpperCase()
     if (!groups.has(letter)) groups.set(letter, [])
-    groups.get(letter)!.push(discipline)
+    groups.get(letter)!.push(project)
   })
 
   return groups
 }
 
 // Shared content component for both Popover and Drawer
-interface DisciplinePickerContentProps {
-  disciplines: Discipline[]
+interface ProjectPickerContentProps {
+  projects: Project[]
   selectedId: string
   inputValue: string
   onInputChange: (value: string) => void
-  onSelect: (discipline: Discipline) => void
+  onSelect: (discipline: Project) => void
   onCreateNew: () => void
   showCreateOption: boolean
   isCreating: boolean
-  matchingOptions: Discipline[]
+  matchingOptions: Project[]
   emptyMessage: string
   searchPlaceholder: string
   isMobile: boolean
 }
 
-function DisciplinePickerContent({
+function ProjectPickerContent({
   selectedId,
   inputValue,
   onInputChange,
@@ -82,7 +82,7 @@ function DisciplinePickerContent({
   emptyMessage,
   searchPlaceholder,
   isMobile,
-}: DisciplinePickerContentProps) {
+}: ProjectPickerContentProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const grouped = React.useMemo(
     () => groupByFirstLetter(matchingOptions),
@@ -140,39 +140,39 @@ function DisciplinePickerContent({
                 <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover" aria-hidden="true">
                   {letter}
                 </p>
-                {items.map((discipline) => (
+                {items.map((project) => (
                   <button
-                    key={discipline.id}
-                    onClick={() => onSelect(discipline)}
+                    key={project.id}
+                    onClick={() => onSelect(project)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        onSelect(discipline)
+                        onSelect(project)
                       }
                     }}
                     role="option"
-                    aria-selected={selectedId === discipline.id}
+                    aria-selected={selectedId === project.id}
                     className={cn(
                       "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors",
                       "hover:bg-accent hover:text-accent-foreground",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      selectedId === discipline.id && "bg-accent"
+                      selectedId === project.id && "bg-accent"
                     )}
                   >
                     <Layers className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
-                    {discipline.color && (
+                    {project.color && (
                       <span
                         className="w-2 h-2 rounded-full mr-2 shrink-0"
-                        style={{ backgroundColor: discipline.color }}
+                        style={{ backgroundColor: project.color }}
                       />
                     )}
-                    <span className="flex-1 text-left">{discipline.name}</span>
-                    {discipline.subjects && discipline.subjects.length > 0 && (
+                    <span className="flex-1 text-left">{project.name}</span>
+                    {project.tasks && project.tasks.length > 0 && (
                       <span className="text-xs text-muted-foreground mr-2">
-                        ({discipline.subjects.length})
+                        ({project.tasks.length})
                       </span>
                     )}
-                    {selectedId === discipline.id && (
+                    {selectedId === project.id && (
                       <Check className="h-4 w-4 text-primary" />
                     )}
                   </button>
@@ -217,12 +217,12 @@ function DisciplinePickerContent({
   )
 }
 
-export function DisciplinePicker(props: DisciplinePickerProps) {
+export function ProjectPicker(props: ProjectPickerProps) {
   const {
     value,
     onValueChange,
-    disciplines,
-    onCreateDiscipline,
+    projects,
+    onCreateProject,
     placeholder = "Selecione...",
     searchPlaceholder = "Buscar disciplina...",
     emptyMessage = "Nenhuma disciplina encontrada.",
@@ -250,37 +250,37 @@ export function DisciplinePicker(props: DisciplinePickerProps) {
   // Get display value
   const displayValue = React.useMemo(() => {
     if (!value) return ""
-    const found = disciplines.find(d => d.id === value)
+    const found = projects.find(d => d.id === value)
     return found?.name ?? ""
-  }, [value, disciplines])
+  }, [value, projects])
 
   const matchingOptions = React.useMemo(
     () =>
-      disciplines.filter((option) =>
+      projects.filter((option) =>
         normalizeString(option.name).includes(normalizeString(inputValue))
       ),
-    [disciplines, inputValue]
+    [projects, inputValue]
   )
 
-  const exactMatch = disciplines.some(
+  const exactMatch = projects.some(
     (option) => normalizeString(option.name) === normalizeString(inputValue)
   )
 
-  const showCreateOption = Boolean(inputValue.trim()) && !exactMatch && !!onCreateDiscipline
+  const showCreateOption = Boolean(inputValue.trim()) && !exactMatch && !!onCreateProject
 
-  const handleSelect = (discipline: Discipline) => {
+  const handleSelect = (discipline: Project) => {
     onValueChange(discipline.id)
     setInputValue("")
     setOpen(false)
   }
 
   const handleCreateNew = async () => {
-    if (!inputValue.trim() || !onCreateDiscipline) return
+    if (!inputValue.trim() || !onCreateProject) return
 
     setIsCreating(true)
     try {
-      const newDiscipline = await onCreateDiscipline(inputValue.trim())
-      onValueChange(newDiscipline.id)
+      const newProject = await onCreateProject(inputValue.trim())
+      onValueChange(newProject.id)
       setInputValue("")
       setOpen(false)
     } catch (error) {
@@ -337,8 +337,8 @@ export function DisciplinePicker(props: DisciplinePickerProps) {
               </DrawerClose>
             </div>
           </DrawerHeader>
-          <DisciplinePickerContent
-            disciplines={disciplines}
+          <ProjectPickerContent
+            projects={projects}
             selectedId={value}
             inputValue={inputValue}
             onInputChange={setInputValue}
@@ -364,8 +364,8 @@ export function DisciplinePicker(props: DisciplinePickerProps) {
         className="w-[--radix-popover-trigger-width] p-0"
         align="start"
       >
-        <DisciplinePickerContent
-          disciplines={disciplines}
+        <ProjectPickerContent
+          projects={projects}
           selectedId={value}
           inputValue={inputValue}
           onInputChange={setInputValue}

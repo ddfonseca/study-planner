@@ -1,11 +1,11 @@
 /**
- * Subject Analytics Page - Detailed analytics for individual subjects
+ * Task Analytics Page - Detailed analytics for individual tasks
  */
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSessionStore } from '@/store/sessionStore';
 import { useSessions } from '@/hooks/useSessions';
-import { useSubjectAnalytics } from '@/hooks/useSubjectAnalytics';
+import { useTaskAnalytics } from '@/hooks/useTaskAnalytics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonTransition } from '@/components/ui/skeleton-transition';
 import { Button } from '@/components/ui/button';
@@ -13,13 +13,13 @@ import { PieChart, ArrowLeft } from 'lucide-react';
 
 import {
   DateRangeFilter,
-  SubjectSelector,
-  SubjectStatsCards,
-  SubjectTrendChart,
-  SubjectWeeklyChart,
+  TaskSelector,
+  TaskStatsCards,
+  TaskTrendChart,
+  TaskWeeklyChart,
 } from '@/components/dashboard';
 
-export function SubjectAnalyticsPage() {
+export function TaskAnalyticsPage() {
   const { isLoading } = useSessionStore();
   const { fetchSessions } = useSessions();
   const {
@@ -31,7 +31,7 @@ export function SubjectAnalyticsPage() {
     weeklyChartData,
     setDateRangePreset,
     selectSubject,
-  } = useSubjectAnalytics();
+  } = useTaskAnalytics();
 
   useEffect(() => {
     fetchSessions();
@@ -69,7 +69,7 @@ export function SubjectAnalyticsPage() {
 
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <SubjectSelector
+          <TaskSelector
             subjects={subjects}
             selectedSubject={selectedSubject}
             onSelectSubject={selectSubject}
@@ -98,12 +98,12 @@ export function SubjectAnalyticsPage() {
       ) : (
         <>
           {/* Stats Cards */}
-          <SubjectStatsCards stats={stats} />
+          <TaskStatsCards stats={stats} />
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SubjectTrendChart data={trendChartData} />
-            <SubjectWeeklyChart data={weeklyChartData} />
+            <TaskTrendChart data={trendChartData} />
+            <TaskWeeklyChart data={weeklyChartData} />
           </div>
         </>
       )}
@@ -112,4 +112,4 @@ export function SubjectAnalyticsPage() {
   );
 }
 
-export default SubjectAnalyticsPage;
+export default TaskAnalyticsPage;

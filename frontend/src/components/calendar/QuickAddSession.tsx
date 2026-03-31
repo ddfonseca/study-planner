@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SubjectPicker } from '@/components/ui/subject-picker';
-import { useRecentSubjects } from '@/hooks/useRecentSubjects';
+import { TaskPicker } from '@/components/ui/task-picker';
+import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { Plus, Loader2 } from 'lucide-react';
 
 interface QuickAddSessionProps {
@@ -24,7 +24,7 @@ export function QuickAddSession({
   const [subject, setSubject] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { recentSubjects, addRecentSubject } = useRecentSubjects();
+  const { recentTasks, addRecentTask } = useRecentTasks();
 
   // Show message when in "all" mode
   if (!canModify) {
@@ -73,12 +73,12 @@ export function QuickAddSession({
             <Label htmlFor="quick-subject" className="text-xs">
               Matéria
             </Label>
-            <SubjectPicker
+            <TaskPicker
               value={subject}
               onValueChange={setSubject}
               subjects={subjects}
-              recentSubjects={recentSubjects}
-              onSubjectUsed={addRecentSubject}
+              recentTasks={recentTasks}
+              onTaskUsed={addRecentTask}
               placeholder="Selecione..."
               searchPlaceholder="Buscar..."
               emptyMessage="Nenhuma matéria"

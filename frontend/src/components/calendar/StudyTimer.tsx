@@ -4,8 +4,8 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { SubjectPicker } from '@/components/ui/subject-picker';
-import { useRecentSubjects } from '@/hooks/useRecentSubjects';
+import { TaskPicker } from '@/components/ui/task-picker';
+import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { useSessions } from '@/hooks/useSessions';
 import { useToast } from '@/hooks/use-toast';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -13,7 +13,7 @@ import { Play, Square, Clock, Timer, Infinity as InfinityIcon, Maximize2, Minimi
 import { TimerOfflineWarning } from './TimerOfflineWarning';
 import { cn } from '@/lib/utils';
 import { formatDateKey } from '@/lib/utils/date';
-import type { Subject, Discipline } from '@/types/api';
+import type { Task, Project } from '@/types/api';
 
 const STORAGE_KEY = 'studyTimer';
 
@@ -35,18 +35,18 @@ interface TimerState {
 }
 
 interface StudyTimerProps {
-  subjects: Subject[];
-  disciplines?: Discipline[];
+  subjects: Task[];
+  disciplines?: Project[];
   onRunningChange?: (isRunning: boolean) => void;
   fullscreen?: boolean;
   onFullscreenChange?: (fullscreen: boolean) => void;
-  onCreateSubject?: (data: { name: string; disciplineId?: string }) => Promise<Subject>;
+  onCreateTask?: (data: { name: string; disciplineId?: string }) => Promise<Task>;
 }
 
-export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen = false, onFullscreenChange, onCreateSubject }: StudyTimerProps) {
+export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen = false, onFullscreenChange, onCreateTask }: StudyTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
-  const { recentSubjects, addRecentSubject } = useRecentSubjects();
+  const { recentTasks, addRecentTask } = useRecentTasks();
   const { trigger: triggerHaptic, triggerPattern } = useHaptic();
 
   const [mode, setMode] = useState<TimerMode>('pomodoro-25');
@@ -509,14 +509,14 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
         {/* Subject input - only show when not running */}
         {!isRunning && (
           <div className={cn(isFullscreen && "max-w-md mx-auto")}>
-            <SubjectPicker
+            <TaskPicker
               value={subjectId}
               onValueChange={setSubjectId}
               subjects={subjects}
-              disciplines={disciplines}
-              recentSubjects={recentSubjects}
-              onSubjectUsed={addRecentSubject}
-              onCreateSubject={onCreateSubject}
+              projects={disciplines}
+              recentTasks={recentTasks}
+              onTaskUsed={addRecentTask}
+              onCreateTask={onCreateTask}
               placeholder="Selecione a matéria..."
               searchPlaceholder="Buscar..."
               emptyMessage="Nenhuma matéria"

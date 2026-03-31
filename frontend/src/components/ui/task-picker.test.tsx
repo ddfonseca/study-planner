@@ -1,20 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { SubjectPicker } from './subject-picker'
+import { TaskPicker } from './task-picker'
 
 // Mock the useIsMobile hook
 vi.mock('@/hooks/useMediaQuery', () => ({
   useIsMobile: vi.fn(() => false),
 }))
 
-describe('SubjectPicker', () => {
+describe('TaskPicker', () => {
   const defaultProps = {
     value: '',
     onValueChange: vi.fn(),
     subjects: ['Matemática', 'Física', 'Química', 'Biologia'],
-    recentSubjects: ['Matemática', 'Física'],
-    onSubjectUsed: vi.fn(),
+    recentTasks: ['Matemática', 'Física'],
+    onTaskUsed: vi.fn(),
     placeholder: 'Selecione...',
     searchPlaceholder: 'Buscar matéria...',
     emptyMessage: 'Nenhuma matéria encontrada',
@@ -27,7 +27,7 @@ describe('SubjectPicker', () => {
   describe('keyboard navigation for recent subjects', () => {
     it('recent subject badges have role="option"', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} />)
+      render(<TaskPicker {...defaultProps} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -38,7 +38,7 @@ describe('SubjectPicker', () => {
 
     it('recent subject badges have tabIndex=0', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} />)
+      render(<TaskPicker {...defaultProps} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -54,7 +54,7 @@ describe('SubjectPicker', () => {
     it('selects recent subject on Enter key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -71,7 +71,7 @@ describe('SubjectPicker', () => {
     it('selects recent subject on Space key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -88,7 +88,7 @@ describe('SubjectPicker', () => {
 
     it('recent subjects have aria-selected attribute', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} value="Matemática" />)
+      render(<TaskPicker {...defaultProps} value="Matemática" />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -104,7 +104,7 @@ describe('SubjectPicker', () => {
 
     it('recents container has role="listbox" with aria-label', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} />)
+      render(<TaskPicker {...defaultProps} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -117,7 +117,7 @@ describe('SubjectPicker', () => {
   describe('keyboard navigation for subject list', () => {
     it('subject buttons have role="option"', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} recentSubjects={[]} />)
+      render(<TaskPicker {...defaultProps} recentTasks={[]} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -129,7 +129,7 @@ describe('SubjectPicker', () => {
     it('subject buttons select on Enter key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} recentSubjects={[]} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} recentTasks={[]} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -145,7 +145,7 @@ describe('SubjectPicker', () => {
     it('subject buttons select on Space key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} recentSubjects={[]} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} recentTasks={[]} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -160,7 +160,7 @@ describe('SubjectPicker', () => {
 
     it('subject buttons have aria-selected attribute', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} value="Química" recentSubjects={[]} />)
+      render(<TaskPicker {...defaultProps} value="Química" recentTasks={[]} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -174,7 +174,7 @@ describe('SubjectPicker', () => {
 
     it('subject buttons have focus-visible ring styles', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} recentSubjects={[]} />)
+      render(<TaskPicker {...defaultProps} recentTasks={[]} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -191,7 +191,7 @@ describe('SubjectPicker', () => {
   describe('create new option keyboard navigation', () => {
     it('create button has aria-label', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} />)
+      render(<TaskPicker {...defaultProps} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -207,7 +207,7 @@ describe('SubjectPicker', () => {
     it('create button triggers on Enter key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -226,7 +226,7 @@ describe('SubjectPicker', () => {
     it('create button triggers on Space key', async () => {
       const user = userEvent.setup()
       const onValueChange = vi.fn()
-      render(<SubjectPicker {...defaultProps} onValueChange={onValueChange} />)
+      render(<TaskPicker {...defaultProps} onValueChange={onValueChange} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))
@@ -244,7 +244,7 @@ describe('SubjectPicker', () => {
 
     it('create button has focus-visible ring styles', async () => {
       const user = userEvent.setup()
-      render(<SubjectPicker {...defaultProps} />)
+      render(<TaskPicker {...defaultProps} />)
 
       // Open the picker
       await user.click(screen.getByRole('combobox'))

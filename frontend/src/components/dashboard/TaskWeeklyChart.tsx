@@ -19,11 +19,11 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface SubjectWeeklyChartProps {
+interface TaskWeeklyChartProps {
   data: ChartData<'bar'>;
 }
 
-export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
+export function TaskWeeklyChart({ data }: TaskWeeklyChartProps) {
   const hasData = data.labels && data.labels.length > 0;
   const hasNonZeroData = data.datasets[0]?.data.some((value) => (value as number) > 0);
   const isMobile = useIsMobile();
@@ -91,4 +91,4 @@ export function SubjectWeeklyChart({ data }: SubjectWeeklyChartProps) {
   );
 }
 
-export default SubjectWeeklyChart;
+export default TaskWeeklyChart;
