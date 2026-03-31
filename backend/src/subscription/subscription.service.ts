@@ -166,7 +166,7 @@ export class SubscriptionService {
    * Check max_cycles limit
    */
   async checkCyclesLimit(userId: string, workspaceId: string): Promise<FeatureLimitCheck> {
-    const currentCount = await this.prisma.studyCycle.count({
+    const currentCount = await this.prisma.focusCycle.count({
       where: { workspaceId },
     });
     return this.checkFeatureLimit(userId, 'max_cycles', currentCount);
@@ -192,7 +192,7 @@ export class SubscriptionService {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const currentCount = await this.prisma.studySession.count({
+    const currentCount = await this.prisma.workSession.count({
       where: {
         userId,
         createdAt: {

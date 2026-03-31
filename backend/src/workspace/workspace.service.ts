@@ -123,14 +123,14 @@ export class WorkspaceService {
         throw new BadRequestException('No default workspace found');
       }
 
-      // First, move subjects to the default workspace
-      await this.prisma.subject.updateMany({
+      // First, move tasks to the default workspace
+      await this.prisma.task.updateMany({
         where: { workspaceId },
         data: { workspaceId: defaultWorkspace.id },
       });
 
       // Then, move sessions to the default workspace
-      await this.prisma.studySession.updateMany({
+      await this.prisma.workSession.updateMany({
         where: { workspaceId },
         data: { workspaceId: defaultWorkspace.id },
       });
@@ -190,19 +190,19 @@ export class WorkspaceService {
   }
 
   /**
-   * Busca matérias distintas de um workspace
+   * Busca tasks distintas de um workspace
    */
-  async getDistinctSubjects(userId: string, workspaceId: string): Promise<string[]> {
+  async getDistinctTasks(userId: string, workspaceId: string): Promise<string[]> {
     // Verificar acesso ao workspace
     await this.findById(userId, workspaceId);
 
-    const subjects = await this.prisma.subject.findMany({
+    const tasks = await this.prisma.task.findMany({
       where: { workspaceId, archivedAt: null },
       select: { name: true },
       orderBy: { name: 'asc' },
     });
 
-    return subjects.map((s) => s.name);
+    return tasks.map((s) => s.name);
   }
 
   /**
@@ -212,10 +212,10 @@ export class WorkspaceService {
     await this.findById(userId, workspaceId);
 
     const [sessionsCount, totalMinutes] = await Promise.all([
-      this.prisma.studySession.count({
+      this.prisma.workSession.count({
         where: { workspaceId },
       }),
-      this.prisma.studySession.aggregate({
+      this.prisma.workSession.aggregate({
         where: { workspaceId },
         _sum: { minutes: true },
       }),

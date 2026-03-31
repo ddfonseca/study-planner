@@ -22,7 +22,7 @@ export class CategoryService {
       orderBy: { position: 'asc' },
       include: {
         _count: {
-          select: { subjects: true },
+          select: { tasks: true },
         },
       },
     });
@@ -37,7 +37,7 @@ export class CategoryService {
       include: {
         workspace: true,
         _count: {
-          select: { subjects: true },
+          select: { tasks: true },
         },
       },
     });

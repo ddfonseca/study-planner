@@ -1,0 +1,970 @@
+/**
+ * FocusCycleService Tests
+ * Using jest-prisma for automatic transaction rollback
+ */
+import { Test, TestingModule } from '@nestjs/testing';
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
+import { FocusCycleService } from '../src/focus-cycle/focus-cycle.service';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { SubscriptionService } from '../src/subscription/subscription.service';
+import {
+  createTestUser,
+  createTestWorkspace,
+  createTestUserWithWorkspace,
+  createTestTask,
+  createTestTasks,
+} from './helpers/database.helper';
+
+describe('FocusCycleService', () => {
+  let service: FocusCycleService;
+
+  // Mock SubscriptionService to always allow (no limits enforced in tests)
+  const mockSubscriptionService = {
+    enforceFeatureLimit: jest.fn().mockResolvedValue(undefined),
+    checkFeatureLimit: jest.fn().mockResolvedValue({ allowed: true, limit: -1, current: 0, remaining: Infinity }),
+  };
+
+  beforeEach(async () => {
+    const prisma = jestPrisma.client;
+    jest.clearAllMocks();
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FocusCycleService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: SubscriptionService, useValue: mockSubscriptionService },
+      ],
+    }).compile();
+
+    service = module.get<FocusCycleService>(FocusCycleService);
+  });
+
+  describe('getCycle', () => {
+    it('should return null when no cycle exists', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      const cycle = await service.getCycle(user.id, workspace.id);
+
+      expect(cycle).toBeNull();
+    });
+
+    it('should return cycle with items ordered by position', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics', 'English']);
+
+      const createdCycle = await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 30, position: 2 },
+            ],
+          },
+        },
+      });
+
+      const cycle = await service.getCycle(user.id, workspace.id);
+
+      expect(cycle).toBeDefined();
+      expect(cycle!.id).toBe(createdCycle.id);
+      expect(cycle!.name).toBe('Test Cycle');
+      expect(cycle!.items).toHaveLength(3);
+      expect(cycle!.items[0].task?.name).toBe('Math');
+      expect(cycle!.items[1].task?.name).toBe('Physics');
+      expect(cycle!.items[2].task?.name).toBe('English');
+    });
+
+    it('should throw ForbiddenException when accessing another user workspace', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+
+      await expect(
+        service.getCycle(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw NotFoundException when workspace does not exist', async () => {
+      const user = await createTestUser();
+
+      await expect(
+        service.getCycle(user.id, 'non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new cycle with items', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Português', 'Matemática', 'Direito']);
+
+      const cycle = await service.create(user.id, workspace.id, {
+        name: 'Concurso TRT',
+        items: [
+          { subjectId: subjects[0].id, targetMinutes: 120 },
+          { subjectId: subjects[1].id, targetMinutes: 90 },
+          { subjectId: subjects[2].id, targetMinutes: 60 },
+        ],
+      });
+
+      expect(cycle).toBeDefined();
+      expect(cycle.workspaceId).toBe(workspace.id);
+      expect(cycle.name).toBe('Concurso TRT');
+      expect(cycle.isActive).toBe(true);
+      expect(cycle.currentItemIndex).toBe(0);
+      expect(cycle.items).toHaveLength(3);
+      expect(cycle.items[0].task?.name).toBe('Português');
+      expect(cycle.items[0].position).toBe(0);
+      expect(cycle.items[1].task?.name).toBe('Matemática');
+      expect(cycle.items[1].position).toBe(1);
+    });
+
+    it('should auto-activate first cycle in workspace', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      const cycle = await service.create(user.id, workspace.id, {
+        name: 'First Cycle',
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
+      });
+
+      expect(cycle.isActive).toBe(true);
+    });
+
+    it('should not auto-activate second cycle unless specified', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      // Create first cycle (auto-activated)
+      await service.create(user.id, workspace.id, {
+        name: 'First Cycle',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      // Create second cycle (should not be active by default)
+      const secondCycle = await service.create(user.id, workspace.id, {
+        name: 'Second Cycle',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+      });
+
+      expect(secondCycle.isActive).toBe(false);
+    });
+
+    it('should activate second cycle when activateOnCreate is true', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      // Create first cycle
+      const firstCycle = await service.create(user.id, workspace.id, {
+        name: 'First Cycle',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      expect(firstCycle.isActive).toBe(true);
+
+      // Create second cycle with activateOnCreate
+      const secondCycle = await service.create(user.id, workspace.id, {
+        name: 'Second Cycle',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+        activateOnCreate: true,
+      });
+
+      expect(secondCycle.isActive).toBe(true);
+
+      // First cycle should now be inactive
+      const prisma = jestPrisma.client;
+      const updatedFirst = await prisma.focusCycle.findUnique({
+        where: { id: firstCycle.id },
+      });
+      expect(updatedFirst!.isActive).toBe(false);
+    });
+
+    it('should throw BadRequestException when creating cycle with duplicate name', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await service.create(user.id, workspace.id, {
+        name: 'My Cycle',
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
+      });
+
+      await expect(
+        service.create(user.id, workspace.id, {
+          name: 'My Cycle',
+          items: [{ subjectId: subject.id, targetMinutes: 60 }],
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw ForbiddenException when creating in another user workspace', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await expect(
+        service.create(user2.id, workspace.id, {
+          name: 'Test Cycle',
+          items: [{ subjectId: subject.id, targetMinutes: 60 }],
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('update', () => {
+    it('should update cycle name', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Old Name',
+          isActive: true,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      const updated = await service.update(user.id, workspace.id, {
+        name: 'New Name',
+      });
+
+      expect(updated.name).toBe('New Name');
+    });
+
+    it('should update isActive status', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      const updated = await service.update(user.id, workspace.id, {
+        isActive: false,
+      });
+
+      expect(updated.isActive).toBe(false);
+    });
+
+    it('should update currentItemIndex', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 0,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+            ],
+          },
+        },
+      });
+
+      const updated = await service.update(user.id, workspace.id, {
+        currentItemIndex: 1,
+      });
+
+      expect(updated.currentItemIndex).toBe(1);
+    });
+
+    it('should replace items when items array is provided', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const oldSubjects = await createTestTasks(workspace.id, ['Old1', 'Old2']);
+      const newSubjects = await createTestTasks(workspace.id, ['New1', 'New2', 'New3']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [
+              { subjectId: oldSubjects[0].id, targetMinutes: 30, position: 0 },
+              { subjectId: oldSubjects[1].id, targetMinutes: 30, position: 1 },
+            ],
+          },
+        },
+      });
+
+      const updated = await service.update(user.id, workspace.id, {
+        items: [
+          { subjectId: newSubjects[0].id, targetMinutes: 60 },
+          { subjectId: newSubjects[1].id, targetMinutes: 90 },
+          { subjectId: newSubjects[2].id, targetMinutes: 120 },
+        ],
+      });
+
+      expect(updated.items).toHaveLength(3);
+      expect(updated.items[0].task?.name).toBe('New1');
+      expect(updated.items[1].task?.name).toBe('New2');
+      expect(updated.items[2].task?.name).toBe('New3');
+    });
+
+    it('should adjust currentItemIndex when items are reduced', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['A', 'B', 'C']);
+      const onlySubject = await createTestTask(workspace.id, { name: 'Only' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 2,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 30, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 30, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 30, position: 2 },
+            ],
+          },
+        },
+      });
+
+      const updated = await service.update(user.id, workspace.id, {
+        items: [{ subjectId: onlySubject.id, targetMinutes: 60 }],
+      });
+
+      // currentItemIndex should be adjusted to last valid index (0)
+      expect(updated.currentItemIndex).toBe(0);
+    });
+
+    it('should throw NotFoundException when cycle does not exist', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      await expect(
+        service.update(user.id, workspace.id, { name: 'New' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when updating another user cycle', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      await expect(
+        service.update(user2.id, workspace.id, { name: 'Hacked' }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      const result = await service.delete(user.id, workspace.id);
+
+      expect(result.success).toBe(true);
+
+      const cycle = await service.getCycle(user.id, workspace.id);
+      expect(cycle).toBeNull();
+    });
+
+    it('should delete items when cycle is deleted (cascade)', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+            ],
+          },
+        },
+      });
+
+      await service.delete(user.id, workspace.id);
+
+      const items = await prisma.focusCycleItem.findMany({
+        where: { cycle: { workspaceId: workspace.id } },
+      });
+      expect(items).toHaveLength(0);
+    });
+
+    it('should not throw when deleting non-existent cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      const result = await service.delete(user.id, workspace.id);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should throw ForbiddenException when deleting another user cycle', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+
+      await expect(
+        service.delete(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('advanceToNext', () => {
+    it('should advance to next item', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics', 'English']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 0,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
+            ],
+          },
+        },
+      });
+
+      const updated = await service.advanceToNext(user.id, workspace.id);
+
+      expect(updated.currentItemIndex).toBe(1);
+    });
+
+    it('should wrap around to first item when at end', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics', 'English']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 2,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
+            ],
+          },
+        },
+      });
+
+      const updated = await service.advanceToNext(user.id, workspace.id);
+
+      expect(updated.currentItemIndex).toBe(0);
+    });
+
+    it('should throw NotFoundException when cycle does not exist', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      await expect(
+        service.advanceToNext(user.id, workspace.id),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when cycle has no items', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+        },
+      });
+
+      await expect(
+        service.advanceToNext(user.id, workspace.id),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('getSuggestion', () => {
+    it('should return hasCycle=false when no cycle exists', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.hasCycle).toBe(false);
+      expect(suggestion.suggestion).toBeNull();
+    });
+
+    it('should return hasCycle=false when cycle is inactive', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: false,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.hasCycle).toBe(false);
+    });
+
+    it('should return hasCycle=false when cycle has no items', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+        },
+      });
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.hasCycle).toBe(true); // Service returns true with isEmpty flag
+      expect(suggestion.isEmpty).toBe(true);
+      expect(suggestion.suggestion).toBeNull();
+    });
+
+    it('should return current subject suggestion', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Matemática', 'Português']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 0,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+            ],
+          },
+        },
+      });
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.hasCycle).toBe(true);
+      expect(suggestion.suggestion).toBeDefined();
+      expect(suggestion.suggestion!.currentSubject).toBe('Matemática');
+      expect(suggestion.suggestion!.currentTargetMinutes).toBe(120);
+      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(0);
+      expect(suggestion.suggestion!.remainingMinutes).toBe(120);
+      expect(suggestion.suggestion!.isCurrentComplete).toBe(false);
+      expect(suggestion.suggestion!.nextSubject).toBe('Português');
+      expect(suggestion.suggestion!.currentPosition).toBe(0);
+      expect(suggestion.suggestion!.totalItems).toBe(2);
+    });
+
+    it('should calculate accumulated minutes from sessions', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 0,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+            ],
+          },
+        },
+      });
+
+      // Add study sessions for Math
+      await prisma.workSession.createMany({
+        data: [
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 30 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 45 },
+        ],
+      });
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.suggestion!.currentAccumulatedMinutes).toBe(75);
+      expect(suggestion.suggestion!.remainingMinutes).toBe(45);
+      expect(suggestion.suggestion!.isCurrentComplete).toBe(false);
+    });
+
+    it('should mark as complete when target is reached', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          currentItemIndex: 0,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 60, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+            ],
+          },
+        },
+      });
+
+      await prisma.workSession.create({
+        data: {
+          userId: user.id,
+          workspaceId: workspace.id,
+          subjectId: subjects[0].id,
+          date: new Date(),
+          minutes: 60,
+        },
+      });
+
+      const suggestion = await service.getSuggestion(user.id, workspace.id);
+
+      expect(suggestion.suggestion!.isCurrentComplete).toBe(true);
+      expect(suggestion.suggestion!.remainingMinutes).toBe(0);
+    });
+
+    it('should throw ForbiddenException when accessing another user workspace', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+
+      await expect(
+        service.getSuggestion(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('listCycles', () => {
+    it('should return empty array when no cycles exist', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      const cycles = await service.listCycles(user.id, workspace.id);
+
+      expect(cycles).toHaveLength(0);
+    });
+
+    it('should return all cycles for workspace', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await service.create(user.id, workspace.id, {
+        name: 'Cycle 1',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      await service.create(user.id, workspace.id, {
+        name: 'Cycle 2',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+      });
+
+      const cycles = await service.listCycles(user.id, workspace.id);
+
+      expect(cycles).toHaveLength(2);
+    });
+
+    it('should return cycles sorted by active first, then display order', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await service.create(user.id, workspace.id, {
+        name: 'Cycle A',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      await service.create(user.id, workspace.id, {
+        name: 'Cycle B',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+        activateOnCreate: true,
+      });
+
+      const cycles = await service.listCycles(user.id, workspace.id);
+
+      expect(cycles[0].name).toBe('Cycle B'); // Active one first
+      expect(cycles[0].isActive).toBe(true);
+      expect(cycles[1].name).toBe('Cycle A');
+      expect(cycles[1].isActive).toBe(false);
+    });
+
+    it('should throw ForbiddenException when listing another user workspace cycles', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+
+      await expect(
+        service.listCycles(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('activateCycle', () => {
+    it('should activate specified cycle and deactivate others', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      const cycle1 = await service.create(user.id, workspace.id, {
+        name: 'Cycle 1',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      const cycle2 = await service.create(user.id, workspace.id, {
+        name: 'Cycle 2',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+      });
+
+      expect(cycle1.isActive).toBe(true);
+      expect(cycle2.isActive).toBe(false);
+
+      // Activate cycle 2
+      const activated = await service.activateCycle(user.id, workspace.id, cycle2.id);
+
+      expect(activated.isActive).toBe(true);
+      expect(activated.name).toBe('Cycle 2');
+
+      // Verify cycle 1 is now inactive
+      const prisma = jestPrisma.client;
+      const updatedCycle1 = await prisma.focusCycle.findUnique({
+        where: { id: cycle1.id },
+      });
+      expect(updatedCycle1!.isActive).toBe(false);
+    });
+
+    it('should throw NotFoundException when cycle does not exist', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      await expect(
+        service.activateCycle(user.id, workspace.id, 'non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when activating another user cycle', async () => {
+      const { user: user1, workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      const cycle = await service.create(user1.id, workspace.id, {
+        name: 'User1 Cycle',
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
+      });
+
+      await expect(
+        service.activateCycle(user2.id, workspace.id, cycle.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getStatistics', () => {
+    it('should return null when no active cycle exists', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      const stats = await service.getStatistics(user.id, workspace.id);
+
+      expect(stats).toBeNull();
+    });
+
+    it('should return statistics for active cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics', 'English']);
+
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Test Cycle',
+          isActive: true,
+          items: {
+            create: [
+              { subjectId: subjects[0].id, targetMinutes: 120, position: 0 },
+              { subjectId: subjects[1].id, targetMinutes: 60, position: 1 },
+              { subjectId: subjects[2].id, targetMinutes: 60, position: 2 },
+            ],
+          },
+        },
+      });
+
+      // Add sessions
+      await prisma.workSession.createMany({
+        data: [
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[0].id, date: new Date(), minutes: 60 },
+          { userId: user.id, workspaceId: workspace.id, subjectId: subjects[1].id, date: new Date(), minutes: 60 },
+        ],
+      });
+
+      const stats = await service.getStatistics(user.id, workspace.id);
+
+      expect(stats).toBeDefined();
+      expect(stats!.totalTargetMinutes).toBe(240); // 120 + 60 + 60
+      expect(stats!.totalAccumulatedMinutes).toBe(120); // 60 + 60
+      expect(stats!.completedItemsCount).toBe(1); // Physics is complete
+      expect(stats!.totalItemsCount).toBe(3);
+      expect(stats!.overallPercentage).toBe(50); // 120/240 * 100
+      expect(stats!.averagePerItem).toBe(40); // 120/3
+    });
+
+    it('should throw ForbiddenException when accessing another user workspace', async () => {
+      const { workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+
+      await expect(
+        service.getStatistics(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('resetCycle', () => {
+    it('should reset cycle and set lastResetAt', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      await service.create(user.id, workspace.id, {
+        name: 'Test Cycle',
+        items: [
+          { subjectId: subjects[0].id, targetMinutes: 60 },
+          { subjectId: subjects[1].id, targetMinutes: 60 },
+        ],
+      });
+
+      // Advance to position 1
+      await service.advanceToNext(user.id, workspace.id);
+
+      const updatedCycle = await service.resetCycle(user.id, workspace.id);
+
+      expect(updatedCycle.currentItemIndex).toBe(0);
+      expect(updatedCycle.lastResetAt).toBeDefined();
+    });
+
+    it('should throw NotFoundException when no active cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+
+      await expect(
+        service.resetCycle(user.id, workspace.id),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when resetting another user cycle', async () => {
+      const { user: user1, workspace } = await createTestUserWithWorkspace({ email: 'user1@test.com' });
+      const user2 = await createTestUser({ email: 'user2@test.com' });
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      await service.create(user1.id, workspace.id, {
+        name: 'User1 Cycle',
+        items: [{ subjectId: subject.id, targetMinutes: 60 }],
+      });
+
+      await expect(
+        service.resetCycle(user2.id, workspace.id),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getCycle returns active cycle only', () => {
+    it('should return only the active cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const subjects = await createTestTasks(workspace.id, ['Math', 'Physics']);
+
+      const cycle1 = await service.create(user.id, workspace.id, {
+        name: 'Cycle 1',
+        items: [{ subjectId: subjects[0].id, targetMinutes: 60 }],
+      });
+
+      await service.create(user.id, workspace.id, {
+        name: 'Cycle 2',
+        items: [{ subjectId: subjects[1].id, targetMinutes: 60 }],
+      });
+
+      const activeCycle = await service.getCycle(user.id, workspace.id);
+
+      expect(activeCycle).toBeDefined();
+      expect(activeCycle!.id).toBe(cycle1.id);
+      expect(activeCycle!.name).toBe('Cycle 1');
+    });
+
+    it('should return null when no active cycle', async () => {
+      const { user, workspace } = await createTestUserWithWorkspace();
+      const prisma = jestPrisma.client;
+      const subject = await createTestTask(workspace.id, { name: 'Math' });
+
+      // Create inactive cycle directly
+      await prisma.focusCycle.create({
+        data: {
+          workspaceId: workspace.id,
+          name: 'Inactive Cycle',
+          isActive: false,
+          items: {
+            create: [{ subjectId: subject.id, targetMinutes: 60, position: 0 }],
+          },
+        },
+      });
+
+      const activeCycle = await service.getCycle(user.id, workspace.id);
+
+      expect(activeCycle).toBeNull();
+    });
+  });
+});

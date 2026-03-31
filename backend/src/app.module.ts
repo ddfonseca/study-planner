@@ -7,17 +7,17 @@ import * as winston from 'winston';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { PrismaModule } from './prisma/prisma.module';
 import { auth } from './auth/auth.config';
-import { StudySessionsModule } from './study-sessions/study-sessions.module';
+import { WorkSessionModule } from './work-session/work-session.module';
 import { UserConfigModule } from './config/config.module';
 import { WeeklyGoalModule } from './weekly-goal/weekly-goal.module';
 import { WorkspaceModule } from './workspace/workspace.module';
-import { StudyCycleModule } from './study-cycle/study-cycle.module';
+import { FocusCycleModule } from './focus-cycle/focus-cycle.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { MercadoPagoModule } from './mercadopago/mercadopago.module';
 import { ScratchpadNotesModule } from './scratchpad-notes/scratchpad-notes.module';
-import { SubjectModule } from './subject/subject.module';
+import { TaskModule } from './task/task.module';
 import { CategoryModule } from './category/category.module';
-import { DisciplineModule } from './discipline/discipline.module';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -59,17 +59,17 @@ import { DisciplineModule } from './discipline/discipline.module';
     }),
     PrismaModule,
     AuthModule.forRoot({ auth, disableControllers: true }),
-    StudySessionsModule,
+    WorkSessionModule,
     UserConfigModule,
     WeeklyGoalModule,
     WorkspaceModule,
-    StudyCycleModule,
+    FocusCycleModule,
     SubscriptionModule,
     MercadoPagoModule,
     ScratchpadNotesModule,
-    SubjectModule,
+    TaskModule,
     CategoryModule,
-    DisciplineModule,
+    ProjectModule,
   ],
   providers: [
     {

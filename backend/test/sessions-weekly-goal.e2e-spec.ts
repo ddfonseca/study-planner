@@ -3,14 +3,14 @@
  * Using jest-prisma for automatic transaction rollback
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudySessionsService } from '../src/study-sessions/study-sessions.service';
+import { WorkSessionService } from '../src/work-session/work-session.service';
 import { WeeklyGoalService } from '../src/weekly-goal/weekly-goal.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ConfigService } from '../src/config/config.service';
-import { createUserConfig, createTestUserWithWorkspace, createTestSubject } from './helpers/database.helper';
+import { createUserConfig, createTestUserWithWorkspace, createTestTask } from './helpers/database.helper';
 
 describe('Sessions + WeeklyGoal Integration', () => {
-  let studySessionsService: StudySessionsService;
+  let workSessionService: WorkSessionService;
   let weeklyGoalService: WeeklyGoalService;
 
   beforeEach(async () => {
@@ -18,7 +18,7 @@ describe('Sessions + WeeklyGoal Integration', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        StudySessionsService,
+        WorkSessionService,
         WeeklyGoalService,
         { provide: PrismaService, useValue: prisma },
         {
@@ -33,7 +33,7 @@ describe('Sessions + WeeklyGoal Integration', () => {
       ],
     }).compile();
 
-    studySessionsService = module.get<StudySessionsService>(StudySessionsService);
+    workSessionService = module.get<WorkSessionService>(WorkSessionService);
     weeklyGoalService = module.get<WeeklyGoalService>(WeeklyGoalService);
   });
 
@@ -66,32 +66,32 @@ describe('Sessions + WeeklyGoal Integration', () => {
   describe('Weekly progress calculation', () => {
     it('should calculate weekly total from sessions', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
-      const math = await createTestSubject(workspace.id, { name: 'Math' });
-      const physics = await createTestSubject(workspace.id, { name: 'Physics' });
-      const chemistry = await createTestSubject(workspace.id, { name: 'Chemistry' });
+      const math = await createTestTask(workspace.id, { name: 'Math' });
+      const physics = await createTestTask(workspace.id, { name: 'Physics' });
+      const chemistry = await createTestTask(workspace.id, { name: 'Chemistry' });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace.id,
         date: '2024-12-16',
         subjectId: math.id,
         minutes: 60,
       });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace.id,
         date: '2024-12-18',
         subjectId: physics.id,
         minutes: 90,
       });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace.id,
         date: '2024-12-20',
         subjectId: chemistry.id,
         minutes: 120,
       });
 
-      const sessions = await studySessionsService.findByDateRange(
+      const sessions = await workSessionService.findByDateRange(
         user.id,
         workspace.id,
         '2024-12-16',
@@ -107,21 +107,21 @@ describe('Sessions + WeeklyGoal Integration', () => {
     it('should calculate progress percentage based on goal', async () => {
       const { user, workspace } = await createTestUserWithWorkspace();
       const weekStart = new Date(Date.UTC(2024, 11, 16));
-      const math = await createTestSubject(workspace.id, { name: 'Math' });
+      const math = await createTestTask(workspace.id, { name: 'Math' });
 
       await weeklyGoalService.getOrCreateForWeek(user.id, workspace.id, weekStart);
       const goal = await weeklyGoalService.update(user.id, workspace.id, weekStart, {
         targetHours: 5,
       });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace.id,
         date: '2024-12-16',
         subjectId: math.id,
         minutes: 180,
       });
 
-      const sessions = await studySessionsService.findByDateRange(
+      const sessions = await workSessionService.findByDateRange(
         user.id,
         workspace.id,
         '2024-12-16',
@@ -167,38 +167,38 @@ describe('Sessions + WeeklyGoal Integration', () => {
           isDefault: false,
         },
       });
-      const math = await createTestSubject(workspace1.id, { name: 'Math' });
-      const workProject = await createTestSubject(workspace2.id, { name: 'Work Project' });
+      const math = await createTestTask(workspace1.id, { name: 'Math' });
+      const workProject = await createTestTask(workspace2.id, { name: 'Work Project' });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace1.id,
         date: '2024-12-16',
         subjectId: math.id,
         minutes: 60,
       });
 
-      await studySessionsService.create(user.id, {
+      await workSessionService.create(user.id, {
         workspaceId: workspace2.id,
         date: '2024-12-16',
         subjectId: workProject.id,
         minutes: 120,
       });
 
-      const workspace1Sessions = await studySessionsService.findByDateRange(
+      const workspace1Sessions = await workSessionService.findByDateRange(
         user.id,
         workspace1.id,
         '2024-12-16',
         '2024-12-22',
       );
 
-      const workspace2Sessions = await studySessionsService.findByDateRange(
+      const workspace2Sessions = await workSessionService.findByDateRange(
         user.id,
         workspace2.id,
         '2024-12-16',
         '2024-12-22',
       );
 
-      const allSessions = await studySessionsService.findByDateRange(
+      const allSessions = await workSessionService.findByDateRange(
         user.id,
         'all',
         '2024-12-16',
