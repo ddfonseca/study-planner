@@ -2,18 +2,18 @@
  * Session Types - Types for app state and UI
  */
 
-// Individual study session in UI format
-export interface StudySession {
+// Individual work session in UI format
+export interface WorkSessionUI {
   id: string;
-  subjectId: string; // subject ID
-  materia: string; // subject name in Portuguese
-  minutos: number; // minutes in Portuguese
+  taskId: string; // task ID
+  taskName: string; // task name
+  minutes: number;
 }
 
 // Day data containing all sessions for a specific date
 export interface DayData {
-  totalMinutos: number;
-  materias: StudySession[];
+  totalMinutes: number;
+  entries: WorkSessionUI[];
 }
 
 // Sessions organized by date (YYYY-MM-DD)
@@ -33,12 +33,12 @@ export interface StudyStats {
   totalMinutes: number;
   totalDays: number;
   averageMinutesPerDay: number;
-  mostStudiedSubject: string | null;
-  subjectBreakdown: Record<string, number>;
+  mostWorkedTask: string | null;
+  taskBreakdown: Record<string, number>;
 }
 
-// Subject-specific analytics
-export interface SubjectStats {
+// Task-specific analytics
+export interface TaskStats {
   subject: string;
   totalMinutes: number;
   totalSessions: number;

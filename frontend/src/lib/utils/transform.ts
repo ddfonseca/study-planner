@@ -1,13 +1,13 @@
 /**
  * Data transformation utilities between backend and frontend formats
  */
-import type { Session } from '@/types/api';
-import type { SessionsMap, DayData, StudySession, StudyStats } from '@/types/session';
+import type { WorkSession } from '@/types/api';
+import type { SessionsMap, DayData, WorkSessionUI, StudyStats } from '@/types/session';
 
 /**
  * Transform backend sessions array to app format (grouped by date)
  */
-export function transformSessionsToAppFormat(sessions: Session[]): SessionsMap {
+export function transformSessionsToAppFormat(sessions: WorkSession[]): SessionsMap {
   const data: SessionsMap = {};
 
   sessions.forEach((session) => {
@@ -16,19 +16,19 @@ export function transformSessionsToAppFormat(sessions: Session[]): SessionsMap {
 
     if (!data[dateKey]) {
       data[dateKey] = {
-        totalMinutos: 0,
-        materias: [],
+        totalMinutes: 0,
+        entries: [],
       };
     }
 
-    data[dateKey].materias.push({
+    data[dateKey].entries.push({
       id: session.id,
-      subjectId: session.subjectId,
-      materia: session.subject.name,
-      minutos: session.minutes,
+      taskId: session.taskId,
+      taskName: session.task.name,
+      minutes: session.minutes,
     });
 
-    data[dateKey].totalMinutos += session.minutes;
+    data[dateKey].totalMinutes += session.minutes;
   });
 
   return data;
@@ -37,12 +37,12 @@ export function transformSessionsToAppFormat(sessions: Session[]): SessionsMap {
 /**
  * Transform a single session from backend to UI format
  */
-export function transformSessionToUI(session: Session): StudySession {
+export function transformSessionToUI(session: WorkSession): WorkSessionUI {
   return {
     id: session.id,
-    subjectId: session.subjectId,
-    materia: session.subject.name,
-    minutos: session.minutes,
+    taskId: session.taskId,
+    taskName: session.task.name,
+    minutes: session.minutes,
   };
 }
 
@@ -50,37 +50,37 @@ export function transformSessionToUI(session: Session): StudySession {
  * Get DayData for a specific date, or empty data if not found
  */
 export function getDayData(sessions: SessionsMap, dateKey: string): DayData {
-  return sessions[dateKey] || { totalMinutos: 0, materias: [] };
+  return sessions[dateKey] || { totalMinutes: 0, entries: [] };
 }
 
 /**
  * Calculate study statistics from sessions
  */
 export function calculateStats(sessions: SessionsMap): StudyStats {
-  const subjectBreakdown: Record<string, number> = {};
+  const taskBreakdown: Record<string, number> = {};
   let totalMinutes = 0;
   let totalDays = 0;
 
   Object.values(sessions).forEach((dayData) => {
-    if (dayData.totalMinutos > 0) {
+    if (dayData.totalMinutes > 0) {
       totalDays++;
-      totalMinutes += dayData.totalMinutos;
+      totalMinutes += dayData.totalMinutes;
 
-      dayData.materias.forEach((materia) => {
-        subjectBreakdown[materia.materia] =
-          (subjectBreakdown[materia.materia] || 0) + materia.minutos;
+      dayData.entries.forEach((entry) => {
+        taskBreakdown[entry.taskName] =
+          (taskBreakdown[entry.taskName] || 0) + entry.minutes;
       });
     }
   });
 
-  // Find most studied subject
-  let mostStudiedSubject: string | null = null;
+  // Find most worked task
+  let mostWorkedTask: string | null = null;
   let maxMinutes = 0;
 
-  Object.entries(subjectBreakdown).forEach(([subject, minutes]) => {
+  Object.entries(taskBreakdown).forEach(([task, minutes]) => {
     if (minutes > maxMinutes) {
       maxMinutes = minutes;
-      mostStudiedSubject = subject;
+      mostWorkedTask = task;
     }
   });
 
@@ -88,8 +88,8 @@ export function calculateStats(sessions: SessionsMap): StudyStats {
     totalMinutes,
     totalDays,
     averageMinutesPerDay: totalDays > 0 ? Math.round(totalMinutes / totalDays) : 0,
-    mostStudiedSubject,
-    subjectBreakdown,
+    mostWorkedTask,
+    taskBreakdown,
   };
 }
 

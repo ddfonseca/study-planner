@@ -1,38 +1,38 @@
 /**
- * Subject Analytics Utilities
- * Functions to calculate subject-specific metrics and trends
+ * Task Analytics Utilities
+ * Functions to calculate task-specific metrics and trends
  */
-import type { SessionsMap, SubjectStats, TrendPoint, WeekdayAverage } from '@/types/session';
+import type { SessionsMap, TaskStats, TrendPoint, WeekdayAverage } from '@/types/session';
 import { getDay } from 'date-fns';
 import { parseDateKey, formatDateKey, addDays } from './date';
 
 /**
- * Get list of all unique subjects from sessions
+ * Get list of all unique tasks from sessions
  */
-export function getUniqueSubjects(sessions: SessionsMap): string[] {
-  const subjects = new Set<string>();
+export function getUniqueTasks(sessions: SessionsMap): string[] {
+  const tasks = new Set<string>();
 
   Object.values(sessions).forEach((dayData) => {
-    dayData.materias.forEach((materia) => {
-      subjects.add(materia.materia);
+    dayData.entries.forEach((entry) => {
+      tasks.add(entry.taskName);
     });
   });
 
-  return Array.from(subjects).sort();
+  return Array.from(tasks).sort();
 }
 
 /**
- * Calculate detailed stats for a specific subject
+ * Calculate detailed stats for a specific task
  */
-export function calculateSubjectStats(
+export function calculateTaskStats(
   sessions: SessionsMap,
   subject: string,
   startDate: string,
   endDate: string
-): SubjectStats {
+): TaskStats {
   let totalMinutes = 0;
   let totalSessions = 0;
-  let allSubjectsTotalMinutes = 0;
+  let allTasksTotalMinutes = 0;
 
   // Calculate weeks in range for weekly average
   const start = parseDateKey(startDate);
@@ -42,13 +42,13 @@ export function calculateSubjectStats(
 
   Object.entries(sessions).forEach(([dateKey, dayData]) => {
     if (dateKey >= startDate && dateKey <= endDate) {
-      // Count total for all subjects (for percentage)
-      allSubjectsTotalMinutes += dayData.totalMinutos;
+      // Count total for all tasks (for percentage)
+      allTasksTotalMinutes += dayData.totalMinutes;
 
-      // Count stats for selected subject
-      dayData.materias.forEach((materia) => {
-        if (materia.materia === subject) {
-          totalMinutes += materia.minutos;
+      // Count stats for selected task
+      dayData.entries.forEach((entry) => {
+        if (entry.taskName === subject) {
+          totalMinutes += entry.minutes;
           totalSessions++;
         }
       });
@@ -61,16 +61,16 @@ export function calculateSubjectStats(
     totalSessions,
     averageSessionMinutes: totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0,
     weeklyAverageMinutes: Math.round(totalMinutes / weeksInRange),
-    percentageOfTotal: allSubjectsTotalMinutes > 0
-      ? Math.round((totalMinutes / allSubjectsTotalMinutes) * 100)
+    percentageOfTotal: allTasksTotalMinutes > 0
+      ? Math.round((totalMinutes / allTasksTotalMinutes) * 100)
       : 0,
   };
 }
 
 /**
- * Get trend data (minutes per day) for a specific subject
+ * Get trend data (minutes per day) for a specific task
  */
-export function getSubjectTrendData(
+export function getTaskTrendData(
   sessions: SessionsMap,
   subject: string,
   startDate: string,
@@ -87,9 +87,9 @@ export function getSubjectTrendData(
 
     const dayData = sessions[dateKey];
     if (dayData) {
-      dayData.materias.forEach((materia) => {
-        if (materia.materia === subject) {
-          minutesForDay += materia.minutos;
+      dayData.entries.forEach((entry) => {
+        if (entry.taskName === subject) {
+          minutesForDay += entry.minutes;
         }
       });
     }
@@ -104,16 +104,16 @@ export function getSubjectTrendData(
 }
 
 /**
- * Get average minutes per weekday for a specific subject
+ * Get average minutes per weekday for a specific task
  */
-export function getSubjectWeeklyAverages(
+export function getTaskWeeklyAverages(
   sessions: SessionsMap,
   subject: string,
   startDate: string,
   endDate: string
 ): WeekdayAverage[] {
-  // Weekday names in Portuguese (starting from Sunday)
-  const weekdayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  // Weekday names (starting from Sunday)
+  const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // Track totals and counts for each weekday
   const weekdayTotals: number[] = [0, 0, 0, 0, 0, 0, 0];
@@ -131,9 +131,9 @@ export function getSubjectWeeklyAverages(
 
     const dayData = sessions[dateKey];
     if (dayData) {
-      dayData.materias.forEach((materia) => {
-        if (materia.materia === subject) {
-          weekdayTotals[dayOfWeek] += materia.minutos;
+      dayData.entries.forEach((entry) => {
+        if (entry.taskName === subject) {
+          weekdayTotals[dayOfWeek] += entry.minutes;
         }
       });
     }

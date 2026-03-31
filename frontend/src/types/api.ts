@@ -23,7 +23,7 @@ export interface Workspace {
   updatedAt: string;
 }
 
-// Category entity - categorization for subjects
+// Category entity - categorization for tasks
 export interface Category {
   id: string;
   workspaceId: string;
@@ -33,49 +33,49 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
   _count?: {
-    subjects: number;
+    tasks: number;
   };
 }
 
-// SubjectCategory junction
-export interface SubjectCategory {
+// TaskCategory junction
+export interface TaskCategory {
   id: string;
-  subjectId: string;
+  taskId: string;
   categoryId: string;
   category: Category;
   createdAt: string;
 }
 
-// Subject entity - normalized subject per workspace
-export interface Subject {
+// Task entity - normalized task per workspace
+export interface Task {
   id: string;
   workspaceId: string;
-  disciplineId: string | null;
+  projectId: string | null;
   name: string;
   color: string | null;
   icon: string | null;
   category: string | null; // @deprecated - use categories
-  categories: SubjectCategory[];
-  discipline?: Discipline | null;
+  categories: TaskCategory[];
+  project?: Project | null;
   position: number;
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-// Create subject DTO
-export interface CreateSubjectDto {
+// Create task DTO
+export interface CreateTaskDto {
   name: string;
   color?: string;
   icon?: string;
   category?: string; // @deprecated - use categoryIds
   categoryIds?: string[];
   position?: number;
-  disciplineId?: string;
+  projectId?: string;
 }
 
-// Update subject DTO
-export interface UpdateSubjectDto {
+// Update task DTO
+export interface UpdateTaskDto {
   name?: string;
   color?: string;
   icon?: string;
@@ -98,58 +98,58 @@ export interface UpdateCategoryDto {
   position?: number;
 }
 
-// Discipline entity - groups related subjects for study cycle organization
-export interface Discipline {
+// Project entity - groups related tasks for focus cycle organization
+export interface Project {
   id: string;
   workspaceId: string;
   name: string;
   color: string | null;
   icon: string | null;
   position: number;
-  subjects: Pick<Subject, 'id' | 'name' | 'color' | 'icon'>[];
+  tasks: Pick<Task, 'id' | 'name' | 'color' | 'icon'>[];
   createdAt: string;
   updatedAt: string;
   _count?: {
-    subjects: number;
+    tasks: number;
   };
 }
 
-// Create discipline DTO
-export interface CreateDisciplineDto {
+// Create project DTO
+export interface CreateProjectDto {
   name: string;
   color?: string;
   icon?: string;
   position?: number;
-  subjectIds?: string[];
+  taskIds?: string[];
 }
 
-// Update discipline DTO
-export interface UpdateDisciplineDto {
+// Update project DTO
+export interface UpdateProjectDto {
   name?: string;
   color?: string;
   icon?: string;
   position?: number;
-  subjectIds?: string[];
+  taskIds?: string[];
 }
 
-// Merge subjects DTO
-export interface MergeSubjectsDto {
+// Merge tasks DTO
+export interface MergeTasksDto {
   sourceIds: string[];
   targetId: string;
 }
 
-// Reorder subjects DTO
-export interface ReorderSubjectsDto {
-  subjectIds: string[];
+// Reorder tasks DTO
+export interface ReorderTasksDto {
+  taskIds: string[];
 }
 
-// Session entity from backend
-export interface Session {
+// WorkSession entity from backend
+export interface WorkSession {
   id: string;
   userId: string;
   workspaceId: string;
-  subjectId: string;
-  subject: Subject; // Populated relation
+  taskId: string;
+  task: Task; // Populated relation
   date: string; // ISO date string
   minutes: number;
   createdAt: string;
@@ -196,18 +196,18 @@ export interface ApiError {
   error?: string;
 }
 
-// Create session DTO
-export interface CreateSessionDto {
+// Create work session DTO
+export interface CreateWorkSessionDto {
   workspaceId: string;
   date: string;
-  subjectId: string;
+  taskId: string;
   minutes: number;
 }
 
-// Update session DTO
-export interface UpdateSessionDto {
+// Update work session DTO
+export interface UpdateWorkSessionDto {
   date?: string;
-  subjectId?: string;
+  taskId?: string;
   minutes?: number;
 }
 
@@ -235,26 +235,26 @@ export interface UpdateWorkspaceDto {
   color?: string;
 }
 
-// Study Cycle Item
-export interface StudyCycleItem {
+// Focus Cycle Item
+export interface FocusCycleItem {
   id: string;
   cycleId: string;
-  subjectId: string | null;
-  disciplineId: string | null;
-  subject: Subject | null; // Populated relation
-  discipline: Discipline | null; // Populated relation
+  taskId: string | null;
+  projectId: string | null;
+  task: Task | null; // Populated relation
+  project: Project | null; // Populated relation
   targetMinutes: number;
   position: number;
 }
 
-// Study Cycle
-export interface StudyCycle {
+// Focus Cycle
+export interface FocusCycle {
   id: string;
   workspaceId: string;
   name: string | null;
   isActive: boolean;
   currentItemIndex: number;
-  items: StudyCycleItem[];
+  items: FocusCycleItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -266,9 +266,9 @@ export interface CycleItemProgress {
   accumulatedMinutes: number;
   isComplete: boolean;
   position: number;
-  isDiscipline: boolean;
-  disciplineId?: string;
-  subjectId?: string;
+  isProject: boolean;
+  projectId?: string;
+  taskId?: string;
 }
 
 // Cycle Suggestion response
@@ -287,9 +287,9 @@ export interface CycleSuggestion {
     totalItems: number;
     allItemsProgress: CycleItemProgress[];
     isCycleComplete: boolean;
-    currentIsDiscipline: boolean;
-    currentDisciplineId?: string;
-    currentSubjectId?: string;
+    currentIsProject: boolean;
+    currentProjectId?: string;
+    currentTaskId?: string;
   } | null;
 }
 
@@ -326,20 +326,20 @@ export interface CycleHistory {
 
 // Create cycle item DTO
 export interface CreateCycleItemDto {
-  subjectId?: string;
-  disciplineId?: string;
+  taskId?: string;
+  projectId?: string;
   targetMinutes: number;
 }
 
-// Create study cycle DTO
-export interface CreateStudyCycleDto {
+// Create focus cycle DTO
+export interface CreateFocusCycleDto {
   name: string;
   items: CreateCycleItemDto[];
   activateOnCreate?: boolean;
 }
 
-// Update study cycle DTO
-export interface UpdateStudyCycleDto {
+// Update focus cycle DTO
+export interface UpdateFocusCycleDto {
   name?: string;
   isActive?: boolean;
   currentItemIndex?: number;
