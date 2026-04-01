@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import { getApiClient } from '../api/client';
-import { SessionsApi, StudySession } from '../api/sessions';
+import { SessionsApi, WorkSession } from '../api/sessions';
 import { GoalsApi, WeeklyGoal } from '../api/goals';
 import { Workspace } from '../api/workspaces';
 import {
@@ -25,14 +25,14 @@ interface ProgressProps {
 interface DailySummary {
   date: Date;
   minutes: number;
-  subjects: Map<string, number>;
+  tasks: Map<string, number>;
 }
 
 export function Progress({ token, workspace, onBack }: ProgressProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(null);
-  const [sessions, setSessions] = useState<StudySession[]>([]);
+  const [sessions, setSessions] = useState<WorkSession[]>([]);
   const [dailySummaries, setDailySummaries] = useState<DailySummary[]>([]);
 
   const client = getApiClient(token);
@@ -75,16 +75,16 @@ export function Progress({ token, workspace, onBack }: ProgressProps) {
           (s) => s.date.split('T')[0] === dateStr
         );
 
-        const subjects = new Map<string, number>();
+        const tasks = new Map<string, number>();
         let totalMinutes = 0;
 
         for (const session of daySessions) {
-          const current = subjects.get(session.subject) || 0;
-          subjects.set(session.subject, current + session.minutes);
+          const current = tasks.get(session.task) || 0;
+          tasks.set(session.task, current + session.minutes);
           totalMinutes += session.minutes;
         }
 
-        summaries.push({ date, minutes: totalMinutes, subjects });
+        summaries.push({ date, minutes: totalMinutes, tasks });
       }
 
       setDailySummaries(summaries);
@@ -114,15 +114,15 @@ export function Progress({ token, workspace, onBack }: ProgressProps) {
   const targetMinutes = weeklyGoal ? weeklyGoal.targetHours * 60 : 0;
   const percentage = targetMinutes > 0 ? Math.round((totalMinutes / targetMinutes) * 100) : 0;
 
-  // Get unique subjects with totals
-  const subjectTotals = new Map<string, number>();
+  // Get unique tasks with totals
+  const taskTotals = new Map<string, number>();
   for (const session of sessions) {
-    const current = subjectTotals.get(session.subject) || 0;
-    subjectTotals.set(session.subject, current + session.minutes);
+    const current = taskTotals.get(session.task) || 0;
+    taskTotals.set(session.task, current + session.minutes);
   }
 
-  // Sort subjects by time spent
-  const sortedSubjects = Array.from(subjectTotals.entries()).sort((a, b) => b[1] - a[1]);
+  // Sort tasks by time spent
+  const sortedTasks = Array.from(taskTotals.entries()).sort((a, b) => b[1] - a[1]);
 
   // Calculate max bar width for ASCII chart
   const maxMinutes = Math.max(...dailySummaries.map((d) => d.minutes), 1);
@@ -181,17 +181,17 @@ export function Progress({ token, workspace, onBack }: ProgressProps) {
         })}
       </Box>
 
-      {/* Subject Breakdown */}
-      {sortedSubjects.length > 0 && (
+      {/* Task Breakdown */}
+      {sortedTasks.length > 0 && (
         <Box marginBottom={1} flexDirection="column" borderStyle="round" paddingX={1}>
-          <Text bold>By Subject</Text>
-          {sortedSubjects.map(([subject, minutes]) => {
-            const subjectPercentage = Math.round((minutes / totalMinutes) * 100);
+          <Text bold>By Task</Text>
+          {sortedTasks.map(([task, minutes]) => {
+            const taskPercentage = Math.round((minutes / totalMinutes) * 100);
             return (
-              <Box key={subject}>
-                <Text>{padRight(subject, 20)}</Text>
+              <Box key={task}>
+                <Text>{padRight(task, 20)}</Text>
                 <Text color="cyan">{padLeft(formatMinutes(minutes), 8)}</Text>
-                <Text color="gray"> ({subjectPercentage}%)</Text>
+                <Text color="gray"> ({taskPercentage}%)</Text>
               </Box>
             );
           })}

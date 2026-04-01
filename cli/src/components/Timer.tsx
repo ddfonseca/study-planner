@@ -5,7 +5,7 @@ import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import { getApiClient } from '../api/client';
 import { SessionsApi } from '../api/sessions';
-import { CycleSuggestion } from '../api/cycles';
+import { CycleSuggestion } from '../api/focusCycles';
 import { Workspace } from '../api/workspaces';
 import { formatDate, formatMinutes, progressBar } from '../utils/format';
 import { useTimer } from '../context/TimerContext';
@@ -17,7 +17,7 @@ interface TimerProps {
   onBack: () => void;
 }
 
-type Step = 'select-subject' | 'select-time' | 'custom-time' | 'running' | 'completed' | 'save-confirm';
+type Step = 'select-task' | 'select-time' | 'custom-time' | 'running' | 'completed' | 'save-confirm';
 
 const TIME_PRESETS = [
   { label: '25 min (Pomodoro)', value: 25 },
@@ -44,50 +44,50 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
     if (timerState.remainingSeconds === 0 && timerState.totalSeconds > 0 && timerState.workspaceId === workspace.id) {
       return 'completed';
     }
-    return 'select-subject';
+    return 'select-task';
   };
 
   const [step, setStep] = useState<Step>(getInitialStep);
-  const [subjects, setSubjects] = useState<string[]>([]);
+  const [tasks, setTasks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedSubject, setSelectedSubject] = useState(timerState.subject || '');
-  const [customSubject, setCustomSubject] = useState('');
-  const [showCustomSubjectInput, setShowCustomSubjectInput] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(timerState.task || '');
+  const [customTask, setCustomTask] = useState('');
+  const [showCustomTaskInput, setShowCustomTaskInput] = useState(false);
   const [customMinutes, setCustomMinutes] = useState('');
 
   const client = getApiClient(token);
   const sessionsApi = new SessionsApi(client);
 
   useEffect(() => {
-    loadSubjects();
+    loadTasks();
   }, []);
 
   // Sync step with timer state changes
   useEffect(() => {
     if (timerState.isRunning && timerState.workspaceId === workspace.id) {
       setStep('running');
-      setSelectedSubject(timerState.subject);
+      setSelectedTask(timerState.task);
     } else if (timerState.remainingSeconds === 0 && timerState.totalSeconds > 0 && timerState.workspaceId === workspace.id) {
       setStep('completed');
     }
   }, [timerState.isRunning, timerState.remainingSeconds, timerState.workspaceId, workspace.id]);
 
-  const loadSubjects = async () => {
+  const loadTasks = async () => {
     setLoading(true);
     try {
-      const subs = await sessionsApi.getSubjects(workspace.id);
+      const taskList = await sessionsApi.getTasks(workspace.id);
       if (suggestion?.hasCycle && suggestion.suggestion) {
-        const cycleSubjects = suggestion.suggestion.allItemsProgress.map((p) => p.subject);
-        const allSubjects = [...new Set([...cycleSubjects, ...subs])];
-        setSubjects(allSubjects);
+        const cycleTasks = suggestion.suggestion.allItemsProgress.map((p) => p.task);
+        const allTasks = [...new Set([...cycleTasks, ...taskList])];
+        setTasks(allTasks);
       } else {
-        setSubjects(subs);
+        setTasks(taskList);
       }
     } catch {
-      setError('Failed to load subjects');
+      setError('Failed to load tasks');
     } finally {
       setLoading(false);
     }
@@ -113,10 +113,10 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
     }
 
     if (key.escape) {
-      if (showCustomSubjectInput) {
-        setShowCustomSubjectInput(false);
+      if (showCustomTaskInput) {
+        setShowCustomTaskInput(false);
       } else if (step === 'select-time') {
-        setStep('select-subject');
+        setStep('select-task');
       } else if (step === 'custom-time') {
         setStep('select-time');
       } else if (step === 'completed' || step === 'save-confirm') {
@@ -127,19 +127,19 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
     }
   });
 
-  const handleSubjectSelect = (item: { label: string; value: string }) => {
+  const handleTaskSelect = (item: { label: string; value: string }) => {
     if (item.value === 'custom') {
-      setShowCustomSubjectInput(true);
+      setShowCustomTaskInput(true);
     } else {
-      setSelectedSubject(item.value);
+      setSelectedTask(item.value);
       setStep('select-time');
     }
   };
 
-  const handleCustomSubjectSubmit = () => {
-    if (customSubject.trim()) {
-      setSelectedSubject(customSubject.trim());
-      setShowCustomSubjectInput(false);
+  const handleCustomTaskSubmit = () => {
+    if (customTask.trim()) {
+      setSelectedTask(customTask.trim());
+      setShowCustomTaskInput(false);
       setStep('select-time');
     }
   };
@@ -166,7 +166,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
   };
 
   const startTimer = (minutes: number) => {
-    timer.start(selectedSubject, minutes, workspace.id);
+    timer.start(selectedTask, minutes, workspace.id);
     setStep('running');
   };
 
@@ -184,7 +184,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
       await sessionsApi.create({
         workspaceId: workspace.id,
         date: formatDate(new Date()),
-        subject: selectedSubject,
+        task: selectedTask,
         minutes: elapsedMinutes,
       });
       onBack();
@@ -203,7 +203,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
         await sessionsApi.create({
           workspaceId: workspace.id,
           date: formatDate(new Date()),
-          subject: selectedSubject,
+          task: selectedTask,
           minutes,
         });
         onBack();
@@ -213,7 +213,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
       }
     } else if (item.value === 'restart') {
       timer.reset();
-      timer.start(selectedSubject, Math.round(timerState.totalSeconds / 60), workspace.id);
+      timer.start(selectedTask, Math.round(timerState.totalSeconds / 60), workspace.id);
       setStep('running');
     } else {
       onBack();
@@ -229,20 +229,20 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
     );
   }
 
-  // Build subject options
-  const subjectItems = [
+  // Build task options
+  const taskItems = [
     ...(suggestion?.hasCycle && suggestion.suggestion
       ? [
           {
-            label: `* ${suggestion.suggestion.currentSubject} (suggested - ${formatMinutes(suggestion.suggestion.remainingMinutes)} remaining)`,
-            value: suggestion.suggestion.currentSubject,
+            label: `* ${suggestion.suggestion.currentTask} (suggested - ${formatMinutes(suggestion.suggestion.remainingMinutes)} remaining)`,
+            value: suggestion.suggestion.currentTask,
           },
         ]
       : []),
-    ...subjects
-      .filter((s) => s !== suggestion?.suggestion?.currentSubject)
-      .map((s) => ({ label: s, value: s })),
-    { label: '+ Add new subject', value: 'custom' },
+    ...tasks
+      .filter((t) => t !== suggestion?.suggestion?.currentTask)
+      .map((t) => ({ label: t, value: t })),
+    { label: '+ Add new task', value: 'custom' },
   ];
 
   // Build time presets with suggestion
@@ -262,7 +262,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
     <Box flexDirection="column" padding={1}>
       <Box marginBottom={1}>
         <Text bold color="cyan">
-          Study Timer
+          Work Timer
         </Text>
         <Text> - </Text>
         <Text color="yellow">{workspace.name}</Text>
@@ -274,22 +274,22 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
         </Box>
       )}
 
-      {step === 'select-subject' && (
+      {step === 'select-task' && (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text bold>Select subject to study:</Text>
+            <Text bold>Select task to work on:</Text>
           </Box>
-          {showCustomSubjectInput ? (
+          {showCustomTaskInput ? (
             <Box>
-              <Text>Subject name: </Text>
+              <Text>Task name: </Text>
               <TextInput
-                value={customSubject}
-                onChange={setCustomSubject}
-                onSubmit={handleCustomSubjectSubmit}
+                value={customTask}
+                onChange={setCustomTask}
+                onSubmit={handleCustomTaskSubmit}
               />
             </Box>
           ) : (
-            <SelectInput items={subjectItems} onSelect={handleSubjectSelect} />
+            <SelectInput items={taskItems} onSelect={handleTaskSelect} />
           )}
         </Box>
       )}
@@ -298,7 +298,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
         <Box flexDirection="column">
           <Box marginBottom={1}>
             <Text>
-              Subject: <Text color="cyan">{selectedSubject}</Text>
+              Task: <Text color="cyan">{selectedTask}</Text>
             </Text>
           </Box>
           <Box marginBottom={1}>
@@ -312,7 +312,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
         <Box flexDirection="column">
           <Box marginBottom={1}>
             <Text>
-              Subject: <Text color="cyan">{selectedSubject}</Text>
+              Task: <Text color="cyan">{selectedTask}</Text>
             </Text>
           </Box>
           <Box>
@@ -330,7 +330,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
           <Box marginBottom={1} flexDirection="column" borderStyle="round" paddingX={2} paddingY={1}>
             <Box justifyContent="center" marginBottom={1}>
               <Text color="cyan" bold>
-                {timerState.subject}
+                {timerState.task}
               </Text>
             </Box>
 
@@ -368,7 +368,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
               </Text>
             </Box>
             <Text>
-              Subject: <Text color="cyan">{selectedSubject}</Text>
+              Task: <Text color="cyan">{selectedTask}</Text>
             </Text>
             <Text>
               Duration: <Text color="green">{formatMinutes(Math.round(timerState.totalSeconds / 60))}</Text>
@@ -404,7 +404,7 @@ export function Timer({ token, workspace, suggestion, onBack }: TimerProps) {
             <Text>Timer stopped early. Save partial session?</Text>
           </Box>
           <Text>
-            Subject: <Text color="cyan">{selectedSubject}</Text>
+            Task: <Text color="cyan">{selectedTask}</Text>
           </Text>
           <Text>
             Duration: <Text color="yellow">{formatMinutes(Math.round((timerState.totalSeconds - timerState.remainingSeconds) / 60))}</Text>

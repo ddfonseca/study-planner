@@ -5,7 +5,7 @@ import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import { getApiClient } from '../api/client';
 import { SessionsApi } from '../api/sessions';
-import { CyclesApi, CycleSuggestion } from '../api/cycles';
+import { FocusCyclesApi, CycleSuggestion } from '../api/focusCycles';
 import { Workspace } from '../api/workspaces';
 import { formatDate, formatMinutes } from '../utils/format';
 
@@ -16,44 +16,44 @@ interface SessionLogProps {
   onBack: () => void;
 }
 
-type Step = 'subject' | 'minutes' | 'confirm';
+type Step = 'task' | 'minutes' | 'confirm';
 
 export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogProps) {
-  const [step, setStep] = useState<Step>('subject');
-  const [subjects, setSubjects] = useState<string[]>([]);
+  const [step, setStep] = useState<Step>('task');
+  const [tasks, setTasks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [customSubject, setCustomSubject] = useState('');
+  const [selectedTask, setSelectedTask] = useState('');
+  const [customTask, setCustomTask] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [minutes, setMinutes] = useState('');
 
   const client = getApiClient(token);
   const sessionsApi = new SessionsApi(client);
-  const cyclesApi = new CyclesApi(client);
+  const focusCyclesApi = new FocusCyclesApi(client);
 
   useEffect(() => {
-    loadSubjects();
+    loadTasks();
   }, []);
 
-  const loadSubjects = async () => {
+  const loadTasks = async () => {
     setLoading(true);
     try {
-      const subs = await sessionsApi.getSubjects(workspace.id);
+      const taskList = await sessionsApi.getTasks(workspace.id);
 
-      // Add cycle subjects if available
+      // Add cycle tasks if available
       if (suggestion?.hasCycle && suggestion.suggestion) {
-        const cycleSubjects = suggestion.suggestion.allItemsProgress.map((p) => p.subject);
-        const allSubjects = [...new Set([...cycleSubjects, ...subs])];
-        setSubjects(allSubjects);
+        const cycleTasks = suggestion.suggestion.allItemsProgress.map((p) => p.task);
+        const allTasks = [...new Set([...cycleTasks, ...taskList])];
+        setTasks(allTasks);
       } else {
-        setSubjects(subs);
+        setTasks(taskList);
       }
     } catch {
-      setError('Failed to load subjects');
+      setError('Failed to load tasks');
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
       if (showCustomInput) {
         setShowCustomInput(false);
       } else if (step === 'minutes') {
-        setStep('subject');
+        setStep('task');
       } else if (step === 'confirm') {
         setStep('minutes');
       } else {
@@ -73,18 +73,18 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
     }
   });
 
-  const handleSubjectSelect = (item: { label: string; value: string }) => {
+  const handleTaskSelect = (item: { label: string; value: string }) => {
     if (item.value === 'custom') {
       setShowCustomInput(true);
     } else {
-      setSelectedSubject(item.value);
+      setSelectedTask(item.value);
       setStep('minutes');
     }
   };
 
-  const handleCustomSubjectSubmit = () => {
-    if (customSubject.trim()) {
-      setSelectedSubject(customSubject.trim());
+  const handleCustomTaskSubmit = () => {
+    if (customTask.trim()) {
+      setSelectedTask(customTask.trim());
       setShowCustomInput(false);
       setStep('minutes');
     }
@@ -102,7 +102,7 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
 
   const handleConfirm = async (item: { value: string }) => {
     if (item.value === 'no') {
-      setStep('subject');
+      setStep('task');
       return;
     }
 
@@ -113,7 +113,7 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
       await sessionsApi.create({
         workspaceId: workspace.id,
         date: formatDate(new Date()),
-        subject: selectedSubject,
+        task: selectedTask,
         minutes: parseInt(minutes, 10),
       });
       setSuccess(true);
@@ -128,7 +128,7 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
     return (
       <Box padding={1}>
         <Spinner type="dots" />
-        <Text> Loading subjects...</Text>
+        <Text> Loading tasks...</Text>
       </Box>
     );
   }
@@ -140,36 +140,36 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
           Session logged successfully!
         </Text>
         <Text>
-          {selectedSubject}: {formatMinutes(parseInt(minutes, 10))}
+          {selectedTask}: {formatMinutes(parseInt(minutes, 10))}
         </Text>
       </Box>
     );
   }
 
-  // Build subject options
-  const subjectItems = [
-    // Suggested subject first if available
+  // Build task options
+  const taskItems = [
+    // Suggested task first if available
     ...(suggestion?.hasCycle && suggestion.suggestion
       ? [
           {
-            label: `⭐ ${suggestion.suggestion.currentSubject} (suggested)`,
-            value: suggestion.suggestion.currentSubject,
+            label: `* ${suggestion.suggestion.currentTask} (suggested)`,
+            value: suggestion.suggestion.currentTask,
           },
         ]
       : []),
-    // Other subjects
-    ...subjects
-      .filter((s) => s !== suggestion?.suggestion?.currentSubject)
-      .map((s) => ({ label: s, value: s })),
+    // Other tasks
+    ...tasks
+      .filter((t) => t !== suggestion?.suggestion?.currentTask)
+      .map((t) => ({ label: t, value: t })),
     // Custom option
-    { label: '+ Add new subject', value: 'custom' },
+    { label: '+ Add new task', value: 'custom' },
   ];
 
   return (
     <Box flexDirection="column" padding={1}>
       <Box marginBottom={1}>
         <Text bold color="cyan">
-          Log Study Session
+          Log Work Session
         </Text>
         <Text> - </Text>
         <Text color="yellow">{workspace.name}</Text>
@@ -181,22 +181,22 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
         </Box>
       )}
 
-      {step === 'subject' && (
+      {step === 'task' && (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text bold>Select subject:</Text>
+            <Text bold>Select task:</Text>
           </Box>
           {showCustomInput ? (
             <Box>
-              <Text>Subject name: </Text>
+              <Text>Task name: </Text>
               <TextInput
-                value={customSubject}
-                onChange={setCustomSubject}
-                onSubmit={handleCustomSubjectSubmit}
+                value={customTask}
+                onChange={setCustomTask}
+                onSubmit={handleCustomTaskSubmit}
               />
             </Box>
           ) : (
-            <SelectInput items={subjectItems} onSelect={handleSubjectSelect} />
+            <SelectInput items={taskItems} onSelect={handleTaskSelect} />
           )}
         </Box>
       )}
@@ -204,10 +204,10 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
       {step === 'minutes' && (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text>Subject: <Text color="cyan">{selectedSubject}</Text></Text>
+            <Text>Task: <Text color="cyan">{selectedTask}</Text></Text>
           </Box>
           <Box>
-            <Text>Minutes studied: </Text>
+            <Text>Minutes worked: </Text>
             <TextInput value={minutes} onChange={setMinutes} onSubmit={handleMinutesSubmit} />
           </Box>
           <Box marginTop={1}>
@@ -222,7 +222,7 @@ export function SessionLog({ token, workspace, suggestion, onBack }: SessionLogP
             <Text bold>Confirm session:</Text>
           </Box>
           <Text>
-            Subject: <Text color="cyan">{selectedSubject}</Text>
+            Task: <Text color="cyan">{selectedTask}</Text>
           </Text>
           <Text>
             Duration: <Text color="green">{formatMinutes(parseInt(minutes, 10))}</Text>

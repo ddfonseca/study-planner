@@ -4,7 +4,7 @@ import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import { getApiClient } from '../api/client';
-import { CyclesApi, StudyCycle } from '../api/cycles';
+import { FocusCyclesApi, FocusCycle } from '../api/focusCycles';
 import { Workspace } from '../api/workspaces';
 import { formatMinutes } from '../utils/format';
 
@@ -14,16 +14,16 @@ interface CycleManagerProps {
   onBack: () => void;
 }
 
-type Step = 'list' | 'create-name' | 'create-subjects' | 'create-minutes' | 'create-confirm';
+type Step = 'list' | 'create-name' | 'create-tasks' | 'create-minutes' | 'create-confirm';
 
 interface CycleItem {
-  subject: string;
+  task: string;
   targetMinutes: number;
 }
 
 export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
   const [step, setStep] = useState<Step>('list');
-  const [cycles, setCycles] = useState<StudyCycle[]>([]);
+  const [cycles, setCycles] = useState<FocusCycle[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,21 +32,21 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
   // Create form state
   const [newCycleName, setNewCycleName] = useState('');
   const [newCycleItems, setNewCycleItems] = useState<CycleItem[]>([]);
-  const [currentSubject, setCurrentSubject] = useState('');
+  const [currentTask, setCurrentTask] = useState('');
   const [currentMinutes, setCurrentMinutes] = useState('');
   const [editingMinutesIndex, setEditingMinutesIndex] = useState(0);
 
   const client = getApiClient(token);
-  const cyclesApi = new CyclesApi(client);
+  const focusCyclesApi = new FocusCyclesApi(client);
 
   const loadCycles = async () => {
     setLoading(true);
     setError(null);
     try {
-      const list = await cyclesApi.list(workspace.id);
+      const list = await focusCyclesApi.list(workspace.id);
       setCycles(list);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load cycles');
+      setError(err instanceof Error ? err.message : 'Failed to load focus cycles');
     } finally {
       setLoading(false);
     }
@@ -61,10 +61,10 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
       if (step === 'create-name') {
         setStep('list');
         resetForm();
-      } else if (step === 'create-subjects') {
+      } else if (step === 'create-tasks') {
         setStep('create-name');
       } else if (step === 'create-minutes') {
-        setStep('create-subjects');
+        setStep('create-tasks');
       } else if (step === 'create-confirm') {
         setStep('create-minutes');
       } else {
@@ -76,7 +76,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
   const resetForm = () => {
     setNewCycleName('');
     setNewCycleItems([]);
-    setCurrentSubject('');
+    setCurrentTask('');
     setCurrentMinutes('');
     setEditingMinutesIndex(0);
   };
@@ -93,7 +93,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
       setSaving(true);
       setError(null);
       try {
-        await cyclesApi.activate(workspace.id, cycle.id);
+        await focusCyclesApi.activate(workspace.id, cycle.id);
         setSuccess(`Activated "${cycle.name}"`);
         await loadCycles();
         setTimeout(() => setSuccess(null), 2000);
@@ -115,23 +115,23 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
       return;
     }
     setError(null);
-    setStep('create-subjects');
+    setStep('create-tasks');
   };
 
-  const handleAddSubject = () => {
-    if (currentSubject.trim().length === 0) {
-      setError('Subject name cannot be empty');
+  const handleAddTask = () => {
+    if (currentTask.trim().length === 0) {
+      setError('Task name cannot be empty');
       return;
     }
     setError(null);
-    setNewCycleItems([...newCycleItems, { subject: currentSubject.trim(), targetMinutes: 60 }]);
-    setCurrentSubject('');
+    setNewCycleItems([...newCycleItems, { task: currentTask.trim(), targetMinutes: 60 }]);
+    setCurrentTask('');
   };
 
-  const handleSubjectAction = (item: { value: string }) => {
+  const handleTaskAction = (item: { value: string }) => {
     if (item.value === 'done') {
       if (newCycleItems.length === 0) {
-        setError('Add at least one subject');
+        setError('Add at least one task');
         return;
       }
       setError(null);
@@ -157,7 +157,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
     setNewCycleItems(updated);
 
     if (editingMinutesIndex < newCycleItems.length - 1) {
-      // Move to next subject
+      // Move to next task
       const nextIndex = editingMinutesIndex + 1;
       setEditingMinutesIndex(nextIndex);
       setCurrentMinutes(updated[nextIndex].targetMinutes.toString());
@@ -178,10 +178,10 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
     setError(null);
 
     try {
-      await cyclesApi.create(workspace.id, {
+      await focusCyclesApi.create(workspace.id, {
         name: newCycleName.trim(),
         items: newCycleItems.map((item) => ({
-          subject: item.subject,
+          task: item.task,
           targetMinutes: item.targetMinutes,
         })),
         activateOnCreate: true,
@@ -192,7 +192,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
       await loadCycles();
       setTimeout(() => setSuccess(null), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create cycle');
+      setError(err instanceof Error ? err.message : 'Failed to create focus cycle');
     } finally {
       setSaving(false);
     }
@@ -202,7 +202,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
     return (
       <Box padding={1}>
         <Spinner type="dots" />
-        <Text> Loading cycles...</Text>
+        <Text> Loading focus cycles...</Text>
       </Box>
     );
   }
@@ -211,27 +211,27 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
   const cycleItems = [
     ...cycles.map((c) => ({
       label: c.isActive
-        ? `▶ ${c.name} (active) - ${c.items.length} subjects`
-        : `  ${c.name} - ${c.items.length} subjects`,
+        ? `> ${c.name} (active) - ${c.items.length} tasks`
+        : `  ${c.name} - ${c.items.length} tasks`,
       value: c.id,
     })),
-    { label: '+ Create New Cycle', value: 'create' },
+    { label: '+ Create New Focus Cycle', value: 'create' },
   ];
 
-  // Build subject action items for create flow
-  const subjectActionItems = [
+  // Build task action items for create flow
+  const taskActionItems = [
     ...newCycleItems.map((item, i) => ({
-      label: `✕ Remove "${item.subject}"`,
+      label: `x Remove "${item.task}"`,
       value: `remove-${i}`,
     })),
-    { label: newCycleItems.length > 0 ? '✓ Done adding subjects' : '(Add subjects first)', value: 'done' },
+    { label: newCycleItems.length > 0 ? 'Done adding tasks' : '(Add tasks first)', value: 'done' },
   ];
 
   return (
     <Box flexDirection="column" padding={1}>
       <Box marginBottom={1}>
         <Text bold color="cyan">
-          📚 Cycle Manager
+          Focus Cycle Manager
         </Text>
         <Text> - </Text>
         <Text color="yellow">{workspace.name}</Text>
@@ -245,7 +245,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
 
       {success && (
         <Box marginBottom={1}>
-          <Text color="green">✓ {success}</Text>
+          <Text color="green">{success}</Text>
         </Box>
       )}
 
@@ -259,11 +259,11 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
       {step === 'list' && !saving && (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text bold>Your Study Cycles:</Text>
+            <Text bold>Your Focus Cycles:</Text>
           </Box>
           {cycles.length === 0 ? (
             <Box marginBottom={1}>
-              <Text color="gray">No cycles yet. Create your first one!</Text>
+              <Text color="gray">No focus cycles yet. Create your first one!</Text>
             </Box>
           ) : null}
           <SelectInput items={cycleItems} onSelect={handleCycleSelect} />
@@ -283,15 +283,15 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
             <TextInput value={newCycleName} onChange={setNewCycleName} onSubmit={handleNameSubmit} />
           </Box>
           <Box marginTop={1}>
-            <Text color="gray">Enter a name for your study cycle (max 50 characters)</Text>
+            <Text color="gray">Enter a name for your focus cycle (max 50 characters)</Text>
           </Box>
         </Box>
       )}
 
-      {step === 'create-subjects' && (
+      {step === 'create-tasks' && (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text bold>Step 2/4: Add Subjects</Text>
+            <Text bold>Step 2/4: Add Tasks</Text>
           </Box>
           <Box marginBottom={1}>
             <Text>
@@ -301,25 +301,25 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
 
           {newCycleItems.length > 0 && (
             <Box marginBottom={1} flexDirection="column">
-              <Text color="gray">Added subjects:</Text>
+              <Text color="gray">Added tasks:</Text>
               {newCycleItems.map((item, i) => (
                 <Text key={i}>
-                  {i + 1}. {item.subject}
+                  {i + 1}. {item.task}
                 </Text>
               ))}
             </Box>
           )}
 
           <Box marginBottom={1}>
-            <Text>Add subject: </Text>
-            <TextInput value={currentSubject} onChange={setCurrentSubject} onSubmit={handleAddSubject} />
+            <Text>Add task: </Text>
+            <TextInput value={currentTask} onChange={setCurrentTask} onSubmit={handleAddTask} />
           </Box>
 
           <Box marginBottom={1}>
             <Text color="gray">Press Enter to add, then select action below</Text>
           </Box>
 
-          <SelectInput items={subjectActionItems} onSelect={handleSubjectAction} />
+          <SelectInput items={taskActionItems} onSelect={handleTaskAction} />
         </Box>
       )}
 
@@ -337,7 +337,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
           <Box marginBottom={1} flexDirection="column">
             {newCycleItems.map((item, i) => (
               <Text key={i} color={i === editingMinutesIndex ? 'yellow' : i < editingMinutesIndex ? 'green' : 'gray'}>
-                {i < editingMinutesIndex ? '✓' : i === editingMinutesIndex ? '▶' : ' '} {item.subject}:{' '}
+                {i < editingMinutesIndex ? '>' : i === editingMinutesIndex ? '>' : ' '} {item.task}:{' '}
                 {i < editingMinutesIndex ? formatMinutes(item.targetMinutes) : i === editingMinutesIndex ? '...' : '?'}
               </Text>
             ))}
@@ -345,13 +345,13 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
 
           <Box>
             <Text>
-              Minutes for <Text color="cyan">{newCycleItems[editingMinutesIndex].subject}</Text>:{' '}
+              Minutes for <Text color="cyan">{newCycleItems[editingMinutesIndex].task}</Text>:{' '}
             </Text>
             <TextInput value={currentMinutes} onChange={setCurrentMinutes} onSubmit={handleMinutesSubmit} />
           </Box>
           <Box marginTop={1}>
             <Text color="gray">
-              Subject {editingMinutesIndex + 1} of {newCycleItems.length}
+              Task {editingMinutesIndex + 1} of {newCycleItems.length}
             </Text>
           </Box>
         </Box>
@@ -369,7 +369,7 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
             </Text>
             {newCycleItems.map((item, i) => (
               <Text key={i}>
-                {i + 1}. {item.subject} - <Text color="green">{formatMinutes(item.targetMinutes)}</Text>
+                {i + 1}. {item.task} - <Text color="green">{formatMinutes(item.targetMinutes)}</Text>
               </Text>
             ))}
             <Box marginTop={1}>
@@ -382,12 +382,12 @@ export function CycleManager({ token, workspace, onBack }: CycleManagerProps) {
           {saving ? (
             <Box>
               <Spinner type="dots" />
-              <Text> Creating cycle...</Text>
+              <Text> Creating focus cycle...</Text>
             </Box>
           ) : (
             <Box flexDirection="column">
               <Box marginBottom={1}>
-                <Text>Create this cycle and activate it?</Text>
+                <Text>Create this focus cycle and activate it?</Text>
               </Box>
               <SelectInput
                 items={[

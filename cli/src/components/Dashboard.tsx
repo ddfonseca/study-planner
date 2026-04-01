@@ -4,9 +4,9 @@ import SelectInput from 'ink-select-input';
 import Spinner from 'ink-spinner';
 import { getApiClient } from '../api/client';
 import { WorkspacesApi, Workspace } from '../api/workspaces';
-import { CyclesApi, CycleSuggestion } from '../api/cycles';
+import { FocusCyclesApi, CycleSuggestion } from '../api/focusCycles';
 import { GoalsApi, WeeklyGoal } from '../api/goals';
-import { SessionsApi, StudySession } from '../api/sessions';
+import { SessionsApi, WorkSession } from '../api/sessions';
 import { formatMinutes, formatHours, progressBar, getWeekStart, formatDate } from '../utils/format';
 import { SessionLog } from './SessionLog';
 import { CycleView } from './CycleView';
@@ -44,7 +44,7 @@ export function Dashboard({ token, user, onLogout }: DashboardProps) {
 
   const client = getApiClient(token);
   const workspacesApi = new WorkspacesApi(client);
-  const cyclesApi = new CyclesApi(client);
+  const focusCyclesApi = new FocusCyclesApi(client);
   const goalsApi = new GoalsApi(client);
   const sessionsApi = new SessionsApi(client);
 
@@ -71,8 +71,8 @@ export function Dashboard({ token, user, onLogout }: DashboardProps) {
       if (targetWs) {
         setSelectedWorkspace(targetWs);
 
-        // Load cycle suggestion
-        const sug = await cyclesApi.getSuggestion(targetWs.id);
+        // Load focus cycle suggestion
+        const sug = await focusCyclesApi.getSuggestion(targetWs.id);
         setSuggestion(sug);
 
         // Load weekly goal
@@ -199,10 +199,10 @@ export function Dashboard({ token, user, onLogout }: DashboardProps) {
   }
 
   const menuItems: MenuItem[] = [
-    { label: 'Start Study Timer', value: 'timer' },
-    { label: 'Log Study Session', value: 'log-session' },
-    { label: 'View Study Cycle', value: 'cycle' },
-    { label: 'Manage Cycles', value: 'cycle-manager' },
+    { label: 'Start Timer', value: 'timer' },
+    { label: 'Log Work Session', value: 'log-session' },
+    { label: 'View Focus Cycle', value: 'cycle' },
+    { label: 'Manage Focus Cycles', value: 'cycle-manager' },
     { label: 'Weekly Progress', value: 'progress' },
     { label: 'Switch Workspace', value: 'workspace-selector' },
     { label: 'Logout', value: 'logout' },
@@ -246,7 +246,7 @@ export function Dashboard({ token, user, onLogout }: DashboardProps) {
         {/* Header */}
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            Study Planner CLI
+            Engineering Planner CLI
           </Text>
           <Text> - </Text>
           <Text color="gray">{user.email}</Text>
@@ -287,21 +287,21 @@ export function Dashboard({ token, user, onLogout }: DashboardProps) {
               </Box>
             </Box>
 
-            {/* Current Study Suggestion */}
+            {/* Current Task Suggestion */}
             {suggestion?.hasCycle && suggestion.suggestion && (
               <Box marginBottom={1} flexDirection="column" borderStyle="round" paddingX={1}>
                 <Text bold color="blue">
                   Next Up
                 </Text>
                 <Text>
-                  <Text color="cyan">{suggestion.suggestion.currentSubject}</Text>
+                  <Text color="cyan">{suggestion.suggestion.currentTask}</Text>
                   {' - '}
                   <Text>
                     {formatMinutes(suggestion.suggestion.remainingMinutes)} remaining
                   </Text>
                 </Text>
                 {suggestion.suggestion.isCurrentComplete && (
-                  <Text color="green">Ready to advance to next subject!</Text>
+                  <Text color="green">Ready to advance to next task!</Text>
                 )}
               </Box>
             )}

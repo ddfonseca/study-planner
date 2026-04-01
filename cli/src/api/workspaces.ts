@@ -18,7 +18,7 @@ export interface CreateWorkspaceDto {
 export interface WorkspaceStats {
   totalMinutes: number;
   totalSessions: number;
-  subjects: string[];
+  tasks: string[];
 }
 
 export class WorkspacesApi {
@@ -36,8 +36,8 @@ export class WorkspacesApi {
     return this.client.get<Workspace>(`/api/workspaces/${id}`);
   }
 
-  async getSubjects(id: string): Promise<string[]> {
-    return this.client.get<string[]>(`/api/workspaces/${id}/subjects`);
+  async getTasks(id: string): Promise<string[]> {
+    return this.client.get<string[]>(`/api/workspaces/${id}/tasks`);
   }
 
   async getStats(id: string): Promise<WorkspaceStats> {
