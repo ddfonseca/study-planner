@@ -18,7 +18,7 @@ import {
   getDaysInMonth,
   subDays,
 } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 /**
  * Format date to YYYY-MM-DD string
@@ -35,31 +35,31 @@ export function parseDateKey(dateKey: string): Date {
 }
 
 /**
- * Format date for display in Portuguese
+ * Format date for display
  */
 export function formatDateDisplay(date: Date): string {
-  return format(date, 'dd/MM/yyyy', { locale: ptBR });
+  return format(date, 'MM/dd/yyyy', { locale: enUS });
 }
 
 /**
- * Format date for display in Portuguese (short)
+ * Format date for display (short)
  */
 export function formatDateShort(date: Date): string {
-  return format(date, 'dd/MM', { locale: ptBR });
+  return format(date, 'MM/dd', { locale: enUS });
 }
 
 /**
  * Format month and year for display
  */
 export function formatMonthYear(date: Date): string {
-  return format(date, 'MMMM yyyy', { locale: ptBR });
+  return format(date, 'MMMM yyyy', { locale: enUS });
 }
 
 /**
  * Format day of week
  */
 export function formatDayOfWeek(date: Date): string {
-  return format(date, 'EEEE', { locale: ptBR });
+  return format(date, 'EEEE', { locale: enUS });
 }
 
 /**
@@ -67,7 +67,7 @@ export function formatDayOfWeek(date: Date): string {
  * @param weekStartDay 0=Sunday, 1=Monday (default)
  */
 export function getDayNames(weekStartDay: number = 1): string[] {
-  const allDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const allDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   // Rotate array to start from weekStartDay
   return [...allDays.slice(weekStartDay), ...allDays.slice(0, weekStartDay)];
 }

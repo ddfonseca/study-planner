@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Falha ao entrar',
+        error: error instanceof Error ? error.message : 'Failed to sign in',
       });
     }
   },
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       set({ isLoading: true, error: null });
       const result = await authApi.loginWithEmail(email, password);
       if (!result.success) {
-        set({ isLoading: false, error: result.error || 'Falha ao entrar' });
+        set({ isLoading: false, error: result.error || 'Failed to sign in' });
         return false;
       }
       // Session will be checked after redirect
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Falha ao entrar',
+        error: error instanceof Error ? error.message : 'Failed to sign in',
       });
       return false;
     }
@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       set({ isLoading: true, error: null });
       const result = await authApi.signUpWithEmail(email, password, name);
       if (!result.success) {
-        set({ isLoading: false, error: result.error || 'Falha ao criar conta' });
+        set({ isLoading: false, error: result.error || 'Failed to create account' });
         return false;
       }
       // Session will be checked after redirect
@@ -95,7 +95,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Falha ao criar conta',
+        error: error instanceof Error ? error.message : 'Failed to create account',
       });
       return false;
     }
@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Falha ao verificar sessão',
+        error: error instanceof Error ? error.message : 'Failed to verify session',
       });
     }
   },

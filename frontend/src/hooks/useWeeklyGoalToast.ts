@@ -69,8 +69,8 @@ export function useWeeklyGoalToast(
     triggerPattern('success');
 
     toast({
-      title: '🎉 Meta Semanal Alcançada!',
-      description: `Parabéns! Você estudou ${formattedHours}h de ${targetHours}h esta semana.`,
+      title: '🎉 Weekly Goal Achieved!',
+      description: `Congratulations! You worked ${formattedHours}h of ${targetHours}h this week.`,
       variant: 'success',
       duration: 6000,
     });

@@ -161,8 +161,8 @@ export function CalendarGrid({
         {!hasSessionsInMonth(weeks) && (
           <EmptyState
             icon={CalendarOff}
-            title="Nenhuma sessão neste mês"
-            description="Clique em um dia para adicionar sua primeira sessão de estudo"
+            title="No sessions this month"
+            description="Click a day to add your first work session"
             variant="subtle"
             size="sm"
             action={
@@ -172,7 +172,7 @@ export function CalendarGrid({
                 onClick={() => onCellClick(new Date())}
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Adicionar sessão
+                Add session
               </Button>
             }
           />

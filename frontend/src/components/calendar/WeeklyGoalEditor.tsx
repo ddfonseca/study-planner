@@ -41,11 +41,11 @@ export function WeeklyGoalEditor({
   // Format date range for display
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
-  const weekEndStr = weekEnd.toLocaleDateString('pt-BR', {
+  const weekEndStr = weekEnd.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
   });
-  const weekStartDisplay = weekStart.toLocaleDateString('pt-BR', {
+  const weekStartDisplay = weekStart.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
   });
@@ -59,7 +59,7 @@ export function WeeklyGoalEditor({
         setTargetHours(String(loadedGoal.targetHours));
       }
     } catch {
-      setError('Erro ao carregar meta');
+      setError('Failed to load goal');
     }
   }, [getGoalForWeek, weekStart]);
 
@@ -73,7 +73,7 @@ export function WeeklyGoalEditor({
     const targetValue = parseFloat(targetHours) || 0;
 
     if (targetValue < 0) {
-      setError('Meta deve ser maior ou igual a 0');
+      setError('Goal must be greater than or equal to 0');
       return;
     }
 
@@ -84,9 +84,9 @@ export function WeeklyGoalEditor({
       onClose();
     } catch (err) {
       if (err instanceof Error && err.message.includes('past')) {
-        setError('Não é possível editar metas de semanas passadas');
+        setError('Cannot edit goals for past weeks');
       } else {
-        setError('Erro ao salvar meta');
+        setError('Failed to save goal');
       }
     } finally {
       setIsSaving(false);
@@ -102,7 +102,7 @@ export function WeeklyGoalEditor({
       <ResponsiveDialogContent className="sm:max-w-[400px]">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
-            Meta da Semana
+            Weekly Goal
             <span className="block text-sm font-normal text-muted-foreground">
               {weekStartDisplay} - {weekEndStr}
             </span>
@@ -113,7 +113,7 @@ export function WeeklyGoalEditor({
           {/* Current progress */}
           <div className="p-4 bg-muted/50 rounded-lg">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Progresso</span>
+              <span className="text-sm text-muted-foreground">Progress</span>
               <span className="text-lg font-semibold">{formatTime(currentTotal)}</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -137,7 +137,7 @@ export function WeeklyGoalEditor({
           {/* Goal input */}
           <div className="space-y-2">
             <Label htmlFor="targetHours">
-              Meta Semanal (horas)
+              Weekly Goal (hours)
             </Label>
             <Input
               id="targetHours"
@@ -152,13 +152,13 @@ export function WeeklyGoalEditor({
 
           {!canModifyGoals && (
             <p className="text-sm text-amber-600 dark:text-amber-400">
-              Selecione um workspace para editar metas.
+              Select a workspace to edit goals.
             </p>
           )}
 
           {goal?.isCustom && (
             <p className="text-xs text-muted-foreground">
-              Esta meta foi personalizada para esta semana.
+              This goal has been customized for this week.
             </p>
           )}
 
@@ -169,10 +169,10 @@ export function WeeklyGoalEditor({
 
         <ResponsiveDialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancelar
+            Cancel
           </Button>
           <Button onClick={handleSave} disabled={!canEdit || isLoading || isSaving}>
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

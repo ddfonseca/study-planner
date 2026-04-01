@@ -26,8 +26,8 @@ export function ConfigPanel() {
 
     if (targetValue < 0) {
       toast({
-        title: 'Erro',
-        description: 'O valor deve ser maior ou igual a 0',
+        title: 'Error',
+        description: 'Value must be greater than or equal to 0',
         variant: 'destructive',
       });
       return;
@@ -38,13 +38,13 @@ export function ConfigPanel() {
         targetHours: targetValue,
       });
       toast({
-        title: 'Sucesso',
-        description: 'Configurações salvas!',
+        title: 'Success',
+        description: 'Settings saved!',
       });
     } catch {
       toast({
-        title: 'Erro',
-        description: 'Falha ao salvar configurações',
+        title: 'Error',
+        description: 'Failed to save settings',
         variant: 'destructive',
       });
     }
@@ -55,13 +55,13 @@ export function ConfigPanel() {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Settings className="h-4 w-4" aria-hidden="true" />
-          Meta Semanal Padrão
+          Default Weekly Goal
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="targetHours" className="text-xs">
-            Horas por Semana
+            Hours per Week
           </Label>
           <Input
             id="targetHours"
@@ -81,12 +81,12 @@ export function ConfigPanel() {
           size="sm"
           className="w-full"
           aria-busy={isLoading}
-          aria-label="Salvar configurações"
+          aria-label="Save settings"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            'Salvar'
+            'Save'
           )}
         </Button>
       </CardContent>

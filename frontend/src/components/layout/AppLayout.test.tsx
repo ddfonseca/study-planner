@@ -54,24 +54,24 @@ describe('AppLayout', () => {
   describe('rendering', () => {
     it('renders the header with logo', () => {
       renderWithRouter(<AppLayout />)
-      expect(screen.getByText('Horas Líquidas')).toBeInTheDocument()
+      expect(screen.getByText('ShipHours')).toBeInTheDocument()
     })
 
     it('renders navigation links', () => {
       renderWithRouter(<AppLayout />)
-      expect(screen.getAllByText('Calendário').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Calendar').length).toBeGreaterThan(0)
       expect(screen.getAllByText('Dashboard').length).toBeGreaterThan(0)
-      expect(screen.getAllByText('Configurações').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Settings').length).toBeGreaterThan(0)
     })
 
     it('renders theme toggle button', () => {
       renderWithRouter(<AppLayout />)
-      expect(screen.getByLabelText(/ativar modo/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/toggle.*mode/i)).toBeInTheDocument()
     })
 
     it('renders logout button', () => {
       renderWithRouter(<AppLayout />)
-      expect(screen.getByText('Sair')).toBeInTheDocument()
+      expect(screen.getByText('Sign out')).toBeInTheDocument()
     })
   })
 
@@ -80,7 +80,7 @@ describe('AppLayout', () => {
       Storage.prototype.getItem = vi.fn(() => 'light')
       renderWithRouter(<AppLayout />)
 
-      const themeButton = screen.getByLabelText('Ativar modo escuro')
+      const themeButton = screen.getByLabelText('Toggle dark mode')
       expect(themeButton).toBeInTheDocument()
     })
 
@@ -88,14 +88,14 @@ describe('AppLayout', () => {
       Storage.prototype.getItem = vi.fn(() => 'dark')
       renderWithRouter(<AppLayout />)
 
-      const themeButton = screen.getByLabelText('Ativar modo claro')
+      const themeButton = screen.getByLabelText('Toggle light mode')
       expect(themeButton).toBeInTheDocument()
     })
 
     it('theme toggle icon is hidden from screen readers', () => {
       renderWithRouter(<AppLayout />)
 
-      const themeButton = screen.getByLabelText(/ativar modo/i)
+      const themeButton = screen.getByLabelText(/toggle.*mode/i)
       const icon = themeButton.querySelector('svg')
       expect(icon).toHaveAttribute('aria-hidden', 'true')
     })
@@ -103,14 +103,14 @@ describe('AppLayout', () => {
     it('logout button has aria-label', () => {
       renderWithRouter(<AppLayout />)
 
-      const logoutButton = screen.getByLabelText('Sair da conta')
+      const logoutButton = screen.getByLabelText('Sign out')
       expect(logoutButton).toBeInTheDocument()
     })
 
     it('logout icon is hidden from screen readers', () => {
       renderWithRouter(<AppLayout />)
 
-      const logoutButton = screen.getByLabelText('Sair da conta')
+      const logoutButton = screen.getByLabelText('Sign out')
       const icon = logoutButton.querySelector('svg')
       expect(icon).toHaveAttribute('aria-hidden', 'true')
     })
@@ -120,11 +120,11 @@ describe('AppLayout', () => {
       Storage.prototype.getItem = vi.fn(() => 'light')
       renderWithRouter(<AppLayout />)
 
-      const themeButton = screen.getByLabelText('Ativar modo escuro')
+      const themeButton = screen.getByLabelText('Toggle dark mode')
       await user.click(themeButton)
 
       // After click, the button label should change
-      expect(screen.getByLabelText('Ativar modo claro')).toBeInTheDocument()
+      expect(screen.getByLabelText('Toggle light mode')).toBeInTheDocument()
     })
   })
 })

@@ -98,8 +98,8 @@ export function CycleSuggestionCard() {
           <CardContent className="p-0">
             <EmptyState
               icon={Layers}
-              title="Nenhum ciclo configurado"
-              description="Organize seus estudos com um ciclo de rotação entre matérias"
+              title="No cycle configured"
+              description="Organize your work with a rotation cycle between tasks"
               size="sm"
               action={
                 canCreateCycle ? (
@@ -109,7 +109,7 @@ export function CycleSuggestionCard() {
                     onClick={() => setEditorOpen(true)}
                   >
                     <Settings className="h-3.5 w-3.5 mr-1.5" />
-                    Configurar Ciclo
+                    Set Up Cycle
                   </Button>
                 ) : (
                   <UpgradePrompt
@@ -137,8 +137,8 @@ export function CycleSuggestionCard() {
           <CardContent className="p-0">
             <EmptyState
               icon={Layers}
-              title="Ciclo sem tópicos"
-              description="Os tópicos deste ciclo foram removidos. Adicione novos tópicos para continuar."
+              title="Cycle has no tasks"
+              description="The tasks in this cycle were removed. Add new tasks to continue."
               size="sm"
               action={
                 <Button
@@ -150,7 +150,7 @@ export function CycleSuggestionCard() {
                   }}
                 >
                   <Settings className="h-3.5 w-3.5 mr-1.5" />
-                  Editar Ciclo
+                  Edit Cycle
                 </Button>
               }
             />
@@ -321,27 +321,27 @@ export function CycleSuggestionCard() {
           ) : data.isCurrentComplete ? (
             <div className="space-y-2">
               <p className="text-xs text-accent font-medium">
-                Meta atingida!
+                Goal reached!
               </p>
               <Button
                 size="sm"
                 className="w-full"
                 onClick={() => handleAdvance()}
                 disabled={isLoading}
-                title={`Avançar para ${data.nextSubject}`}
+                title={`Advance to ${data.nextSubject}`}
               >
                 <ChevronRight className="h-3.5 w-3.5 mr-1 shrink-0" />
-                <span className="truncate">Avançar para {data.nextSubject}</span>
+                <span className="truncate">Advance to {data.nextSubject}</span>
               </Button>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground">
-                <span>Faltam </span>
+                <span>
                 <span className="font-medium text-foreground">
                   {formatDuration(data.remainingMinutes)}
                 </span>
-                <span> para completar</span>
+                <span> remaining</span>
               </div>
               <Button
                 variant="ghost"
@@ -349,10 +349,10 @@ export function CycleSuggestionCard() {
                 className="w-full h-7 text-xs text-muted-foreground hover:text-foreground"
                 onClick={() => handleAdvance(true)}
                 disabled={isLoading}
-                title="Considerar matéria como completa e avançar"
+                title="Mark task as complete and advance"
               >
                 <SkipForward className="h-3 w-3 mr-1.5" />
-                Avançar mesmo assim
+                Advance anyway
               </Button>
             </div>
           )}
@@ -360,8 +360,8 @@ export function CycleSuggestionCard() {
           {/* Next subject preview */}
           {!data.isCurrentComplete && !data.isCycleComplete && (
             <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground truncate" title={`Próximo: ${data.nextSubject}`}>
-                Próximo: <span className="font-medium">{data.nextSubject}</span>
+              <p className="text-xs text-muted-foreground truncate" title={`Next: ${data.nextSubject}`}>
+                Next: <span className="font-medium">{data.nextSubject}</span>
                 {' '}({formatDuration(data.nextTargetMinutes)})
               </p>
             </div>
@@ -378,7 +378,7 @@ export function CycleSuggestionCard() {
                 <ChevronDown
                   className={`h-3 w-3 transition-transform ${showAllItems ? 'rotate-180' : ''}`}
                 />
-                {showAllItems ? 'Ocultar matérias' : 'Ver todas as matérias'}
+                {showAllItems ? 'Hide tasks' : 'View all tasks'}
               </button>
 
               {showAllItems && (
@@ -392,12 +392,12 @@ export function CycleSuggestionCard() {
                     return (
                       <div className="p-2 rounded-md bg-muted/30 border border-border/50 space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Progresso geral</span>
+                          <span className="text-muted-foreground">Overall progress</span>
                           <span className="font-medium">{Math.min(100, overallPercent)}%</span>
                         </div>
                         <Progress value={Math.min(100, overallPercent)} className="h-1.5" />
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{completedCount}/{data.allItemsProgress.length} matérias</span>
+                          <span>{completedCount}/{data.allItemsProgress.length} tasks</span>
                           <span>{formatDuration(totalAccumulated)}/{formatDuration(totalTarget)}</span>
                         </div>
                       </div>

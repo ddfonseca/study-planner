@@ -91,7 +91,7 @@ export function useAutoSave<T>({
       // Don't attempt save if offline
       if (!navigator.onLine) {
         setStatus('error');
-        setErrorMessage('Sem conexão com a internet');
+        setErrorMessage('No internet connection');
         lastDataRef.current = data;
         return;
       }
@@ -118,7 +118,7 @@ export function useAutoSave<T>({
       } catch (error) {
         if (!isMountedRef.current) return;
 
-        const message = error instanceof Error ? error.message : 'Falha ao salvar';
+        const message = error instanceof Error ? error.message : 'Failed to save';
 
         // Check if we should retry
         if (currentRetry < maxRetries) {

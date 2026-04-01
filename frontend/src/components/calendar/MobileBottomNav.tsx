@@ -15,9 +15,9 @@ interface MobileBottomNavProps {
 }
 
 const tabs: { id: MobileTab; label: string; icon: typeof Calendar; badgeKey: FeatureKey | null }[] = [
-  { id: 'calendar', label: 'Dia', icon: Calendar, badgeKey: null },
-  { id: 'cycle', label: 'Ciclo', icon: RefreshCw, badgeKey: 'cycles' },
-  { id: 'progress', label: 'Progresso', icon: TrendingUp, badgeKey: null },
+  { id: 'calendar', label: 'Day', icon: Calendar, badgeKey: null },
+  { id: 'cycle', label: 'Cycle', icon: RefreshCw, badgeKey: 'cycles' },
+  { id: 'progress', label: 'Progress', icon: TrendingUp, badgeKey: null },
   { id: 'timer', label: 'Timer', icon: Clock, badgeKey: 'timer' },
 ];
 
@@ -69,7 +69,7 @@ export function MobileBottomNav({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-inset-bottom" aria-label="Navegação principal" data-tour="mobile-nav">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-inset-bottom" aria-label="Main navigation" data-tour="mobile-nav">
       <div className="flex items-center justify-around h-16 w-full max-w-lg mx-auto px-2 sm:px-4" role="tablist">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -104,7 +104,7 @@ export function MobileBottomNav({
               {/* New feature badge */}
               {showNewBadge && (
                 <span className="absolute top-1 right-1/4 px-1 py-0 text-[8px] font-semibold bg-primary text-primary-foreground rounded">
-                  Novo
+                  New
                 </span>
               )}
 

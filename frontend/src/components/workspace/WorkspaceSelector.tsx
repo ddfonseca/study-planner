@@ -59,7 +59,7 @@ export function WorkspaceSelector() {
             ) : (
               <>
                 <Layers className="h-4 w-4 shrink-0" />
-                <span>Todos</span>
+                <span>All</span>
               </>
             )}
           </div>
@@ -70,7 +70,7 @@ export function WorkspaceSelector() {
         <SelectItem value="all">
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
-            <span>Todos</span>
+            <span>All</span>
           </div>
         </SelectItem>
 
@@ -87,7 +87,7 @@ export function WorkspaceSelector() {
               <span className="truncate">{workspace.name}</span>
               {workspace.isDefault && (
                 <span className="text-xs opacity-50 ml-1">
-                  (Padrão)
+                  (Default)
                 </span>
               )}
             </div>

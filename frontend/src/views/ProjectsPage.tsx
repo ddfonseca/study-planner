@@ -173,9 +173,9 @@ export function ProjectsContent() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Layers className="h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Nenhum workspace selecionado</h2>
+        <h2 className="text-xl font-semibold mb-2">No workspace selected</h2>
         <p className="text-muted-foreground">
-          Selecione um workspace para gerenciar as disciplinas.
+          Select a workspace to manage projects.
         </p>
       </div>
     );
@@ -185,9 +185,9 @@ export function ProjectsContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Disciplinas</h1>
+        <h1 className="text-2xl font-bold">Projects</h1>
         <p className="text-muted-foreground">
-          Agrupe tópicos relacionados em disciplinas para usar no ciclo de estudos
+          Group related tasks into projects to use in focus cycles
         </p>
       </div>
 
@@ -204,7 +204,7 @@ export function ProjectsContent() {
       {/* Add new discipline */}
       <div className="flex gap-2">
         <Input
-          placeholder="Nome da nova disciplina..."
+          placeholder="New project name..."
           value={newDisciplineName}
           onChange={(e) => setNewDisciplineName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -229,9 +229,9 @@ export function ProjectsContent() {
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
           <Layers className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Nenhuma disciplina cadastrada</h3>
+          <h3 className="text-lg font-medium mb-2">No projects created yet</h3>
           <p className="text-muted-foreground mb-4">
-            Crie disciplinas para agrupar tópicos relacionados.
+            Create projects to group related tasks.
             <br />
             Ex: "Inglês" pode conter "Listening", "Grammar", "Reading"
           </p>
@@ -306,7 +306,7 @@ export function ProjectsContent() {
 
                     {/* Subject count */}
                     <Badge variant="secondary" className="text-xs">
-                      {discipline.tasks.length} tópicos
+                      {discipline.tasks.length} tasks
                     </Badge>
 
                     {/* Actions */}
@@ -359,7 +359,7 @@ export function ProjectsContent() {
                     <div className="p-3 space-y-2">
                       {discipline.tasks.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-2">
-                          Nenhum tópico vinculado a esta disciplina
+                          No tasks linked to this project
                         </p>
                       ) : (
                         <div className="space-y-1">
@@ -392,7 +392,7 @@ export function ProjectsContent() {
                           <div className="flex flex-wrap gap-1">
                             {unassignedSubjects.length === 0 ? (
                               <p className="text-xs text-muted-foreground">
-                                Todos os tópicos já estão em disciplinas
+                                All tasks are already in projects
                               </p>
                             ) : (
                               unassignedSubjects.map((subject) => (
@@ -441,8 +441,8 @@ export function ProjectsContent() {
       <ConfirmDialog
         open={!!confirmDelete}
         onOpenChange={(open) => !open && setConfirmDelete(null)}
-        title="Deletar disciplina?"
-        description="A disciplina será removida permanentemente. Os tópicos não serão afetados, apenas perderão o vínculo com esta disciplina."
+        title="Delete project?"
+        description="The project will be permanently removed. Tasks will not be affected, they will only lose their link to this project."
         confirmText="Deletar"
         variant="destructive"
         onConfirm={() => {

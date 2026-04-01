@@ -8,12 +8,12 @@ import { useCanUseFeature, FEATURES, type FeatureKey } from '@/hooks/useSubscrip
 import { cn } from '@/lib/utils';
 
 const FEATURE_LABELS: Record<FeatureKey, string> = {
-  [FEATURES.MAX_CYCLES]: 'ciclos de estudo',
+  [FEATURES.MAX_CYCLES]: 'focus cycles',
   [FEATURES.MAX_WORKSPACES]: 'workspaces',
-  [FEATURES.MAX_SESSIONS_PER_DAY]: 'sessões por dia',
-  [FEATURES.EXPORT_DATA]: 'exportação de dados',
-  [FEATURES.SHARED_PLANS]: 'compartilhamentos',
-  [FEATURES.HISTORY_DAYS]: 'dias de histórico',
+  [FEATURES.MAX_SESSIONS_PER_DAY]: 'sessions per day',
+  [FEATURES.EXPORT_DATA]: 'data export',
+  [FEATURES.SHARED_PLANS]: 'shared plans',
+  [FEATURES.HISTORY_DAYS]: 'history days',
 };
 
 interface UpgradePromptProps {
@@ -43,13 +43,13 @@ export function UpgradePrompt({
   if (variant === 'inline') {
     return (
       <p className={cn('text-sm text-amber-600 dark:text-amber-400', className)}>
-        Limite de {limit} {featureLabel} atingido.{' '}
+        Limit of {limit} {featureLabel} reached.{' '}
         <button
           onClick={onUpgradeClick}
           className="underline hover:no-underline font-medium"
-          aria-label={`Fazer upgrade para aumentar limite de ${featureLabel}`}
+          aria-label={`Upgrade to increase ${featureLabel} limit`}
         >
-          Fazer upgrade
+          Upgrade
         </button>
       </p>
     );
@@ -66,10 +66,10 @@ export function UpgradePrompt({
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-500" aria-hidden="true" />
           <span className="text-sm">
-            Você atingiu o limite de {limit} {featureLabel}
+            You've reached the limit of {limit} {featureLabel}
           </span>
         </div>
-        <Button size="sm" variant="outline" onClick={onUpgradeClick} aria-label={`Fazer upgrade para aumentar limite de ${featureLabel}`}>
+        <Button size="sm" variant="outline" onClick={onUpgradeClick} aria-label={`Upgrade to increase ${featureLabel} limit`}>
           <Crown className="h-3 w-3 mr-1" aria-hidden="true" />
           Upgrade
         </Button>
@@ -87,20 +87,20 @@ export function UpgradePrompt({
           </div>
           <div className="flex-1">
             <h4 className="font-medium text-foreground">
-              Limite atingido
+              Limit reached
             </h4>
             <p className="text-sm text-muted-foreground mt-1">
-              Você atingiu o limite de {limit} {featureLabel} do plano gratuito.
-              Faça upgrade para desbloquear mais recursos.
+              You've reached the limit of {limit} {featureLabel} on the free plan.
+              Upgrade to unlock more features.
             </p>
             <Button
               size="sm"
               className="mt-3"
               onClick={onUpgradeClick}
-              aria-label="Ver planos de upgrade disponíveis"
+              aria-label="View available upgrade plans"
             >
               <Zap className="h-4 w-4 mr-2" aria-hidden="true" />
-              Ver planos
+              View plans
             </Button>
           </div>
         </div>

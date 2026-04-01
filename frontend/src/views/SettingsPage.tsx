@@ -55,8 +55,8 @@ export function SettingsPage() {
 
     if (targetValue < 0) {
       toast({
-        title: 'Erro',
-        description: 'O valor deve ser maior ou igual a 0',
+        title: 'Error',
+        description: 'Value must be greater than or equal to 0',
         variant: 'destructive',
       });
       return;
@@ -68,13 +68,13 @@ export function SettingsPage() {
         weekStartDay: weekStartValue,
       });
       toast({
-        title: 'Sucesso',
-        description: 'Configurações salvas com sucesso!',
+        title: 'Success',
+        description: 'Settings saved successfully!',
       });
     } catch {
       toast({
-        title: 'Erro',
-        description: 'Falha ao salvar configurações',
+        title: 'Error',
+        description: 'Failed to save settings',
         variant: 'destructive',
       });
     }
@@ -85,7 +85,7 @@ export function SettingsPage() {
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-3">
         <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Configurações</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Settings</h1>
       </div>
 
       {/* User Profile Card */}
@@ -93,9 +93,9 @@ export function SettingsPage() {
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <User className="h-4 w-4 sm:h-5 sm:w-5" />
-            Perfil
+            Profile
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Informações da sua conta</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Your account information</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           {user ? (
@@ -113,7 +113,7 @@ export function SettingsPage() {
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm">Carregando...</p>
+            <p className="text-muted-foreground text-sm">Loading...</p>
           )}
         </CardContent>
       </Card>
@@ -123,10 +123,10 @@ export function SettingsPage() {
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
-            Plano
+            Plan
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Gerencie sua assinatura e veja os recursos disponíveis
+            Manage your subscription and view available features
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4 pt-0">
@@ -136,19 +136,19 @@ export function SettingsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium text-sm sm:text-base">{currentPlan?.displayName || 'Gratuito'}</span>
+                <span className="font-medium text-sm sm:text-base">{currentPlan?.displayName || 'Free'}</span>
                 {!isFree && subscription?.status === 'ACTIVE' && (
-                  <Badge variant="default" className="bg-green-500 text-xs">Ativo</Badge>
+                  <Badge variant="default" className="bg-green-500 text-xs">Active</Badge>
                 )}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {isFree
-                  ? 'Faça upgrade para desbloquear mais recursos'
+                  ? 'Upgrade to unlock more features'
                   : subscription?.billingCycle === 'LIFETIME'
-                    ? 'Acesso vitalício - nunca expira'
+                    ? 'Lifetime access - never expires'
                     : subscription?.billingCycle === 'YEARLY'
-                      ? 'Cobrança anual'
-                      : 'Cobrança mensal'
+                      ? 'Billed annually'
+                      : 'Billed monthly'
                 }
               </p>
             </div>
@@ -161,7 +161,7 @@ export function SettingsPage() {
               className="w-full sm:w-auto"
             >
               <Crown className="h-4 w-4 mr-2" />
-              Fazer Upgrade
+              Upgrade
             </Button>
           )}
         </CardContent>
@@ -175,7 +175,7 @@ export function SettingsPage() {
             Workspaces
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Organize suas sessões de estudo em diferentes contextos
+            Organize your work sessions into different contexts
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4 pt-0">
@@ -191,7 +191,7 @@ export function SettingsPage() {
                 />
                 <span className="truncate max-w-[100px] sm:max-w-none">{workspace.name}</span>
                 {workspace.isDefault && (
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">(Padrão)</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">(Default)</span>
                 )}
               </div>
             ))}
@@ -203,7 +203,7 @@ export function SettingsPage() {
             className="w-full sm:w-auto"
           >
             <Layers className="h-4 w-4 mr-2" />
-            Gerenciar Workspaces
+            Manage Workspaces
           </Button>
         </CardContent>
       </Card>
@@ -213,16 +213,16 @@ export function SettingsPage() {
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
-            Meta Semanal Padrão
+            Default Weekly Goal
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Configure o padrão de horas para novas semanas. Você pode personalizar semanas individuais clicando na coluna "Total" do calendário.
+            Set the default hours for new weeks. You can customize individual weeks by clicking the "Total" column in the calendar.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6 pt-0">
           <div className="space-y-2 max-w-full sm:max-w-xs">
             <Label htmlFor="targetHours" className="text-sm">
-              Horas por Semana
+              Hours per Week
             </Label>
             <Input
               id="targetHours"
@@ -235,7 +235,7 @@ export function SettingsPage() {
               className="w-full"
             />
             <p className="text-[10px] sm:text-xs text-muted-foreground">
-              Semanas que atingirem esta meta ficam verdes no calendário
+              Weeks that reach this goal turn green in the calendar
             </p>
           </div>
         </CardContent>
@@ -246,76 +246,76 @@ export function SettingsPage() {
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-            Calendário
+            Calendar
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Configure como o calendário é exibido
+            Configure how the calendar is displayed
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6 pt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-2">
               <Label htmlFor="weekStartDay" className="text-sm">
-                Início da Semana
+                Week Start Day
               </Label>
               <Select
                 value={localWeekStartDay}
                 onValueChange={setLocalWeekStartDay}
               >
                 <SelectTrigger id="weekStartDay" className="w-full">
-                  <SelectValue placeholder="Selecione o dia" />
+                  <SelectValue placeholder="Select day" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Domingo</SelectItem>
-                  <SelectItem value="1">Segunda-feira</SelectItem>
+                  <SelectItem value="0">Sunday</SelectItem>
+                  <SelectItem value="1">Monday</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Define qual dia aparece primeiro no calendário
+                Sets which day appears first in the calendar
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="heatmapStyle" className="flex items-center gap-2 text-sm">
                 <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Estilo do Calendário
+                Calendar Style
               </Label>
               <Select
                 value={heatmapStyle}
                 onValueChange={handleHeatmapStyleChange}
               >
                 <SelectTrigger id="heatmapStyle" className="w-full">
-                  <SelectValue placeholder="Selecione o estilo" />
+                  <SelectValue placeholder="Select style" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gradient">Gradiente (cores)</SelectItem>
-                  <SelectItem value="dots">Pontos (minimalista)</SelectItem>
+                  <SelectItem value="gradient">Gradient (colors)</SelectItem>
+                  <SelectItem value="dots">Dots (minimalist)</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Como a intensidade de estudo é exibida nas células
+                How work intensity is displayed in calendar cells
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="timeDisplayMode" className="flex items-center gap-2 text-sm">
                 <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Exibição de Tempo
+                Time Display
               </Label>
               <Select
                 value={timeDisplayMode}
                 onValueChange={handleTimeDisplayModeChange}
               >
                 <SelectTrigger id="timeDisplayMode" className="w-full">
-                  <SelectValue placeholder="Selecione o formato" />
+                  <SelectValue placeholder="Select format" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hours">🕐 Horas</SelectItem>
+                  <SelectItem value="hours">🕐 Hours</SelectItem>
                   <SelectItem value="pomodoros">🍅 Pomodoros</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[10px] sm:text-xs text-muted-foreground">
-                1 pomodoro = 25 minutos
+                1 pomodoro = 25 minutes
               </p>
             </div>
           </div>
@@ -326,7 +326,7 @@ export function SettingsPage() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Salvar Configurações
+            Save Settings
           </Button>
         </CardContent>
       </Card>

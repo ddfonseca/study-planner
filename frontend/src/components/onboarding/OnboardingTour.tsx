@@ -12,8 +12,8 @@ import { X } from 'lucide-react';
 const desktopSteps: Step[] = [
   {
     target: '[data-tour="calendar-grid"]',
-    content: 'Clique em qualquer dia para registrar suas sessões de estudo.',
-    title: 'Calendário',
+    content: 'Click any day to log your work sessions.',
+    title: 'Calendar',
     placement: 'bottom',
     disableBeacon: true,
     spotlightClicks: true,
@@ -21,36 +21,36 @@ const desktopSteps: Step[] = [
   {
     target: '[data-tour="study-timer"]',
     content:
-      'Use o cronômetro para medir seu tempo de estudo em tempo real. Ele continua rodando mesmo se você fechar a aba!',
+      'Use the timer to track your work time in real time. It keeps running even if you close the tab!',
     title: 'Timer',
     placement: 'left',
   },
   {
     target: '[data-tour="cycle-card"]',
     content:
-      'Organize suas matérias em ciclos para estudar de forma equilibrada. O sistema sugere qual matéria estudar em seguida.',
-    title: 'Ciclos de Estudo',
+      'Organize your tasks in cycles for balanced focus. The system suggests which task to work on next.',
+    title: 'Focus Cycles',
     placement: 'left',
   },
   {
     target: '[data-tour="nav-scratchpad"]',
     content:
-      'Anote ideias, resumos e lembretes rápidos enquanto estuda. Suas notas ficam salvas automaticamente.',
-    title: 'Notas Rápidas',
+      'Jot down ideas, summaries, and quick reminders while working. Your notes are saved automatically.',
+    title: 'Quick Notes',
     placement: 'bottom',
   },
   {
     target: '[data-tour="nav-dashboard"]',
     content:
-      'Acompanhe seu progresso com gráficos e estatísticas detalhadas do seu tempo de estudo.',
+      'Track your progress with detailed charts and statistics of your work time.',
     title: 'Dashboard',
     placement: 'bottom',
   },
   {
-    target: '[data-tour="nav-subjects"]',
+    target: '[data-tour="nav-tasks"]',
     content:
-      'Gerencie seus tópicos de estudo: renomeie, mescle duplicados, arquive ou adicione cores.',
-    title: 'Tópicos',
+      'Manage your tasks: rename, merge duplicates, archive, or add colors.',
+    title: 'Tasks',
     placement: 'bottom',
   },
 ];
@@ -59,8 +59,8 @@ const desktopSteps: Step[] = [
 const mobileSteps: Step[] = [
   {
     target: '[data-tour="mobile-day-view"]',
-    content: 'Navegue entre os dias e registre suas sessões de estudo.',
-    title: '📅 Calendário',
+    content: 'Navigate between days and log your work sessions.',
+    title: '📅 Calendar',
     placement: 'bottom',
     disableBeacon: true,
     spotlightClicks: true,
@@ -68,8 +68,8 @@ const mobileSteps: Step[] = [
   {
     target: '[data-tour="mobile-nav"]',
     content:
-      'Use a barra inferior para alternar entre calendário, ciclos, progresso e timer.',
-    title: '📱 Navegação',
+      'Use the bottom bar to switch between calendar, cycles, progress, and timer.',
+    title: '📱 Navigation',
     placement: 'top',
   },
 ];
@@ -92,7 +92,7 @@ function CustomTooltip({
       <button
         {...closeProps}
         className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-        aria-label="Fechar tour"
+        aria-label="Close tour"
       >
         <X className="h-4 w-4" />
       </button>
@@ -105,17 +105,17 @@ function CustomTooltip({
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
-          {index + 1} de {size}
+          {index + 1} of {size}
         </span>
 
         <div className="flex gap-2">
           {index > 0 && (
             <Button variant="ghost" size="sm" {...backProps}>
-              Voltar
+              Back
             </Button>
           )}
           <Button size="sm" {...primaryProps}>
-            {isLastStep ? 'Concluir' : 'Próximo'}
+            {isLastStep ? 'Finish' : 'Next'}
           </Button>
         </div>
       </div>
@@ -172,11 +172,11 @@ export function OnboardingTour() {
       callback={handleJoyrideCallback}
       tooltipComponent={CustomTooltip}
       locale={{
-        back: 'Voltar',
-        close: 'Fechar',
-        last: 'Concluir',
-        next: 'Próximo',
-        skip: 'Pular tour',
+        back: 'Back',
+        close: 'Close',
+        last: 'Finish',
+        next: 'Next',
+        skip: 'Skip tour',
       }}
       styles={{
         options: {

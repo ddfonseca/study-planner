@@ -32,10 +32,10 @@ function HistoryEntry({ entry }: { entry: CycleHistoryEntry }) {
         <Trophy className="h-4 w-4 text-green-500 mt-0.5 shrink-0" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-green-700 dark:text-green-400">
-            Ciclo completo!
+            Cycle complete!
           </p>
           <p className="text-xs text-muted-foreground">
-            {entry.itemsCount} matérias · {formatDuration(entry.totalSpentMinutes || 0)}
+            {entry.itemsCount} tasks · {formatDuration(entry.totalSpentMinutes || 0)}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {formatRelativeTime(entry.timestamp)}
@@ -50,13 +50,13 @@ function HistoryEntry({ entry }: { entry: CycleHistoryEntry }) {
       <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <p className="text-xs">
-          <span className="text-muted-foreground">De </span>
+          <span className="text-muted-foreground">From </span>
           <span className="font-medium truncate">{entry.fromSubject}</span>
-          <span className="text-muted-foreground"> para </span>
+          <span className="text-muted-foreground"> to </span>
           <span className="font-medium truncate">{entry.toSubject}</span>
         </p>
         <p className="text-xs text-muted-foreground">
-          {formatDuration(entry.minutesSpent || 0)} estudados · {formatRelativeTime(entry.timestamp)}
+          {formatDuration(entry.minutesSpent || 0)} worked · {formatRelativeTime(entry.timestamp)}
         </p>
       </div>
     </div>
@@ -98,11 +98,11 @@ export function CycleHistoryCard() {
           className="flex items-center justify-between w-full"
           onClick={() => setIsExpanded(!isExpanded)}
           aria-expanded={isExpanded}
-          aria-label={isExpanded ? 'Recolher histórico do ciclo' : 'Expandir histórico do ciclo'}
+          aria-label={isExpanded ? 'Collapse cycle history' : 'Expand cycle history'}
         >
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <History className="h-4 w-4" aria-hidden="true" />
-            Histórico do Ciclo
+            Cycle History
           </CardTitle>
           <ChevronDown
             className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -114,17 +114,17 @@ export function CycleHistoryCard() {
       {isExpanded && (
         <CardContent className="pt-0">
           {isLoading ? (
-            <p className="text-xs text-muted-foreground text-center py-4">Carregando...</p>
+            <p className="text-xs text-muted-foreground text-center py-4">Loading...</p>
           ) : !history || history.entries.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">
-              Nenhum histórico ainda. Avance no ciclo para começar a registrar.
+              No history yet. Advance the cycle to start recording.
             </p>
           ) : (
             <div className="space-y-2">
               {/* Summary */}
               <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b">
-                <span>{history.totalAdvances} avanços</span>
-                <span>{history.totalCompletions} ciclos completos</span>
+                <span>{history.totalAdvances} advances</span>
+                <span>{history.totalCompletions} cycles completed</span>
               </div>
 
               {/* Entries */}

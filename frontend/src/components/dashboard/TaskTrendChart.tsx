@@ -112,7 +112,7 @@ export function TaskTrendChart({ data }: TaskTrendChartProps) {
           </div>
         ) : (
           <div className="h-[280px] sm:h-[300px] flex items-center justify-center">
-            <p className="text-sm text-muted-foreground">Nenhum dado disponivel</p>
+            <p className="text-sm text-muted-foreground">No data available</p>
           </div>
         )}
       </CardContent>

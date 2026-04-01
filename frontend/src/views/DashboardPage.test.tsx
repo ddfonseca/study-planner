@@ -100,9 +100,9 @@ describe('DashboardPage', () => {
 
       renderWithRouter(<DashboardPage />)
 
-      expect(screen.getByText('Nenhuma sessão neste período')).toBeInTheDocument()
+      expect(screen.getByText('No sessions in this period')).toBeInTheDocument()
       expect(
-        screen.getByText('Selecione outro período ou adicione sessões de estudo para visualizar estatísticas')
+        screen.getByText('Select another period or add work sessions to view statistics')
       ).toBeInTheDocument()
     })
 
@@ -162,7 +162,7 @@ describe('DashboardPage', () => {
 
       renderWithRouter(<DashboardPage />)
 
-      expect(screen.getByRole('button', { name: /ir para calendário/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /go to calendar/i })).toBeInTheDocument()
     })
 
     it('navigates to calendar when CTA button is clicked', async () => {
@@ -183,7 +183,7 @@ describe('DashboardPage', () => {
 
       renderWithRouter(<DashboardPage />)
 
-      await user.click(screen.getByRole('button', { name: /ir para calendário/i }))
+      await user.click(screen.getByRole('button', { name: /go to calendar/i }))
 
       expect(mockNavigate).toHaveBeenCalledWith('/app/calendar')
     })
@@ -208,7 +208,7 @@ describe('DashboardPage', () => {
 
       renderWithRouter(<DashboardPage />)
 
-      expect(screen.queryByText('Nenhuma sessão neste período')).not.toBeInTheDocument()
+      expect(screen.queryByText('No sessions in this period')).not.toBeInTheDocument()
       expect(screen.getByTestId('stats-cards')).toBeInTheDocument()
       expect(screen.getByTestId('subject-chart')).toBeInTheDocument()
       expect(screen.getByTestId('daily-chart')).toBeInTheDocument()
@@ -232,8 +232,8 @@ describe('DashboardPage', () => {
 
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
       expect(screen.getByTestId('date-range-filter')).toBeInTheDocument()
-      // Text is split for responsive design: "Ver por" (hidden on mobile) + " Materia"
-      expect(screen.getByText(/Materia/)).toBeInTheDocument()
+      // Text is split for responsive design: "View by" (hidden on mobile) + " Task"
+      expect(screen.getByText(/Task/)).toBeInTheDocument()
     })
   })
 })

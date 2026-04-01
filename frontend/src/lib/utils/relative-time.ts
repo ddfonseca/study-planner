@@ -1,7 +1,7 @@
 /**
  * Relative time formatting utilities
- * Formats dates as relative timestamps in Portuguese
- * Examples: "há 5s", "há 2 min", "há 1 hora", "há 3 dias"
+ * Formats dates as relative timestamps in English
+ * Examples: "5s ago", "2 min ago", "1 hour ago", "3 days ago"
  */
 
 /**
@@ -19,7 +19,7 @@ const YEAR = 365 * DAY;
  * Format a date as relative time string in Portuguese
  * @param date The date to format (Date object, timestamp, or ISO string)
  * @param baseDate Optional base date for comparison (defaults to now)
- * @returns Relative time string (e.g., "há 5s", "há 2 min", "agora")
+ * @returns Relative time string (e.g., "5s ago", "2 min ago", "just now")
  */
 export function formatRelativeTime(
   date: Date | number | string,
@@ -56,41 +56,41 @@ function toDate(input: Date | number | string): Date {
  */
 function formatPastTime(diff: number): string {
   if (diff < 5 * SECOND) {
-    return 'agora';
+    return 'just now';
   }
 
   if (diff < MINUTE) {
     const seconds = Math.floor(diff / SECOND);
-    return `há ${seconds}s`;
+    return `${seconds}s ago`;
   }
 
   if (diff < HOUR) {
     const minutes = Math.floor(diff / MINUTE);
-    return `há ${minutes} min`;
+    return `${minutes} min ago`;
   }
 
   if (diff < DAY) {
     const hours = Math.floor(diff / HOUR);
-    return hours === 1 ? 'há 1 hora' : `há ${hours} horas`;
+    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
   }
 
   if (diff < WEEK) {
     const days = Math.floor(diff / DAY);
-    return days === 1 ? 'há 1 dia' : `há ${days} dias`;
+    return days === 1 ? '1 day ago' : `${days} days ago`;
   }
 
   if (diff < MONTH) {
     const weeks = Math.floor(diff / WEEK);
-    return weeks === 1 ? 'há 1 semana' : `há ${weeks} semanas`;
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
   }
 
   if (diff < YEAR) {
     const months = Math.floor(diff / MONTH);
-    return months === 1 ? 'há 1 mês' : `há ${months} meses`;
+    return months === 1 ? '1 month ago' : `${months} months ago`;
   }
 
   const years = Math.floor(diff / YEAR);
-  return years === 1 ? 'há 1 ano' : `há ${years} anos`;
+  return years === 1 ? '1 year ago' : `${years} years ago`;
 }
 
 /**
@@ -98,41 +98,41 @@ function formatPastTime(diff: number): string {
  */
 function formatFutureTime(diff: number): string {
   if (diff < 5 * SECOND) {
-    return 'agora';
+    return 'just now';
   }
 
   if (diff < MINUTE) {
     const seconds = Math.floor(diff / SECOND);
-    return `em ${seconds}s`;
+    return `in ${seconds}s`;
   }
 
   if (diff < HOUR) {
     const minutes = Math.floor(diff / MINUTE);
-    return `em ${minutes} min`;
+    return `in ${minutes} min`;
   }
 
   if (diff < DAY) {
     const hours = Math.floor(diff / HOUR);
-    return hours === 1 ? 'em 1 hora' : `em ${hours} horas`;
+    return hours === 1 ? 'in 1 hour' : `in ${hours} hours`;
   }
 
   if (diff < WEEK) {
     const days = Math.floor(diff / DAY);
-    return days === 1 ? 'em 1 dia' : `em ${days} dias`;
+    return days === 1 ? 'in 1 day' : `in ${days} days`;
   }
 
   if (diff < MONTH) {
     const weeks = Math.floor(diff / WEEK);
-    return weeks === 1 ? 'em 1 semana' : `em ${weeks} semanas`;
+    return weeks === 1 ? 'in 1 week' : `in ${weeks} weeks`;
   }
 
   if (diff < YEAR) {
     const months = Math.floor(diff / MONTH);
-    return months === 1 ? 'em 1 mês' : `em ${months} meses`;
+    return months === 1 ? 'in 1 month' : `in ${months} months`;
   }
 
   const years = Math.floor(diff / YEAR);
-  return years === 1 ? 'em 1 ano' : `em ${years} anos`;
+  return years === 1 ? 'in 1 year' : `in ${years} years`;
 }
 
 /**

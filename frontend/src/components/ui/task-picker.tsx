@@ -190,9 +190,9 @@ function TaskPickerContent({
             value={selectedProjectId}
             onValueChange={onDisciplineChange}
             projects={projects}
-            placeholder="Selecione uma disciplina"
-            searchPlaceholder="Buscar disciplina..."
-            emptyMessage="Nenhuma disciplina"
+            placeholder="Select a project"
+            searchPlaceholder="Search project..."
+            emptyMessage="No projects found"
           />
         </div>
 
@@ -289,9 +289,9 @@ function TaskPickerContent({
 
         {/* Grouped list A-Z */}
         {matchingOptions.length > 0 ? (
-          <div className="p-1" role="listbox" aria-label="Lista de matérias">
+          <div className="p-1" role="listbox" aria-label="Task list">
             {Array.from(grouped.entries()).map(([letter, items]) => (
-              <div key={letter} role="group" aria-label={`Matérias com letra ${letter}`}>
+              <div key={letter} role="group" aria-label={`Tasks starting with ${letter}`}>
                 <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover" aria-hidden="true">
                   {letter}
                 </p>
@@ -355,10 +355,10 @@ function TaskPickerContent({
               "flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isCreating && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={`Criar nova matéria: ${inputValue.trim()}`}
+            aria-label={`Create new task: ${inputValue.trim()}`}
           >
             <Plus className="h-4 w-4" />
-            {isCreating ? "Criando..." : `Criar "${inputValue.trim()}"`}
+            {isCreating ? "Creating..." : `Create "${inputValue.trim()}"`}
           </button>
         </div>
       )}
@@ -373,9 +373,9 @@ export function TaskPicker(props: TaskPickerProps) {
     subjects,
     recentTasks = [],
     onTaskUsed,
-    placeholder = "Selecione...",
-    searchPlaceholder = "Buscar matéria...",
-    emptyMessage = "Nenhuma matéria encontrada.",
+    placeholder = "Select...",
+    searchPlaceholder = "Search task...",
+    emptyMessage = "No tasks found.",
     disabled = false,
     className,
     open: controlledOpen,

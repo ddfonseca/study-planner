@@ -117,12 +117,12 @@ function SelectorContent({
       >
         {/* Grouped list A-Z */}
         {matchingOptions.length > 0 ? (
-          <div className="p-1" role="listbox" aria-label="Lista de matérias">
+          <div className="p-1" role="listbox" aria-label="Task list">
             {Array.from(grouped.entries()).map(([letter, items]) => (
               <div
                 key={letter}
                 role="group"
-                aria-label={`Matérias com letra ${letter}`}
+                aria-label={`Tasks starting with ${letter}`}
               >
                 <p
                   className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover"
@@ -154,7 +154,7 @@ function SelectorContent({
           </div>
         ) : (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            Nenhuma matéria encontrada.
+            No tasks found.
           </p>
         )}
       </div>
@@ -189,7 +189,7 @@ export function TaskSelector({
     return (
       <div className="flex items-center gap-2 text-muted-foreground">
         <BookOpen className="h-4 w-4" />
-        <span className="text-sm">Nenhuma matéria encontrada</span>
+        <span className="text-sm">No tasks found</span>
       </div>
     );
   }
@@ -204,7 +204,7 @@ export function TaskSelector({
         !selectedSubject && 'text-muted-foreground'
       )}
     >
-      <span className="truncate">{selectedSubject || 'Selecione uma matéria'}</span>
+      <span className="truncate">{selectedSubject || 'Select a task'}</span>
       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
     </Button>
   );
@@ -215,7 +215,7 @@ export function TaskSelector({
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2 text-muted-foreground">
           <BookOpen className="h-4 w-4" />
-          <span className="text-sm">Matéria:</span>
+          <span className="text-sm">Task:</span>
         </div>
         <Drawer open={open} onOpenChange={setOpen}>
           <div onClick={() => setOpen(true)} className="flex-1">
@@ -224,7 +224,7 @@ export function TaskSelector({
           <DrawerContent className="h-[70vh] max-h-[70vh]">
             <DrawerHeader className="border-b pb-2">
               <div className="flex items-center justify-between">
-                <DrawerTitle>Selecionar Matéria</DrawerTitle>
+                <DrawerTitle>Select Task</DrawerTitle>
                 <DrawerClose asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <X className="h-4 w-4" />
@@ -251,7 +251,7 @@ export function TaskSelector({
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-2 text-muted-foreground">
         <BookOpen className="h-4 w-4" />
-        <span className="text-sm">Matéria:</span>
+        <span className="text-sm">Task:</span>
       </div>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>

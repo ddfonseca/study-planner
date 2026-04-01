@@ -24,23 +24,23 @@ interface PricingModalProps {
 
 // Map feature keys to friendly labels
 const FEATURE_LABELS: Record<string, string> = {
-  max_cycles: 'Ciclos de estudo',
+  max_cycles: 'Focus cycles',
   max_workspaces: 'Workspaces',
-  max_sessions_per_day: 'Sessões por dia',
-  history_days: 'Dias de histórico',
-  export_data: 'Exportar dados',
-  shared_plans: 'Compartilhamentos',
+  max_sessions_per_day: 'Sessions per day',
+  history_days: 'History days',
+  export_data: 'Export data',
+  shared_plans: 'Shared plans',
 };
 
 // Format limit value for display
 function formatLimitValue(feature: string, value: number): string {
-  if (value === -1) return 'Ilimitado';
+  if (value === -1) return 'Unlimited';
   if (feature === 'history_days') {
-    if (value >= 365) return `${Math.floor(value / 365)} ano${value >= 730 ? 's' : ''}`;
-    return `${value} dias`;
+    if (value >= 365) return `${Math.floor(value / 365)} year${value >= 730 ? 's' : ''}`;
+    return `${value} days`;
   }
   if (feature === 'export_data' || feature === 'shared_plans') {
-    return value > 0 ? 'Sim' : 'Não';
+    return value > 0 ? 'Yes' : 'No';
   }
   return value.toString();
 }
@@ -78,19 +78,19 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
         window.open(response.initPoint, '_blank');
         onOpenChange(false);
         toast({
-          title: 'Checkout aberto',
-          description: 'Complete o pagamento na nova aba do Mercado Pago',
+          title: 'Checkout opened',
+          description: 'Complete the payment in the new tab',
         });
         setIsSubscribing(false);
         setSubscribingPlanId(null);
       } else {
-        throw new Error('Não foi possível iniciar o checkout');
+        throw new Error('Could not start checkout');
       }
     } catch (error) {
       console.error('Subscription error:', error);
       toast({
-        title: 'Erro ao processar pagamento',
-        description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
+        title: 'Payment processing error',
+        description: error instanceof Error ? error.message : 'Please try again later',
         variant: 'destructive',
       });
       setIsSubscribing(false);
@@ -104,10 +104,10 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-primary" />
-            Escolha seu plano
+            Choose your plan
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Desbloqueie todos os recursos com um único pagamento
+            Unlock all features with a single payment
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -137,7 +137,7 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <Badge variant="default" className="bg-primary flex items-center gap-1">
                           <Sparkles className="h-3 w-3" />
-                          Recomendado
+                          Recommended
                         </Badge>
                       </div>
                     )}
@@ -159,20 +159,20 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                       {/* Price */}
                       <div className="mb-4">
                         {isFree ? (
-                          <span className="text-3xl font-bold">Grátis</span>
+                          <span className="text-3xl font-bold">Free</span>
                         ) : (
                           <>
                             <span className="text-3xl font-bold">
                               R$ {price.toFixed(2).replace('.', ',')}
                             </span>
                             <span className="text-muted-foreground text-sm ml-1">
-                              pagamento único
+                              one-time payment
                             </span>
                           </>
                         )}
                         {isPro && (
                           <div className="text-sm text-primary mt-1 font-medium">
-                            Acesso vitalício
+                            Lifetime access
                           </div>
                         )}
                       </div>
@@ -197,9 +197,10 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                             >
                               <Check className={`h-4 w-4 shrink-0 ${isPro ? 'text-primary' : 'text-green-500'}`} />
                               <span>
-                                {value === 'Sim' || value === 'Não'
+                                {value === 'Yes' || value === 'No'
                                   ? label
                                   : `${value} ${label.toLowerCase()}`}
+
                               </span>
                             </li>
                           );
@@ -217,16 +218,16 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
                         {subscribingPlanId === plan.id ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processando...
+                            Processing...
                           </>
                         ) : isCurrentPlan ? (
-                          'Plano atual'
+                          'Current plan'
                         ) : plan.name === 'free' ? (
-                          'Continuar grátis'
+                          'Continue free'
                         ) : (
                           <>
                             <Crown className="h-4 w-4 mr-2" />
-                            Comprar acesso vitalício
+                            Buy lifetime access
                           </>
                         )}
                       </Button>

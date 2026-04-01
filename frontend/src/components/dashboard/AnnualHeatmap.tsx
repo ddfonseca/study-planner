@@ -27,11 +27,11 @@ interface MonthInfo {
   totalMinutes: number;
 }
 
-const MONTHS_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Rotate day labels based on weekStartDay
 function getDayLabels(weekStartDay: number): string[] {
-  const fullDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const fullDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const rotated = [...fullDays.slice(weekStartDay), ...fullDays.slice(0, weekStartDay)];
   // Show only every other label for space
   return rotated.map((d, i) => i % 2 === 0 ? d : '');
@@ -137,15 +137,15 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
   // Format date for tooltip
   const formatTooltip = (day: DayData): string => {
     if (day.isFuture) return '';
-    const dateStr = day.date.toLocaleDateString('pt-BR', {
+    const dateStr = day.date.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
     return day.minutes > 0
-      ? `${dateStr}\n${formatTime(day.minutes)} de estudo`
-      : `${dateStr}\nSem estudo`;
+      ? `${dateStr}\n${formatTime(day.minutes)} of work`
+      : `${dateStr}\nNo work`;
   };
 
   return (
@@ -153,7 +153,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-2">
           <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Atividade do Ano
+          Yearly Activity
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2 px-3 sm:px-6">
@@ -255,7 +255,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
         <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
           <span className="text-foreground font-medium">{currentYear}</span>
           <div className="flex items-center gap-1">
-            <span>Menos</span>
+            <span>Less</span>
             <div className="flex gap-[2px]">
               {heatmapStyle === 'gradient' ? (
                 // Gradient legend
@@ -280,7 +280,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
                 ))
               )}
             </div>
-            <span>Mais</span>
+            <span>More</span>
           </div>
         </div>
       </CardContent>

@@ -69,7 +69,7 @@ export function WeeklyProgress() {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <TrendingUp className="h-4 w-4" />
-          Progresso Semanal
+          Weekly Progress
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,15 +93,15 @@ export function WeeklyProgress() {
             </p>
             <p className="text-xs text-muted-foreground">
               {timeDisplayMode === 'pomodoros'
-                ? `de ${hoursToPomodoros(targetHours)} 🍅 meta`
-                : `de ${targetHours}h meta`}
+                ? `of ${hoursToPomodoros(targetHours)} 🍅 goal`
+                : `of ${targetHours}h goal`}
             </p>
           </div>
         </div>
 
         {/* Bar Chart - Current week */}
         <div>
-          <p className="text-xs text-muted-foreground mb-2">Semana atual</p>
+          <p className="text-xs text-muted-foreground mb-2">Current week</p>
           <div className="flex items-end gap-1 h-16">
             {weekData.map((day, index) => {
               const height = weeklyStats.maxMinutes > 0

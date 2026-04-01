@@ -13,8 +13,8 @@ export function AuthLayout() {
           <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Horas Líquidas</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">Organize seus estudos</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">ShipHours</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Track your work hours</p>
         </div>
       </div>
 
@@ -25,7 +25,7 @@ export function AuthLayout() {
 
       {/* Footer */}
       <p className="mt-6 sm:mt-8 text-xs sm:text-sm text-muted-foreground text-center px-4">
-        Acompanhe seu progresso e alcance suas metas de estudo
+        Track your progress and reach your goals
       </p>
     </div>
   );

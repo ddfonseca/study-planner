@@ -1,5 +1,5 @@
 /**
- * Study Timer - Stopwatch and Pomodoro timer for tracking study sessions
+ * Focus Timer - Stopwatch and Pomodoro timer for tracking work sessions
  */
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,14 +15,14 @@ import { cn } from '@/lib/utils';
 import { formatDateKey } from '@/lib/utils/date';
 import type { Task, Project } from '@/types/api';
 
-const STORAGE_KEY = 'studyTimer';
+const STORAGE_KEY = 'focusTimer';
 
 type TimerMode = 'pomodoro-25' | 'pomodoro-50' | 'stopwatch';
 
 const TIMER_PRESETS: { mode: TimerMode; label: string; sublabel: string; seconds: number }[] = [
   { mode: 'pomodoro-25', label: '25 min', sublabel: 'Pomodoro', seconds: 25 * 60 },
   { mode: 'pomodoro-50', label: '50 min', sublabel: 'Deep Work', seconds: 50 * 60 },
-  { mode: 'stopwatch', label: 'Livre', sublabel: 'Cronômetro', seconds: 0 },
+  { mode: 'stopwatch', label: 'Free', sublabel: 'Stopwatch', seconds: 0 },
 ];
 
 interface TimerState {
@@ -34,7 +34,7 @@ interface TimerState {
   startTime: number | null;
 }
 
-interface StudyTimerProps {
+interface FocusTimerProps {
   subjects: Task[];
   disciplines?: Project[];
   onRunningChange?: (isRunning: boolean) => void;
@@ -43,7 +43,7 @@ interface StudyTimerProps {
   onCreateTask?: (data: { name: string; disciplineId?: string }) => Promise<Task>;
 }
 
-export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen = false, onFullscreenChange, onCreateTask }: StudyTimerProps) {
+export function FocusTimer({ subjects, disciplines, onRunningChange, fullscreen = false, onFullscreenChange, onCreateTask }: FocusTimerProps) {
   const { handleAddSession, canModify } = useSessions();
   const { toast } = useToast();
   const { recentTasks, addRecentTask } = useRecentTasks();
@@ -218,10 +218,10 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
       const modeIcon = mode === 'stopwatch' ? '⏱️' : '🍅';
       document.title = `${modeIcon} ${timeStr} - ${subjectName}`;
     } else {
-      document.title = 'Horas Líquidas';
+      document.title = 'ShipHours';
     }
     return () => {
-      document.title = 'Horas Líquidas';
+      document.title = 'ShipHours';
     };
   }, [isRunning, seconds, subjectName, mode]);
 
@@ -259,8 +259,8 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
     if (!subjectId) {
       triggerPattern('error');
       toast({
-        title: 'Atenção',
-        description: 'Selecione a matéria antes de iniciar',
+        title: 'Attention',
+        description: 'Select a task before starting',
         variant: 'destructive',
       });
       return;
@@ -295,8 +295,8 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
 
     // Try to show browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('🍅 Pomodoro completo!', {
-        body: `${minutes} minutos de ${subjectIdRef.current ? subjects.find(s => s.id === subjectIdRef.current)?.name : ''} finalizados. Hora da pausa!`,
+      new Notification('🍅 Pomodoro complete!', {
+        body: `${minutes} minutes of ${subjectIdRef.current ? subjects.find(s => s.id === subjectIdRef.current)?.name : ''} finished. Time for a break!`,
         icon: '/favicon.png',
       });
     }
@@ -308,14 +308,14 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
         const currentSubjectName = subjects.find(s => s.id === subjectIdRef.current)?.name || '';
         await handleAddSession(today, subjectIdRef.current, minutes);
         toast({
-          title: '🍅 Pomodoro completo!',
-          description: `${minutes} minutos de ${currentSubjectName} registrados. Hora da pausa!`,
+          title: '🍅 Pomodoro complete!',
+          description: `${minutes} minutes of ${currentSubjectName} recorded. Time for a break!`,
         });
       } catch (err) {
         triggerPattern('error');
         toast({
-          title: 'Erro',
-          description: err instanceof Error ? err.message : 'Falha ao salvar sessão',
+          title: 'Error',
+          description: err instanceof Error ? err.message : 'Failed to save session',
           variant: 'destructive',
         });
       }
@@ -343,22 +343,22 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
         await handleAddSession(today, subjectId, studiedMinutes);
         triggerPattern('success');
         toast({
-          title: 'Sessão salva!',
-          description: `${studiedMinutes} minutos de ${subjectName} registrados`,
+          title: 'Session saved!',
+          description: `${studiedMinutes} minutes of ${subjectName} recorded`,
         });
       } catch (err) {
         triggerPattern('error');
         toast({
-          title: 'Erro',
-          description: err instanceof Error ? err.message : 'Falha ao salvar sessão',
+          title: 'Error',
+          description: err instanceof Error ? err.message : 'Failed to save session',
           variant: 'destructive',
         });
       }
     } else {
       triggerPattern('warning');
       toast({
-        title: 'Tempo muito curto',
-        description: 'Estude pelo menos 1 minuto para registrar',
+        title: 'Too short',
+        description: 'Work at least 1 minute to record a session',
       });
     }
 
@@ -417,14 +417,14 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
             ) : (
               <Timer className={isFullscreen ? "h-5 w-5" : "h-4 w-4"} />
             )}
-            Estudar Agora
+            Focus Now
           </CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleFullscreen}
             className="h-8 w-8 p-0"
-            title={isFullscreen ? "Minimizar" : "Expandir"}
+            title={isFullscreen ? "Minimize" : "Expand"}
           >
             {isFullscreen ? (
               <Minimize2 className="h-4 w-4" />
@@ -498,7 +498,7 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
               <p className={cn(
                 "text-muted-foreground",
                 isFullscreen ? "text-sm" : "text-xs"
-              )}>{progress}% concluído</p>
+              )}>{progress}% complete</p>
             </div>
           )}
         </div>
@@ -517,9 +517,9 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
               recentTasks={recentTasks}
               onTaskUsed={addRecentTask}
               onCreateTask={onCreateTask}
-              placeholder="Selecione a matéria..."
-              searchPlaceholder="Buscar..."
-              emptyMessage="Nenhuma matéria"
+              placeholder="Select a task..."
+              searchPlaceholder="Search..."
+              emptyMessage="No tasks found"
               disabled={isRunning || !canModify}
               open={isPickerOpen}
               onOpenChange={setIsPickerOpen}
@@ -534,12 +534,12 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
               "text-amber-600 dark:text-amber-400 text-center",
               isFullscreen ? "text-sm" : "text-xs"
             )}>
-              Selecione um workspace para usar o timer.
+              Select a workspace to use the timer.
             </p>
           ) : !isRunning ? (
             <Button onClick={handleStart} className="w-full" size="lg">
               <Play className={cn("mr-2", isFullscreen ? "h-5 w-5" : "h-4 w-4")} />
-              {mode === 'stopwatch' ? 'Iniciar' : 'Iniciar Pomodoro'}
+              {mode === 'stopwatch' ? 'Start' : 'Start Pomodoro'}
             </Button>
           ) : (
             <Button
@@ -549,7 +549,7 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
               size="lg"
             >
               <Square className={cn("mr-2", isFullscreen ? "h-5 w-5" : "h-4 w-4")} />
-              Parar e Salvar
+              Stop & Save
             </Button>
           )}
         </div>
@@ -558,4 +558,4 @@ export function StudyTimer({ subjects, disciplines, onRunningChange, fullscreen 
   );
 }
 
-export default StudyTimer;
+export default FocusTimer;

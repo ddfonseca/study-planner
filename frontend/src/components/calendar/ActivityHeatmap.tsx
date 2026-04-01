@@ -75,10 +75,10 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
     <div className="p-4 bg-card rounded-lg border">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-muted-foreground">
-          Atividade do Mês
+          Monthly Activity
         </span>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span>Menos</span>
+          <span>Less</span>
           {heatmapStyle === 'gradient' ? (
             // Gradient legend
             [0, 1, 2, 3, 4].map((i) => (
@@ -100,7 +100,7 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
               </div>
             ))
           )}
-          <span>Mais</span>
+          <span>More</span>
         </div>
       </div>
 

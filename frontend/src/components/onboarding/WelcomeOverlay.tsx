@@ -64,37 +64,37 @@ export function WelcomeOverlay() {
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
           <ResponsiveDialogTitle className="text-xl">
-            Bem-vindo ao Horas Líquidas!
+            Welcome to ShipHours!
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Acompanhe seu tempo de estudo de forma simples e eficiente.
+            Track your work time simply and efficiently.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
         <div className="space-y-4 py-4">
           <FeatureItem
             icon={<Calendar className="h-5 w-5" />}
-            title="Calendário de Estudos"
-            description="Registre suas sessões de estudo diárias com facilidade."
+            title="Work Calendar"
+            description="Log your daily work sessions with ease."
           />
           <FeatureItem
             icon={<Clock className="h-5 w-5" />}
-            title="Ciclos de Estudo"
-            description="Organize suas matérias em ciclos para estudar de forma equilibrada."
+            title="Focus Cycles"
+            description="Organize your tasks in cycles for balanced focus."
           />
           <FeatureItem
             icon={<BarChart3 className="h-5 w-5" />}
-            title="Dashboard de Progresso"
-            description="Visualize seu progresso com gráficos e estatísticas detalhadas."
+            title="Progress Dashboard"
+            description="Visualize your progress with detailed charts and statistics."
           />
         </div>
 
         <ResponsiveDialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button variant="ghost" onClick={handleClose} className="w-full sm:w-auto">
-            Pular
+            Skip
           </Button>
           <Button onClick={handleStart} className="w-full sm:flex-1">
-            Começar
+            Get Started
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </ResponsiveDialogFooter>

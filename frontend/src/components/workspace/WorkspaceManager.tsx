@@ -93,7 +93,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
 
   const handleCreate = async () => {
     if (!newName.trim()) {
-      setError('Nome é obrigatório');
+      setError('Name is required');
       return;
     }
 
@@ -105,7 +105,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
       setNewName('');
       setNewColor(PRESET_COLORS[0]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar workspace');
+      setError(err instanceof Error ? err.message : 'Failed to create workspace');
     } finally {
       setIsSaving(false);
     }
@@ -120,7 +120,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
 
   const handleSaveEdit = async () => {
     if (!editingId || !editName.trim()) {
-      setError('Nome é obrigatório');
+      setError('Name is required');
       return;
     }
 
@@ -132,7 +132,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
       setEditName('');
       setEditColor('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar workspace');
+      setError(err instanceof Error ? err.message : 'Failed to update workspace');
     } finally {
       setIsSaving(false);
     }
@@ -159,7 +159,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
     if (!workspace) return;
 
     if (deleteConfirmName !== workspace.name) {
-      setError('Digite o nome do workspace para confirmar');
+      setError('Type the workspace name to confirm');
       return;
     }
 
@@ -170,7 +170,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
       setDeletingId(null);
       setDeleteConfirmName('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao deletar workspace');
+      setError(err instanceof Error ? err.message : 'Failed to delete workspace');
     } finally {
       setIsSaving(false);
     }
@@ -189,7 +189,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
     <ResponsiveDialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <ResponsiveDialogContent className="sm:max-w-[500px]">
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Gerenciar Workspaces</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Manage Workspaces</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
 
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
@@ -207,7 +207,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                       <Input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        placeholder="Nome do workspace"
+                        placeholder="Workspace name"
                         disabled={isSaving}
                         className="flex-1"
                       />
@@ -232,14 +232,14 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="flex gap-1" role="radiogroup" aria-label="Cor do workspace">
+                    <div className="flex gap-1" role="radiogroup" aria-label="Workspace color">
                       {PRESET_COLORS.map((color, index) => (
                         <button
                           key={color}
                           type="button"
                           role="radio"
                           aria-checked={editColor === color}
-                          aria-label={`Cor ${index + 1}`}
+                          aria-label={`Color ${index + 1}`}
                           className={`h-6 w-6 rounded-full border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                             editColor === color
                               ? 'border-foreground scale-110'
@@ -280,7 +280,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                       {workspace.name}
                       {workspace.isDefault && (
                         <span className="ml-2 text-xs text-muted-foreground">
-                          (Padrão)
+                          (Default)
                         </span>
                       )}
                     </span>
@@ -316,17 +316,17 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                 <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-destructive">
-                    Deletar "{deletingWorkspace.name}"?
+                    Delete "{deletingWorkspace.name}"?
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Esta ação não pode ser desfeita.
+                    This action cannot be undone.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label className="text-sm">
-                  O que fazer com as sessões deste workspace?
+                  What to do with sessions in this workspace?
                 </Label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 text-sm">
@@ -336,7 +336,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                       onChange={() => setMoveToDefault(true)}
                       disabled={isSaving}
                     />
-                    Mover para "Geral"
+                    Move to "General"
                   </label>
                   <label className="flex items-center gap-2 text-sm">
                     <input
@@ -345,14 +345,14 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                       onChange={() => setMoveToDefault(false)}
                       disabled={isSaving}
                     />
-                    Deletar tudo
+                    Delete all
                   </label>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirm-delete" className="text-sm">
-                  Digite "{deletingWorkspace.name}" para confirmar:
+                  Type "{deletingWorkspace.name}" to confirm:
                 </Label>
                 <Input
                   id="confirm-delete"
@@ -370,7 +370,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                   onClick={handleCancelDelete}
                   disabled={isSaving}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button
                   variant="destructive"
@@ -381,7 +381,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                   {isSaving ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Deletar
+                  Delete
                 </Button>
               </div>
             </div>
@@ -391,26 +391,26 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
           {isCreating ? (
             <div className="p-4 rounded-lg border bg-muted/50 space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="new-name">Nome do Workspace</Label>
+                <Label htmlFor="new-name">Workspace Name</Label>
                 <Input
                   id="new-name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Ex: Trabalho, Pessoal, Faculdade..."
+                  placeholder="e.g. Work, Personal, School..."
                   disabled={isSaving}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Cor</Label>
-                <div className="flex gap-1" role="radiogroup" aria-label="Cor do workspace">
+                <Label>Color</Label>
+                <div className="flex gap-1" role="radiogroup" aria-label="Workspace color">
                   {PRESET_COLORS.map((color, index) => (
                     <button
                       key={color}
                       type="button"
                       role="radio"
                       aria-checked={newColor === color}
-                      aria-label={`Cor ${index + 1}`}
+                      aria-label={`Color ${index + 1}`}
                       className={`h-6 w-6 rounded-full border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         newColor === color
                           ? 'border-foreground scale-110'
@@ -452,7 +452,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                   }}
                   disabled={isSaving}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button size="sm" onClick={handleCreate} disabled={isSaving}>
                   {isSaving ? (
@@ -460,7 +460,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                   ) : (
                     <Plus className="h-4 w-4 mr-2" />
                   )}
-                  Criar
+                  Create
                 </Button>
               </div>
             </div>
@@ -472,7 +472,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Novo Workspace
+              New Workspace
               <LimitIndicator
                 feature={FEATURES.MAX_WORKSPACES}
                 currentUsage={workspaces.length}
@@ -487,7 +487,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
                 disabled
               >
                 <Lock className="h-4 w-4 mr-2" />
-                Novo Workspace
+                New Workspace
                 <LimitIndicator
                   feature={FEATURES.MAX_WORKSPACES}
                   currentUsage={workspaces.length}
@@ -511,7 +511,7 @@ export function WorkspaceManager({ isOpen, onClose }: WorkspaceManagerProps) {
 
         <ResponsiveDialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            Fechar
+            Close
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

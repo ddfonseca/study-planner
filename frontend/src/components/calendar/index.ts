@@ -9,7 +9,7 @@ export { SessionListSkeleton } from './SessionListSkeleton';
 export { SessionModal } from './SessionModal';
 export { ConfigPanel } from './ConfigPanel';
 export { WeeklyGoalEditor } from './WeeklyGoalEditor';
-export { StudyTimer } from './StudyTimer';
+export { FocusTimer } from './FocusTimer';
 export { QuickAddSession } from './QuickAddSession';
 export { WeeklyProgress } from './WeeklyProgress';
 export { MobileDayView } from './MobileDayView';

@@ -11,8 +11,8 @@ import type { Range } from "@codemirror/state";
 // Matches [ ] or [x]/[X] at the start of a line, optionally preceded by - or *
 const taskPattern = /^(\s*(?:[-*]\s+)?)\[([ xX])\]/;
 
-// Matches the completion timestamp appended at end of line: ✓ DD/MM/YYYY às HH:MM
-const timestampPattern = / ✓ \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/;
+// Matches the completion timestamp appended at end of line: ✓ MM/DD/YYYY at HH:MM
+const timestampPattern = / ✓ \d{2}\/\d{2}\/\d{4} at \d{2}:\d{2}$/;
 
 function formatTimestamp(): string {
   const now = new Date();
@@ -21,7 +21,7 @@ function formatTimestamp(): string {
   const yyyy = now.getFullYear();
   const hh = String(now.getHours()).padStart(2, "0");
   const min = String(now.getMinutes()).padStart(2, "0");
-  return ` ✓ ${dd}/${mm}/${yyyy} às ${hh}:${min}`;
+  return ` ✓ ${mm}/${dd}/${yyyy} at ${hh}:${min}`;
 }
 
 class CheckboxWidget extends WidgetType {
@@ -63,7 +63,7 @@ class CheckboxWidget extends WidgetType {
       // Checked: show ✅ [x] (emoji + [x]), clickable to uncheck
       const span = document.createElement("span");
       span.className = "cm-task-checked";
-      span.setAttribute("aria-label", "Desmarcar tarefa");
+      span.setAttribute("aria-label", "Uncheck task");
       span.textContent = "✅ [x] ";
       span.addEventListener("mousedown", (e) => {
         e.preventDefault();
@@ -77,7 +77,7 @@ class CheckboxWidget extends WidgetType {
     input.type = "checkbox";
     input.checked = false;
     input.className = "cm-task-checkbox";
-    input.setAttribute("aria-label", "Marcar tarefa");
+    input.setAttribute("aria-label", "Check task");
     input.addEventListener("mousedown", (e) => {
       e.preventDefault();
       runToggle();

@@ -259,11 +259,11 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <RefreshCw className="h-5 w-5 text-primary" />
-            {cycle ? 'Editar Ciclo' : 'Criar Ciclo de Estudos'}
+            {cycle ? 'Edit Cycle' : 'Create Focus Cycle'}
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Configure as matérias/disciplinas e o tempo de estudo para cada uma. O ciclo irá
-            sugerir o que estudar baseado na ordem definida.
+            Set up the tasks/projects and work time for each. The cycle will
+            suggest what to work on based on the defined order.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -271,7 +271,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           {/* Cycle name */}
           <div className="space-y-2">
             <Label htmlFor="cycleName">
-              Nome do ciclo {!isEditing && <span className="text-destructive">*</span>}
+              Cycle name {!isEditing && <span className="text-destructive">*</span>}
             </Label>
             <Input
               id="cycleName"
@@ -292,14 +292,14 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                 onCheckedChange={(checked) => setActivateOnCreate(checked === true)}
               />
               <Label htmlFor="activateOnCreate" className="text-sm font-normal cursor-pointer">
-                Ativar este ciclo ao criar
+                Activate this cycle on creation
               </Label>
             </div>
           )}
 
           {/* Add item form */}
           <div className="space-y-2">
-            <Label>Adicionar ao ciclo</Label>
+            <Label>Add to cycle</Label>
 
             {/* Type selector tabs */}
             <Tabs
@@ -310,11 +310,11 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="subject" className="flex items-center gap-1.5">
                   <BookOpen className="h-3.5 w-3.5" />
-                  Tópico
+                  Task
                 </TabsTrigger>
                 <TabsTrigger value="discipline" className="flex items-center gap-1.5">
                   <Layers className="h-3.5 w-3.5" />
-                  Disciplina
+                  Project
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -334,9 +334,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                         ? (data) => findOrCreateTask(currentWorkspaceId, data.name, data.projectId)
                         : undefined
                     }
-                    placeholder="Tópico"
-                    searchPlaceholder="Buscar..."
-                    emptyMessage="Nenhum encontrado"
+                    placeholder="Task"
+                    searchPlaceholder="Search..."
+                    emptyMessage="No tasks found"
                   />
                 ) : (
                   <ProjectPicker
@@ -348,9 +348,9 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                         ? (name) => findOrCreateProject(currentWorkspaceId, name)
                         : undefined
                     }
-                    placeholder="Selecione uma disciplina"
-                    searchPlaceholder="Buscar disciplina..."
-                    emptyMessage="Nenhuma disciplina encontrada"
+                    placeholder="Select a project"
+                    searchPlaceholder="Search project..."
+                    emptyMessage="No projects found"
                   />
                 )}
               </div>
@@ -373,7 +373,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           {items.length > 0 ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Ordem do ciclo</Label>
+                <Label>Cycle order</Label>
                 <span className="text-xs text-muted-foreground">
                   Total: {formatDuration(totalMinutes)}
                 </span>
@@ -405,7 +405,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              Adicione matérias ou disciplinas para criar o ciclo
+              Add tasks or projects to create the cycle
             </p>
           )}
         </div>
@@ -419,16 +419,16 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
               className="w-full sm:w-auto"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
+              Delete
             </Button>
           )}
           <ConfirmDialog
             open={showDeleteConfirm}
             onOpenChange={setShowDeleteConfirm}
-            title="Excluir ciclo"
-            description="Tem certeza que deseja excluir este ciclo? Esta ação não pode ser desfeita."
-            confirmText="Excluir"
-            cancelText="Cancelar"
+            title="Delete cycle"
+            description="Are you sure you want to delete this cycle? This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
             onConfirm={handleDelete}
             isLoading={isDeleting}
             variant="destructive"
@@ -441,7 +441,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             disabled={isSaving}
             className="w-full sm:w-auto"
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             onClick={handleSave}
@@ -455,7 +455,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Salvar
+            Save
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

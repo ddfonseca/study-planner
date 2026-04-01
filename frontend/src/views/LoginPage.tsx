@@ -84,9 +84,9 @@ export function LoginPage() {
   return (
     <Card className="bg-container shadow-lg">
       <CardHeader className="text-center px-4 sm:px-6">
-        <CardTitle className="text-xl sm:text-2xl">Bem-vindo!</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">Welcome!</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          Entre com sua conta Google para começar a organizar seus estudos
+          Sign in with your Google account to start tracking your work
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 px-4 sm:px-6">
@@ -100,7 +100,7 @@ export function LoginPage() {
           ) : (
             <GoogleIcon />
           )}
-          <span className="ml-2 sm:ml-3 font-medium">Entrar com Google</span>
+          <span className="ml-2 sm:ml-3 font-medium">Sign in with Google</span>
         </Button>
 
         {/* Email/Password auth */}
@@ -112,7 +112,7 @@ export function LoginPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  ou
+                  or
                 </span>
               </div>
             </div>
@@ -124,17 +124,17 @@ export function LoginPage() {
                 className="w-full h-12"
               >
                 <Mail className="h-5 w-5 mr-2" />
-                Entrar com Email
+                Sign in with Email
               </Button>
             ) : (
               <form onSubmit={handleEmailSubmit} className="space-y-3">
                 {isSignUp && (
                   <div className="space-y-1">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="name">Name</Label>
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Seu nome"
+                      placeholder="Your name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required={isSignUp}
@@ -146,14 +146,14 @@ export function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder="you@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="password">Senha</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
                     type="password"
@@ -173,7 +173,7 @@ export function LoginPage() {
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  {isSignUp ? 'Criar conta' : 'Entrar'}
+                  {isSignUp ? 'Create account' : 'Sign in'}
                 </Button>
 
                 <Button
@@ -182,7 +182,7 @@ export function LoginPage() {
                   onClick={() => setIsSignUp(!isSignUp)}
                   className="w-full text-sm"
                 >
-                  {isSignUp ? 'Já tem conta? Entrar' : 'Não tem conta? Criar'}
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
                 </Button>
               </form>
             )}
@@ -190,14 +190,14 @@ export function LoginPage() {
         )}
 
         <div className="text-center text-xs sm:text-sm text-muted-foreground">
-          <p>Ao entrar, você concorda com nossos</p>
+          <p>By signing in, you agree to our</p>
           <p>
             <Link to="/terms" className="text-primary hover:underline">
-              Termos de Uso
+              Terms of Service
             </Link>
-            {' e '}
+            {' and '}
             <Link to="/privacy" className="text-primary hover:underline">
-              Política de Privacidade
+              Privacy Policy
             </Link>
           </p>
         </div>

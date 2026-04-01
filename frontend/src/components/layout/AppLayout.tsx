@@ -71,10 +71,10 @@ export function AppLayout() {
   };
 
   const navItems = [
-    { to: '/app/calendar', icon: Calendar, label: 'Calendário', badgeKey: null, tourId: null },
-    { to: '/app/scratchpad', icon: FileText, label: 'Notas', badgeKey: 'scratchpad' as const, tourId: 'nav-scratchpad' },
+    { to: '/app/calendar', icon: Calendar, label: 'Calendar', badgeKey: null, tourId: null },
+    { to: '/app/scratchpad', icon: FileText, label: 'Notes', badgeKey: 'scratchpad' as const, tourId: 'nav-scratchpad' },
     { to: '/app/dashboard', icon: BarChart3, label: 'Dashboard', badgeKey: 'dashboard' as const, tourId: 'nav-dashboard' },
-    { to: '/app/content', icon: Layers, label: 'Conteúdo', badgeKey: 'content' as const, tourId: 'nav-content' },
+    { to: '/app/content', icon: Layers, label: 'Projects & Tasks', badgeKey: 'content' as const, tourId: 'nav-tasks' },
   ];
 
   return (
@@ -90,7 +90,7 @@ export function AppLayout() {
             <Link to="/app/calendar" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
               <Clock className="h-6 w-6 text-primary" />
               <span className="text-lg font-semibold text-foreground hidden sm:inline">
-                Horas Líquidas
+                ShipHours
               </span>
             </Link>
 
@@ -115,7 +115,7 @@ export function AppLayout() {
                   <span className="hidden lg:inline">{label}</span>
                   {badgeKey && isFeatureNew(badgeKey) && (
                     <Badge variant="default" className="hidden lg:inline-flex ml-1 px-1.5 py-0 text-[10px] bg-primary/90">
-                      Novo
+                      New
                     </Badge>
                   )}
                   {badgeKey && isFeatureNew(badgeKey) && (

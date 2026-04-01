@@ -24,7 +24,7 @@ import {
   CalendarGrid,
   CalendarGridSkeleton,
   SessionModal,
-  StudyTimer,
+  FocusTimer,
   WeeklyProgress,
   MobileDayView,
   MobileBottomNav,
@@ -176,7 +176,7 @@ export function CalendarPage() {
   const handleCreateSubject = useCallback(
     async (data: { name: string; disciplineId?: string }) => {
       if (!currentWorkspaceId) {
-        throw new Error('Selecione um workspace');
+        throw new Error('Select a workspace');
       }
       return findOrCreateTask(currentWorkspaceId, data.name, data.disciplineId);
     },
@@ -190,13 +190,13 @@ export function CalendarPage() {
       try {
         await handleAddSession(formatDateKey(selectedDate), subjectId, minutes);
         toast({
-          title: 'Sucesso',
-          description: 'Sessão adicionada com sucesso!',
+          title: 'Success',
+          description: 'Session added successfully!',
         });
       } catch {
         toast({
-          title: 'Erro',
-          description: 'Falha ao adicionar sessão',
+          title: 'Error',
+          description: 'Failed to add session',
           variant: 'destructive',
         });
       }
@@ -210,13 +210,13 @@ export function CalendarPage() {
       try {
         await handleUpdateSession(id, subjectId, minutes);
         toast({
-          title: 'Sucesso',
-          description: 'Sessão atualizada!',
+          title: 'Success',
+          description: 'Session updated!',
         });
       } catch {
         toast({
-          title: 'Erro',
-          description: 'Falha ao atualizar sessão',
+          title: 'Error',
+          description: 'Failed to update session',
           variant: 'destructive',
         });
       }
@@ -231,8 +231,8 @@ export function CalendarPage() {
 
       if (!result) {
         toast({
-          title: 'Erro',
-          description: 'Sessão não encontrada',
+          title: 'Error',
+          description: 'Session not found',
           variant: 'destructive',
         });
         return;
@@ -240,26 +240,26 @@ export function CalendarPage() {
 
       const { session, undo } = result;
 
-      const subjectName = session.subject?.name ?? 'Sessão';
+      const subjectName = session.subject?.name ?? 'Session';
       const { dismiss } = toast({
-        title: 'Sessão removida',
-        description: `"${subjectName}" foi removida`,
+        title: 'Session removed',
+        description: `"${subjectName}" was removed`,
         duration: 5000,
         action: (
           <ToastAction
-            altText="Desfazer remoção da sessão"
+            altText="Undo session removal"
             onClick={() => {
               const restored = undo();
               if (restored) {
                 dismiss();
                 toast({
-                  title: 'Sessão restaurada',
-                  description: `"${subjectName}" foi restaurada`,
+                  title: 'Session restored',
+                  description: `"${subjectName}" was restored`,
                 });
               }
             }}
           >
-            Desfazer
+            Undo
           </ToastAction>
         ),
       });
@@ -330,10 +330,10 @@ export function CalendarPage() {
         // Don't render here if fullscreen - single instance rendered in overlay
         if (isTimerFullscreen) return null;
         return (
-          <StudyTimer
+          <FocusTimer
             subjects={activeTasks}
             disciplines={projects}
-            onCreateSubject={handleCreateSubject}
+            onCreateTask={handleCreateSubject}
             onRunningChange={setTimerActive}
             fullscreen={isTimerFullscreen}
             onFullscreenChange={setIsTimerFullscreen}
@@ -352,7 +352,7 @@ export function CalendarPage() {
         <div className="flex items-center gap-3">
           <CalendarIcon className="h-6 w-6 text-primary" />
           <h1 className={`font-bold text-foreground ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            Calendário de Estudos
+            Work Calendar
           </h1>
         </div>
 
@@ -392,10 +392,10 @@ export function CalendarPage() {
               <WeeklyProgress />
               {/* Don't render here if fullscreen - single instance rendered in overlay */}
               {!isTimerFullscreen && (
-                <StudyTimer
+                <FocusTimer
                   subjects={activeTasks}
                   disciplines={projects}
-                  onCreateSubject={handleCreateSubject}
+                  onCreateTask={handleCreateSubject}
                   onRunningChange={setTimerActive}
                   fullscreen={isTimerFullscreen}
                   onFullscreenChange={setIsTimerFullscreen}
@@ -419,7 +419,7 @@ export function CalendarPage() {
           onAddSession={handleAddSessionSubmit}
           onUpdateSession={handleUpdateSessionSubmit}
           onDeleteSession={handleDeleteSessionSubmit}
-          onCreateSubject={handleCreateSubject}
+          onCreateTask={handleCreateSubject}
           canModify={canModify}
           highlighted={isModalHighlighted}
         />
@@ -441,10 +441,10 @@ export function CalendarPage() {
       {isTimerFullscreen && (
         <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4 md:p-8 pb-24 md:pb-8">
           <div className="w-full max-w-md">
-            <StudyTimer
+            <FocusTimer
               subjects={activeTasks}
               disciplines={projects}
-              onCreateSubject={handleCreateSubject}
+              onCreateTask={handleCreateSubject}
               onRunningChange={setTimerActive}
               fullscreen={true}
               onFullscreenChange={setIsTimerFullscreen}

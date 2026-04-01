@@ -33,12 +33,12 @@ export function QuickAddSession({
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Adicionar Estudo de Hoje
+            Add Today's Session
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Selecione um workspace para adicionar sessões.
+            Select a workspace to add sessions.
           </p>
         </CardContent>
       </Card>
@@ -64,14 +64,14 @@ export function QuickAddSession({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Adicionar Estudo de Hoje
+          Add Today's Session
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor="quick-subject" className="text-xs">
-              Matéria
+              Task
             </Label>
             <TaskPicker
               value={subject}
@@ -79,21 +79,21 @@ export function QuickAddSession({
               subjects={subjects}
               recentTasks={recentTasks}
               onTaskUsed={addRecentTask}
-              placeholder="Selecione..."
-              searchPlaceholder="Buscar..."
-              emptyMessage="Nenhuma matéria"
+              placeholder="Select..."
+              searchPlaceholder="Search..."
+              emptyMessage="No tasks found"
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-1">
             <Label htmlFor="quick-minutes" className="text-xs">
-              Minutos
+              Minutes
             </Label>
             <Input
               id="quick-minutes"
               type="number"
-              placeholder="Ex: 60"
+              placeholder="e.g. 60"
               min="1"
               max="1440"
               value={minutes}
@@ -107,14 +107,14 @@ export function QuickAddSession({
             disabled={!subject.trim() || !minutes || isSubmitting}
             className="w-full"
             aria-busy={isSubmitting}
-            aria-label="Adicionar sessão de estudo"
+            aria-label="Add work session"
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
             ) : (
               <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             )}
-            Adicionar
+            Add
           </Button>
         </form>
       </CardContent>

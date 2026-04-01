@@ -9,7 +9,7 @@ export interface TimerOfflineWarningProps extends React.HTMLAttributes<HTMLDivEl
 }
 
 const TimerOfflineWarning = React.forwardRef<HTMLDivElement, TimerOfflineWarningProps>(
-  ({ className, message = "Você está offline. A sessão será salva quando a conexão voltar.", ...props }, ref) => {
+  ({ className, message = "You are offline. The session will be saved when the connection returns.", ...props }, ref) => {
     const isOnline = useOnlineStatus()
 
     if (isOnline) {

@@ -9,25 +9,25 @@ import { Calendar, BarChart3, Settings, Plus, Timer, Keyboard, FileText } from '
 
 const shortcutGroups = [
   {
-    heading: 'Navegacao',
+    heading: 'Navigation',
     items: [
-      { icon: Calendar, label: 'Ir para Calendario', shortcut: 'G → C' },
-      { icon: BarChart3, label: 'Ir para Dashboard', shortcut: 'G → D' },
-      { icon: FileText, label: 'Ir para Notas', shortcut: 'G → N' },
-      { icon: Settings, label: 'Ir para Configuracoes', shortcut: 'G → S' },
+      { icon: Calendar, label: 'Go to Calendar', shortcut: 'G → C' },
+      { icon: BarChart3, label: 'Go to Dashboard', shortcut: 'G → D' },
+      { icon: FileText, label: 'Go to Notes', shortcut: 'G → N' },
+      { icon: Settings, label: 'Go to Settings', shortcut: 'G → S' },
     ],
   },
   {
-    heading: 'Acoes',
+    heading: 'Actions',
     items: [
-      { icon: Plus, label: 'Nova sessao de estudo', shortcut: 'N' },
-      { icon: Timer, label: 'Timer: selecionar/iniciar/parar', shortcut: 'T' },
+      { icon: Plus, label: 'New work session', shortcut: 'N' },
+      { icon: Timer, label: 'Timer: select/start/stop', shortcut: 'T' },
     ],
   },
   {
-    heading: 'Ajuda',
+    heading: 'Help',
     items: [
-      { icon: Keyboard, label: 'Mostrar atalhos', shortcut: '?' },
+      { icon: Keyboard, label: 'Show shortcuts', shortcut: '?' },
     ],
   },
 ];
@@ -41,9 +41,9 @@ export function ShortcutsModal({ open, onOpenChange }: ShortcutsModalProps) {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <div className="px-4 py-3 border-b">
-        <h2 className="text-lg font-semibold">Atalhos de Teclado</h2>
+        <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
         <p className="text-sm text-muted-foreground">
-          Use atalhos para navegar mais rapido
+          Use shortcuts to navigate faster
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export function ShortcutsModal({ open, onOpenChange }: ShortcutsModalProps) {
 
       <div className="px-4 py-3 border-t bg-muted/50">
         <p className="text-xs text-muted-foreground text-center">
-          Pressione <kbd className="px-1.5 py-0.5 bg-background rounded border text-xs">Esc</kbd> para fechar
+          Press <kbd className="px-1.5 py-0.5 bg-background rounded border text-xs">Esc</kbd> to close
         </p>
       </div>
     </CommandDialog>

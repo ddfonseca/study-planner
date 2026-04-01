@@ -22,7 +22,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { SyncIndicator, type SyncState } from '@/components/ui/sync-indicator';
 import { useAutoSave, type AutoSaveStatus } from '@/hooks/useAutoSave';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 // Old localStorage key from previous implementation
@@ -310,7 +310,7 @@ export function ScratchpadPage() {
       <div className="h-full flex flex-col items-center justify-center min-h-[40vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-sm text-muted-foreground">
-          {isMigrating ? 'Migrando notas...' : 'Carregando notas...'}
+          {isMigrating ? 'Migrating notes...' : 'Loading notes...'}
         </p>
       </div>
     );
@@ -323,7 +323,7 @@ export function ScratchpadPage() {
         <AlertCircle className="h-8 w-8 text-destructive mb-4" />
         <p className="text-sm text-destructive mb-4">{error}</p>
         <Button onClick={() => { clearError(); fetchNotes(); }}>
-          Tentar novamente
+          Try again
         </Button>
       </div>
     );
@@ -333,13 +333,13 @@ export function ScratchpadPage() {
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center p-4 sm:p-8">
       <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/50 mb-3 sm:mb-4" />
-      <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">Nenhuma nota ainda</h3>
+      <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No notes yet</h3>
       <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 max-w-xs">
-        Crie sua primeira nota para comecar a organizar seus pensamentos.
+        Create your first note to start organizing your thoughts.
       </p>
       <Button onClick={handleNewNote} className="gap-2" size="sm" disabled={isSaving}>
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-        Nova nota
+        New note
       </Button>
     </div>
   );
@@ -357,10 +357,10 @@ export function ScratchpadPage() {
               size="sm"
               onRetry={retrySave}
               labels={{
-                idle: isOnline ? 'Salvo' : 'Offline',
-                syncing: 'Salvando...',
-                success: 'Salvo',
-                error: 'Erro ao salvar',
+                idle: isOnline ? 'Saved' : 'Offline',
+                syncing: 'Saving...',
+                success: 'Saved',
+                error: 'Failed to save',
               }}
             />
           )}
@@ -374,7 +374,7 @@ export function ScratchpadPage() {
             disabled={isSaving}
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span className="hidden sm:inline">Nova</span>
+            <span className="hidden sm:inline">New</span>
           </Button>
           {currentNote && (
             <Button
@@ -382,7 +382,7 @@ export function ScratchpadPage() {
               size="sm"
               onClick={toggleVimMode}
               className="gap-1 sm:gap-2 h-8 px-2 sm:px-3"
-              title={vimMode ? "Vim ativo" : "Ativar Vim"}
+              title={vimMode ? "Vim enabled" : "Enable Vim"}
             >
               <Terminal className="h-4 w-4" />
               <span className="hidden sm:inline">Vim</span>
@@ -425,7 +425,7 @@ export function ScratchpadPage() {
                     <h2
                       className="text-lg sm:text-xl font-semibold cursor-pointer hover:text-primary transition-colors truncate"
                       onClick={() => setIsEditingTitle(true)}
-                      title="Clique para editar o titulo"
+                      title="Click to edit title"
                     >
                       {currentNote.title}
                     </h2>
@@ -439,7 +439,7 @@ export function ScratchpadPage() {
                     initialDoc={currentNote.content}
                     onChange={handleEditorChange}
                     vimMode={vimMode}
-                    placeholder="Escreva seus pensamentos, objetivos, reflexoes..."
+                    placeholder="Write your thoughts, goals, reflections..."
                     className="h-full min-h-[40vh] sm:min-h-[50vh]"
                   />
                 </div>
@@ -447,15 +447,15 @@ export function ScratchpadPage() {
                 {/* Footer - Desktop only */}
                 <p className="hidden md:block text-xs text-muted-foreground text-center mt-3">
                   {lastSavedAt
-                    ? `Ultimo save: ${format(lastSavedAt, "HH:mm 'de' dd/MM", { locale: ptBR })}`
+                    ? `Last saved: ${format(lastSavedAt, "HH:mm MM/dd", { locale: enUS })}`
                     : currentNote.updatedAt
-                    ? `Ultimo save: ${format(new Date(currentNote.updatedAt), "HH:mm 'de' dd/MM", { locale: ptBR })}`
-                    : `Criado em: ${format(new Date(currentNote.createdAt), "HH:mm 'de' dd/MM", { locale: ptBR })}`}
+                    ? `Last saved: ${format(new Date(currentNote.updatedAt), "HH:mm MM/dd", { locale: enUS })}`
+                    : `Created: ${format(new Date(currentNote.createdAt), "HH:mm MM/dd", { locale: enUS })}`}
                 </p>
               </>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                Selecione uma nota ou crie uma nova
+                Select a note or create a new one
               </div>
             )}
           </div>
@@ -479,7 +479,7 @@ export function ScratchpadPage() {
           >
             <div className="flex items-center gap-2 truncate">
               <StickyNote className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{currentNote?.title || 'Selecione uma nota'}</span>
+              <span className="truncate">{currentNote?.title || 'Select a note'}</span>
             </div>
             <ChevronDown
               className={cn('h-4 w-4 transition-transform flex-shrink-0', mobileListOpen && 'rotate-180')}
@@ -492,10 +492,10 @@ export function ScratchpadPage() {
       <ConfirmDialog
         open={!!noteToDelete}
         onOpenChange={(open) => !open && setNoteToDelete(null)}
-        title="Excluir nota"
-        description="Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title="Delete note"
+        description="Are you sure you want to delete this note? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
         onConfirm={handleDeleteNote}
         isLoading={isDeleting}
         variant="destructive"

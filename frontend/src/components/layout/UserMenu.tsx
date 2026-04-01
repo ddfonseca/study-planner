@@ -54,7 +54,7 @@ export function UserMenu({ user, isDark, onToggleTheme, onLogout, isLoading }: U
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/app/settings">
             <Settings className="mr-2 h-4 w-4" />
-            Configurações
+            Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onToggleTheme} className="cursor-pointer">
@@ -63,7 +63,7 @@ export function UserMenu({ user, isDark, onToggleTheme, onLogout, isLoading }: U
           ) : (
             <Moon className="mr-2 h-4 w-4" />
           )}
-          {isDark ? 'Modo claro' : 'Modo escuro'}
+          {isDark ? 'Light mode' : 'Dark mode'}
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="cursor-pointer">
           <a href="/blog">
@@ -74,7 +74,7 @@ export function UserMenu({ user, isDark, onToggleTheme, onLogout, isLoading }: U
         <DropdownMenuItem asChild className="cursor-pointer">
           <a href="https://t.me/+g27TaGZfnYIzZTUx" target="_blank" rel="noopener noreferrer">
             <Users className="mr-2 h-4 w-4" />
-            Comunidade
+            Community
           </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -84,7 +84,7 @@ export function UserMenu({ user, isDark, onToggleTheme, onLogout, isLoading }: U
           className="cursor-pointer text-destructive focus:text-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          Sair
+          Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -128,7 +128,7 @@ export function SessionModal({
             {formatDateDisplay(date)}
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Total do dia:{' '}
+            Day total:{' '}
             <span className="font-medium text-foreground">
               {formatTime(dayData.totalMinutos)}
             </span>
@@ -140,7 +140,7 @@ export function SessionModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="subject">Matéria</Label>
+                <Label htmlFor="subject">Task</Label>
                 <TaskPicker
                   value={subjectId}
                   onValueChange={setSubjectId}
@@ -149,18 +149,18 @@ export function SessionModal({
                   recentTasks={recentTasks}
                   onTaskUsed={addRecentTask}
                   onCreateTask={onCreateTask}
-                  placeholder="Selecione ou digite..."
-                  searchPlaceholder="Buscar matéria..."
-                  emptyMessage="Nenhuma matéria encontrada"
+                  placeholder="Select or type..."
+                  searchPlaceholder="Search task..."
+                  emptyMessage="No tasks found"
                   disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="minutes">Minutos</Label>
+                <Label htmlFor="minutes">Minutes</Label>
                 <Input
                   id="minutes"
                   type="number"
-                  placeholder="Ex: 60"
+                  placeholder="e.g. 60"
                   min="1"
                   max="1440"
                   value={minutes}
@@ -179,7 +179,7 @@ export function SessionModal({
                   className="flex-1"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  Cancelar
+                  Cancel
                 </Button>
               )}
               <Button
@@ -194,13 +194,13 @@ export function SessionModal({
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />
                 )}
-                {isEditing ? 'Atualizar' : 'Adicionar'}
+                {isEditing ? 'Update' : 'Add'}
               </Button>
             </div>
           </form>
         ) : (
           <p className="text-sm text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
-            Selecione um workspace para adicionar ou editar sessões.
+            Select a workspace to add or edit sessions.
           </p>
         )}
 
@@ -208,8 +208,8 @@ export function SessionModal({
         {dayData.materias.length > 0 && (
           <div className="mt-4 space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">
-              Sessões do dia:{' '}
-              {canModify && <span className="text-xs">(clique para editar)</span>}
+              Day sessions:{' '}
+              {canModify && <span className="text-xs">(click to edit)</span>}
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
               {dayData.materias.map((materia) => (
@@ -225,7 +225,7 @@ export function SessionModal({
                   }}
                   role={canModify ? 'button' : 'listitem'}
                   tabIndex={canModify ? 0 : undefined}
-                  aria-label={canModify ? `Editar sessão: ${materia.materia}, ${formatTime(materia.minutos)}` : undefined}
+                  aria-label={canModify ? `Edit session: ${materia.materia}, ${formatTime(materia.minutos)}` : undefined}
                   className={`flex items-center justify-between p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border-2 ${
                     canModify ? 'cursor-pointer' : 'cursor-default'
                   } ${
@@ -252,7 +252,7 @@ export function SessionModal({
                       }}
                       disabled={isSubmitting}
                       className="text-danger hover:text-danger hover:bg-danger/10"
-                      aria-label={`Excluir sessão: ${materia.materia}`}
+                      aria-label={`Delete session: ${materia.materia}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -265,7 +265,7 @@ export function SessionModal({
 
         {dayData.materias.length === 0 && (
           <p className="text-center text-muted-foreground py-4">
-            Nenhuma sessão registrada neste dia
+            No sessions recorded for this day
           </p>
         )}
       </ResponsiveDialogContent>
@@ -273,9 +273,9 @@ export function SessionModal({
       <ConfirmDialog
         open={!!deleteConfirmId}
         onOpenChange={(open) => !open && setDeleteConfirmId(null)}
-        title="Excluir sessão?"
-        description="Esta ação não pode ser desfeita."
-        confirmText="Excluir"
+        title="Delete session?"
+        description="This action cannot be undone."
+        confirmText="Delete"
         variant="destructive"
         onConfirm={handleDeleteConfirm}
         isLoading={isSubmitting}

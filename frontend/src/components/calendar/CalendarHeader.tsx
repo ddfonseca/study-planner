@@ -24,7 +24,7 @@ export function CalendarHeader({
           variant="outline"
           size="icon-sm"
           onClick={onPreviousMonth}
-          aria-label="Mês anterior"
+          aria-label="Previous month"
         >
           <ChevronLeft />
         </Button>
@@ -32,7 +32,7 @@ export function CalendarHeader({
           variant="outline"
           size="icon-sm"
           onClick={onNextMonth}
-          aria-label="Próximo mês"
+          aria-label="Next month"
         >
           <ChevronRight />
         </Button>
@@ -43,7 +43,7 @@ export function CalendarHeader({
 
       <Button variant="outline" onClick={onToday} className="flex items-center gap-2">
         <CalendarDays className="h-4 w-4" />
-        Hoje
+        Today
       </Button>
     </div>
   );

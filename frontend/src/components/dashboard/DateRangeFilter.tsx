@@ -10,10 +10,10 @@ interface DateRangeFilterProps {
 }
 
 const presets = [
-  { days: 7, label: '7 dias' },
-  { days: 14, label: '14 dias' },
-  { days: 30, label: '30 dias' },
-  { days: 90, label: '90 dias' },
+  { days: 7, label: '7 days' },
+  { days: 14, label: '14 days' },
+  { days: 30, label: '30 days' },
+  { days: 90, label: '90 days' },
 ];
 
 export function DateRangeFilter({ currentDays, onSelectPreset }: DateRangeFilterProps) {
@@ -21,7 +21,7 @@ export function DateRangeFilter({ currentDays, onSelectPreset }: DateRangeFilter
     <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-2 text-muted-foreground">
         <Calendar className="h-4 w-4" aria-hidden="true" />
-        <span className="text-sm" id="date-range-label">Período:</span>
+        <span className="text-sm" id="date-range-label">Period:</span>
       </div>
       <div className="flex gap-2" role="group" aria-labelledby="date-range-label">
         {presets.map(({ days, label }) => (
@@ -31,7 +31,7 @@ export function DateRangeFilter({ currentDays, onSelectPreset }: DateRangeFilter
             size="sm"
             onClick={() => onSelectPreset(days)}
             aria-current={currentDays === days ? 'true' : undefined}
-            aria-label={`Filtrar últimos ${label}`}
+            aria-label={`Filter last ${label}`}
           >
             {label}
           </Button>

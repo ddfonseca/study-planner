@@ -74,7 +74,7 @@ export function TaskWeeklyChart({ data }: TaskWeeklyChartProps) {
   return (
     <Card className="h-full">
       <CardHeader className="pb-2 sm:pb-6">
-        <CardTitle className="text-base sm:text-lg">Media por Dia da Semana</CardTitle>
+        <CardTitle className="text-base sm:text-lg">Average per Weekday</CardTitle>
       </CardHeader>
       <CardContent className="px-3 sm:px-6">
         {hasData && hasNonZeroData ? (
@@ -83,7 +83,7 @@ export function TaskWeeklyChart({ data }: TaskWeeklyChartProps) {
           </div>
         ) : (
           <div className="h-[280px] sm:h-[300px] flex items-center justify-center">
-            <p className="text-sm text-muted-foreground">Nenhum dado disponivel</p>
+            <p className="text-sm text-muted-foreground">No data available</p>
           </div>
         )}
       </CardContent>

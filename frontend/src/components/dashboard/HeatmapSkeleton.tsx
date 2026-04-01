@@ -80,13 +80,13 @@ export function HeatmapSkeleton({ weekCount = DEFAULT_WEEKS }: HeatmapSkeletonPr
         <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
           <Skeleton className="h-3 w-10" />
           <div className="flex items-center gap-1">
-            <span>Menos</span>
+            <span>Less</span>
             <div className="flex gap-[2px]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton key={index} className="w-[10px] h-[10px] rounded-sm" />
               ))}
             </div>
-            <span>Mais</span>
+            <span>More</span>
           </div>
         </div>
       </CardContent>

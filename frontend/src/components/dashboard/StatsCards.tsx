@@ -13,28 +13,28 @@ interface StatsCardsProps {
 export function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      title: 'Tempo Total',
+      title: 'Total Time',
       value: formatTime(stats.totalMinutes),
       icon: Clock,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
     {
-      title: 'Dias Estudados',
+      title: 'Days Worked',
       value: stats.totalDays.toString(),
       icon: BookOpen,
       color: 'text-success',
       bgColor: 'bg-success/10',
     },
     {
-      title: 'Média por Dia',
+      title: 'Daily Average',
       value: formatTime(stats.averageMinutesPerDay),
       icon: Target,
       color: 'text-warning',
       bgColor: 'bg-warning/10',
     },
     {
-      title: 'Matéria Principal',
+      title: 'Top Task',
       value: stats.mostStudiedSubject || 'N/A',
       icon: BarChart3,
       color: 'text-danger',

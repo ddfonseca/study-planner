@@ -71,7 +71,7 @@ export function useSessions() {
   const handleAddSession = useCallback(
     async (date: string, subjectId: string, minutes: number) => {
       if (!currentWorkspaceId) {
-        throw new Error('Selecione um workspace para adicionar sessão');
+        throw new Error('Select a workspace to add a session');
       }
       const sessionData: CreateSessionDto = {
         workspaceId: currentWorkspaceId,
@@ -172,7 +172,7 @@ export function useSessions() {
     // Include subjects from study cycle
     cycle?.items.forEach((item) => subjectsSet.add(item.subject));
     return Array.from(subjectsSet).sort((a, b) =>
-      a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+      a.localeCompare(b, 'en-US', { sensitivity: 'base' })
     );
   }, [sessions, cycle]);
 

@@ -2,7 +2,7 @@
  * Mobile Day View - Single day view for mobile devices
  */
 import { isToday, addDays, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -44,10 +44,8 @@ export function MobileDayView({
     onDateChange(new Date());
   };
 
-  // Format: "Segunda, 23 Dez 2025"
-  const formattedDate = format(date, "EEEE, d MMM yyyy", { locale: ptBR });
-  // Capitalize first letter
-  const displayDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+  // Format: "Monday, Dec 23, 2025"
+  const displayDate = format(date, "EEEE, MMM d, yyyy", { locale: enUS });
 
   return (
     <div className="space-y-4" data-tour="mobile-day-view">
@@ -59,7 +57,7 @@ export function MobileDayView({
               variant="ghost"
               size="icon"
               onClick={goToPreviousDay}
-              aria-label="Dia anterior"
+              aria-label="Previous day"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -78,7 +76,7 @@ export function MobileDayView({
                   onClick={goToToday}
                   className="text-xs h-auto p-0"
                 >
-                  Ir para hoje
+                  Go to today
                 </Button>
               )}
             </div>
@@ -87,7 +85,7 @@ export function MobileDayView({
               variant="ghost"
               size="icon"
               onClick={goToNextDay}
-              aria-label="Próximo dia"
+              aria-label="Next day"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -104,10 +102,10 @@ export function MobileDayView({
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {dayData.materias.length === 0
-                ? 'Nenhuma sessão registrada'
+                ? 'No sessions recorded'
                 : dayData.materias.length === 1
-                  ? '1 sessão'
-                  : `${dayData.materias.length} sessões`}
+                  ? '1 session'
+                  : `${dayData.materias.length} sessions`}
             </p>
           </div>
         </CardContent>
@@ -118,7 +116,7 @@ export function MobileDayView({
         <Card>
           <CardContent className="p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-3">
-              Sessões do dia
+              Day sessions
             </h3>
             <div className="space-y-2">
               {dayData.materias.map((materia) => (
@@ -143,13 +141,13 @@ export function MobileDayView({
           className="w-full"
         >
           <Plus className="h-5 w-5 mr-2" />
-          Adicionar Sessão
+          Add Session
         </Button>
       ) : (
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
-              Selecione um workspace para adicionar sessões.
+              Select a workspace to add sessions.
             </p>
           </CardContent>
         </Card>

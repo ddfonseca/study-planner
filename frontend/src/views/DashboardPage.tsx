@@ -156,7 +156,7 @@ export function DashboardPage() {
           <Link to="/app/analytics">
             <Button variant="outline" size="sm" className="text-xs sm:text-sm h-8 sm:h-9">
               <PieChart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-              <span className="hidden xs:inline">Ver por</span> Materia
+              <span className="hidden xs:inline">View by</span> Task
             </Button>
           </Link>
           <DateRangeFilter
@@ -177,8 +177,8 @@ export function DashboardPage() {
       {filteredStats.totalMinutes === 0 ? (
         <EmptyState
           icon={CalendarOff}
-          title="Nenhuma sessão neste período"
-          description="Selecione outro período ou adicione sessões de estudo para visualizar estatísticas"
+          title="No sessions in this period"
+          description="Select another period or add work sessions to view statistics"
           variant="card"
           action={
             <Button
@@ -186,7 +186,7 @@ export function DashboardPage() {
               size="sm"
               onClick={() => navigate('/app/calendar')}
             >
-              Ir para calendário
+              Go to calendar
             </Button>
           }
         />

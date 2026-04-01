@@ -10,7 +10,7 @@ export interface OfflineBannerProps extends React.HTMLAttributes<HTMLDivElement>
 }
 
 const OfflineBanner = React.forwardRef<HTMLDivElement, OfflineBannerProps>(
-  ({ className, message = "Você está offline", ...props }, ref) => {
+  ({ className, message = "You are offline", ...props }, ref) => {
     const isOnline = useOnlineStatus()
 
     return (

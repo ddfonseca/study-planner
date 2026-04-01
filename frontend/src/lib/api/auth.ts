@@ -21,24 +21,24 @@ export const authClient = createAuthClient({
   },
 });
 
-// Error messages in Portuguese
+// Error messages
 const errorMessages: Record<string, string> = {
-  'Invalid email or password': 'Email ou senha inválidos',
-  'User not found': 'Usuário não encontrado',
-  'User already exists': 'Este email já está cadastrado',
-  'Invalid password': 'Senha inválida',
-  'Invalid email': 'Email inválido',
-  'Email not verified': 'Email não verificado',
-  'Password too short': 'A senha deve ter no mínimo 8 caracteres',
-  'Password too long': 'A senha deve ter no máximo 128 caracteres',
-  'Invalid credentials': 'Credenciais inválidas',
-  'Account not found': 'Conta não encontrada',
-  'Session expired': 'Sessão expirada',
-  'Too many requests': 'Muitas tentativas. Aguarde um momento.',
+  'Invalid email or password': 'Invalid email or password',
+  'User not found': 'User not found',
+  'User already exists': 'This email is already registered',
+  'Invalid password': 'Invalid password',
+  'Invalid email': 'Invalid email',
+  'Email not verified': 'Email not verified',
+  'Password too short': 'Password must be at least 8 characters',
+  'Password too long': 'Password must be at most 128 characters',
+  'Invalid credentials': 'Invalid credentials',
+  'Account not found': 'Account not found',
+  'Session expired': 'Session expired',
+  'Too many requests': 'Too many attempts. Please wait a moment.',
 };
 
 function translateError(message: string | undefined): string {
-  if (!message) return 'Erro desconhecido';
+  if (!message) return 'Unknown error';
   return errorMessages[message] || message;
 }
 
