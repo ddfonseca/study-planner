@@ -43,7 +43,7 @@ export function WeeklyProgress() {
 
       days.push({
         date,
-        minutes: dayData?.totalMinutos || 0,
+        minutes: dayData?.totalMinutes || 0,
         label: dayLabels[i],
         isToday: dateKey === todayKey,
         isFuture: date > today,

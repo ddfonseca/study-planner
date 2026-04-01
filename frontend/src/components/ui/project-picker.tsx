@@ -42,7 +42,7 @@ const normalizeString = (str: string) =>
 function groupByFirstLetter(projects: Project[]): Map<string, Project[]> {
   const groups = new Map<string, Project[]>()
   const sorted = [...projects].sort((a, b) =>
-    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+    a.name.localeCompare(b.name, 'en-US', { sensitivity: 'base' })
   )
 
   sorted.forEach((project) => {

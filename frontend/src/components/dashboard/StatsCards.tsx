@@ -35,7 +35,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       title: 'Top Task',
-      value: stats.mostStudiedSubject || 'N/A',
+      value: stats.mostWorkedTask || 'N/A',
       icon: BarChart3,
       color: 'text-danger',
       bgColor: 'bg-danger/10',

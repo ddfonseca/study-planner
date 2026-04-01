@@ -18,11 +18,11 @@ function formatRelativeTime(timestamp: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'agora';
-  if (diffMins < 60) return `${diffMins}min atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 7) return `${diffDays}d atrás`;
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}min ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function HistoryEntry({ entry }: { entry: CycleHistoryEntry }) {

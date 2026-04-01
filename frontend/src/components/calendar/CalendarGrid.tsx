@@ -104,8 +104,8 @@ export function CalendarGrid({
                   {week.map((date) => {
                     const dateKey = formatDateKey(date);
                     const dayData: DayData = sessions[dateKey] || {
-                      totalMinutos: 0,
-                      materias: [],
+                      totalMinutes: 0,
+                      entries: [],
                     };
                     const intensity = getCellIntensity(dateKey);
 

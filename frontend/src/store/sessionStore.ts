@@ -2,9 +2,9 @@
  * Study Sessions Store using Zustand
  */
 import { create } from 'zustand';
-import type { Session, CreateSessionDto, UpdateSessionDto } from '@/types/api';
+import type { WorkSession as Session, CreateWorkSessionDto as CreateSessionDto, UpdateWorkSessionDto as UpdateSessionDto } from '@/types/api';
 import type { SessionsMap, DayData } from '@/types/session';
-import { sessionsApi } from '@/lib/api/sessions';
+import { workSessionsApi as sessionsApi } from '@/lib/api/workSessions';
 import { transformSessionsToAppFormat, getDayData } from '@/lib/utils/transform';
 
 // Pending deletion entry for undo functionality

@@ -65,7 +65,7 @@ export function DashboardPage() {
   // Filter raw sessions by category for heatmap
   const filteredRawSessions = useMemo(() => {
     if (!filteredTaskIds) return rawSessions;
-    return rawSessions.filter(s => filteredTaskIds.includes(s.subjectId));
+    return rawSessions.filter(s => filteredTaskIds.includes(s.taskId));
   }, [rawSessions, filteredTaskIds]);
 
   // Recalculate stats for filtered sessions
@@ -73,7 +73,7 @@ export function DashboardPage() {
     if (!filteredTaskIds) return stats;
     // If filtering, recalculate basic stats
     const totalMinutes = filteredRawSessions.reduce((sum, s) => sum + s.minutes, 0);
-    const uniqueSubjects = new Set(filteredRawSessions.map(s => s.subjectId));
+    const uniqueSubjects = new Set(filteredRawSessions.map(s => s.taskId));
     return {
       ...stats,
       totalMinutes,

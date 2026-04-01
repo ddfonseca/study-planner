@@ -130,7 +130,7 @@ export function SessionModal({
           <ResponsiveDialogDescription>
             Day total:{' '}
             <span className="font-medium text-foreground">
-              {formatTime(dayData.totalMinutos)}
+              {formatTime(dayData.totalMinutes)}
             </span>
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
@@ -205,7 +205,7 @@ export function SessionModal({
         )}
 
         {/* Sessions list */}
-        {dayData.materias.length > 0 && (
+        {dayData.entries.length > 0 && (
           <div className="mt-4 space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">
               Day sessions:{' '}
@@ -263,7 +263,7 @@ export function SessionModal({
           </div>
         )}
 
-        {dayData.materias.length === 0 && (
+        {dayData.entries.length === 0 && (
           <p className="text-center text-muted-foreground py-4">
             No sessions recorded for this day
           </p>

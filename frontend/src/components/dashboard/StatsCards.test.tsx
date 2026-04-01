@@ -7,7 +7,8 @@ const mockStats: StudyStats = {
   totalMinutes: 180,
   totalDays: 5,
   averageMinutesPerDay: 36,
-  mostStudiedSubject: 'Matemática',
+  mostWorkedTask: 'Backend API',
+  taskBreakdown: {},
 }
 
 describe('StatsCards', () => {
@@ -39,7 +40,7 @@ describe('StatsCards', () => {
     it('displays N/A when no subject is available', () => {
       const statsWithNoSubject: StudyStats = {
         ...mockStats,
-        mostStudiedSubject: null,
+        mostWorkedTask: null,
       }
       render(<StatsCards stats={statsWithNoSubject} />)
       expect(screen.getByText('N/A')).toBeInTheDocument()

@@ -85,7 +85,7 @@ const normalizeString = (str: string) =>
 function groupByFirstLetter(subjects: TaskItem[]): Map<string, TaskItem[]> {
   const groups = new Map<string, TaskItem[]>()
   const sorted = [...subjects].sort((a, b) =>
-    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+    a.name.localeCompare(b.name, 'en-US', { sensitivity: 'base' })
   )
 
   sorted.forEach((subject) => {
@@ -259,7 +259,7 @@ function TaskPickerContent({
             <p className="text-xs font-medium text-muted-foreground mb-2 px-1">
               RECENTES
             </p>
-            <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Matérias recentes">
+            <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Recent tasks">
               {filteredRecents.map((subject) => (
                 <Badge
                   key={subject.id}
@@ -576,7 +576,7 @@ export function TaskPicker(props: TaskPickerProps) {
         <DrawerContent className="h-[85vh] max-h-[85vh]">
           <DrawerHeader className="border-b pb-2">
             <div className="flex items-center justify-between">
-              <DrawerTitle>Selecionar Matéria</DrawerTitle>
+              <DrawerTitle>Select Task</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <X className="h-4 w-4" />

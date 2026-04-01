@@ -94,7 +94,7 @@ export function AnnualHeatmap({ sessions }: AnnualHeatmapProps) {
         const isOutOfYear = date.getFullYear() !== currentYear;
         const isFuture = date > today;
         const dateKey = formatDateKey(date);
-        const minutes = (!isFuture && !isOutOfYear) ? (sessions[dateKey]?.totalMinutos || 0) : 0;
+        const minutes = (!isFuture && !isOutOfYear) ? (sessions[dateKey]?.totalMinutes || 0) : 0;
 
         const month = date.getMonth();
 

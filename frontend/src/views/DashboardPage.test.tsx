@@ -193,7 +193,7 @@ describe('DashboardPage', () => {
     it('shows stats cards and charts when period has sessions', () => {
       mockUseSessionStore.mockReturnValue({
         sessions: {
-          '2025-01-10': { totalMinutos: 60, materias: [{ id: '1', materia: 'Math', minutos: 60 }] },
+          '2025-01-10': { totalMinutes: 60, entries: [{ id: '1', taskName: 'Math', minutes: 60 }] },
         },
         isLoading: false,
       } as ReturnType<typeof useSessionStore>)

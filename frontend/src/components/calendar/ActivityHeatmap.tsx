@@ -44,7 +44,7 @@ export function ActivityHeatmap({ year, month }: ActivityHeatmapProps) {
 
   const getMinutesForDay = (date: Date): number => {
     const dateKey = formatDateKey(date);
-    return sessions[dateKey]?.totalMinutos || 0;
+    return sessions[dateKey]?.totalMinutes || 0;
   };
 
   const isCurrentMonth = (date: Date): boolean => {

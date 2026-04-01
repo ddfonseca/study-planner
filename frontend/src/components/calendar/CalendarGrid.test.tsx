@@ -18,7 +18,8 @@ vi.mock('@/hooks/useWeeklyGoals', () => ({
 
 import { useSessions } from '@/hooks/useSessions'
 
-const mockUseSessions = vi.mocked(useSessions)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockUseSessions = vi.mocked(useSessions) as any
 
 describe('CalendarGrid', () => {
   const defaultDayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
@@ -65,14 +66,14 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
         getWeekTotals: vi.fn(() => 0),
         getUniqueSubjects: vi.fn(() => []),
-        hasSessionsInMonth: vi.fn(() => false),
+        hasSessionsInMonth: vi.fn(() => false) as unknown as (weeks: Date[][]) => boolean,
       })
 
       render(
@@ -93,7 +94,7 @@ describe('CalendarGrid', () => {
     it('does not show empty state when month has sessions', () => {
       mockUseSessions.mockReturnValue({
         sessions: {
-          '2025-01-10': { totalMinutos: 60, materias: [{ materia: 'Math', minutos: 60 }] },
+          '2025-01-10': { totalMinutes: 60, entries: [{ id: '1', taskId: 'task-1', taskName: 'Math', minutes: 60 }] },
         },
         selectedDate: null,
         isLoading: false,
@@ -102,8 +103,8 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
@@ -134,14 +135,14 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
         getWeekTotals: vi.fn(() => 0),
         getUniqueSubjects: vi.fn(() => []),
-        hasSessionsInMonth: vi.fn(() => false),
+        hasSessionsInMonth: vi.fn(() => false) as unknown as (weeks: Date[][]) => boolean,
       })
 
       render(
@@ -168,14 +169,14 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
         getWeekTotals: vi.fn(() => 0),
         getUniqueSubjects: vi.fn(() => []),
-        hasSessionsInMonth: vi.fn(() => false),
+        hasSessionsInMonth: vi.fn(() => false) as unknown as (weeks: Date[][]) => boolean,
       })
 
       render(
@@ -207,14 +208,14 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
         getWeekTotals: vi.fn(() => 0),
         getUniqueSubjects: vi.fn(() => []),
-        hasSessionsInMonth: vi.fn(() => false),
+        hasSessionsInMonth: vi.fn(() => false) as unknown as (weeks: Date[][]) => boolean,
       })
 
       render(
@@ -242,14 +243,14 @@ describe('CalendarGrid', () => {
         canModify: true,
         fetchSessions: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
-        getCellIntensity: vi.fn(() => 0),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
+        getCellIntensity: vi.fn(() => 0 as import('@/types/session').CellIntensity),
         handleAddSession: vi.fn(),
         handleUpdateSession: vi.fn(),
         handleDeleteSession: vi.fn(),
         getWeekTotals: vi.fn(() => 0),
         getUniqueSubjects: vi.fn(() => []),
-        hasSessionsInMonth: vi.fn(() => false),
+        hasSessionsInMonth: vi.fn(() => false) as unknown as (weeks: Date[][]) => boolean,
       })
 
       const weeks = createWeeks()

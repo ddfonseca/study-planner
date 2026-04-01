@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useFocusCycleStore } from '@/store/focusCycleStore';
-import type { CreateSessionDto, UpdateSessionDto, Session } from '@/types/api';
+import type { CreateWorkSessionDto as CreateSessionDto, UpdateWorkSessionDto as UpdateSessionDto, WorkSession as Session } from '@/types/api';
 import type { CellIntensity } from '@/types/session';
 import { formatDateKey } from '@/lib/utils/date';
 
@@ -54,11 +54,11 @@ export function useSessions() {
   const getCellIntensity = useCallback(
     (dateKey: string): CellIntensity => {
       const dayData = sessions[dateKey];
-      if (!dayData || dayData.totalMinutos === 0) {
+      if (!dayData || dayData.totalMinutes === 0) {
         return 0;
       }
 
-      const minutes = dayData.totalMinutos;
+      const minutes = dayData.totalMinutes;
       if (minutes < 60) return 1;   // < 1h
       if (minutes < 120) return 2;  // 1-2h
       if (minutes < 180) return 3;  // 2-3h
@@ -76,7 +76,7 @@ export function useSessions() {
       const sessionData: CreateSessionDto = {
         workspaceId: currentWorkspaceId,
         date,
-        subjectId,
+        taskId: subjectId,
         minutes,
       };
       const result = await addSession(sessionData);
@@ -91,7 +91,7 @@ export function useSessions() {
   const handleUpdateSession = useCallback(
     async (id: string, subjectId: string, minutes: number) => {
       const sessionData: UpdateSessionDto = {
-        subjectId,
+        taskId: subjectId,
         minutes,
       };
       const result = await updateSession(id, sessionData);
@@ -155,7 +155,7 @@ export function useSessions() {
         const dateKey = formatDateKey(date);
         const dayData = sessions[dateKey];
         if (dayData) {
-          total += dayData.totalMinutos;
+          total += dayData.totalMinutes;
         }
       });
       return total;
@@ -167,10 +167,10 @@ export function useSessions() {
   const getUniqueSubjects = useCallback((): string[] => {
     const subjectsSet = new Set<string>();
     Object.values(sessions).forEach((dayData) => {
-      dayData.materias.forEach((m) => subjectsSet.add(m.materia));
+      dayData.entries.forEach((m) => subjectsSet.add(m.taskName));
     });
     // Include subjects from study cycle
-    cycle?.items.forEach((item) => subjectsSet.add(item.subject));
+    cycle?.items.forEach((item) => { if (item.task) subjectsSet.add(item.task.name); });
     return Array.from(subjectsSet).sort((a, b) =>
       a.localeCompare(b, 'en-US', { sensitivity: 'base' })
     );
@@ -183,7 +183,7 @@ export function useSessions() {
         for (const date of week) {
           const dateKey = formatDateKey(date);
           const dayData = sessions[dateKey];
-          if (dayData && dayData.totalMinutos > 0) {
+          if (dayData && dayData.totalMinutes > 0) {
             return true;
           }
         }

@@ -14,7 +14,7 @@ vi.mock('@/store/sessionStore', () => ({
     updateSession: vi.fn(),
     deleteSession: vi.fn(),
     selectDate: vi.fn(),
-    getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+    getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
   })),
 }))
 
@@ -75,7 +75,7 @@ describe('useSessions', () => {
         updateSession: vi.fn(),
         deleteSession: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
         clearSessions: vi.fn(),
         setLoading: vi.fn(),
         setError: vi.fn(),
@@ -90,7 +90,7 @@ describe('useSessions', () => {
     it('returns true when there is at least one session in the month', () => {
       mockUseSessionStore.mockReturnValue({
         sessions: {
-          '2025-01-10': { totalMinutos: 60, materias: [{ materia: 'Math', minutos: 60 }] },
+          '2025-01-10': { totalMinutes: 60, entries: [{ taskName: 'Math', minutes: 60 }] },
         },
         selectedDate: null,
         isLoading: false,
@@ -102,7 +102,7 @@ describe('useSessions', () => {
         updateSession: vi.fn(),
         deleteSession: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
         clearSessions: vi.fn(),
         setLoading: vi.fn(),
         setError: vi.fn(),
@@ -117,7 +117,7 @@ describe('useSessions', () => {
     it('returns false when sessions exist but have zero minutes', () => {
       mockUseSessionStore.mockReturnValue({
         sessions: {
-          '2025-01-10': { totalMinutos: 0, materias: [] },
+          '2025-01-10': { totalMinutes: 0, entries: [] },
         },
         selectedDate: null,
         isLoading: false,
@@ -129,7 +129,7 @@ describe('useSessions', () => {
         updateSession: vi.fn(),
         deleteSession: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
         clearSessions: vi.fn(),
         setLoading: vi.fn(),
         setError: vi.fn(),
@@ -144,7 +144,7 @@ describe('useSessions', () => {
     it('returns false when sessions exist outside the displayed weeks', () => {
       mockUseSessionStore.mockReturnValue({
         sessions: {
-          '2025-02-15': { totalMinutos: 120, materias: [{ materia: 'Physics', minutos: 120 }] },
+          '2025-02-15': { totalMinutes: 120, entries: [{ taskName: 'Physics', minutes: 120 }] },
         },
         selectedDate: null,
         isLoading: false,
@@ -156,7 +156,7 @@ describe('useSessions', () => {
         updateSession: vi.fn(),
         deleteSession: vi.fn(),
         selectDate: vi.fn(),
-        getSessionsForDate: vi.fn(() => ({ totalMinutos: 0, materias: [] })),
+        getSessionsForDate: vi.fn(() => ({ totalMinutes: 0, entries: [] })),
         clearSessions: vi.fn(),
         setLoading: vi.fn(),
         setError: vi.fn(),

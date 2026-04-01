@@ -37,7 +37,7 @@ describe('WelcomeOverlay', () => {
       render(<WelcomeOverlay />)
 
       expect(screen.getByRole('dialog')).toBeInTheDocument()
-      expect(screen.getByText('Bem-vindo ao Horas Líquidas!')).toBeInTheDocument()
+      expect(screen.getByText('Welcome to ShipHours!')).toBeInTheDocument()
     })
 
     it('does not render overlay when user has already seen welcome', () => {
@@ -51,7 +51,7 @@ describe('WelcomeOverlay', () => {
     it('displays the welcome title', () => {
       render(<WelcomeOverlay />)
 
-      expect(screen.getByText('Bem-vindo ao Horas Líquidas!')).toBeInTheDocument()
+      expect(screen.getByText('Welcome to ShipHours!')).toBeInTheDocument()
     })
 
     it('displays the welcome description', () => {

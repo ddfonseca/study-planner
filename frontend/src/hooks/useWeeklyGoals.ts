@@ -11,7 +11,7 @@ import {
 } from '@/store';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { WeeklyGoal, UpdateWeeklyGoalDto } from '@/types/api';
-import type { Session } from '@/types/api';
+import type { WorkSession as Session } from '@/types/api';
 
 interface UseWeeklyGoalsOptions {
   /**

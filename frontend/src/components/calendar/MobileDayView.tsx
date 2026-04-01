@@ -98,31 +98,31 @@ export function MobileDayView({
         <CardContent className="p-6">
           <div className="text-center">
             <p className="text-4xl font-bold text-primary">
-              {dayData.totalMinutos > 0 ? formatTime(dayData.totalMinutos) : '0min'}
+              {dayData.totalMinutes > 0 ? formatTime(dayData.totalMinutes) : '0min'}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {dayData.materias.length === 0
+              {dayData.entries.length === 0
                 ? 'No sessions recorded'
-                : dayData.materias.length === 1
+                : dayData.entries.length === 1
                   ? '1 session'
-                  : `${dayData.materias.length} sessions`}
+                  : `${dayData.entries.length} sessions`}
             </p>
           </div>
         </CardContent>
       </Card>
 
       {/* Sessions List */}
-      {dayData.materias.length > 0 && (
+      {dayData.entries.length > 0 && (
         <Card>
           <CardContent className="p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-3">
               Day sessions
             </h3>
             <div className="space-y-2">
-              {dayData.materias.map((materia) => (
+              {dayData.entries.map((taskName) => (
                 <SwipeableSessionItem
-                  key={materia.id}
-                  session={materia}
+                  key={taskName.id}
+                  session={taskName}
                   onEdit={onEditSession}
                   onDelete={onDeleteSession}
                   canModify={canModify}

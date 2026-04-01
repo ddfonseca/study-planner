@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act } from '@testing-library/react';
 import { useSessionStore } from './sessionStore';
-import type { Session } from '@/types/api';
+import type { WorkSession as Session } from '@/types/api';
 
 // Mock the sessions API
-vi.mock('@/lib/api/sessions', () => ({
+vi.mock('@/lib/api/workSessions', () => ({
   sessionsApi: {
     getAll: vi.fn(),
     create: vi.fn(),
@@ -16,27 +16,27 @@ vi.mock('@/lib/api/sessions', () => ({
 // Mock the transform utilities
 vi.mock('@/lib/utils/transform', () => ({
   transformSessionsToAppFormat: vi.fn((sessions: Session[]) => {
-    const result: Record<string, { totalMinutos: number; materias: { id: string; materia: string; minutos: number }[] }> = {};
+    const result: Record<string, { totalMinutes: number; entries: { id: string; taskName: string; minutes: number }[] }> = {};
     sessions.forEach((session) => {
       const dateKey = session.date.split('T')[0];
       if (!result[dateKey]) {
-        result[dateKey] = { totalMinutos: 0, materias: [] };
+        result[dateKey] = { totalMinutes: 0, entries: [] };
       }
-      result[dateKey].totalMinutos += session.minutes;
-      result[dateKey].materias.push({
+      result[dateKey].totalMinutes += session.minutes;
+      result[dateKey].entries.push({
         id: session.id,
-        materia: session.subject,
-        minutos: session.minutes,
+        taskName: session.task?.name ?? '',
+        minutes: session.minutes,
       });
     });
     return result;
   }),
   getDayData: vi.fn((sessions, dateKey) => {
-    return sessions[dateKey] || { totalMinutos: 0, materias: [] };
+    return sessions[dateKey] || { totalMinutes: 0, entries: [] };
   }),
 }));
 
-import { sessionsApi } from '@/lib/api/sessions';
+import { workSessionsApi as sessionsApi } from '@/lib/api/workSessions';
 
 const mockSessionsApi = vi.mocked(sessionsApi);
 
@@ -44,8 +44,9 @@ const createMockSession = (id: string, subject: string, minutes: number, date = 
   id,
   userId: 'user-1',
   workspaceId: 'workspace-1',
+  taskId: 'task-1',
+  task: { id: 'task-1', name: subject, workspaceId: 'workspace-1', projectId: null, color: null, icon: null, category: null, categories: [], position: 0, archivedAt: null, createdAt: '', updatedAt: '' },
   date,
-  subject,
   minutes,
   createdAt: '2025-01-15T10:00:00Z',
   updatedAt: '2025-01-15T10:00:00Z',
@@ -78,8 +79,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -102,8 +103,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -126,8 +127,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -166,8 +167,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -195,8 +196,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -236,8 +237,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -267,8 +268,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -305,8 +306,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -338,8 +339,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -370,8 +371,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -398,8 +399,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -428,8 +429,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -467,8 +468,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -502,8 +503,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });
@@ -547,8 +548,8 @@ describe('sessionStore - Undo Delete Functionality', () => {
         rawSessions: [session],
         sessions: {
           '2025-01-15': {
-            totalMinutos: 60,
-            materias: [{ id: 'session-1', materia: 'Math', minutos: 60 }],
+            totalMinutes: 60,
+            entries: [{ id: 'session-1', taskId: 'task-1', taskName: 'Math', minutes: 60 }],
           },
         },
       });

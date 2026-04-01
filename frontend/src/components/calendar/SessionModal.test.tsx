@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SessionModal } from './SessionModal'
 import type { DayData } from '@/types/session'
+import type { Task } from '@/types/api'
 
 // Mock the hooks and components
 vi.mock('@/hooks/useRecentTasks', () => ({
@@ -18,19 +19,25 @@ vi.mock('@/hooks/useMediaQuery', () => ({
 
 describe('SessionModal', () => {
   const mockSessions: DayData = {
-    totalMinutos: 120,
-    materias: [
-      { id: '1', materia: 'Matemática', minutos: 60 },
-      { id: '2', materia: 'Física', minutos: 60 },
+    totalMinutes: 120,
+    entries: [
+      { id: '1', taskId: 'task-1', taskName: 'Backend API', minutes: 60 },
+      { id: '2', taskId: 'task-2', taskName: 'Code Review', minutes: 60 },
     ],
   }
+
+  const mockSubjects: Task[] = [
+    { id: 'task-1', name: 'Backend API', workspaceId: 'ws-1', projectId: null, color: null, icon: null, category: null, categories: [], position: 0, archivedAt: null, createdAt: '', updatedAt: '' },
+    { id: 'task-2', name: 'Code Review', workspaceId: 'ws-1', projectId: null, color: null, icon: null, category: null, categories: [], position: 1, archivedAt: null, createdAt: '', updatedAt: '' },
+    { id: 'task-3', name: 'Feature Dev', workspaceId: 'ws-1', projectId: null, color: null, icon: null, category: null, categories: [], position: 2, archivedAt: null, createdAt: '', updatedAt: '' },
+  ]
 
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
     date: new Date(2025, 0, 15),
     dayData: mockSessions,
-    subjects: ['Matemática', 'Física', 'Química'],
+    subjects: mockSubjects,
     onAddSession: vi.fn().mockResolvedValue(undefined),
     onUpdateSession: vi.fn().mockResolvedValue(undefined),
     onDeleteSession: vi.fn().mockResolvedValue(undefined),
@@ -137,7 +144,7 @@ describe('SessionModal', () => {
     })
 
     it('does not render list when no sessions', () => {
-      render(<SessionModal {...defaultProps} dayData={{ totalMinutos: 0, materias: [] }} />)
+      render(<SessionModal {...defaultProps} dayData={{ totalMinutes: 0, entries: [] }} />)
 
       expect(screen.queryByRole('list')).not.toBeInTheDocument()
     })

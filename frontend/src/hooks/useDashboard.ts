@@ -33,8 +33,8 @@ export function useDashboard() {
 
   // Get data for subject chart (doughnut)
   const subjectChartData = useMemo(() => {
-    const labels = Object.keys(stats.subjectBreakdown);
-    const data = Object.values(stats.subjectBreakdown);
+    const labels = Object.keys(stats.taskBreakdown);
+    const data = Object.values(stats.taskBreakdown);
 
     // Modern soft color palette (pastel tones)
     const modernPalette = [
@@ -65,7 +65,7 @@ export function useDashboard() {
         },
       ],
     };
-  }, [stats.subjectBreakdown]);
+  }, [stats.taskBreakdown]);
 
   // Get data for daily chart (bar)
   const dailyChartData = useMemo(() => {
@@ -79,7 +79,7 @@ export function useDashboard() {
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dateKey = formatDateKey(new Date(d));
       dates.push(dateKey);
-      data.push(filteredSessions[dateKey]?.totalMinutos || 0);
+      data.push(filteredSessions[dateKey]?.totalMinutes || 0);
     }
 
     return {

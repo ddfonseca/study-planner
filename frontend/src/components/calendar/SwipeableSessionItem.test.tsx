@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SwipeableSessionItem } from './SwipeableSessionItem';
-import type { StudySession } from '@/types/session';
+import type { WorkSessionUI } from '@/types/session';
 
 describe('SwipeableSessionItem', () => {
-  const mockSession: StudySession = {
+  const mockSession: WorkSessionUI = {
     id: 'session-1',
-    materia: 'Mathematics',
-    minutos: 60,
+    taskId: 'task-1',
+    taskName: 'Mathematics',
+    minutes: 60,
   };
 
   const defaultProps = {

@@ -151,7 +151,7 @@ export function MultiCategorySelect({
                     {category.name}
                     {category._count && (
                       <span className="ml-auto text-xs text-muted-foreground">
-                        {category._count.subjects}
+                        {category._count.tasks}
                       </span>
                     )}
                   </CommandItem>

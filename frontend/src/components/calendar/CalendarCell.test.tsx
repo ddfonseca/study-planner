@@ -17,8 +17,8 @@ describe('CalendarCell', () => {
     date: new Date(2025, 0, 15), // January 15, 2025 (using local timezone)
     currentMonth: 0, // January
     dayData: {
-      totalMinutos: 0,
-      materias: [],
+      totalMinutes: 0,
+      entries: [],
     } as DayData,
     intensity: 0 as CellIntensity,
     onClick: vi.fn(),
@@ -49,10 +49,10 @@ describe('CalendarCell', () => {
       const propsWithSessions = {
         ...defaultProps,
         dayData: {
-          totalMinutos: 60,
-          materias: [
-            { id: '1', materia: 'Math', minutos: 30 },
-            { id: '2', materia: 'Science', minutos: 30 },
+          totalMinutes: 60,
+          entries: [
+            { id: '1', taskId: 'task-1', taskName: 'Math', minutes: 30 },
+            { id: '2', taskId: 'task-2', taskName: 'Science', minutes: 30 },
           ],
         },
         intensity: 1 as CellIntensity,
@@ -100,9 +100,9 @@ describe('CalendarCell', () => {
       const propsWithSessions = {
         ...defaultProps,
         dayData: {
-          totalMinutos: 60,
-          materias: [
-            { id: '1', materia: 'Matemática', minutos: 60 },
+          totalMinutes: 60,
+          entries: [
+            { id: '1', taskId: 'task-1', taskName: 'Matemática', minutes: 60 },
           ],
         },
         intensity: 1 as CellIntensity,
@@ -116,11 +116,11 @@ describe('CalendarCell', () => {
       const propsWithManySessions = {
         ...defaultProps,
         dayData: {
-          totalMinutos: 180,
-          materias: [
-            { id: '1', materia: 'Math', minutos: 60 },
-            { id: '2', materia: 'Science', minutos: 60 },
-            { id: '3', materia: 'History', minutos: 60 },
+          totalMinutes: 180,
+          entries: [
+            { id: '1', taskId: 'task-1', taskName: 'Math', minutes: 60 },
+            { id: '2', taskId: 'task-2', taskName: 'Science', minutes: 60 },
+            { id: '3', taskId: 'task-3', taskName: 'History', minutes: 60 },
           ],
         },
         intensity: 2 as CellIntensity,
@@ -166,9 +166,9 @@ describe('CalendarCell', () => {
       const propsWithSessions = {
         ...defaultProps,
         dayData: {
-          totalMinutos: 90,
-          materias: [
-            { id: '1', materia: 'Math', minutos: 90 },
+          totalMinutes: 90,
+          entries: [
+            { id: '1', taskId: 'task-1', taskName: 'Math', minutes: 90 },
           ],
         },
         intensity: 1 as CellIntensity,

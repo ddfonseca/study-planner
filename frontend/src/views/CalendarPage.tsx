@@ -240,7 +240,7 @@ export function CalendarPage() {
 
       const { session, undo } = result;
 
-      const subjectName = session.subject?.name ?? 'Session';
+      const subjectName = session.task?.name ?? 'Session';
       const { dismiss } = toast({
         title: 'Session removed',
         description: `"${subjectName}" was removed`,
@@ -270,7 +270,7 @@ export function CalendarPage() {
   // Get day data for selected date
   const selectedDayData: DayData = selectedDate
     ? getSessionsForDate(formatDateKey(selectedDate))
-    : { totalMinutos: 0, materias: [] };
+    : { totalMinutes: 0, entries: [] };
 
   const isLoading = sessionsLoading || configLoading;
 

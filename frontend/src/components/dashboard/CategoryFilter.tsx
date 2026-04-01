@@ -54,7 +54,7 @@ export function CategoryFilter({
               <Tag className="h-3 w-3" />
               {category.name}
               {category._count && (
-                <span className="text-xs opacity-70">({category._count.subjects})</span>
+                <span className="text-xs opacity-70">({category._count.tasks})</span>
               )}
             </Button>
           );

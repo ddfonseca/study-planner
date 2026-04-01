@@ -4,9 +4,11 @@ import { TaskStatsCards } from './TaskStatsCards'
 import type { TaskStats } from '@/types/session'
 
 const mockStats: TaskStats = {
+  subject: 'Backend API',
   totalMinutes: 180,
   totalSessions: 5,
   averageSessionMinutes: 36,
+  weeklyAverageMinutes: 36,
   percentageOfTotal: 25,
 }
 

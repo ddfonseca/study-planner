@@ -337,7 +337,6 @@ export function CycleSuggestionCard() {
           ) : (
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground">
-                <span>
                 <span className="font-medium text-foreground">
                   {formatDuration(data.remainingMinutes)}
                 </span>

@@ -6,7 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Subject } from '@/types/api';
+import type { Task as Subject } from '@/types/api';
 
 interface SortableSubjectItemProps {
   subject: Subject;
