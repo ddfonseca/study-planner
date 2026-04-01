@@ -14,8 +14,8 @@ import { TasksContent } from './TasksPage';
 type ActiveSection = 'projects' | 'tasks';
 
 const sections = [
-  { id: 'projects' as const, label: 'Disciplinas', icon: Layers },
-  { id: 'tasks' as const, label: 'Tópicos', icon: BookOpen },
+  { id: 'projects' as const, label: 'Projects', icon: Layers },
+  { id: 'tasks' as const, label: 'Tasks', icon: BookOpen },
 ];
 
 export function TasksAndProjectsPage() {

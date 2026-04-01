@@ -18,7 +18,7 @@ import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { formatDateDisplay } from '@/lib/utils/date';
 import { formatTime } from '@/lib/utils/time';
 import { Trash2, Plus, Loader2, Clock, Pencil, X } from 'lucide-react';
-import type { DayData, StudySession } from '@/types/session';
+import type { DayData, WorkSessionUI } from '@/types/session';
 import type { Task, Project } from '@/types/api';
 
 interface SessionModalProps {
@@ -53,23 +53,23 @@ export function SessionModal({
   const [subjectId, setSubjectId] = useState('');
   const [minutes, setMinutes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingSession, setEditingSession] = useState<StudySession | null>(null);
+  const [editingSession, setEditingSession] = useState<WorkSessionUI | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { recentTasks, addRecentTask } = useRecentTasks();
 
   const isEditing = editingSession !== null;
 
-  // Find subject by name for editing (session.materia is the name)
-  const findSubjectIdByName = (name: string): string => {
+  // Find task by name for editing (session.taskName is the name)
+  const findTaskIdByName = (name: string): string => {
     const subject = subjects.find(s => s.name === name);
     return subject?.id || '';
   };
 
-  const handleStartEdit = (session: StudySession) => {
+  const handleStartEdit = (session: WorkSessionUI) => {
     setEditingSession(session);
-    // Session stores subject name, convert to ID
-    setSubjectId(session.subjectId || findSubjectIdByName(session.materia));
-    setMinutes(session.minutos.toString());
+    // Session stores task name, convert to ID
+    setSubjectId(session.taskId || findTaskIdByName(session.taskName));
+    setMinutes(session.minutes.toString());
   };
 
   const handleCancelEdit = () => {
@@ -212,24 +212,24 @@ export function SessionModal({
               {canModify && <span className="text-xs">(click to edit)</span>}
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
-              {dayData.materias.map((materia) => (
+              {dayData.entries.map((entry) => (
                 <div
-                  key={materia.id}
-                  onClick={() => canModify && handleStartEdit(materia)}
+                  key={entry.id}
+                  onClick={() => canModify && handleStartEdit(entry)}
                   onKeyDown={(e) => {
                     if (!canModify) return;
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleStartEdit(materia);
+                      handleStartEdit(entry);
                     }
                   }}
                   role={canModify ? 'button' : 'listitem'}
                   tabIndex={canModify ? 0 : undefined}
-                  aria-label={canModify ? `Edit session: ${materia.materia}, ${formatTime(materia.minutos)}` : undefined}
+                  aria-label={canModify ? `Edit session: ${entry.taskName}, ${formatTime(entry.minutes)}` : undefined}
                   className={`flex items-center justify-between p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border-2 ${
                     canModify ? 'cursor-pointer' : 'cursor-default'
                   } ${
-                    editingSession?.id === materia.id
+                    editingSession?.id === entry.id
                       ? 'bg-primary/20 border-primary'
                       : canModify
                         ? 'bg-muted hover:bg-muted/80 border-transparent'
@@ -237,9 +237,9 @@ export function SessionModal({
                   }`}
                 >
                   <div className="flex-1">
-                    <span className="font-medium text-foreground">{materia.materia}</span>
+                    <span className="font-medium text-foreground">{entry.taskName}</span>
                     <span className="text-sm text-muted-foreground ml-2">
-                      {formatTime(materia.minutos)}
+                      {formatTime(entry.minutes)}
                     </span>
                   </div>
                   {canModify && (
@@ -248,11 +248,11 @@ export function SessionModal({
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setDeleteConfirmId(materia.id);
+                        setDeleteConfirmId(entry.id);
                       }}
                       disabled={isSubmitting}
                       className="text-danger hover:text-danger hover:bg-danger/10"
-                      aria-label={`Delete session: ${materia.materia}`}
+                      aria-label={`Delete session: ${entry.taskName}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

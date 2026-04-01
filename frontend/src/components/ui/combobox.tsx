@@ -32,9 +32,9 @@ export function Combobox({
   value,
   onValueChange,
   options,
-  placeholder = "Selecione...",
-  searchPlaceholder = "Buscar...",
-  emptyMessage = "Nenhum resultado encontrado.",
+  placeholder = "Select...",
+  searchPlaceholder = "Search...",
+  emptyMessage = "No results found.",
   disabled = false,
   className,
 }: ComboboxProps) {
@@ -125,7 +125,7 @@ export function Combobox({
                   className="text-primary"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Criar "{inputValue.trim()}"
+                  Create "{inputValue.trim()}"
                 </CommandItem>
               </CommandGroup>
             )}

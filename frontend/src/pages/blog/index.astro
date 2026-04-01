@@ -8,7 +8,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Blog - Horas Líquidas" description="Dicas de produtividade, técnicas de estudo e como aproveitar melhor seu tempo de foco.">
+<BaseLayout title="Blog - ShipHours" description="Insights on focus, deep work, and shipping software consistently.">
   <div class="min-h-screen bg-background">
     <!-- Header -->
     <header class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -18,7 +18,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
+          <span class="font-semibold text-base sm:text-lg">ShipHours</span>
         </a>
         <nav class="flex items-center gap-2 sm:gap-4">
           <a href="/blog" class="text-sm font-medium text-foreground flex items-center h-8">
@@ -27,7 +27,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
           <ThemeToggle />
           <a href="/login">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md px-3 text-xs sm:text-sm">
-              Entrar
+              Sign in
             </button>
           </a>
         </nav>
@@ -39,14 +39,14 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       <header class="mb-10">
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Blog</h1>
         <p class="text-lg text-muted-foreground">
-          Dicas de produtividade, técnicas de estudo e como aproveitar melhor seu tempo de foco.
+          Insights on focus, deep work, and shipping software consistently.
         </p>
       </header>
 
       <!-- Posts list -->
       <div class="space-y-8">
         {posts.map((post) => {
-          const formattedDate = post.data.pubDate.toLocaleDateString('pt-BR', {
+          const formattedDate = post.data.pubDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -79,7 +79,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
                       {post.data.description}
                     </p>
                     <div class="flex items-center gap-2 text-sm text-primary">
-                      <span>Ler artigo</span>
+                      <span>Read article</span>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 transition-transform group-hover:translate-x-1">
                         <path d="M5 12h14"></path>
                         <path d="m12 5 7 7-7 7"></path>
@@ -95,7 +95,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 
       {posts.length === 0 && (
         <div class="text-center py-12">
-          <p class="text-muted-foreground">Nenhum artigo publicado ainda.</p>
+          <p class="text-muted-foreground">No articles published yet.</p>
         </div>
       )}
 
@@ -110,7 +110,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
             <path d="M4 4a16 16 0 0 1 16 16"></path>
             <circle cx="5" cy="19" r="1"></circle>
           </svg>
-          Assinar via RSS
+          Subscribe via RSS
         </a>
       </div>
     </main>
@@ -124,14 +124,14 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span class="font-medium text-sm sm:text-base">Horas Líquidas</span>
+            <span class="font-medium text-sm sm:text-base">ShipHours</span>
           </div>
           <div class="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
             <a href="/terms" class="hover:text-foreground transition-colors">
-              Termos de Uso
+              Terms of Use
             </a>
             <a href="/privacy" class="hover:text-foreground transition-colors">
-              Política de Privacidade
+              Privacy Policy
             </a>
           </div>
         </div>

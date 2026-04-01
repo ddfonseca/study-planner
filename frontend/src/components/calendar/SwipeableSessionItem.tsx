@@ -4,10 +4,10 @@
 import { useCallback } from 'react';
 import { formatTime } from '@/lib/utils/time';
 import { cn } from '@/lib/utils';
-import type { StudySession } from '@/types/session';
+import type { WorkSessionUI } from '@/types/session';
 
 interface SwipeableSessionItemProps {
-  session: StudySession;
+  session: WorkSessionUI;
   onEdit: () => void;
   onDelete?: (id: string) => void; // Kept for API compatibility but not used
   canModify?: boolean;
@@ -49,10 +49,10 @@ export function SwipeableSessionItem({
           onKeyDown={handleKeyDown}
         >
           <p className="font-medium text-foreground truncate">
-            {session.materia}
+            {session.taskName}
           </p>
           <p className="text-sm text-muted-foreground">
-            {formatTime(session.minutos)}
+            {formatTime(session.minutes)}
           </p>
         </div>
       </div>

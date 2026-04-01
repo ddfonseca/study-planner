@@ -38,9 +38,9 @@ export function MultiCategorySelect({
   onValueChange,
   categories,
   onCreateCategory,
-  placeholder = 'Selecionar categorias...',
-  searchPlaceholder = 'Buscar ou criar...',
-  emptyMessage = 'Nenhuma categoria encontrada.',
+  placeholder = 'Select categories...',
+  searchPlaceholder = 'Search or create...',
+  emptyMessage = 'No categories found.',
   disabled = false,
   className,
 }: MultiCategorySelectProps) {
@@ -167,7 +167,7 @@ export function MultiCategorySelect({
                   className="text-primary"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  {isCreating ? 'Criando...' : `Criar "${inputValue.trim()}"`}
+                  {isCreating ? 'Creating...' : `Create "${inputValue.trim()}"`}
                 </CommandItem>
               </CommandGroup>
             )}

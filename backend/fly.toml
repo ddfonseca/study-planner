@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for study-planner-api on 2025-12-21T14:45:29-03:00
+# fly.toml app configuration file for shiphours-api
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'study-planner-api'
+app = 'shiphours-api'
 primary_region = 'gru'
 
 [build]

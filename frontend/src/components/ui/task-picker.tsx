@@ -176,7 +176,7 @@ function TaskPickerContent({
     return (
       <div className={cn("flex flex-col p-4 space-y-4", isMobile ? "h-full" : "")}>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Nome do tópico</label>
+          <label className="text-sm font-medium">Task name</label>
           <div className="px-3 py-2 bg-muted rounded-md text-sm">
             {pendingName}
           </div>
@@ -184,7 +184,7 @@ function TaskPickerContent({
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            Disciplina <span className="text-muted-foreground font-normal">(opcional)</span>
+            Project <span className="text-muted-foreground font-normal">(optional)</span>
           </label>
           <ProjectPicker
             value={selectedProjectId}
@@ -206,14 +206,14 @@ function TaskPickerContent({
             disabled={isCreating}
             className="flex-1"
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             onClick={onConfirmCreate}
             disabled={isCreating}
             className="flex-1"
           >
-            {isCreating ? "Criando..." : "Criar Tópico"}
+            {isCreating ? "Creating..." : "Create Task"}
           </Button>
         </div>
       </div>

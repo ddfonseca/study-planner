@@ -6,9 +6,9 @@ export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
 
   return rss({
-    title: 'Blog - Horas Líquidas',
-    description: 'Dicas de produtividade, técnicas de estudo e como aproveitar melhor seu tempo de foco.',
-    site: context.site || 'https://horasliquidas.com',
+    title: 'ShipHours Blog',
+    description: 'Engineering time tracking tips, productivity techniques, and how to make the most of your focus time.',
+    site: context.site || 'https://shiphours.io',
     items: posts
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
       .map((post) => ({
@@ -18,6 +18,6 @@ export async function GET(context: APIContext) {
         link: `/blog/${post.slug}/`,
         author: post.data.author,
       })),
-    customData: `<language>pt-BR</language>`,
+    customData: `<language>en-US</language>`,
   });
 }

@@ -14,7 +14,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const pendingKeyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Callback para abrir nova sessão (navega se necessário, depois emite evento)
+  // Callback to open new session (navigates if needed, then emits event)
   const openNewSession = useCallback(() => {
     const isOnCalendar = location.pathname === '/app' || location.pathname === '/app/' || location.pathname === '/app/calendar';
 
@@ -29,7 +29,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
     }
   }, [location, navigate]);
 
-  // Callback para toggle timer
+  // Callback to toggle timer
   const toggleTimer = useCallback(() => {
     window.dispatchEvent(new CustomEvent('shortcut:toggleTimer'));
   }, []);
@@ -38,7 +38,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
 
-      // Ignorar se em input/textarea/contenteditable
+      // Ignore if in input/textarea/contenteditable
       if (
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
@@ -49,7 +49,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
 
       const key = e.key.toLowerCase();
 
-      // Se modal de ajuda está aberto, só processar Escape
+      // If help modal is open, only process Escape
       if (isHelpOpen) {
         if (key === 'escape') {
           setIsHelpOpen(false);
@@ -57,7 +57,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
         return;
       }
 
-      // Sequência G + letra
+      // G + letter sequence
       if (pendingKey === 'g') {
         if (pendingKeyTimeoutRef.current) {
           clearTimeout(pendingKeyTimeoutRef.current);
@@ -85,7 +85,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
         return;
       }
 
-      // Iniciar sequência com G
+      // Start sequence with G
       if (key === 'g' && !e.ctrlKey && !e.metaKey) {
         setPendingKey('g');
         pendingKeyTimeoutRef.current = setTimeout(() => {
@@ -94,7 +94,7 @@ export function useKeyboardShortcuts(): UseKeyboardShortcutsReturn {
         return;
       }
 
-      // Atalhos simples
+      // Simple shortcuts
       switch (key) {
         case '?':
           e.preventDefault();

@@ -13,163 +13,162 @@ export function PrivacyPage() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
-          Voltar
+          Back
         </Link>
 
-        <h1 className="text-3xl font-bold mb-2">Política de Privacidade</h1>
+        <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">
-          Última atualização: {new Date().toLocaleDateString('pt-BR')}
+          Last updated: {new Date().toLocaleDateString('en-US')}
         </p>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6">
           <section>
-            <h2 className="text-xl font-semibold mb-3">1. Introdução</h2>
+            <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Horas Líquidas valoriza a privacidade dos seus usuários. Esta Política de
-              Privacidade explica como coletamos, usamos, armazenamos e protegemos suas
-              informações pessoais quando você utiliza nosso serviço de gerenciamento de estudos.
+              ShipHours values the privacy of its users. This Privacy Policy explains how we
+              collect, use, store, and protect your personal information when you use our
+              time tracking service for software engineers.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">2. Informações que Coletamos</h2>
+            <h2 className="text-xl font-semibold mb-3">2. Information We Collect</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Coletamos os seguintes tipos de informações:
+              We collect the following types of information:
             </p>
 
-            <h3 className="text-lg font-medium mt-4 mb-2">2.1 Informações de Conta</h3>
+            <h3 className="text-lg font-medium mt-4 mb-2">2.1 Account Information</h3>
             <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-              <li>Nome e endereço de e-mail (quando você cria uma conta)</li>
-              <li>Foto de perfil (se fornecida através do login social)</li>
-              <li>Preferências de conta e configurações</li>
+              <li>Name and email address (when you create an account)</li>
+              <li>Profile photo (if provided via social login)</li>
+              <li>Account preferences and settings</li>
             </ul>
 
-            <h3 className="text-lg font-medium mt-4 mb-2">2.2 Dados de Estudo</h3>
+            <h3 className="text-lg font-medium mt-4 mb-2">2.2 Work Session Data</h3>
             <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-              <li>Sessões de estudo registradas (data, matéria, duração)</li>
-              <li>Metas semanais definidas</li>
-              <li>Histórico de atividades e progresso</li>
+              <li>Logged work sessions (date, task, project, duration)</li>
+              <li>Weekly goals you have set</li>
+              <li>Activity history and progress</li>
             </ul>
 
-            <h3 className="text-lg font-medium mt-4 mb-2">2.3 Dados Técnicos</h3>
+            <h3 className="text-lg font-medium mt-4 mb-2">2.3 Technical Data</h3>
             <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-              <li>Endereço IP e tipo de navegador</li>
-              <li>Sistema operacional e tipo de dispositivo</li>
-              <li>Páginas visitadas e tempo de uso</li>
+              <li>IP address and browser type</li>
+              <li>Operating system and device type</li>
+              <li>Pages visited and usage time</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">3. Como Usamos Suas Informações</h2>
+            <h2 className="text-xl font-semibold mb-3">3. How We Use Your Information</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Utilizamos suas informações para:
+              We use your information to:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Fornecer e manter o serviço Horas Líquidas</li>
-              <li>Personalizar sua experiência e exibir seu progresso</li>
-              <li>Gerar estatísticas e dashboards de estudo</li>
-              <li>Enviar notificações sobre suas metas (se habilitado)</li>
-              <li>Melhorar nosso serviço e desenvolver novos recursos</li>
-              <li>Comunicar atualizações importantes sobre o serviço</li>
+              <li>Provide and maintain the ShipHours service</li>
+              <li>Personalize your experience and display your progress</li>
+              <li>Generate statistics and work session dashboards</li>
+              <li>Send notifications about your goals (if enabled)</li>
+              <li>Improve our service and develop new features</li>
+              <li>Communicate important service updates</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">4. Armazenamento e Segurança</h2>
+            <h2 className="text-xl font-semibold mb-3">4. Storage and Security</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Seus dados são armazenados em servidores seguros. Implementamos medidas de
-              segurança técnicas e organizacionais para proteger suas informações contra
-              acesso não autorizado, alteração, divulgação ou destruição. Isso inclui:
+              Your data is stored on secure servers. We implement technical and organizational
+              security measures to protect your information against unauthorized access,
+              alteration, disclosure, or destruction. This includes:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Criptografia de dados em trânsito (HTTPS)</li>
-              <li>Senhas armazenadas com hash seguro</li>
-              <li>Acesso restrito aos dados do usuário</li>
-              <li>Backups regulares dos dados</li>
+              <li>Data encryption in transit (HTTPS)</li>
+              <li>Passwords stored with secure hashing</li>
+              <li>Restricted access to user data</li>
+              <li>Regular data backups</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">5. Compartilhamento de Dados</h2>
+            <h2 className="text-xl font-semibold mb-3">5. Data Sharing</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Não vendemos, alugamos ou compartilhamos suas informações pessoais com terceiros
-              para fins de marketing. Podemos compartilhar dados apenas nas seguintes situações:
+              We do not sell, rent, or share your personal information with third parties
+              for marketing purposes. We may share data only in the following situations:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Com seu consentimento explícito</li>
-              <li>Para cumprir obrigações legais</li>
-              <li>Para proteger nossos direitos e segurança</li>
-              <li>Com prestadores de serviço que nos auxiliam (hospedagem, analytics)</li>
+              <li>With your explicit consent</li>
+              <li>To comply with legal obligations</li>
+              <li>To protect our rights and security</li>
+              <li>With service providers who assist us (hosting, analytics)</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">6. Seus Direitos</h2>
+            <h2 className="text-xl font-semibold mb-3">6. Your Rights</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Você tem os seguintes direitos em relação aos seus dados:
+              You have the following rights regarding your data:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li><strong>Acesso:</strong> Solicitar uma cópia dos seus dados pessoais</li>
-              <li><strong>Correção:</strong> Corrigir dados imprecisos ou incompletos</li>
-              <li><strong>Exclusão:</strong> Solicitar a exclusão dos seus dados</li>
-              <li><strong>Portabilidade:</strong> Exportar seus dados em formato legível</li>
-              <li><strong>Restrição:</strong> Limitar o processamento dos seus dados</li>
+              <li><strong>Access:</strong> Request a copy of your personal data</li>
+              <li><strong>Correction:</strong> Correct inaccurate or incomplete data</li>
+              <li><strong>Deletion:</strong> Request deletion of your data</li>
+              <li><strong>Portability:</strong> Export your data in a readable format</li>
+              <li><strong>Restriction:</strong> Limit the processing of your data</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-3">
-              Para exercer esses direitos, acesse as configurações da sua conta ou entre em contato conosco.
+              To exercise these rights, visit your account settings or contact us.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">7. Cookies e Tecnologias Similares</h2>
+            <h2 className="text-xl font-semibold mb-3">7. Cookies and Similar Technologies</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Utilizamos cookies e tecnologias similares para:
+              We use cookies and similar technologies to:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Manter você conectado à sua conta</li>
-              <li>Lembrar suas preferências (tema, configurações)</li>
-              <li>Entender como você usa o serviço</li>
+              <li>Keep you signed in to your account</li>
+              <li>Remember your preferences (theme, settings)</li>
+              <li>Understand how you use the service</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-3">
-              Você pode configurar seu navegador para recusar cookies, mas isso pode afetar
-              a funcionalidade do serviço.
+              You can configure your browser to refuse cookies, but this may affect
+              the functionality of the service.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">8. Retenção de Dados</h2>
+            <h2 className="text-xl font-semibold mb-3">8. Data Retention</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Mantemos seus dados enquanto sua conta estiver ativa ou conforme necessário para
-              fornecer o serviço. Se você excluir sua conta, removeremos seus dados pessoais
-              em até 30 dias, exceto quando a retenção for necessária para fins legais.
+              We retain your data while your account is active or as needed to provide
+              the service. If you delete your account, we will remove your personal data
+              within 30 days, except where retention is required for legal purposes.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">9. Menores de Idade</h2>
+            <h2 className="text-xl font-semibold mb-3">9. Minors</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Horas Líquidas não é direcionado a menores de 13 anos. Não coletamos
-              intencionalmente informações de crianças. Se você é pai/mãe ou responsável e
-              acredita que seu filho nos forneceu informações, entre em contato para que
-              possamos remover esses dados.
+              ShipHours is not directed at children under 13 years of age. We do not
+              intentionally collect information from children. If you are a parent or
+              guardian and believe your child has provided us with information, please
+              contact us so we can remove that data.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">10. Alterações nesta Política</h2>
+            <h2 className="text-xl font-semibold mb-3">10. Changes to This Policy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos
-              sobre alterações significativas através do aplicativo ou por e-mail.
-              Recomendamos revisar esta página regularmente.
+              We may update this Privacy Policy periodically. We will notify you of
+              significant changes through the application or by email. We recommend
+              reviewing this page regularly.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">11. Contato</h2>
+            <h2 className="text-xl font-semibold mb-3">11. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Se você tiver dúvidas sobre esta Política de Privacidade ou sobre como
-              tratamos seus dados, entre em contato conosco através das configurações
-              do aplicativo.
+              If you have questions about this Privacy Policy or how we handle your data,
+              please contact us through the application settings.
             </p>
           </section>
         </div>
@@ -179,7 +178,7 @@ export function PrivacyPage() {
             to="/terms"
             className="text-primary hover:underline"
           >
-            Ver Termos de Uso
+            View Terms of Use
           </Link>
         </div>
       </div>

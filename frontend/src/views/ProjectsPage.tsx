@@ -217,7 +217,7 @@ export function ProjectsContent() {
           ) : (
             <Plus className="h-4 w-4 mr-2" />
           )}
-          Adicionar
+          Add
         </Button>
       </div>
 
@@ -233,7 +233,7 @@ export function ProjectsContent() {
           <p className="text-muted-foreground mb-4">
             Create projects to group related tasks.
             <br />
-            Ex: "Inglês" pode conter "Listening", "Grammar", "Reading"
+            Ex: "English" can contain "Listening", "Grammar", "Reading"
           </p>
         </div>
       ) : (
@@ -293,7 +293,7 @@ export function ProjectsContent() {
                           setEditingDiscipline({ ...editingDiscipline!, name: e.target.value })
                         }
                         className="flex-1 h-8"
-                        placeholder="Nome"
+                        placeholder="Name"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleSaveEdit();
@@ -387,7 +387,7 @@ export function ProjectsContent() {
                       {addingSubjectTo === discipline.id ? (
                         <div className="space-y-2 pt-2 border-t">
                           <p className="text-xs text-muted-foreground">
-                            Selecione um tópico para adicionar:
+                            Select a task to add:
                           </p>
                           <div className="flex flex-wrap gap-1">
                             {unassignedSubjects.length === 0 ? (
@@ -414,7 +414,7 @@ export function ProjectsContent() {
                             size="sm"
                             onClick={() => setAddingSubjectTo(null)}
                           >
-                            Cancelar
+                            Cancel
                           </Button>
                         </div>
                       ) : (
@@ -425,7 +425,7 @@ export function ProjectsContent() {
                           onClick={() => setAddingSubjectTo(discipline.id)}
                         >
                           <Plus className="h-3.5 w-3.5 mr-1.5" />
-                          Adicionar tópico
+                          Add task
                         </Button>
                       )}
                     </div>
@@ -443,7 +443,7 @@ export function ProjectsContent() {
         onOpenChange={(open) => !open && setConfirmDelete(null)}
         title="Delete project?"
         description="The project will be permanently removed. Tasks will not be affected, they will only lose their link to this project."
-        confirmText="Deletar"
+        confirmText="Delete"
         variant="destructive"
         onConfirm={() => {
           if (confirmDelete) handleDelete(confirmDelete);

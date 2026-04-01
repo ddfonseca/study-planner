@@ -1,7 +1,7 @@
 {
-  "name": "study-planner-cli",
+  "name": "shiphours-cli",
   "version": "1.0.0",
-  "description": "CLI interface for Study Planner using Ink (React for CLIs)",
+  "description": "CLI interface for ShipHours engineering time tracking using Ink (React for CLIs)",
   "type": "module",
   "main": "src/index.tsx",
   "bin": {

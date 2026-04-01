@@ -86,10 +86,10 @@ export function TaskAnalyticsPage() {
         <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
           <PieChart className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/50 mb-3 sm:mb-4" />
           <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
-            Nenhum dado encontrado
+            No data found
           </h2>
           <p className="text-sm text-muted-foreground mb-3 sm:mb-4 max-w-xs">
-            Registre sessoes de estudo para ver analytics detalhados.
+            Log work sessions to see detailed analytics.
           </p>
           <Link to="/app/calendar">
             <Button size="sm">Ir para Calendario</Button>

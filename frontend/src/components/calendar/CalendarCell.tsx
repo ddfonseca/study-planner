@@ -68,8 +68,8 @@ export function CalendarCell({
   const getAriaLabel = () => {
     const dateStr = format(date, "MMMM d", { locale: enUS });
     const todayStr = isTodayDate ? ', today' : '';
-    const sessionsStr = dayData.totalMinutos > 0
-      ? `, ${formatTime(dayData.totalMinutos)} of work`
+    const sessionsStr = dayData.totalMinutes > 0
+      ? `, ${formatTime(dayData.totalMinutes)} of work`
       : ', no sessions';
     return `${dateStr}${todayStr}${sessionsStr}`;
   };
@@ -113,7 +113,7 @@ export function CalendarCell({
         >
           {date.getDate()}
         </span>
-        {dayData.totalMinutos > 0 && heatmapStyle === 'gradient' && (
+        {dayData.totalMinutes > 0 && heatmapStyle === 'gradient' && (
           <span className={cn(
             "text-[10px] px-1.5 py-0.5 rounded font-medium",
             needsLightText
@@ -122,17 +122,17 @@ export function CalendarCell({
                 ? "text-foreground bg-background/90"
                 : "text-muted-foreground bg-background/80"
           )}>
-            {formatTime(dayData.totalMinutos)}
+            {formatTime(dayData.totalMinutes)}
           </span>
         )}
       </div>
 
       {/* Sessions list - compact */}
-      {dayData.materias.length > 0 && (
+      {dayData.entries.length > 0 && (
         <div className="space-y-0.5 max-h-[35px] sm:max-h-[55px] overflow-hidden">
-          {dayData.materias.slice(0, 2).map((materia) => (
+          {dayData.entries.slice(0, 2).map((entry) => (
             <div
-              key={materia.id}
+              key={entry.id}
               className={cn(
                 "flex items-center gap-1 text-[11px] rounded px-1.5 py-0.5 min-w-0",
                 needsLightText
@@ -145,7 +145,7 @@ export function CalendarCell({
               <span className={cn(
                 "truncate flex-1 min-w-0",
                 needsLightText ? "text-white" : "text-foreground"
-              )}>{materia.materia}</span>
+              )}>{entry.taskName}</span>
               <span className={cn(
                 "whitespace-nowrap text-[10px] shrink-0",
                 needsLightText
@@ -154,16 +154,16 @@ export function CalendarCell({
                     ? "text-foreground/70"
                     : "text-muted-foreground"
               )}>
-                {formatTime(materia.minutos)}
+                {formatTime(entry.minutes)}
               </span>
             </div>
           ))}
-          {dayData.materias.length > 2 && (
+          {dayData.entries.length > 2 && (
             <span className={cn(
               "text-[10px] pl-1",
               needsLightText ? "text-white/80" : isHighIntensity ? "text-foreground/70" : "text-muted-foreground"
             )}>
-              +{dayData.materias.length - 2} more
+              +{dayData.entries.length - 2} more
             </span>
           )}
         </div>

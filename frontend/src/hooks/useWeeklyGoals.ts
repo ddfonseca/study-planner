@@ -77,7 +77,7 @@ export function useWeeklyGoals(options: UseWeeklyGoalsOptions = {}) {
   const updateGoal = useCallback(
     async (date: Date, data: UpdateWeeklyGoalDto): Promise<WeeklyGoal> => {
       if (!currentWorkspaceId) {
-        throw new Error('Selecione um workspace para editar a meta');
+        throw new Error('Select a workspace to edit the goal');
       }
       const weekStart = calculateWeekStart(date, weekStartDay);
       return useWeeklyGoalStore.getState().updateGoal(currentWorkspaceId, weekStart, data);

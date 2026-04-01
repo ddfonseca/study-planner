@@ -324,9 +324,9 @@ export function TasksContent() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Nenhum workspace selecionado</h2>
+        <h2 className="text-xl font-semibold mb-2">No workspace selected</h2>
         <p className="text-muted-foreground">
-          Selecione um workspace para gerenciar os tópicos.
+          Select a workspace to manage tasks.
         </p>
       </div>
     );
@@ -337,9 +337,9 @@ export function TasksContent() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Tópicos</h1>
+          <h1 className="text-2xl font-bold">Tasks</h1>
           <p className="text-muted-foreground">
-            Gerencie os tópicos do workspace {currentWorkspace.name}
+            Manage tasks in the {currentWorkspace.name} workspace
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -351,12 +351,12 @@ export function TasksContent() {
             {showArchived ? (
               <>
                 <EyeOff className="h-4 w-4 mr-2" />
-                Ocultar arquivadas
+                Hide archived
               </>
             ) : (
               <>
                 <Eye className="h-4 w-4 mr-2" />
-                Mostrar arquivadas ({archivedTasks.length})
+                Show archived ({archivedTasks.length})
               </>
             )}
           </Button>
@@ -373,7 +373,7 @@ export function TasksContent() {
               size="sm"
               onClick={() => setSelectedCategoryIds([])}
             >
-              Todos
+              All
             </Button>
           )}
           {categories.map((cat) => (
@@ -408,12 +408,12 @@ export function TasksContent() {
             {managingCategories ? (
               <>
                 <Check className="h-3 w-3 mr-1" />
-                Concluir
+                Done
               </>
             ) : (
               <>
                 <Settings2 className="h-3 w-3 mr-1" />
-                Gerenciar
+                Manage
               </>
             )}
           </Button>
@@ -433,7 +433,7 @@ export function TasksContent() {
       {/* Add new subject */}
       <div className="flex gap-2">
         <Input
-          placeholder="Nome do novo tópico..."
+          placeholder="New task name..."
           value={newSubjectName}
           onChange={(e) => setNewSubjectName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -449,7 +449,7 @@ export function TasksContent() {
           ) : (
             <Plus className="h-4 w-4 mr-2" />
           )}
-          Adicionar
+          Add
         </Button>
       </div>
 
@@ -457,19 +457,19 @@ export function TasksContent() {
       {selectedForMerge.size > 0 && (
         <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
           <span className="text-sm font-medium">
-            {selectedForMerge.size} tópicos selecionados
+            {selectedForMerge.size} tasks selected
           </span>
           {isMerging ? (
             <>
               <span className="text-sm text-muted-foreground">
-                Selecione o tópico de destino:
+                Select the target task:
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={cancelMerge}
               >
-                Cancelar
+                Cancel
               </Button>
             </>
           ) : (
@@ -481,14 +481,14 @@ export function TasksContent() {
                 disabled={selectedForMerge.size < 2}
               >
                 <Merge className="h-4 w-4 mr-2" />
-                Mesclar
+                Merge
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedForMerge(new Set())}
               >
-                Limpar seleção
+                Clear selection
               </Button>
             </>
           )}
@@ -503,9 +503,9 @@ export function TasksContent() {
       ) : displayedTasks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Nenhum tópico cadastrado</h3>
+          <h3 className="text-lg font-medium mb-2">No tasks added yet</h3>
           <p className="text-muted-foreground mb-4">
-            Comece adicionando seu primeiro tópico acima.
+            Start by adding your first task above.
           </p>
         </div>
       ) : (
@@ -576,7 +576,7 @@ export function TasksContent() {
                             value={editingSubject?.name || ''}
                             onChange={(e) => setEditingSubject({ ...editingSubject!, name: e.target.value })}
                             className="flex-1 h-8 min-w-0"
-                            placeholder="Nome"
+                            placeholder="Name"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleSaveEdit();
@@ -589,7 +589,7 @@ export function TasksContent() {
                               onValueChange={(categoryIds) => setEditingSubject({ ...editingSubject!, categoryIds })}
                               categories={categories}
                               onCreateCategory={handleCreateCategory}
-                              placeholder="Categorias"
+                              placeholder="Categories"
                               className="h-8"
                             />
                           </div>
@@ -611,7 +611,7 @@ export function TasksContent() {
                       {/* Archived badge */}
                       {isArchived && (
                         <Badge variant="secondary" className="text-xs">
-                          Arquivada
+                          Archived
                         </Badge>
                       )}
 
@@ -656,7 +656,7 @@ export function TasksContent() {
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={() => handleUnarchive(task.id)}
-                                  title="Desarquivar"
+                                  title="Unarchive"
                                 >
                                   <ArchiveRestore className="h-4 w-4" />
                                 </Button>
@@ -665,7 +665,7 @@ export function TasksContent() {
                                   size="icon"
                                   className="h-8 w-8 text-destructive hover:text-destructive"
                                   onClick={() => setDeletingSubjectId(task.id)}
-                                  title="Deletar permanentemente"
+                                  title="Delete permanently"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -676,7 +676,7 @@ export function TasksContent() {
                                 size="icon"
                                 className="h-8 w-8"
                                 onClick={() => setConfirmArchive(task.id)}
-                                title="Arquivar"
+                                title="Archive"
                               >
                                 <Archive className="h-4 w-4" />
                               </Button>
@@ -697,9 +697,9 @@ export function TasksContent() {
       <ConfirmDialog
         open={!!confirmArchive}
         onOpenChange={(open) => !open && setConfirmArchive(null)}
-        title="Arquivar tópico?"
-        description="O tópico será ocultado da lista, mas todo o histórico será mantido. Você pode desarquivá-lo a qualquer momento."
-        confirmText="Arquivar"
+        title="Archive task?"
+        description="The task will be hidden from the list, but all history will be kept. You can unarchive it at any time."
+        confirmText="Archive"
         onConfirm={() => { if (confirmArchive) handleArchive(confirmArchive); }}
         isLoading={isSaving}
       />
@@ -708,9 +708,9 @@ export function TasksContent() {
       <ConfirmDialog
         open={!!confirmDeleteCategory}
         onOpenChange={(open) => !open && setConfirmDeleteCategory(null)}
-        title="Deletar categoria?"
-        description="A categoria será removida permanentemente. Os tópicos não serão afetados, apenas perderão esta categoria."
-        confirmText="Deletar"
+        title="Delete category?"
+        description="The category will be permanently removed. Tasks will not be affected, they will only lose this category."
+        confirmText="Delete"
         variant="destructive"
         onConfirm={() => { if (confirmDeleteCategory) handleDeleteCategory(confirmDeleteCategory); }}
         isLoading={isSavingCategory}
@@ -728,11 +728,11 @@ export function TasksContent() {
               <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-lg text-destructive">
-                  Deletar "{deletingSubject.name}" permanentemente?
+                  Permanently delete "{deletingSubject.name}"?
                 </h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Esta ação é irreversível. Todas as horas de estudo registradas
-                  neste tópico serão perdidas permanentemente.
+                  This action is irreversible. All tracked time recorded
+                  for this task will be permanently lost.
                 </p>
               </div>
             </div>
@@ -740,7 +740,7 @@ export function TasksContent() {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="confirm-delete-subject" className="text-sm">
-                  Digite "{deletingSubject.name}" para confirmar:
+                  Type "{deletingSubject.name}" to confirm:
                 </Label>
                 <Input
                   id="confirm-delete-subject"
@@ -758,7 +758,7 @@ export function TasksContent() {
                   onClick={handleCancelDelete}
                   disabled={isSaving}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button
                   variant="destructive"
@@ -770,7 +770,7 @@ export function TasksContent() {
                   ) : (
                     <Trash2 className="h-4 w-4 mr-2" />
                   )}
-                  Deletar permanentemente
+                  Delete permanently
                 </Button>
               </div>
             </div>

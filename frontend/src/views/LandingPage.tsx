@@ -67,13 +67,13 @@ const previewGradientColors: Record<number, string> = {
 // Calendar Preview component with gradient heatmap style
 function CalendarPreview() {
   const days = [
-    { day: 16, label: 'Seg', intensity: 3, session: 'Mat', time: '1h30' },
-    { day: 17, label: 'Ter', intensity: 2, session: 'Fís', time: '45m' },
-    { day: 18, label: 'Qua', intensity: 0, session: '', time: '' },
-    { day: 19, label: 'Qui', intensity: 4, session: 'Quím', time: '2h', isToday: true },
-    { day: 20, label: 'Sex', intensity: 1, session: 'Mat', time: '30m' },
-    { day: 21, label: 'Sáb', intensity: 0, session: '', time: '' },
-    { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
+    { day: 16, label: 'Mon', intensity: 3, session: 'API', time: '1h30' },
+    { day: 17, label: 'Tue', intensity: 2, session: 'Review', time: '45m' },
+    { day: 18, label: 'Wed', intensity: 0, session: '', time: '' },
+    { day: 19, label: 'Thu', intensity: 4, session: 'Feature', time: '2h', isToday: true },
+    { day: 20, label: 'Fri', intensity: 1, session: 'Bugfix', time: '30m' },
+    { day: 21, label: 'Sat', intensity: 0, session: '', time: '' },
+    { day: 22, label: 'Sun', intensity: 0, session: '', time: '' },
   ];
 
   // High intensity needs better text contrast - level 4 (terracotta) needs white text
@@ -139,7 +139,7 @@ function CalendarPreview() {
               <div className="h-full w-[60%] bg-primary rounded-full" />
             </div>
             <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              60% de 10h
+              60% of 10h goal
             </div>
           </div>
         </div>
@@ -173,63 +173,63 @@ export function LandingPage() {
 
   const faqs = [
     {
-      question: 'O Horas Líquidas é gratuito?',
+      question: 'Is ShipHours only for individual engineers?',
       answer:
-        'Sim, oferecemos um plano gratuito com recursos essenciais para organizar seus estudos. Para funcionalidades avançadas como matérias ilimitadas e estatísticas detalhadas, temos o plano Pro.',
+        'Yes, ShipHours is designed for individual contributors who want to take ownership of their time and focus.',
     },
     {
-      question: 'Meus dados ficam salvos na nuvem?',
+      question: 'How is this different from a time tracker for billing?',
       answer:
-        'Sim, seus dados são sincronizados automaticamente na nuvem. Você pode acessar suas sessões de estudo de qualquer dispositivo.',
+        'ShipHours is for personal productivity, not billing. It helps you understand your focus patterns, not report hours to clients.',
     },
     {
-      question: 'Posso usar no celular?',
+      question: 'Does it integrate with my tools?',
       answer:
-        'Sim, a interface é totalmente responsiva e funciona perfeitamente em smartphones, tablets e computadores.',
+        'Not yet — ShipHours is intentionally simple. Just open it and log your sessions.',
     },
     {
-      question: 'Como defino minhas metas semanais?',
+      question: 'What are Tasks and Projects?',
       answer:
-        'Nas configurações do aplicativo, você pode definir quantas horas deseja estudar por semana. O calendário mostrará seu progresso em relação a essa meta.',
+        'Tasks are what you work on (Bug fix, Code review, Feature dev). Projects group related tasks together (Backend API, Mobile App).',
     },
   ];
 
   const plans = [
     {
-      name: 'Gratuito',
+      name: 'Free',
       icon: BookOpen,
-      price: 'R$ 0',
-      period: 'para sempre',
-      description: 'Perfeito para começar a organizar seus estudos.',
+      price: '$0',
+      period: 'forever',
+      description: 'Everything you need to start tracking your focus.',
       features: [
-        'Calendário visual com heatmap',
-        '1 ciclo de estudo',
+        'Visual heatmap calendar',
+        '1 study cycle',
         '2 workspaces',
-        'Até 20 sessões por dia',
-        '30 dias de histórico',
-        'Metas semanais',
-        'Modo escuro',
+        'Up to 20 sessions per day',
+        '30 days of history',
+        'Weekly goals',
+        'Dark mode',
       ],
-      cta: 'Começar grátis',
+      cta: 'Start for free',
       highlighted: false,
     },
     {
-      name: 'Pro Vitalício',
+      name: 'Pro Lifetime',
       icon: Crown,
-      price: 'R$ 19,90',
-      period: 'pagamento único',
-      description: 'Acesso vitalício a todos os recursos premium.',
+      price: '$19',
+      period: 'one-time payment',
+      description: 'Lifetime access to all premium features.',
       features: [
-        'Tudo do plano Gratuito',
-        '10 ciclos de estudo',
+        'Everything in Free',
+        '10 study cycles',
         '10 workspaces',
-        'Sessões ilimitadas',
-        '1 ano de histórico',
-        'Exportar dados',
-        'Compartilhar com 5 pessoas',
-        'Acesso para sempre',
+        'Unlimited sessions',
+        '1 year of history',
+        'Export data',
+        'Share with 5 people',
+        'Access forever',
       ],
-      cta: 'Comprar acesso vitalício',
+      cta: 'Get lifetime access',
       highlighted: true,
     },
   ];
@@ -245,7 +245,7 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            <span className="font-semibold text-base sm:text-lg">Horas Líquidas</span>
+            <span className="font-semibold text-base sm:text-lg">ShipHours</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <Button
@@ -258,7 +258,7 @@ export function LandingPage() {
             </Button>
             <Link to="/login">
               <Button variant="outline" size="sm" className="text-xs sm:text-sm">
-                Entrar
+                Sign in
               </Button>
             </Link>
           </div>
@@ -269,17 +269,17 @@ export function LandingPage() {
       <section className="py-10 sm:py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
-            Controle quanto tempo você{' '}
-            <span className="text-primary">realmente</span> estuda
+            Track your real productive hours,{' '}
+            <span className="text-primary">not just time at a desk</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
-            Não quanto tempo passa na cadeira. Registre sessões de foco, visualize
-            padrões em um calendário heatmap e atinja suas metas semanais.
+            ShipHours helps software engineers measure deep work, build focus habits,
+            and stay intentional about where their time goes.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Link to="/login" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
-                Começar a medir meu foco
+                Start tracking for free
               </Button>
             </Link>
             <Button
@@ -288,7 +288,7 @@ export function LandingPage() {
               onClick={scrollToFeatures}
               className="w-full sm:w-auto text-sm sm:text-base"
             >
-              Saiba mais
+              Learn more
             </Button>
           </div>
         </div>
@@ -298,7 +298,7 @@ export function LandingPage() {
       <section className="py-8 sm:py-12 md:py-16 bg-muted/30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6 sm:mb-8">
-            Visualize seu progresso
+            Visualize your progress
           </h2>
           <CalendarPreview />
         </div>
@@ -308,7 +308,7 @@ export function LandingPage() {
       <section className="py-8 border-b border-border/50">
         <div className="max-w-5xl mx-auto px-4">
           <p className="text-center text-muted-foreground text-sm">
-            Usado por estudantes de <span className="font-medium text-foreground">medicina</span>, <span className="font-medium text-foreground">direito</span> e <span className="font-medium text-foreground">concursos públicos</span>
+            Used by <span className="font-medium text-foreground">engineers worldwide</span>
           </p>
         </div>
       </section>
@@ -317,14 +317,14 @@ export function LandingPage() {
       <section id="features" className="py-12 sm:py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
-            Tudo que você precisa para estudar melhor
+            Everything you need to work with more intention
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
-            Não é sobre estudar mais. É sobre estudar com clareza.
+            It's not about working more. It's about working with clarity.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* Feature 1 - Calendário Heatmap */}
+            {/* Feature 1 - Heatmap Calendar */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500" />
               <CardContent className="p-6">
@@ -333,16 +333,16 @@ export function LandingPage() {
                     <Calendar className="h-6 w-6 text-[#c17a5c]" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Calendário Heatmap</h3>
+                    <h3 className="font-semibold text-lg mb-2">Visualize your effort day by day</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      Visualize seu esforço dia a dia com cores de intensidade. Identifique padrões e entenda seus hábitos de estudo.
+                      See your work patterns at a glance with a heatmap calendar. Know your productive days.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Feature 2 - Foco Real */}
+            {/* Feature 2 - Deep Work */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
               <CardContent className="p-6">
@@ -351,16 +351,16 @@ export function LandingPage() {
                     <Focus className="h-6 w-6 text-purple-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Foco Real</h3>
+                    <h3 className="font-semibold text-lg mb-2">Measure deep work, not seat time</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      Meça tempo de concentração, não tempo sentado. Num mundo de distrações, saber seu foco real é um superpoder.
+                      Track focused work sessions separately from meetings and context-switching. Know your real output.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Feature 3 - Metas Semanais */}
+            {/* Feature 3 - Weekly Goals */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
               <CardContent className="p-6">
@@ -369,16 +369,16 @@ export function LandingPage() {
                     <Target className="h-6 w-6 text-green-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Metas Semanais</h3>
+                    <h3 className="font-semibold text-lg mb-2">Set targets and stay on track</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      Defina objetivos e acompanhe seu progresso em tempo real. Consistência de 1h por dia vale mais que 7h no domingo.
+                      Define weekly hour goals, track progress in real time, and build consistency over sprints.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Feature 4 - Histórico e Padrões */}
+            {/* Feature 4 - Patterns Over Time */}
             <Card className="relative overflow-hidden border-border group hover:border-accent/50 transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
               <CardContent className="p-6">
@@ -387,9 +387,9 @@ export function LandingPage() {
                     <TrendingUp className="h-6 w-6 text-orange-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Histórico e Padrões</h3>
+                    <h3 className="font-semibold text-lg mb-2">Understand your patterns over time</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      Acompanhe sua evolução semana a semana. Compare com você mesmo e supere seu eu de ontem.
+                      See which tasks and projects consume your time. Use data to improve your work habits.
                     </p>
                   </div>
                 </div>
@@ -403,14 +403,14 @@ export function LandingPage() {
       <section className="py-10 sm:py-12 md:py-16 bg-muted/30">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">
-            Pronto para estudar com mais clareza?
+            Ready to take ownership of your time?
           </h3>
           <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
-            Comece gratuitamente e veja a diferença de medir seu foco real.
+            Start for free and see the difference of measuring your real focus.
           </p>
           <Link to="/login">
             <Button size="lg" className="text-sm sm:text-base">
-              Começar grátis agora
+              Start tracking for free
             </Button>
           </Link>
         </div>
@@ -420,7 +420,7 @@ export function LandingPage() {
       <section className="py-12 sm:py-16 md:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-8 sm:mb-12">
-            Perguntas frequentes
+            Frequently asked questions
           </h2>
           <Card>
             <CardContent className="p-6">
@@ -442,10 +442,10 @@ export function LandingPage() {
       <section id="pricing" className="py-12 sm:py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
-            Escolha seu plano
+            Choose your plan
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12">
-            Comece grátis ou desbloqueie tudo com um único pagamento.
+            Start free or unlock everything with a single payment.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {plans.map((plan, index) => {
@@ -463,7 +463,7 @@ export function LandingPage() {
                   {isPro && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <Badge className="bg-primary hover:bg-primary/90 text-white">
-                        Recomendado
+                        Recommended
                       </Badge>
                     </div>
                   )}
@@ -515,18 +515,18 @@ export function LandingPage() {
           <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="font-medium text-sm sm:text-base">Horas Líquidas</span>
+              <span className="font-medium text-sm sm:text-base">ShipHours</span>
             </div>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
               <Link to="/terms" className="hover:text-foreground transition-colors">
-                Termos de Uso
+                Terms of Use
               </Link>
               <Link to="/privacy" className="hover:text-foreground transition-colors">
-                Política de Privacidade
+                Privacy Policy
               </Link>
             </div>
             <div className="text-xs sm:text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Horas Líquidas
+              © {new Date().getFullYear()} ShipHours
             </div>
           </div>
         </div>

@@ -216,7 +216,7 @@ export function CycleSuggestionCard() {
                       className="h-7 px-2 text-xs font-medium justify-between min-w-0"
                       disabled={isLoading}
                     >
-                      <span className="truncate">{cycle?.name || 'Selecionar'}</span>
+                      <span className="truncate">{cycle?.name || 'Select'}</span>
                       <ChevronsUpDown className="h-3 w-3 ml-1 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -247,7 +247,7 @@ export function CycleSuggestionCard() {
                             ) : (
                               <Lock className="mr-2 h-3 w-3" />
                             )}
-                            Novo ciclo
+                            New cycle
                             <LimitIndicator
                               feature={FEATURES.MAX_CYCLES}
                               currentUsage={cycles.length}
@@ -261,7 +261,7 @@ export function CycleSuggestionCard() {
                 </Popover>
               ) : (
                 <CardTitle className="text-sm font-medium truncate">
-                  {cycle?.name || 'Estudar Agora'}
+                  {cycle?.name || 'Focus Now'}
                 </CardTitle>
               )}
             </div>
@@ -306,7 +306,7 @@ export function CycleSuggestionCard() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-accent">
                 <Trophy className="h-4 w-4" />
-                <span className="text-sm font-medium">Ciclo Completo!</span>
+                <span className="text-sm font-medium">Cycle Complete!</span>
               </div>
               <Button
                 size="sm"
@@ -315,7 +315,7 @@ export function CycleSuggestionCard() {
                 disabled={isLoading}
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                Reiniciar Ciclo
+                Restart Cycle
               </Button>
             </div>
           ) : data.isCurrentComplete ? (

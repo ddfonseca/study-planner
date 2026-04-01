@@ -134,9 +134,9 @@ function ProjectPickerContent({
       )}>
         {/* Grouped list A-Z */}
         {matchingOptions.length > 0 ? (
-          <div className="p-1" role="listbox" aria-label="Lista de disciplinas">
+          <div className="p-1" role="listbox" aria-label="Project list">
             {Array.from(grouped.entries()).map(([letter, items]) => (
-              <div key={letter} role="group" aria-label={`Disciplinas com letra ${letter}`}>
+              <div key={letter} role="group" aria-label={`Projects starting with ${letter}`}>
                 <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 bg-popover" aria-hidden="true">
                   {letter}
                 </p>
@@ -206,10 +206,10 @@ function ProjectPickerContent({
               "flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isCreating && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={`Criar nova disciplina: ${inputValue.trim()}`}
+            aria-label={`Create new project: ${inputValue.trim()}`}
           >
             <Plus className="h-4 w-4" />
-            {isCreating ? "Criando..." : `Criar "${inputValue.trim()}"`}
+            {isCreating ? "Creating..." : `Create "${inputValue.trim()}"`}
           </button>
         </div>
       )}
@@ -223,9 +223,9 @@ export function ProjectPicker(props: ProjectPickerProps) {
     onValueChange,
     projects,
     onCreateProject,
-    placeholder = "Selecione...",
-    searchPlaceholder = "Buscar disciplina...",
-    emptyMessage = "Nenhuma disciplina encontrada.",
+    placeholder = "Select...",
+    searchPlaceholder = "Search project...",
+    emptyMessage = "No projects found.",
     disabled = false,
     className,
     open: controlledOpen,
@@ -329,7 +329,7 @@ export function ProjectPicker(props: ProjectPickerProps) {
         <DrawerContent className="h-[85vh] max-h-[85vh]">
           <DrawerHeader className="border-b pb-2">
             <div className="flex items-center justify-between">
-              <DrawerTitle>Selecionar Disciplina</DrawerTitle>
+              <DrawerTitle>Select Project</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <X className="h-4 w-4" />

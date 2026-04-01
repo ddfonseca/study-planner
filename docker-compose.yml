@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: study-planner-postgres
+    container_name: shiphours-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - study-planner-network
+      - shiphours-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -23,7 +23,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: study-planner-backend
+    container_name: shiphours-backend
     restart: unless-stopped
     user: "${UID:-1000}:${GID:-1000}"
     ports:
@@ -34,7 +34,7 @@ services:
       NODE_ENV: development
       BACKEND_URL: http://localhost:3000
       FRONTEND_URL: http://localhost:5173
-      MERCADOPAGO_BACK_URL: https://horasliquidas.com.br
+      MERCADOPAGO_BACK_URL: https://shiphours.io
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-5bMpeQmYI3f9NUyzvNyUIvJ1iInuXuP2riMu//DQcj8=}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
@@ -48,14 +48,14 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - study-planner-network
+      - shiphours-network
     command: sh -c "npx prisma generate && npm run start:dev"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: study-planner-frontend
+    container_name: shiphours-frontend
     restart: unless-stopped
     user: "${UID:-1000}:${GID:-1000}"
     ports:
@@ -69,11 +69,11 @@ services:
     depends_on:
       - backend
     networks:
-      - study-planner-network
+      - shiphours-network
 
   ngrok:
     image: ngrok/ngrok:latest
-    container_name: study-planner-ngrok
+    container_name: shiphours-ngrok
     restart: unless-stopped
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
@@ -86,11 +86,11 @@ services:
       - backend
       - frontend
     networks:
-      - study-planner-network
+      - shiphours-network
 
 volumes:
   postgres_data:
 
 networks:
-  study-planner-network:
+  shiphours-network:
     driver: bridge

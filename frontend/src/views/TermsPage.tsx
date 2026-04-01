@@ -13,110 +13,110 @@ export function TermsPage() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
-          Voltar
+          Back
         </Link>
 
-        <h1 className="text-3xl font-bold mb-2">Termos de Uso</h1>
+        <h1 className="text-3xl font-bold mb-2">Terms of Use</h1>
         <p className="text-muted-foreground mb-8">
-          Última atualização: {new Date().toLocaleDateString('pt-BR')}
+          Last updated: {new Date().toLocaleDateString('en-US')}
         </p>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6">
           <section>
-            <h2 className="text-xl font-semibold mb-3">1. Aceitação dos Termos</h2>
+            <h2 className="text-xl font-semibold mb-3">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Ao acessar e usar o Horas Líquidas, você concorda em cumprir estes Termos de Uso.
-              Se você não concordar com qualquer parte destes termos, não poderá acessar o serviço.
+              By accessing and using ShipHours, you agree to comply with these Terms of Use.
+              If you do not agree with any part of these terms, you may not access the service.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">2. Descrição do Serviço</h2>
+            <h2 className="text-xl font-semibold mb-3">2. Service Description</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Horas Líquidas é uma plataforma de gerenciamento de estudos que permite aos usuários:
+              ShipHours is a time tracking platform for software engineers that allows users to:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Registrar sessões de estudo por matéria</li>
-              <li>Definir e acompanhar metas semanais de estudo</li>
-              <li>Visualizar estatísticas e progresso através de dashboards</li>
-              <li>Acompanhar atividades em calendário e heatmap anual</li>
+              <li>Log focused work sessions by task and project</li>
+              <li>Set and track weekly hour goals</li>
+              <li>Visualize statistics and progress through dashboards</li>
+              <li>Review activity through a calendar and annual heatmap</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">3. Cadastro e Conta</h2>
+            <h2 className="text-xl font-semibold mb-3">3. Account Registration</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Para utilizar o Horas Líquidas, você deve criar uma conta fornecendo informações
-              precisas e completas. Você é responsável por manter a confidencialidade de sua
-              conta e senha, e por todas as atividades que ocorram em sua conta.
+              To use ShipHours, you must create an account by providing accurate and complete
+              information. You are responsible for maintaining the confidentiality of your
+              account and password, and for all activities that occur under your account.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">4. Uso Aceitável</h2>
+            <h2 className="text-xl font-semibold mb-3">4. Acceptable Use</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Você concorda em usar o Horas Líquidas apenas para fins legais e de acordo com
-              estes Termos. Você não deve:
+              You agree to use ShipHours only for lawful purposes and in accordance with
+              these Terms. You must not:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li>Usar o serviço de forma que possa danificar, desabilitar ou sobrecarregar nossos servidores</li>
-              <li>Tentar obter acesso não autorizado a qualquer parte do serviço</li>
-              <li>Usar o serviço para qualquer finalidade ilegal ou não autorizada</li>
-              <li>Transmitir vírus ou qualquer código de natureza destrutiva</li>
+              <li>Use the service in a way that could damage, disable, or overload our servers</li>
+              <li>Attempt to gain unauthorized access to any part of the service</li>
+              <li>Use the service for any illegal or unauthorized purpose</li>
+              <li>Transmit viruses or any code of a destructive nature</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">5. Propriedade Intelectual</h2>
+            <h2 className="text-xl font-semibold mb-3">5. Intellectual Property</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Horas Líquidas e seu conteúdo original, recursos e funcionalidades são de
-              propriedade exclusiva dos desenvolvedores. O serviço é protegido por leis de
-              direitos autorais e outras leis de propriedade intelectual.
+              ShipHours and its original content, features, and functionality are the exclusive
+              property of its developers. The service is protected by copyright and other
+              intellectual property laws.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">6. Seus Dados</h2>
+            <h2 className="text-xl font-semibold mb-3">6. Your Data</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Você mantém todos os direitos sobre os dados que insere no Horas Líquidas,
-              incluindo suas sessões de estudo, matérias e configurações. Você pode exportar
-              ou excluir seus dados a qualquer momento através das configurações da conta.
+              You retain all rights to the data you enter into ShipHours, including your work
+              sessions, tasks, projects, and settings. You may export or delete your data at
+              any time through your account settings.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">7. Limitação de Responsabilidade</h2>
+            <h2 className="text-xl font-semibold mb-3">7. Limitation of Liability</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O Horas Líquidas é fornecido "como está", sem garantias de qualquer tipo.
-              Não garantimos que o serviço será ininterrupto, seguro ou livre de erros.
-              Em nenhum caso seremos responsáveis por quaisquer danos indiretos, incidentais
-              ou consequentes.
+              ShipHours is provided "as is", without warranties of any kind. We do not
+              guarantee that the service will be uninterrupted, secure, or error-free.
+              In no event shall we be liable for any indirect, incidental, or consequential
+              damages.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">8. Modificações do Serviço</h2>
+            <h2 className="text-xl font-semibold mb-3">8. Service Modifications</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Reservamo-nos o direito de modificar ou descontinuar o serviço a qualquer momento,
-              com ou sem aviso prévio. Não seremos responsáveis perante você ou terceiros por
-              qualquer modificação, suspensão ou descontinuação do serviço.
+              We reserve the right to modify or discontinue the service at any time, with or
+              without notice. We shall not be liable to you or any third party for any
+              modification, suspension, or discontinuation of the service.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">9. Alterações nos Termos</h2>
+            <h2 className="text-xl font-semibold mb-3">9. Changes to Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Podemos atualizar estes Termos de Uso periodicamente. Notificaremos sobre
-              quaisquer alterações publicando os novos Termos nesta página. Recomendamos
-              revisar estes Termos periodicamente.
+              We may update these Terms of Use periodically. We will notify you of any
+              changes by posting the new Terms on this page. We recommend reviewing these
+              Terms periodically.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">10. Contato</h2>
+            <h2 className="text-xl font-semibold mb-3">10. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Se você tiver dúvidas sobre estes Termos de Uso, entre em contato conosco
-              através das configurações do aplicativo.
+              If you have questions about these Terms of Use, please contact us through
+              the application settings.
             </p>
           </section>
         </div>
@@ -126,7 +126,7 @@ export function TermsPage() {
             to="/privacy"
             className="text-primary hover:underline"
           >
-            Ver Política de Privacidade
+            View Privacy Policy
           </Link>
         </div>
       </div>

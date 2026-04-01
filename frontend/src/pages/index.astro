@@ -15,13 +15,13 @@ const previewGradientColors: Record<number, string> = {
 };
 
 const calendarDays = [
-  { day: 16, label: 'Seg', intensity: 3, session: 'Mat', time: '1h30' },
-  { day: 17, label: 'Ter', intensity: 2, session: 'Fís', time: '45m' },
-  { day: 18, label: 'Qua', intensity: 0, session: '', time: '' },
-  { day: 19, label: 'Qui', intensity: 4, session: 'Quím', time: '2h', isToday: true },
-  { day: 20, label: 'Sex', intensity: 1, session: 'Mat', time: '30m' },
-  { day: 21, label: 'Sáb', intensity: 0, session: '', time: '' },
-  { day: 22, label: 'Dom', intensity: 0, session: '', time: '' },
+  { day: 16, label: 'Mon', intensity: 3, session: 'API', time: '1h30' },
+  { day: 17, label: 'Tue', intensity: 2, session: 'Review', time: '45m' },
+  { day: 18, label: 'Wed', intensity: 0, session: '', time: '' },
+  { day: 19, label: 'Thu', intensity: 4, session: 'Feature', time: '2h', isToday: true },
+  { day: 20, label: 'Fri', intensity: 1, session: 'Bugfix', time: '30m' },
+  { day: 21, label: 'Sat', intensity: 0, session: '', time: '' },
+  { day: 22, label: 'Sun', intensity: 0, session: '', time: '' },
 ];
 
 const getTextClass = (intensity: number, isToday: boolean) => {
@@ -34,7 +34,7 @@ const getTextClass = (intensity: number, isToday: boolean) => {
 const needsLightText = (intensity: number) => intensity === 4;
 ---
 
-<BaseLayout title="Horas Líquidas - Controle seu tempo de estudo">
+<BaseLayout title="ShipHours - Track your real productive hours">
   <div class="min-h-screen bg-background">
 
     <!-- Navigation -->
@@ -45,11 +45,11 @@ const needsLightText = (intensity: number) => intensity === 4;
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <span class="font-semibold text-base sm:text-lg">Horas Líquidas</span>
+          <span class="font-semibold text-base sm:text-lg">ShipHours</span>
         </div>
         <div class="flex items-center gap-1 sm:gap-2">
           <a href="#features" class="hidden sm:flex text-sm text-muted-foreground hover:text-foreground transition-colors px-2 h-8 items-center">
-            Funcionalidades
+            Features
           </a>
           <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 h-8 flex items-center">
             Blog
@@ -57,7 +57,7 @@ const needsLightText = (intensity: number) => intensity === 4;
           <ThemeToggle />
           <a href="/login">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs sm:text-sm">
-              Entrar
+              Sign in
             </button>
           </a>
         </div>
@@ -68,20 +68,20 @@ const needsLightText = (intensity: number) => intensity === 4;
     <section class="py-10 sm:py-16 md:py-24">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
         <h1 class="animate-on-scroll text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
-          Controle quanto tempo você <span class="text-primary">realmente</span> estuda
+          Track your real productive hours, <span class="text-primary">not just time at a desk</span>
         </h1>
         <p class="animate-on-scroll text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
-          Não quanto tempo passa na cadeira. Registre sessões de foco, visualize padrões em um calendário heatmap e atinja suas metas semanais.
+          ShipHours helps software engineers measure deep work, build focus habits, and stay intentional about where their time goes.
         </p>
         <div class="animate-on-scroll flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
           <a href="/login" class="w-full sm:w-auto">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 w-full sm:w-auto text-sm sm:text-base">
-              Começar a medir meu foco
+              Start tracking for free
             </button>
           </a>
           <a href="#features" class="w-full sm:w-auto">
             <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 rounded-md px-6 w-full sm:w-auto text-sm sm:text-base">
-              Saiba mais
+              Learn more
             </button>
           </a>
         </div>
@@ -92,7 +92,7 @@ const needsLightText = (intensity: number) => intensity === 4;
     <section class="py-8 sm:py-12 md:py-16 bg-muted/30">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
         <h2 class="animate-on-scroll text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-6 sm:mb-8">
-          Visualize seu progresso
+          Visualize your progress
         </h2>
         <div class="animate-on-scroll w-full max-w-4xl mx-auto px-4">
           <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
@@ -147,7 +147,7 @@ const needsLightText = (intensity: number) => intensity === 4;
                   <div class="h-full w-[60%] bg-primary rounded-full"></div>
                 </div>
                 <div class="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                  60% de 10h
+                  60% of 10h goal
                 </div>
               </div>
             </div>
@@ -160,7 +160,7 @@ const needsLightText = (intensity: number) => intensity === 4;
     <section class="py-8 border-b border-border/50">
       <div class="max-w-5xl mx-auto px-4">
         <p class="text-center text-muted-foreground text-sm">
-          Usado por estudantes de <span class="font-medium text-foreground">medicina</span>, <span class="font-medium text-foreground">direito</span> e <span class="font-medium text-foreground">concursos públicos</span>
+          Used by <span class="font-medium text-foreground">engineers worldwide</span>
         </p>
       </div>
     </section>
@@ -169,47 +169,38 @@ const needsLightText = (intensity: number) => intensity === 4;
     <section id="features" class="py-12 sm:py-16 md:py-24">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
         <h2 class="animate-on-scroll text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-3 sm:mb-4">
-          Tudo que você precisa para estudar melhor
+          Everything you need to work with more intention
         </h2>
         <p class="animate-on-scroll text-sm sm:text-base text-muted-foreground text-center mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
-          Não é sobre estudar mais. É sobre estudar com clareza.
+          It's not about working more. It's about working with clarity.
         </p>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
-          <!-- Feature 1 - Alocação Inteligente (Highlighted) -->
+          <!-- Feature 1 - Heatmap Calendar -->
           <div class="animate-on-scroll">
-            <div class="group relative bg-card rounded-xl p-6 border-2 border-blue-500/50 hover:border-blue-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
-              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-              <span class="absolute top-3 right-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-500 text-white">
-                Novo
-              </span>
+            <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-[#c17a5c]/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c17a5c] to-amber-500"></div>
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <path d="M3 9h18"/>
-                    <path d="M9 21V9"/>
+                <div class="w-12 h-12 rounded-xl bg-[#c17a5c]/10 flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#c17a5c]">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">Alocação Inteligente</h3>
-                  <p class="text-muted-foreground text-sm leading-relaxed mb-3">
-                    Calcule quantas horas dedicar a cada disciplina baseado no peso e seu nível atual.
+                  <h3 class="font-semibold text-lg mb-2">Visualize your effort day by day</h3>
+                  <p class="text-muted-foreground text-sm leading-relaxed">
+                    See your work patterns at a glance with a heatmap calendar. Know your productive days.
                   </p>
-                  <a href="/blog/modelo-alocacao-estudo-por-disciplina" class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors">
-                    Entenda o modelo
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Feature 2 - Ciclos de Estudo -->
+          <!-- Feature 2 - Deep Work -->
           <div class="animate-on-scroll">
             <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
@@ -223,16 +214,16 @@ const needsLightText = (intensity: number) => intensity === 4;
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">Ciclos de Estudo</h3>
+                  <h3 class="font-semibold text-lg mb-2">Measure deep work, not seat time</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Organize disciplinas em ciclos de revisão. Saiba exatamente quando retomar cada matéria.
+                    Track focused work sessions separately from meetings and context-switching. Know your real output.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Feature 3 - Metas Semanais -->
+          <!-- Feature 3 - Weekly Goals -->
           <div class="animate-on-scroll">
             <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-green-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
@@ -245,30 +236,29 @@ const needsLightText = (intensity: number) => intensity === 4;
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">Metas Semanais</h3>
+                  <h3 class="font-semibold text-lg mb-2">Set targets and stay on track</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Defina objetivos e acompanhe em tempo real. Consistência diária vale mais que maratonas.
+                    Define weekly hour goals, track progress in real time, and build consistency over sprints.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Feature 4 - Timer Pomodoro -->
+          <!-- Feature 4 - Patterns Over Time -->
           <div class="animate-on-scroll">
             <div class="group relative bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden h-full">
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-amber-500"></div>
               <div class="flex items-start gap-4">
                 <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">Timer Pomodoro</h3>
+                  <h3 class="font-semibold text-lg mb-2">Understand your patterns over time</h3>
                   <p class="text-muted-foreground text-sm leading-relaxed">
-                    Foco em blocos com pausas programadas. Técnica comprovada para maximizar concentração.
+                    See which tasks and projects consume your time. Use data to improve your work habits.
                   </p>
                 </div>
               </div>
@@ -283,14 +273,14 @@ const needsLightText = (intensity: number) => intensity === 4;
     <section class="py-10 sm:py-12 md:py-16 bg-muted/30">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
         <h3 class="animate-on-scroll text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">
-          Pronto para estudar com mais clareza?
+          Ready to take ownership of your time?
         </h3>
         <p class="animate-on-scroll text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
-          Comece gratuitamente e veja a diferença de medir seu foco real.
+          Start for free and see the difference of measuring your real focus.
         </p>
         <a href="/login" class="animate-on-scroll inline-block">
           <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 text-sm sm:text-base">
-            Começar grátis agora
+            Start tracking for free
           </button>
         </a>
       </div>
@@ -305,21 +295,21 @@ const needsLightText = (intensity: number) => intensity === 4;
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span class="font-medium text-sm sm:text-base">Horas Líquidas</span>
+            <span class="font-medium text-sm sm:text-base">ShipHours</span>
           </div>
           <div class="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
             <a href="/terms" class="hover:text-foreground transition-colors">
-              Termos de Uso
+              Terms of Use
             </a>
             <a href="/privacy" class="hover:text-foreground transition-colors">
-              Política de Privacidade
+              Privacy Policy
             </a>
             <a href="/blog" class="hover:text-foreground transition-colors">
               Blog
             </a>
           </div>
           <div class="text-xs sm:text-sm text-muted-foreground">
-            &copy; {currentYear} Horas Líquidas
+            &copy; {currentYear} ShipHours
           </div>
         </div>
       </div>

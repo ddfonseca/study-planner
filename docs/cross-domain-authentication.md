@@ -1,49 +1,49 @@
-# Solução de Autenticação Cross-Domain
+# Cross-Domain Authentication Solution
 
-## Problema
+## Problem
 
-Ao fazer deploy de frontend e backend em domínios diferentes (ex: Netlify e Fly.io), a autenticação OAuth falha devido ao **bloqueio de cookies de terceiros** pelos navegadores modernos.
+When deploying frontend and backend to different domains (e.g. Netlify and Fly.io), OAuth authentication fails due to **third-party cookie blocking** by modern browsers.
 
-### O Problema
+### The Problem
 
-1. Frontend hospedado em `study-planner-front.netlify.app`
-2. Backend hospedado em `study-planner-api.fly.dev`
-3. Quando o usuário autentica via Google OAuth:
-   - O cookie de sessão é definido no domínio do backend (`fly.dev`)
-   - Quando o frontend tenta ler a sessão, o navegador bloqueia o cookie por ser de um domínio diferente (cookie de terceiros)
-4. Resultado: `getSession()` retorna `null` mesmo após login bem-sucedido
+1. Frontend hosted at `shiphours.io` (via Netlify)
+2. Backend hosted at `shiphours-api.fly.dev` (via Fly.io)
+3. When the user authenticates via Google OAuth:
+   - The session cookie is set on the backend domain (`fly.dev`)
+   - When the frontend tries to read the session, the browser blocks the cookie as it comes from a different domain (third-party cookie)
+4. Result: `getSession()` returns `null` even after a successful login
 
-### Erros Comuns
+### Common Errors
 
-- Erro `state_mismatch` durante o callback do OAuth
-- `getSession()` retornando `null` após login OAuth bem-sucedido
-- Cookies não sendo enviados em requisições cross-origin
+- `state_mismatch` error during the OAuth callback
+- `getSession()` returning `null` after a successful OAuth login
+- Cookies not being sent in cross-origin requests
 
-## Solução: Proxy do Netlify
+## Solution: Netlify Proxy
 
-Em vez de fazer requisições cross-domain, roteamos todas as chamadas de API através do proxy do Netlify. Assim:
+Instead of making cross-domain requests, we route all API calls through the Netlify proxy. This way:
 
-- Todas as requisições parecem vir do mesmo domínio
-- Cookies são definidos no domínio do frontend
-- Sem problemas de cookies de terceiros
+- All requests appear to come from the same domain
+- Cookies are set on the frontend domain
+- No third-party cookie issues
 
-### Arquitetura
+### Architecture
 
 ```
-Antes (quebrado):
-┌─────────────────┐    Chamadas API diretas   ┌─────────────────┐
+Before (broken):
+┌─────────────────┐    Direct API calls       ┌─────────────────┐
 │    Frontend     │ ─────────────────────────▶│    Backend      │
-│   (Netlify)     │  (cross-domain = bloqueado)│   (Fly.io)     │
-│  *.netlify.app  │                           │   *.fly.dev     │
+│   (Netlify)     │  (cross-domain = blocked) │   (Fly.io)      │
+│  shiphours.io   │                           │   *.fly.dev     │
 └─────────────────┘                           └─────────────────┘
 
-Depois (funcionando):
-┌─────────────────┐    Requisições /api/*     ┌─────────────────┐
-│    Frontend     │ ─────────────────────────▶│  Proxy Netlify  │
-│   (Netlify)     │  (mesmo domínio = ok)     │                 │
-│  *.netlify.app  │                           └────────┬────────┘
+After (working):
+┌─────────────────┐    /api/* requests        ┌─────────────────┐
+│    Frontend     │ ─────────────────────────▶│ Netlify Proxy   │
+│   (Netlify)     │  (same domain = ok)       │                 │
+│  shiphours.io   │                           └────────┬────────┘
 └─────────────────┘                                    │
-                                                       │ Proxy para
+                                                       │ Proxied to
                                                        ▼
                                               ┌─────────────────┐
                                               │    Backend      │
@@ -52,9 +52,9 @@ Depois (funcionando):
                                               └─────────────────┘
 ```
 
-## Configuração
+## Configuration
 
-### 1. Configuração do Netlify (`frontend/netlify.toml`)
+### 1. Netlify Configuration (`frontend/netlify.toml`)
 
 ```toml
 [build]
@@ -63,38 +63,38 @@ Depois (funcionando):
   publish = "dist"
 
 [build.environment]
-  # String vazia = usar mesmo domínio (proxy do Netlify)
+  # Empty string = use same domain (Netlify proxy)
   VITE_API_BASE_URL = ""
-  VITE_FRONTEND_URL = "https://study-planner-front.netlify.app"
+  VITE_FRONTEND_URL = "https://shiphours.io"
 
-# Proxy das requisições API para o backend no Fly.io (DEVE vir antes do catch-all)
+# Proxy API requests to the Fly.io backend (MUST come before the catch-all)
 [[redirects]]
   from = "/api/*"
-  to = "https://study-planner-api.fly.dev/api/:splat"
+  to = "https://shiphours-api.fly.dev/api/:splat"
   status = 200
   force = true
-  headers = {X-Forwarded-Host = "study-planner-front.netlify.app"}
+  headers = {X-Forwarded-Host = "shiphours.io"}
 
-# Fallback SPA (catch-all para roteamento client-side)
+# SPA fallback (catch-all for client-side routing)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 ```
 
-### 2. Cliente API do Frontend (`frontend/src/lib/api/client.ts`)
+### 2. Frontend API Client (`frontend/src/lib/api/client.ts`)
 
 ```typescript
-// Em produção: string vazia (usa proxy do Netlify no mesmo domínio)
-// Em desenvolvimento: undefined, então usa fallback para localhost
+// In production: empty string (uses Netlify proxy on the same domain)
+// In development: undefined, falls back to localhost
 const envApiUrl = import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = envApiUrl !== undefined ? envApiUrl : 'http://localhost:3000';
 ```
 
-### 3. Configuração de Auth do Backend (`backend/src/auth/auth.config.ts`)
+### 3. Backend Auth Configuration (`backend/src/auth/auth.config.ts`)
 
 ```typescript
-// URL do Frontend - todas as requisições passam pelo proxy do Netlify (mesmo domínio)
+// Frontend URL — all requests go through the Netlify proxy (same domain)
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 export const auth = betterAuth({
@@ -103,11 +103,11 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      // Callback do OAuth passa pelo proxy do Netlify (mesmo domínio do frontend)
+      // OAuth callback goes through the Netlify proxy (same domain as frontend)
       redirectURI: `${FRONTEND_URL}/api/auth/callback/google`,
     },
   },
-  // Usa URL do frontend já que todas as requisições vêm pelo proxy do Netlify
+  // Use the frontend URL since all requests come through the Netlify proxy
   baseURL: FRONTEND_URL,
   basePath: '/api/auth',
   trustedOrigins: [FRONTEND_URL, BACKEND_URL],
@@ -116,56 +116,56 @@ export const auth = betterAuth({
 
 ### 4. Google Cloud Console
 
-Adicione a URI de redirecionamento que passa pelo Netlify:
+Add the redirect URI that goes through Netlify:
 
 ```
-https://study-planner-front.netlify.app/api/auth/callback/google
+https://shiphours.io/api/auth/callback/google
 ```
 
-## Como Funciona
+## How It Works
 
-1. **Usuário clica em "Login com Google"**
-   - Frontend chama `/api/auth/signin/google`
-   - Netlify faz proxy para `https://study-planner-api.fly.dev/api/auth/signin/google`
+1. **User clicks "Sign in with Google"**
+   - Frontend calls `/api/auth/signin/google`
+   - Netlify proxies to `https://shiphours-api.fly.dev/api/auth/signin/google`
 
-2. **Fluxo OAuth do Google**
-   - Usuário autentica com o Google
-   - Google redireciona para `https://study-planner-front.netlify.app/api/auth/callback/google`
-   - Netlify faz proxy para `https://study-planner-api.fly.dev/api/auth/callback/google`
+2. **Google OAuth flow**
+   - User authenticates with Google
+   - Google redirects to `https://shiphours.io/api/auth/callback/google`
+   - Netlify proxies to `https://shiphours-api.fly.dev/api/auth/callback/google`
 
-3. **Cookie de sessão é definido**
-   - Backend cria sessão e define cookie
-   - Como a requisição veio pelo proxy do Netlify, o domínio do cookie é `study-planner-front.netlify.app`
-   - Cookie agora é first-party (mesmo domínio do frontend)
+3. **Session cookie is set**
+   - Backend creates the session and sets the cookie
+   - Because the request came through the Netlify proxy, the cookie domain is `shiphours.io`
+   - Cookie is now first-party (same domain as the frontend)
 
-4. **Requisições subsequentes**
-   - Frontend chama `/api/auth/get-session`
-   - Navegador envia o cookie (mesmo domínio)
-   - Netlify faz proxy para o backend
-   - Backend lê o cookie e retorna a sessão
+4. **Subsequent requests**
+   - Frontend calls `/api/auth/get-session`
+   - Browser sends the cookie (same domain)
+   - Netlify proxies to the backend
+   - Backend reads the cookie and returns the session
 
-## Desenvolvimento vs Produção
+## Development vs Production
 
-| Ambiente | `VITE_API_BASE_URL` | Chamadas API vão para |
-|----------|---------------------|----------------------|
-| Desenvolvimento | `undefined` (não definido) | `http://localhost:3000` |
-| Produção | `""` (string vazia) | Mesmo domínio (proxy Netlify) |
+| Environment | `VITE_API_BASE_URL` | API calls go to |
+|-------------|---------------------|-----------------|
+| Development | `undefined` (not set) | `http://localhost:3000` |
+| Production  | `""` (empty string)   | Same domain (Netlify proxy) |
 
 ## Troubleshooting
 
-### Erro "state_mismatch"
-- Verifique se a URI de redirecionamento OAuth no Google Cloud Console corresponde exatamente:
-  `https://seu-frontend.netlify.app/api/auth/callback/google`
+### "state_mismatch" error
+- Verify that the OAuth redirect URI in Google Cloud Console matches exactly:
+  `https://shiphours.io/api/auth/callback/google`
 
-### `getSession()` retorna null
-- Verifique DevTools do navegador > Application > Cookies
-- Confirme que o domínio do cookie corresponde ao domínio do frontend
-- Garanta que `credentials: 'include'` está definido nas opções do fetch
+### `getSession()` returns null
+- Check DevTools > Application > Cookies
+- Confirm the cookie domain matches the frontend domain
+- Ensure `credentials: 'include'` is set in fetch options
 
-### Chamadas API indo para URL errada
-- Verifique a variável de ambiente `VITE_API_BASE_URL` no dashboard do Netlify
-- Confirme que a variável está definida como string vazia `""`, não ausente
+### API calls going to the wrong URL
+- Check the `VITE_API_BASE_URL` environment variable in the Netlify dashboard
+- Confirm it is set to an empty string `""`, not absent
 
-### Proxy não funcionando
-- Garanta que a regra de redirect do proxy está ANTES do redirect catch-all do SPA
-- Verifique os logs de deploy do Netlify para a configuração de redirects
+### Proxy not working
+- Ensure the proxy redirect rule is BEFORE the SPA catch-all redirect
+- Check the Netlify deploy logs for the redirects configuration

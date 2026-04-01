@@ -33,7 +33,7 @@ const normalizeString = (str: string) =>
 function groupByFirstLetter(subjects: string[]): Map<string, string[]> {
   const groups = new Map<string, string[]>();
   const sorted = [...subjects].sort((a, b) =>
-    a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+    a.localeCompare(b, 'en-US', { sensitivity: 'base' })
   );
 
   sorted.forEach((subject) => {
@@ -91,7 +91,7 @@ function SelectorContent({
         <input
           ref={inputRef}
           type="text"
-          placeholder="Buscar matéria..."
+          placeholder="Search task..."
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
