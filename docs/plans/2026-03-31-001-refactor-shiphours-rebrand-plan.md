@@ -1,7 +1,7 @@
 ---
 title: "refactor: ShipHours full-stack rebrand from study app to engineering time tracker"
 type: refactor
-status: active
+status: completed
 date: 2026-03-31
 origin: docs/brainstorms/2026-03-31-shiphours-rebrand-requirements.md
 deepened: 2026-03-31
