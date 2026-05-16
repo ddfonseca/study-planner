@@ -1,5 +1,5 @@
 .PHONY: up down logs build test lint migrate prisma-generate \
-	deploy-front deploy-back deploy-all postgres postgres-down
+	deploy-front deploy-back deploy-all postgres postgres-down help
 
 # Docker
 up:
@@ -50,3 +50,27 @@ deploy-back:
 	cd backend && fly deploy
 
 deploy-all: deploy-back deploy-front
+
+help:
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Docker:"
+	@echo "  up               Start all Docker containers"
+	@echo "  down             Stop all Docker containers"
+	@echo "  build            Build and start containers"
+	@echo "  logs             Follow container logs"
+	@echo ""
+	@echo "Database:"
+	@echo "  postgres         Start only Postgres (for local dev)"
+	@echo "  postgres-down    Stop Postgres"
+	@echo "  migrate          Run Prisma migrations (local)"
+	@echo "  prisma-generate  Generate Prisma client"
+	@echo ""
+	@echo "Quality:"
+	@echo "  test             Run tests in isolated Docker environment"
+	@echo "  lint             Run linter on frontend and backend"
+	@echo ""
+	@echo "Deploy:"
+	@echo "  deploy-front     Deploy frontend to Netlify"
+	@echo "  deploy-back      Deploy backend to Fly.io"
+	@echo "  deploy-all       Deploy both frontend and backend"
