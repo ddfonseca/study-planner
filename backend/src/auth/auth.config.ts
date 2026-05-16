@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 // Frontend URL - all requests go through Netlify proxy (same domain)
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS ? process.env.EXTRA_ORIGINS.split(',') : [];
 // Backend URL for internal reference
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 export const auth = betterAuth({
@@ -28,5 +29,5 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: FRONTEND_URL,
   basePath: '/api/auth',
-  trustedOrigins: [FRONTEND_URL, BACKEND_URL],
+  trustedOrigins: [FRONTEND_URL, BACKEND_URL, ...EXTRA_ORIGINS],
 });

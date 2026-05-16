@@ -275,7 +275,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
             </Label>
             <Input
               id="cycleName"
-              placeholder="Ex: Auditor-Fiscal"
+              placeholder="Ex: Senior Engineer"
               value={cycleName}
               onChange={(e) => setCycleName(e.target.value)}
               maxLength={50}

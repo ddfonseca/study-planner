@@ -11,7 +11,7 @@
 # Proxy API requests to Fly.io backend (must be before the catch-all)
 [[redirects]]
   from = "/api/*"
-  to = "https://study-planner-api.fly.dev/api/:splat"
+  to = "https://shiphours-api.fly.dev/api/:splat"
   status = 200
   force = true
   headers = {X-Forwarded-Host = "shiphours.io"}

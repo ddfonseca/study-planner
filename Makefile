@@ -44,7 +44,8 @@ prisma-generate:
 
 # Deploy - Production (build is done by Netlify via netlify.toml)
 deploy-front:
-	netlify deploy --prod --dir=frontend/dist --filter=frontend-new
+	cd frontend && npm run build
+	netlify deploy --prod --dir=$(CURDIR)/frontend/dist --site=a8071ed7-b442-48ab-b171-aef912123d94 --no-build --filter shiphours-frontend
 
 deploy-back:
 	cd backend && fly deploy
