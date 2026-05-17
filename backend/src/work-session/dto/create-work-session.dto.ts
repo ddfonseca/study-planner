@@ -18,7 +18,7 @@ export class CreateWorkSessionDto {
 
   @IsString()
   @IsNotEmpty()
-  subjectId: string;
+  taskId: string;
 
   @IsInt()
   @Min(1)

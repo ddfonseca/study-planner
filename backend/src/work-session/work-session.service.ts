@@ -100,7 +100,7 @@ export class WorkSessionService {
 
     // Verificar se o task existe e pertence ao workspace
     const task = await this.prisma.task.findFirst({
-      where: { id: createDto.subjectId, workspaceId: createDto.workspaceId },
+      where: { id: createDto.taskId, workspaceId: createDto.workspaceId },
     });
 
     if (!task) {
@@ -111,7 +111,7 @@ export class WorkSessionService {
       data: {
         userId,
         workspaceId: createDto.workspaceId,
-        subjectId: createDto.subjectId,
+        subjectId: createDto.taskId,
         date: new Date(createDto.date),
         minutes: createDto.minutes,
       },
@@ -142,9 +142,10 @@ export class WorkSessionService {
       throw new ForbiddenException('Not authorized to update this session');
     }
 
+    const { taskId, ...rest } = updateDto;
     return this.prisma.workSession.update({
       where: { id: sessionId },
-      data: updateDto,
+      data: { ...rest, ...(taskId ? { subjectId: taskId } : {}) },
       include: {
         task: true,
       },

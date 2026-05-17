@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsInt, Min } from 'class-validator';
 export class UpdateWorkSessionDto {
   @IsOptional()
   @IsString()
-  subjectId?: string;
+  taskId?: string;
 
   @IsOptional()
   @IsInt()
