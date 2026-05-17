@@ -413,14 +413,14 @@ export function CycleSuggestionCard() {
                         className={`p-2 rounded-md ${isCurrent ? 'bg-primary/10' : 'bg-muted/50'}`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-xs truncate flex items-center gap-1 ${isCurrent ? 'font-medium' : ''}`} title={item.subject}>
+                          <span className={`text-xs truncate flex items-center gap-1 ${isCurrent ? 'font-medium' : ''}`} title={item.task}>
                             {item.isComplete && <Check className="h-3 w-3 text-accent shrink-0" />}
                             {item.isProject ? (
                               <Layers className="h-3 w-3 text-primary/70 shrink-0" />
                             ) : (
                               <BookOpen className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                             )}
-                            {item.subject}
+                            {item.task}
                           </span>
                           <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                             {formatDuration(item.accumulatedMinutes)}/{formatDuration(item.targetMinutes)}

@@ -261,7 +261,7 @@ export interface FocusCycle {
 
 // Cycle item progress
 export interface CycleItemProgress {
-  subject: string;
+  task: string;
   targetMinutes: number;
   accumulatedMinutes: number;
   isComplete: boolean;

@@ -17,11 +17,11 @@ export class CreateCycleItemDto {
   @IsOptional()
   @IsString()
   @ValidateIf((o) => !o.disciplineId)
-  subjectId?: string;
+  taskId?: string;
 
   @IsOptional()
   @IsString()
-  @ValidateIf((o) => !o.subjectId)
+  @ValidateIf((o) => !o.taskId)
   disciplineId?: string;
 
   @IsInt()

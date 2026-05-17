@@ -261,16 +261,16 @@ export class FocusCycleService {
       throw new BadRequestException('A cycle with this name already exists');
     }
 
-    // Validate items - each must have either subjectId or disciplineId
+    // Validate items - each must have either taskId or disciplineId
     for (const item of dto.items) {
-      if (!item.subjectId && !item.disciplineId) {
+      if (!item.taskId && !item.disciplineId) {
         throw new BadRequestException(
-          'Each cycle item must have either a subjectId or disciplineId',
+          'Each cycle item must have either a taskId or disciplineId',
         );
       }
-      if (item.subjectId && item.disciplineId) {
+      if (item.taskId && item.disciplineId) {
         throw new BadRequestException(
-          'Each cycle item must have either a subjectId or disciplineId, not both',
+          'Each cycle item must have either a taskId or disciplineId, not both',
         );
       }
     }
@@ -306,7 +306,7 @@ export class FocusCycleService {
         currentItemIndex: 0,
         items: {
           create: dto.items.map((item, index) => ({
-            subjectId: item.subjectId || null,
+            subjectId: item.taskId || null,
             disciplineId: item.disciplineId || null,
             targetMinutes: item.targetMinutes,
             position: index,
@@ -340,14 +340,14 @@ export class FocusCycleService {
     if (dto.items) {
       // Validate items
       for (const item of dto.items) {
-        if (!item.subjectId && !item.disciplineId) {
+        if (!item.taskId && !item.disciplineId) {
           throw new BadRequestException(
-            'Each cycle item must have either a subjectId or disciplineId',
+            'Each cycle item must have either a taskId or disciplineId',
           );
         }
-        if (item.subjectId && item.disciplineId) {
+        if (item.taskId && item.disciplineId) {
           throw new BadRequestException(
-            'Each cycle item must have either a subjectId or disciplineId, not both',
+            'Each cycle item must have either a taskId or disciplineId, not both',
           );
         }
       }
@@ -361,7 +361,7 @@ export class FocusCycleService {
       await this.prisma.focusCycleItem.createMany({
         data: dto.items.map((item, index) => ({
           cycleId: cycle.id,
-          subjectId: item.subjectId || null,
+          subjectId: item.taskId || null,
           disciplineId: item.disciplineId || null,
           targetMinutes: item.targetMinutes,
           position: index,
