@@ -22,7 +22,7 @@ export class CreateCycleItemDto {
   @IsOptional()
   @IsString()
   @ValidateIf((o) => !o.taskId)
-  disciplineId?: string;
+  projectId?: string;
 
   @IsInt()
   @Min(1)

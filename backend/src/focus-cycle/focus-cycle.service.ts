@@ -261,16 +261,16 @@ export class FocusCycleService {
       throw new BadRequestException('A cycle with this name already exists');
     }
 
-    // Validate items - each must have either taskId or disciplineId
+    // Validate items - each must have either taskId or projectId
     for (const item of dto.items) {
-      if (!item.taskId && !item.disciplineId) {
+      if (!item.taskId && !item.projectId) {
         throw new BadRequestException(
-          'Each cycle item must have either a taskId or disciplineId',
+          'Each cycle item must have either a taskId or projectId',
         );
       }
-      if (item.taskId && item.disciplineId) {
+      if (item.taskId && item.projectId) {
         throw new BadRequestException(
-          'Each cycle item must have either a taskId or disciplineId, not both',
+          'Each cycle item must have either a taskId or projectId, not both',
         );
       }
     }
@@ -307,7 +307,7 @@ export class FocusCycleService {
         items: {
           create: dto.items.map((item, index) => ({
             subjectId: item.taskId || null,
-            disciplineId: item.disciplineId || null,
+            disciplineId: item.projectId || null,
             targetMinutes: item.targetMinutes,
             position: index,
           })),
@@ -340,14 +340,14 @@ export class FocusCycleService {
     if (dto.items) {
       // Validate items
       for (const item of dto.items) {
-        if (!item.taskId && !item.disciplineId) {
+        if (!item.taskId && !item.projectId) {
           throw new BadRequestException(
-            'Each cycle item must have either a taskId or disciplineId',
+            'Each cycle item must have either a taskId or projectId',
           );
         }
-        if (item.taskId && item.disciplineId) {
+        if (item.taskId && item.projectId) {
           throw new BadRequestException(
-            'Each cycle item must have either a taskId or disciplineId, not both',
+            'Each cycle item must have either a taskId or projectId, not both',
           );
         }
       }
@@ -362,7 +362,7 @@ export class FocusCycleService {
         data: dto.items.map((item, index) => ({
           cycleId: cycle.id,
           subjectId: item.taskId || null,
-          disciplineId: item.disciplineId || null,
+          disciplineId: item.projectId || null,
           targetMinutes: item.targetMinutes,
           position: index,
         })),
