@@ -106,7 +106,7 @@ export class TaskService {
         color: dto.color,
         icon: dto.icon,
         position,
-        disciplineId: dto.disciplineId,
+        disciplineId: dto.projectId,
         ...(dto.categoryIds?.length && {
           categories: {
             create: dto.categoryIds.map((categoryId) => ({

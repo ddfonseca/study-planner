@@ -44,5 +44,5 @@ export class CreateTaskDto {
 
   @IsOptional()
   @IsString()
-  disciplineId?: string;
+  projectId?: string;
 }

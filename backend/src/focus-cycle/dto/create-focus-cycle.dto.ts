@@ -16,7 +16,7 @@ import { Type } from 'class-transformer';
 export class CreateCycleItemDto {
   @IsOptional()
   @IsString()
-  @ValidateIf((o) => !o.disciplineId)
+  @ValidateIf((o) => !o.projectId)
   taskId?: string;
 
   @IsOptional()
