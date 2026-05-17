@@ -6,7 +6,7 @@
 [build.environment]
   # API calls will go through Netlify proxy (same domain = no third-party cookie issues)
   PUBLIC_API_BASE_URL = ""
-  PUBLIC_FRONTEND_URL = "https://shiphours.io"
+  PUBLIC_FRONTEND_URL = "https://shiphours.com"
 
 # Proxy API requests to Fly.io backend (must be before the catch-all)
 [[redirects]]
@@ -14,7 +14,7 @@
   to = "https://shiphours-api.fly.dev/api/:splat"
   status = 200
   force = true
-  headers = {X-Forwarded-Host = "shiphours.io"}
+  headers = {X-Forwarded-Host = "shiphours.com"}
 
 # SPA routes - redirect to their respective Astro-generated pages
 [[redirects]]
