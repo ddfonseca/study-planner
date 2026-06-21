@@ -266,7 +266,7 @@ export function CycleItemComposer({
             )}
           </div>
 
-          <div className="max-h-56 space-y-1 overflow-y-auto rounded-lg border p-1">
+          <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border p-1">
             {recents.length > 0 && (
               <>
                 <p className="px-2 pb-1 pt-1.5 text-xs font-medium text-muted-foreground">

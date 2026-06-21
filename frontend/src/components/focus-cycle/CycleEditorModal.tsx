@@ -215,19 +215,22 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-lg">
-        <ResponsiveDialogHeader>
+      <ResponsiveDialogContent
+        className="sm:max-w-lg"
+        drawerClassName="max-h-[90dvh] overflow-hidden px-0 pb-0"
+      >
+        <ResponsiveDialogHeader className="shrink-0">
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <RefreshCw className="h-5 w-5 text-primary" />
             {cycle ? 'Edit Cycle' : 'Create Focus Cycle'}
           </ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
+          <ResponsiveDialogDescription className="hidden sm:block">
             Set up the tasks/projects and work time for each. The cycle will
             suggest what to work on based on the defined order.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="flex-1 min-h-0 space-y-4 overflow-y-auto px-4 py-2 sm:px-0">
           {/* Cycle name */}
           <div className="space-y-2">
             <Label htmlFor="cycleName">
@@ -297,7 +300,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
                   items={items.map((item) => item.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                  <div className="space-y-1">
                     {items.map((item, index) => (
                       <SortableCycleItem
                         key={item.id}
@@ -320,7 +323,7 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           )}
         </div>
 
-        <ResponsiveDialogFooter className="flex-col sm:flex-row gap-2">
+        <ResponsiveDialogFooter className="shrink-0 flex-col gap-2 border-t px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] sm:flex-row sm:border-0 sm:px-0 sm:pt-0 sm:pb-0">
           {cycle && (
             <Button
               variant="destructive"
