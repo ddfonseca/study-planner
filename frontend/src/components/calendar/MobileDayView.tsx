@@ -62,7 +62,7 @@ export function MobileDayView({
               <ChevronLeft className="h-5 w-5" />
             </Button>
 
-            <div className="text-center flex-1">
+            <div className="text-center flex-1 min-w-0">
               <p className={cn(
                 "text-lg font-semibold",
                 isTodayDate && "text-primary"

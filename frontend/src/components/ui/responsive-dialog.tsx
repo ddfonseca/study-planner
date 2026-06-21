@@ -99,7 +99,14 @@ const ResponsiveDialogContent = ({
 
   if (isMobile) {
     return (
-      <DrawerContent className={cn("px-4 pb-6", drawerClassName)}>
+      <DrawerContent
+        className={cn(
+          // Cap height and allow scrolling so a focused input can be scrolled
+          // above the on-screen keyboard instead of being hidden behind it.
+          "max-h-[90dvh] overflow-y-auto overscroll-contain px-4 pb-6",
+          drawerClassName
+        )}
+      >
         {children}
       </DrawerContent>
     )
