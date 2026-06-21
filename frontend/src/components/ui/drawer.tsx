@@ -6,7 +6,9 @@ import { Drawer as DrawerPrimitive } from "vaul"
 import { cn } from "@/lib/utils"
 
 const Drawer = ({
-  shouldScaleBackground = true,
+  // Default to false: scaling the <body> behind the drawer caused a visible
+  // screen shift, especially with stacked/nested drawers on mobile.
+  shouldScaleBackground = false,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
   <DrawerPrimitive.Root

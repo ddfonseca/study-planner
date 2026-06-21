@@ -28,21 +28,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TaskPicker } from '@/components/ui/task-picker';
-import { ProjectPicker } from '@/components/ui/project-picker';
+import { CycleItemComposer } from './CycleItemComposer';
 import { useRecentTasks } from '@/hooks/useRecentTasks';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SortableCycleItem } from './SortableCycleItem';
-import {
-  RefreshCw,
-  Plus,
-  Trash2,
-  Loader2,
-  Save,
-  BookOpen,
-  Layers,
-} from 'lucide-react';
+import { RefreshCw, Trash2, Loader2, Save } from 'lucide-react';
 import { useFocusCycleStore, formatDuration } from '@/store/focusCycleStore';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useWorkspaceStore } from '@/store/workspaceStore';
@@ -75,14 +65,10 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
 
   const [items, setItems] = useState<CycleItemForm[]>([]);
   const [cycleName, setCycleName] = useState('');
-  const [newTaskId, setNewTaskId] = useState('');
-  const [newProjectId, setNewProjectId] = useState('');
-  const [newMinutes, setNewMinutes] = useState('');
   const [activateOnCreate, setActivateOnCreate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [addItemType, setAddItemType] = useState<'subject' | 'discipline'>('subject');
 
   // Fetch disciplines when modal opens
   useEffect(() => {
@@ -141,32 +127,12 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
     }
   }, [open, isEditing, cycle, cycles.length]);
 
-  const handleAddItem = () => {
-    if (!newMinutes) return;
-
-    if (addItemType === 'subject' && newTaskId) {
-      setItems((prev) => [
-        ...prev,
-        {
-          id: generateId(),
-          taskId: newTaskId,
-          targetMinutes: parseInt(newMinutes, 10),
-        },
-      ]);
-      setNewTaskId('');
-    } else if (addItemType === 'discipline' && newProjectId) {
-      setItems((prev) => [
-        ...prev,
-        {
-          id: generateId(),
-          projectId: newProjectId,
-          targetMinutes: parseInt(newMinutes, 10),
-        },
-      ]);
-      setNewProjectId('');
-    }
-
-    setNewMinutes('');
+  const handleAddItem = (item: {
+    taskId?: string;
+    projectId?: string;
+    targetMinutes: number;
+  }) => {
+    setItems((prev) => [...prev, { id: generateId(), ...item }]);
   };
 
   const handleRemoveItem = (id: string) => {
@@ -247,12 +213,6 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
   // Calculate total duration
   const totalMinutes = items.reduce((acc, item) => acc + item.targetMinutes, 0);
 
-  // Check if can add item
-  const canAddItem =
-    !!newMinutes &&
-    ((addItemType === 'subject' && !!newTaskId) ||
-      (addItemType === 'discipline' && !!newProjectId));
-
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="sm:max-w-lg">
@@ -300,73 +260,23 @@ export function CycleEditorModal({ open, onOpenChange, mode = 'edit' }: CycleEdi
           {/* Add item form */}
           <div className="space-y-2">
             <Label>Add to cycle</Label>
-
-            {/* Type selector tabs */}
-            <Tabs
-              value={addItemType}
-              onValueChange={(v) => setAddItemType(v as 'subject' | 'discipline')}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="subject" className="flex items-center gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Task
-                </TabsTrigger>
-                <TabsTrigger value="discipline" className="flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5" />
-                  Project
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                {addItemType === 'subject' ? (
-                  <TaskPicker
-                    value={newTaskId}
-                    onValueChange={setNewTaskId}
-                    subjects={tasks}
-                    recentTasks={recentTasks}
-                    onTaskUsed={addRecentTask}
-                    projects={projects}
-                    onCreateTask={
-                      currentWorkspaceId
-                        ? (data) => findOrCreateTask(currentWorkspaceId, data.name, data.projectId)
-                        : undefined
-                    }
-                    placeholder="Task"
-                    searchPlaceholder="Search..."
-                    emptyMessage="No tasks found"
-                  />
-                ) : (
-                  <ProjectPicker
-                    value={newProjectId}
-                    onValueChange={setNewProjectId}
-                    projects={projects}
-                    onCreateProject={
-                      currentWorkspaceId
-                        ? (name) => findOrCreateProject(currentWorkspaceId, name)
-                        : undefined
-                    }
-                    placeholder="Select a project"
-                    searchPlaceholder="Search project..."
-                    emptyMessage="No projects found"
-                  />
-                )}
-              </div>
-              <Input
-                type="number"
-                placeholder="Min"
-                min="1"
-                max="1440"
-                value={newMinutes}
-                onChange={(e) => setNewMinutes(e.target.value)}
-                className="w-20"
-              />
-              <Button type="button" size="icon" onClick={handleAddItem} disabled={!canAddItem}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <CycleItemComposer
+              tasks={tasks}
+              projects={projects}
+              recentTaskIds={recentTasks}
+              onTaskUsed={addRecentTask}
+              onCreateTask={
+                currentWorkspaceId
+                  ? (name) => findOrCreateTask(currentWorkspaceId, name)
+                  : undefined
+              }
+              onCreateProject={
+                currentWorkspaceId
+                  ? (name) => findOrCreateProject(currentWorkspaceId, name)
+                  : undefined
+              }
+              onAdd={handleAddItem}
+            />
           </div>
 
           {/* Items list */}
