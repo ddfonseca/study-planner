@@ -234,7 +234,7 @@ function TaskPickerContent({
           placeholder={searchPlaceholder}
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
-          className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+          className="flex h-10 w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground md:text-sm"
         />
         {inputValue && (
           <Button

@@ -189,6 +189,21 @@
   }
 }
 
+/*
+ * Prevent iOS Safari from auto-zooming when an input is focused.
+ * Safari zooms whenever a focused field has font-size < 16px. Forcing 16px
+ * on small screens keeps the modal/drawer fully reachable while typing.
+ */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    /* !important is required so this wins over Tailwind text-* utility classes,
+       which have higher selector specificity than a bare element selector. */
+    font-size: 16px !important;
+  }
+}
+
 /* Touch device specific styles */
 @media (pointer: coarse) {
   /* Larger tap targets on touch devices */
